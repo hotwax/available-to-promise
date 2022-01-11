@@ -27,11 +27,11 @@
           </ion-select>
         </ion-item>
 
-        <ion-button expand="block" size="large">{{ $t("Save") }}</ion-button>
+        <ion-button expand="block" size="large" color="medium">{{ $t("Save") }}</ion-button>
 
         <ion-item>
           <ion-label>50 {{ $t("products selected") }}</ion-label>
-          <ion-button slot="end" fill="outline">
+          <ion-button slot="end" fill="outline" color="dark">
             <ion-icon slot="start" :icon="downloadOutline" />
             {{ $t("Download") }}
           </ion-button>
@@ -61,7 +61,7 @@ import { defineComponent } from 'vue';
 import { downloadOutline } from 'ionicons/icons';
 
 export default defineComponent({
-  name: 'UploadCsv',
+  name: 'SelectProductCSVUpload',
   components: {
     IonBackButton,
     IonButton,
