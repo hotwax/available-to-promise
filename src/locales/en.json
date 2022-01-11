@@ -1,11 +1,24 @@
 {
   "Blank": "Blank",
   "Click the backdrop to dismiss.": "Click the backdrop to dismiss.",
+  "Download data in csv": "Download data in csv",
+  "Filter stores": "Filter stores",
+  "Info": "Info",
   "Logout":"Logout",
   "Ready to create an app?": "Ready to create an app?",
+  "Safety stock": "Safety stock",
+  "Search orders": "Search orders",
+  "Set safety stock": "Set safety stock",
   "Settings":"Settings",
+  "Select facility": "Select facility",
+  "Selected products": "Selected products",
   "Start with Ionic": "Start with Ionic",
+  "State": "State",
   "Store":"Store",
   "store name":"store name",
-  "UI Components": "UI Components"
+  "Stores": "Stores",
+  "Type": "Type",
+  "UI Components": "UI Components",
+  "Upload CSV": "Upload CSV",
+  "You can also download the products, locations and safety stock you selected in a CSV to upload in other systems": "You can also download the products, locations and safety stock you selected in a CSV to upload in other systems"
 }
