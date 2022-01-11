@@ -5,7 +5,7 @@
         <ion-menu-button />
         <ion-title>{{ $t("Threshold management") }}</ion-title>
         <ion-buttons slot="end">
-          <ion-button fill="clear">{{ $t("Upload CSV") }}</ion-button>
+          <ion-button fill="clear" @click="() => router.push('/select-product-csv-upload')">{{ $t("Upload CSV") }}</ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
@@ -102,6 +102,8 @@ import {
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { arrowForwardOutline } from 'ionicons/icons';
+import { useRouter } from 'vue-router';
+
 export default defineComponent({
   name: 'SelectProduct',
   components: {
@@ -122,8 +124,11 @@ export default defineComponent({
     Image
   },
   setup() {
+    const router = useRouter();
+
     return {
-      arrowForwardOutline
+      arrowForwardOutline,
+      router
     };
   },
 });

@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
 import Home from '@/views/Home.vue'
 import SelectProduct from '@/views/SelectProduct.vue'
+import SelectProductCSVUpload from '@/views/SelectProductCSVUpload.vue'
 import Login from '@/views/Login.vue'
 import Settings from "@/views/Settings.vue"
 import store from '@/store'
@@ -33,6 +34,11 @@ const routes: Array<RouteRecordRaw> = [
     component: SelectProduct,
     beforeEnter: authGuard
   },    
+  {
+    path: '/select-product-csv-upload',
+    name: 'SelectProductCSVUpload',
+    component: SelectProductCSVUpload
+  },
   {
     path: '/home',
     name: 'Home',
