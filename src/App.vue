@@ -1,6 +1,25 @@
 <template>
   <ion-app>
-    <ion-router-outlet />
+    <ion-menu side="start" menu-id="first" content-id="main">
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Menu</ion-title>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content>
+        <ion-list>
+          <ion-item>
+            <ion-icon :icon="options" slot="start" />
+            <ion-label>Threshold Management</ion-label>
+          </ion-item>
+          <ion-item>
+            <ion-icon :icon="settings" slot="start" />
+            <ion-label>Settings</ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-content>
+    </ion-menu>
+    <ion-router-outlet id="main" />
   </ion-app>
 </template>
 
@@ -8,8 +27,8 @@
 import { IonApp, IonRouterOutlet } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { loadingController } from '@ionic/vue';
+import { options, settings } from 'ionicons/icons';
 import emitter from "@/event-bus"
-
 
 export default defineComponent({
   name: 'App',
@@ -20,17 +39,17 @@ export default defineComponent({
   data() {
     return {
       loader: null as any
-    }
+    };
   },
   methods: {
     async presentLoader() {
       if (!this.loader) {
         this.loader = await loadingController
-          .create({
-            message: this.$t("Click the backdrop to dismiss."),
-            translucent: true,
-            backdropDismiss: true
-          });
+        .create({
+          message: this.$t("Click the backdrop to dismiss."),
+          translucent: true,
+          backdropDismiss: true
+        });
       }
       this.loader.present();
     },
@@ -43,11 +62,11 @@ export default defineComponent({
   },
   async mounted() {
     this.loader = await loadingController
-      .create({
-        message: this.$t("Click the backdrop to dismiss."),
-        translucent: true,
-        backdropDismiss: true
-      });
+    .create({
+      message: this.$t("Click the backdrop to dismiss."),
+      translucent: true,
+      backdropDismiss: true
+    });
     emitter.on('presentLoader', this.presentLoader);
     emitter.on('dismissLoader', this.dismissLoader);
   },
@@ -55,5 +74,11 @@ export default defineComponent({
     emitter.off('presentLoader', this.presentLoader);
     emitter.off('dismissLoader', this.dismissLoader);
   },
+  setup() {
+    return {
+      options,
+      settings
+    }
+  }
 });
 </script>
