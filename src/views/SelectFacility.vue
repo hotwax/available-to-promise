@@ -109,8 +109,8 @@
       </div>
 
       <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="mobile-only">
-        <ion-fab-button>
-          <ion-icon :icon="checkmarkDoneOutline " />
+        <ion-fab-button @click="setSafetyStock()">
+          <ion-icon :icon="checkmarkDoneOutline" />
         </ion-fab-button>
       </ion-fab>
     </ion-content>

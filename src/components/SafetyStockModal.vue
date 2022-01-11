@@ -29,10 +29,10 @@
     </ion-item>
 
     <ion-item lines="none">
-      <ion-label class="text-wrap">{{ $t("You can also download the products, locations and safety stock you selected in a CSV to upload in other systems") }}</ion-label>
+      <ion-label class="ion-text-wrap">{{ $t("You can also download the products, locations and safety stock you selected in a CSV to upload in other systems") }}</ion-label>
     </ion-item>
 
-    <ion-button fill="outline">{{ $t("Download data in csv") }}</ion-button>
+    <ion-button fill="outline" color="medium">{{ $t("Download data in csv") }}</ion-button>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
       <ion-fab-button>
@@ -97,9 +97,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style scoped>
-.text-wrap {
-    white-space: normal;
-}
-</style>
