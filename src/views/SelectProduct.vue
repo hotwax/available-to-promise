@@ -5,7 +5,13 @@
         <ion-menu-button />
         <ion-title>{{ $t("Threshold management") }}</ion-title>
         <ion-buttons slot="end">
-          <ion-button fill="clear" @click="() => router.push('/select-product-csv-upload')">{{ $t("Upload CSV") }}</ion-button>
+          <ion-button fill="clear" class="mobile-only">
+            <ion-icon :icon="downloadOutline" />
+          </ion-button>
+          <ion-button fill="clear" class="mobile-only">
+            <ion-icon :icon="filterOutline" />
+          </ion-button>
+          <ion-button class="desktop-only" @click="() => router.push('/select-product-csv-upload')">{{ $t("Upload CSV") }}</ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
@@ -13,7 +19,7 @@
     <ion-content :fullscreen="true">
       <div class="find">
         <section class="search">
-          <ion-searchbar />
+          <ion-searchbar :placeholder="$t('Search products')" />
         </section>
 
         <aside class="filters desktop-only">
@@ -38,7 +44,7 @@
 
             <div class="tags"></div>
 
-            <div class="metadata">
+            <div class="metadata desktop-only">
               <ion-item lines="none">
                 <ion-label>{{ $t("Select all variants") }}</ion-label>
                 <ion-toggle />
@@ -72,12 +78,18 @@
         </main>
       </div>
 
-      <div class="action">
+      <div class="action desktop-only">
         <ion-button>
           {{ $t("Select locations") }}
           <ion-icon :icon="arrowForwardOutline" />
         </ion-button>
       </div>
+
+      <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="mobile-only">
+        <ion-fab-button>
+          <ion-icon :icon="arrowForwardOutline" />
+        </ion-fab-button>
+      </ion-fab>
     </ion-content>
   </ion-page>
 </template>
@@ -89,6 +101,8 @@ import {
   IonButtons,
   IonCard,
   IonContent,
+  IonFab,
+  IonFabButton,
   IonHeader,
   IonIcon,
   IonItem,
@@ -101,7 +115,7 @@ import {
   IonToolbar
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
-import { arrowForwardOutline } from 'ionicons/icons';
+import { arrowForwardOutline, downloadOutline, filterOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
 
 export default defineComponent({
@@ -111,6 +125,8 @@ export default defineComponent({
     IonButtons,
     IonCard,
     IonContent,
+    IonFab,
+    IonFabButton,
     IonHeader,
     IonIcon,
     IonItem,
@@ -128,6 +144,8 @@ export default defineComponent({
 
     return {
       arrowForwardOutline,
+      downloadOutline,
+      filterOutline,
       router
     };
   },
@@ -141,9 +159,14 @@ export default defineComponent({
 .section-grid {
   grid-template-columns: repeat(auto-fill, 200px);
 }
-.action {
-  /* TODO use spacer variable */
-  margin: 250px 0;
-  text-align: center;
+
+@media (min-width: 991px) {
+  .action {
+    /* desktop-only class is setting display to unset and below properties were not getting applied that is why display is set block here */
+    display: block;
+    /* TODO use spacer variable */
+    margin: 250px 0;
+    text-align: center;
+  }
 }
 </style>
