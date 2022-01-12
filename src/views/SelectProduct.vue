@@ -11,7 +11,11 @@
           <ion-button fill="clear" class="mobile-only">
             <ion-icon :icon="filterOutline" />
           </ion-button>
-          <ion-button class="desktop-only" @click="() => router.push('/select-product-csv-upload')">{{ $t("Upload CSV") }}</ion-button>
+          <ion-button
+            class="desktop-only"
+            @click="() => router.push('/select-product-csv-upload')"
+            >{{ $t("Upload CSV") }}</ion-button
+          >
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
@@ -53,26 +57,29 @@
           </section>
 
           <section class="section-grid">
-            <ion-card>
-              <Image src="https://cdn.shopify.com/s/files/1/0069/7384/9727/products/test-track.jpg?v=1626255137" />
-              <ion-item lines="none">
-                <ion-label>
-                  SKU
-                  <p>Color: Blue</p>
-                  <p>Size: XL</p>
-                </ion-label>
-              </ion-item>
-            </ion-card>
-            <ion-card>
-              <Image src="https://cdn.shopify.com/s/files/1/0069/7384/9727/products/test-track.jpg?v=1626255137" />
-              <ion-item lines="none">
-                <ion-label>
-                  SKU
-                  <p>Color: Blue</p>
-                  <p>Size: XL</p>
-                </ion-label>
-              </ion-item>
-            </ion-card>
+            <div @click="onSelected(isToggle)" ref="parentRef">
+              <ion-card>
+                <ion-icon
+                  class="card-icon"
+                  :icon="checkmarkSharp"
+                  ref="toggleIconRef"
+                  size="large"
+                />
+                <div>
+                  <Image
+                    src="https://cdn.shopify.com/s/files/1/0069/7384/9727/products/test-track.jpg?v=1626255137"
+                  />
+
+                  <ion-item lines="none">
+                    <ion-label>
+                      SKU
+                      <p>Color: Blue</p>
+                      <p>Size: XL</p>
+                    </ion-label>
+                  </ion-item>
+                </div>
+              </ion-card>
+            </div>
           </section>
           <hr />
         </main>
@@ -85,7 +92,12 @@
         </ion-button>
       </div>
 
-      <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="mobile-only">
+      <ion-fab
+        vertical="bottom"
+        horizontal="end"
+        slot="fixed"
+        class="mobile-only"
+      >
         <ion-fab-button>
           <ion-icon :icon="arrowForwardOutline" />
         </ion-fab-button>
@@ -95,7 +107,7 @@
 </template>
 
 <script lang="ts">
-import Image from '@/components/Image.vue';
+import Image from "@/components/Image.vue";
 import {
   IonButton,
   IonButtons,
@@ -112,14 +124,20 @@ import {
   IonSearchbar,
   IonTitle,
   IonToggle,
-  IonToolbar
-} from '@ionic/vue';
-import { defineComponent } from 'vue';
-import { arrowForwardOutline, downloadOutline, filterOutline } from 'ionicons/icons';
-import { useRouter } from 'vue-router';
+  IonToolbar,
+  createAnimation,
+} from "@ionic/vue";
+import { defineComponent, ref, onMounted } from "vue";
+import {
+  arrowForwardOutline,
+  downloadOutline,
+  filterOutline,
+  checkmarkSharp,
+} from "ionicons/icons";
+import { useRouter } from "vue-router";
 
 export default defineComponent({
-  name: 'SelectProduct',
+  name: "SelectProduct",
   components: {
     IonButton,
     IonButtons,
@@ -137,16 +155,75 @@ export default defineComponent({
     IonTitle,
     IonToggle,
     IonToolbar,
-    Image
+    Image,
   },
   setup() {
     const router = useRouter();
+
+    const toggleIconRef = ref();
+    const isToggle = ref(true);
+    const parentRef = ref();
+    let toggleAnimation: any;
+    let removeAnimation: any;
+    onMounted(() => {
+      toggleAnimation = createAnimation()
+        .addElement(toggleIconRef.value.$el)
+        .afterRemoveClass("card-icon");
+      removeAnimation = createAnimation()
+        .addElement(toggleIconRef.value.$el)
+        .afterAddClass("card-icon");
+    });
+    const onSelected = (selected: boolean) => {
+      if (selected) {
+        console.log(parentRef.value.childNodes[0]);
+        const animate = createAnimation()
+          .addElement(parentRef.value.childNodes[0])
+          .duration(2000)
+          .keyframes([
+            {
+              offset: 0,
+              transform: "scale(1))",
+              opacity: "1",
+            },
+            {
+              offset: 0.5,
+              transform: "scale(1.1)",
+              opacity: "0.5",
+            },
+            {
+              offset: 1,
+              transform: "scale(1)",
+              opacity: "1",
+            },
+          ])
+          .addAnimation([toggleAnimation]);
+        animate && animate.play();
+      } else {
+        console.log(selected);
+        const animate = createAnimation()
+          .addElement(parentRef.value.childNodes[0])
+          .duration(2000)
+          .keyframes([
+            { offset: 0, transform: "scale(1))", opacity: "0.5" },
+            { offset: 0.5, transform: "scale(0.9)", opacity: "0.5" },
+            { offset: 1, transform: "scale(1)", opacity: "1" },
+          ])
+          .addAnimation([removeAnimation]);
+        animate && animate.play();
+      }
+      isToggle.value = !selected;
+    };
 
     return {
       arrowForwardOutline,
       downloadOutline,
       filterOutline,
-      router
+      onSelected,
+      parentRef,
+      toggleIconRef,
+      checkmarkSharp,
+      isToggle,
+      router,
     };
   },
 });
@@ -156,8 +233,35 @@ export default defineComponent({
 .filters {
   border-right: 1px solid var(--ion-color-medium);
 }
+
 .section-grid {
   grid-template-columns: repeat(auto-fill, 200px);
+}
+
+ion-card {
+  cursor: pointer;
+  position: relative;
+  width: 168px;
+  height: 300px;
+}
+
+ion-card > ion-icon {
+  width: 168px;
+  height: 300px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: transparent;
+  backdrop-filter: contrast(0.5);
+  color: white;
+}
+
+ion-item > .item-native {
+  background: none !important;
+}
+
+.card-icon {
+  display: none;
 }
 
 @media (min-width: 991px) {
