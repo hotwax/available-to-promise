@@ -41,7 +41,10 @@
 
           <ion-list>
             <ion-list-header>{{ $t("Selected products") }}</ion-list-header>
-            <ion-item-divider>Parent</ion-item-divider>
+            <ion-item-divider>
+              Parent
+              <ion-checkbox slot="end"/>
+            </ion-item-divider>
             <ion-item>
               <ion-label>Variant name</ion-label>
               <ion-checkbox slot="end" />
@@ -68,7 +71,10 @@
 
           <section class="section-grid">
             <ion-card>
-              <ion-item-divider>Store Group</ion-item-divider>
+              <ion-item-divider>
+                Store Group
+                <ion-checkbox slot="end"/>
+              </ion-item-divider>
               <ion-item>
                 <ion-label>Store name</ion-label>
                 <ion-checkbox slot="end" />
@@ -83,7 +89,10 @@
               </ion-item>
             </ion-card>
             <ion-card>
-              <ion-item-divider>Store Group</ion-item-divider>
+              <ion-item-divider>
+                Store Group
+                <ion-checkbox slot="end"/>
+              </ion-item-divider>
               <ion-item>
                 <ion-label>Store name</ion-label>
                 <ion-checkbox slot="end" />
@@ -199,6 +208,10 @@ export default defineComponent({
 <style scoped>
 .filters {
   border-right: 1px solid var(--ion-color-medium);
+}
+
+ion-item-divider > ion-checkbox[slot="end"] {
+   margin-inline-end: 16px;
 }
 
 @media (min-width: 991px) {
