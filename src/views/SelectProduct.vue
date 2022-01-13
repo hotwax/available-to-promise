@@ -60,10 +60,9 @@
             <div @click="onSelected(isToggle)" ref="parentRef">
               <ion-card>
                 <ion-icon
-                  class="card-icon"
+                  class="selected"
                   :icon="checkmarkSharp"
                   ref="toggleIconRef"
-                  size="large"
                 />
                 <div>
                   <Image
@@ -168,10 +167,10 @@ export default defineComponent({
     onMounted(() => {
       toggleAnimation = createAnimation()
         .addElement(toggleIconRef.value.$el)
-        .afterRemoveClass("card-icon");
+        .afterRemoveClass("selected");
       removeAnimation = createAnimation()
         .addElement(toggleIconRef.value.$el)
-        .afterAddClass("card-icon");
+        .afterAddClass("selected");
     });
     const onSelected = (selected: boolean) => {
       if (selected) {
@@ -241,27 +240,22 @@ export default defineComponent({
 ion-card {
   cursor: pointer;
   position: relative;
-  width: 168px;
-  height: 300px;
 }
 
 ion-card > ion-icon {
-  width: 168px;
-  height: 300px;
+  width: 100%;
+  height: 100%;
   position: absolute;
-  top: 0;
-  left: 0;
-  background: transparent;
   backdrop-filter: contrast(0.5);
   color: white;
 }
 
-ion-item > .item-native {
-  background: none !important;
+.selected {
+  display: none;
 }
 
-.card-icon {
-  display: none;
+ion-item::part(native) {
+  background: none;
 }
 
 @media (min-width: 991px) {
