@@ -24,7 +24,7 @@
 </template>
 
 <script lang="ts">
-import { IonApp, IonRouterOutlet } from '@ionic/vue';
+import { IonApp, IonContent, IonHeader, IonItem, IonIcon, IonLabel, IonList, IonMenu, IonTitle, IonToolbar, IonRouterOutlet } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { loadingController } from '@ionic/vue';
 import { options, settings } from 'ionicons/icons';
@@ -33,8 +33,7 @@ import emitter from "@/event-bus"
 export default defineComponent({
   name: 'App',
   components: {
-    IonApp,
-    IonRouterOutlet
+    IonApp, IonContent, IonHeader, IonItem, IonIcon, IonLabel, IonList, IonMenu, IonTitle, IonToolbar, IonRouterOutlet
   },
   data() {
     return {

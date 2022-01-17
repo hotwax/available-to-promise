@@ -162,11 +162,9 @@ export default defineComponent({
 
 @media (min-width: 991px) {
   .action {
-    /* desktop-only class is setting display to unset and below properties were not getting applied that is why display is set block here */
-    display: block;
-    /* TODO use spacer variable */
-    margin: 250px 0;
-    text-align: center;
+    position: fixed;
+    bottom: 100px;
+    left: 850px;
   }
 }
 </style>
