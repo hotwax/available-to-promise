@@ -8,7 +8,7 @@
     </ion-header>
 
     <ion-content :fullscreen="true">
-      <div class="upload-csv">
+      <main>
         <ion-item>
           <ion-label>{{ $t("Product list") }}</ion-label>
           <ion-input :placeholder="$t('Select CSV')" />
@@ -36,7 +36,7 @@
             {{ $t("Download") }}
           </ion-button>
         </ion-item>
-      </div>
+      </main>
     </ion-content>
   </ion-page>
 </template>
@@ -86,7 +86,7 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.upload-csv {
+main {
   max-width: 732px;
   margin: 0 auto;
 }
