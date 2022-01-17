@@ -3,18 +3,18 @@
     <ion-menu side="start" menu-id="first" content-id="main">
       <ion-header>
         <ion-toolbar>
-          <ion-title>Menu</ion-title>
+          <ion-title>{{ $t("Menu") }}</ion-title>
         </ion-toolbar>
       </ion-header>
       <ion-content>
         <ion-list>
           <ion-item>
             <ion-icon :icon="options" slot="start" />
-            <ion-label>Threshold Management</ion-label>
+            <ion-label>{{ $t("Threshold Management") }}</ion-label>
           </ion-item>
           <ion-item>
             <ion-icon :icon="settings" slot="start" />
-            <ion-label>Settings</ion-label>
+            <ion-label>{{ $t("Settings") }}</ion-label>
           </ion-item>
         </ion-list>
       </ion-content>
