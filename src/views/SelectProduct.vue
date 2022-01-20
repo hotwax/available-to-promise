@@ -57,8 +57,8 @@
           </section>
 
           <section class="section-grid">
-            <div @click="onSelected(isToggle)" ref="parentRef">
-              <ion-card>
+            <div @click="onSelected(isToggle)" ref="parent">
+              <ion-card  class="card-content" ref="cardRef">
                 <ion-icon
                   class="selected"
                   :icon="checkmarkSharp"
@@ -159,66 +159,144 @@ export default defineComponent({
   setup() {
     const router = useRouter();
 
+    const parent = ref();
+    const iconRef = ref();
+    const cardRef = ref();
     const toggleIconRef = ref();
     const isToggle = ref(true);
-    const parentRef = ref();
     let toggleAnimation: any;
     let removeAnimation: any;
+
+    const icon = createAnimation()
+      .addElement(iconRef.value)
+      .keyframes([
+        { offset: 0, transform: "scale(1) rotate(0)" },
+        { offset: 0.5, transform: "scale(1.2) rotate(45deg)" },
+        { offset: 1, transform: "scale(1) rotate(45deg)" },
+      ]);
+
+      console.log(icon)
+
+      const card = createAnimation()
+      .addElement(cardRef.value)
+      .keyframes([
+        { offset: 0, transform: "scale(1))", opacity: "1" },
+        { offset: 0.5, transform: "scale(1.2)", opacity: "0.3" },
+        { offset: 1, transform: "scale(1)", opacity: "1" },
+      ]);
+
+      console.log(card)
+
     onMounted(() => {
+      // toggleAnimation = createAnimation()
+      //   .addElement(parent.value)
+      //   .afterRemoveClass("selected");
+      // removeAnimation = createAnimation()
+      //   .addElement(parent.value)
+      //   .afterAddClass("selected");
       toggleAnimation = createAnimation()
-        .addElement(toggleIconRef.value.$el)
-        .afterRemoveClass("selected");
+        .addElement(parent.value)
+        .afterRemoveClass("card-content");
       removeAnimation = createAnimation()
-        .addElement(toggleIconRef.value.$el)
-        .afterAddClass("selected");
+        .addElement(parent.value)
+        .afterAddClass("card-content");
     });
+
     const onSelected = (selected: boolean) => {
+
       if (selected) {
-        console.log(parentRef.value.childNodes[0]);
-        const animate = createAnimation()
-          .addElement(parentRef.value.childNodes[0])
-          .duration(2000)
-          .keyframes([
-            {
-              offset: 0,
-              transform: "scale(1))",
-              opacity: "1",
-            },
-            {
-              offset: 0.5,
-              transform: "scale(1.1)",
-              opacity: "0.5",
-            },
-            {
-              offset: 1,
-              transform: "scale(1)",
-              opacity: "1",
-            },
-          ])
-          .addAnimation([toggleAnimation]);
-        animate && animate.play();
-      } else {
-        console.log(selected);
-        const animate = createAnimation()
-          .addElement(parentRef.value.childNodes[0])
-          .duration(2000)
-          .keyframes([
-            { offset: 0, transform: "scale(1))", opacity: "0.5" },
-            { offset: 0.5, transform: "scale(0.9)", opacity: "0.5" },
-            { offset: 1, transform: "scale(1)", opacity: "1" },
-          ])
-          .addAnimation([removeAnimation]);
-        animate && animate.play();
-      }
-      isToggle.value = !selected;
-    };
+
+      const parent = createAnimation()
+      .duration(3000)
+      .iterations(Infinity)
+      .addAnimation([icon, card])
+      .addAnimation([toggleAnimation]);
+
+        console.log(parent)
+
+      parent && parent.play();
+
+    } else {
+      const parent = createAnimation()
+      .duration(2000)
+      .iterations(Infinity)
+      .addAnimation([icon, card])
+      .addAnimation([removeAnimation]);
+
+      console.log(parent)
+
+      parent && parent.play();
+    }
+     isToggle.value = !selected;
+    }
+
+    // const toggleIconRef = ref();
+    // const isToggle = ref(true);
+    
+    // let toggleAnimation: any;
+    // let removeAnimation: any;
+    // onMounted(() => {
+    //   toggleAnimation = createAnimation()
+    //     .addElement(toggleIconRef.value.$el)
+    //     .afterRemoveClass("selected");
+    //   removeAnimation = createAnimation()
+    //     .addElement(toggleIconRef.value.$el)
+    //     .afterAddClass("selected");
+    //   toggleAnimation = createAnimation()
+    //     .addElement(cardRef.value.$el)
+    //     .afterRemoveClass("card-content");
+    //   removeAnimation = createAnimation()
+    //     .addElement(cardRef.value.$el)
+    //     .afterAddClass("card-content");
+    // });
+    // const onSelected = (selected: boolean) => {
+    //   if (selected) {
+    //     const animate = createAnimation()
+    //       .addElement(parentRef.value)
+    //       .duration(2000)
+    //       .keyframes([
+    //         {
+    //           offset: 0,
+    //           transform: "scale(1))",
+    //           opacity: "1",
+    //         },
+    //         {
+    //           offset: 0.5,
+    //           transform: "scale(1.1)",
+    //           opacity: "0.5",
+    //         },
+    //         {
+    //           offset: 1,
+    //           transform: "scale(1)",
+    //           opacity: "1",
+    //         },
+    //       ])
+    //       .addAnimation([toggleAnimation]);
+
+    //     animate && animate.play();
+    //   } else {
+    //     const animate = createAnimation()
+    //       .addElement(parentRef.value)
+    //       .duration(2000)
+    //       .keyframes([
+    //         { offset: 0, transform: "scale(1))", opacity: "0.5" },
+    //         { offset: 0.5, transform: "scale(0.9)", opacity: "0.5" },
+    //         { offset: 1, transform: "scale(1)", opacity: "1" },
+    //       ])
+    //       .addAnimation([removeAnimation]);
+    //     animate && animate.play();
+    //   }
+    //   isToggle.value = !selected;
+    // };
 
     return {
       arrowForwardOutline,
       downloadOutline,
       filterOutline,
       onSelected,
-      parentRef,
+      parent,
+      iconRef,
+      cardRef,
       toggleIconRef,
       checkmarkSharp,
       isToggle,
@@ -246,12 +324,18 @@ ion-card > ion-icon {
   width: 100%;
   height: 100%;
   position: absolute;
-  backdrop-filter: contrast(0.5);
-  color: white;
+  /* backdrop-filter: contrast(0.5);
+  color: white; */
 }
 
 .selected {
   display: none;
+}
+
+.card-content {
+  /* opacity: 0.3; */
+  box-shadow: rgb(0 0 0 / 14%) 2px 2px 2px 0px, rgb(0 0 0 / 14%) 2px 2px 2px 0px,
+    rgb(0 0 0 / 12%) 2px 1px 5px 2px, rgb(0 0 0 / 12%) 2px 1px 5px 2px;
 }
 
 ion-item::part(native) {
