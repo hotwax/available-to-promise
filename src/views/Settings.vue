@@ -60,6 +60,7 @@ export default defineComponent({
     ...mapGetters({
       userProfile: 'user/getUserProfile',
       currentFacility: 'user/getCurrentFacility',
+      instanceUrl: 'user/getInstanceUrl'
     })
   },
   methods: {
