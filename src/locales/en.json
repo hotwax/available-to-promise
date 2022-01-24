@@ -1,7 +1,6 @@
 {
   "Blank": "Blank",
   "Click the backdrop to dismiss.": "Click the backdrop to dismiss.",
-<<<<<<< HEAD
   "Download": "Download",
   "Logout": "Logout",
   "Menu": "Menu",
@@ -9,10 +8,7 @@
   "Product list": "Product list",
   "Product SKU column": "Product SKU column",
   "products selected": "products selected",
-=======
-  "Logout":"Logout",
   "OMS": "OMS",
->>>>>>> 809bcf9d7f2a4f283d9aee62bed81972f7ba13ca
   "Ready to create an app?": "Ready to create an app?",
   "Save": "Save",
   "Search products": "Search products",
