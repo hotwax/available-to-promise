@@ -57,13 +57,34 @@
           </section>
 
           <section class="section-grid">
-            <div @click="onSelected(isToggle)" ref="parent">
-              <ion-card  class="card-content" ref="cardRef">
+            <div @click="onSelected(isToggle)" ref="parentRef">
+              <ion-card>
                 <ion-icon
-                  class="selected"
+                  class="icon" ref="toggleRef"
                   :icon="checkmarkSharp"
-                  ref="toggleIconRef"
+                  
                 />
+                <div>
+                  <Image
+                    src="https://cdn.shopify.com/s/files/1/0069/7384/9727/products/test-track.jpg?v=1626255137"
+                  />
+
+                  <ion-item lines="none">
+                    <ion-label>
+                      SKU
+                      <p>Color: Blue</p>
+                      <p>Size: XL</p>
+                    </ion-label>
+                  </ion-item>
+                </div>
+              </ion-card>
+            </div>
+             <div> 
+              <ion-card>
+                <!-- <ion-icon
+                  :icon="checkmarkSharp"
+                  
+                /> -->
                 <div>
                   <Image
                     src="https://cdn.shopify.com/s/files/1/0069/7384/9727/products/test-track.jpg?v=1626255137"
@@ -134,7 +155,6 @@ import {
   checkmarkSharp,
 } from "ionicons/icons";
 import { useRouter } from "vue-router";
-
 export default defineComponent({
   name: "SelectProduct",
   components: {
@@ -158,146 +178,48 @@ export default defineComponent({
   },
   setup() {
     const router = useRouter();
-
-    const parent = ref();
-    const iconRef = ref();
-    const cardRef = ref();
-    const toggleIconRef = ref();
+    const toggleRef = ref();
     const isToggle = ref(true);
+    const parentRef = ref();
+    const iconRef = ref();
     let toggleAnimation: any;
     let removeAnimation: any;
-
-    const icon = createAnimation()
-      .addElement(iconRef.value)
-      .keyframes([
-        { offset: 0, transform: "scale(1) rotate(0)" },
-        { offset: 0.5, transform: "scale(1.2) rotate(45deg)" },
-        { offset: 1, transform: "scale(1) rotate(45deg)" },
-      ]);
-
-      console.log(icon)
-
-      const card = createAnimation()
-      .addElement(cardRef.value)
-      .keyframes([
-        { offset: 0, transform: "scale(1))", opacity: "1" },
-        { offset: 0.5, transform: "scale(1.2)", opacity: "0.3" },
-        { offset: 1, transform: "scale(1)", opacity: "1" },
-      ]);
-
-      console.log(card)
-
     onMounted(() => {
-      // toggleAnimation = createAnimation()
-      //   .addElement(parent.value)
-      //   .afterRemoveClass("selected");
-      // removeAnimation = createAnimation()
-      //   .addElement(parent.value)
-      //   .afterAddClass("selected");
       toggleAnimation = createAnimation()
-        .addElement(parent.value)
-        .afterRemoveClass("card-content");
+        .addElement(toggleRef.value.$el)
+        .afterRemoveClass("icon" );
       removeAnimation = createAnimation()
-        .addElement(parent.value)
-        .afterAddClass("card-content");
+        .addElement(toggleRef.value.$el)
+        .afterAddClass("icon");
     });
-
     const onSelected = (selected: boolean) => {
-
       if (selected) {
-
-      const parent = createAnimation()
-      .duration(3000)
-      .iterations(Infinity)
-      .addAnimation([icon, card])
-      .addAnimation([toggleAnimation]);
-
-        console.log(parent)
-
-      parent && parent.play();
-
-    } else {
-      const parent = createAnimation()
-      .duration(2000)
-      .iterations(Infinity)
-      .addAnimation([icon, card])
-      .addAnimation([removeAnimation]);
-
-      console.log(parent)
-
-      parent && parent.play();
-    }
-     isToggle.value = !selected;
-    }
-
-    // const toggleIconRef = ref();
-    // const isToggle = ref(true);
-    
-    // let toggleAnimation: any;
-    // let removeAnimation: any;
-    // onMounted(() => {
-    //   toggleAnimation = createAnimation()
-    //     .addElement(toggleIconRef.value.$el)
-    //     .afterRemoveClass("selected");
-    //   removeAnimation = createAnimation()
-    //     .addElement(toggleIconRef.value.$el)
-    //     .afterAddClass("selected");
-    //   toggleAnimation = createAnimation()
-    //     .addElement(cardRef.value.$el)
-    //     .afterRemoveClass("card-content");
-    //   removeAnimation = createAnimation()
-    //     .addElement(cardRef.value.$el)
-    //     .afterAddClass("card-content");
-    // });
-    // const onSelected = (selected: boolean) => {
-    //   if (selected) {
-    //     const animate = createAnimation()
-    //       .addElement(parentRef.value)
-    //       .duration(2000)
-    //       .keyframes([
-    //         {
-    //           offset: 0,
-    //           transform: "scale(1))",
-    //           opacity: "1",
-    //         },
-    //         {
-    //           offset: 0.5,
-    //           transform: "scale(1.1)",
-    //           opacity: "0.5",
-    //         },
-    //         {
-    //           offset: 1,
-    //           transform: "scale(1)",
-    //           opacity: "1",
-    //         },
-    //       ])
-    //       .addAnimation([toggleAnimation]);
-
-    //     animate && animate.play();
-    //   } else {
-    //     const animate = createAnimation()
-    //       .addElement(parentRef.value)
-    //       .duration(2000)
-    //       .keyframes([
-    //         { offset: 0, transform: "scale(1))", opacity: "0.5" },
-    //         { offset: 0.5, transform: "scale(0.9)", opacity: "0.5" },
-    //         { offset: 1, transform: "scale(1)", opacity: "1" },
-    //       ])
-    //       .addAnimation([removeAnimation]);
-    //     animate && animate.play();
-    //   }
-    //   isToggle.value = !selected;
-    // };
-
+        console.log(parentRef.value.childNodes[0]);
+        const animate = createAnimation()
+          .addElement(parentRef.value.childNodes[0])
+          .fromTo('boxShadow', 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px', 'grey 0px 2px 1px 2px, grey 0px 2px 1px 2px, grey 0px 2px 1px 2px, grey 0px 2px 1px 2px')
+          .fromTo('opacity', '1', '0.3') 
+          .addAnimation([toggleAnimation]);
+        animate && animate.play();
+      } else {
+        console.log(selected);
+        const animate = createAnimation()
+          .addElement(parentRef.value.childNodes[0])
+          .fromTo('boxShadow', 'grey 0px 2px 1px 2px, grey 0px 2px 1px 2px, grey 0px 2px 1px 2px, grey 0px 2px 1px 2px', 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px')
+          .fromTo('opacity', '0.3', '1')
+          .addAnimation([removeAnimation]);
+        animate && animate.play();
+      }
+      isToggle.value = !selected;
+    };
     return {
       arrowForwardOutline,
       downloadOutline,
       filterOutline,
       onSelected,
-      parent,
+      parentRef,
       iconRef,
-      cardRef,
-      toggleIconRef,
+      toggleRef,
       checkmarkSharp,
       isToggle,
       router,
@@ -310,38 +232,30 @@ export default defineComponent({
 .filters {
   border-right: 1px solid var(--ion-color-medium);
 }
-
 .section-grid {
   grid-template-columns: repeat(auto-fill, 200px);
 }
-
 ion-card {
   cursor: pointer;
   position: relative;
 }
-
 ion-card > ion-icon {
-  width: 100%;
-  height: 100%;
+  /* width: 100%;
+  height: 100%; */
   position: absolute;
-  /* backdrop-filter: contrast(0.5);
-  color: white; */
+  /* backdrop-filter: contrast(0.5); */
+  color: black;
 }
 
-.selected {
+/* .icon{
   display: none;
-}
+} */
 
-.card-content {
-  /* opacity: 0.3; */
-  box-shadow: rgb(0 0 0 / 14%) 2px 2px 2px 0px, rgb(0 0 0 / 14%) 2px 2px 2px 0px,
-    rgb(0 0 0 / 12%) 2px 1px 5px 2px, rgb(0 0 0 / 12%) 2px 1px 5px 2px;
-}
+
 
 ion-item::part(native) {
   background: none;
 }
-
 @media (min-width: 991px) {
   .action {
     /* desktop-only class is setting display to unset and below properties were not getting applied that is why display is set block here */
