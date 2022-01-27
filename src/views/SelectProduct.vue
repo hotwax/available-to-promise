@@ -57,13 +57,13 @@
           </section>
 
           <section class="section-grid">
-            <div @click="onSelected(isToggle)" ref="parentRef">
-              <ion-card>
-                <ion-icon
+            <div class="parentDiv"  @click="onSelected(isToggle)" ref="parentRef">
+              <ion-icon
                   class="icon" ref="toggleRef"
                   :icon="checkmarkSharp"
                   
                 />
+              <ion-card>
                 <div>
                   <Image
                     src="https://cdn.shopify.com/s/files/1/0069/7384/9727/products/test-track.jpg?v=1626255137"
@@ -194,9 +194,9 @@ export default defineComponent({
     });
     const onSelected = (selected: boolean) => {
       if (selected) {
-        console.log(parentRef.value.childNodes[0]);
+        console.log(parentRef.value.childNodes[1]);
         const animate = createAnimation()
-          .addElement(parentRef.value.childNodes[0])
+          .addElement(parentRef.value.childNodes[1])
           .fromTo('boxShadow', 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px', 'grey 0px 2px 1px 2px, grey 0px 2px 1px 2px, grey 0px 2px 1px 2px, grey 0px 2px 1px 2px')
           .fromTo('opacity', '1', '0.3') 
           .addAnimation([toggleAnimation]);
@@ -204,7 +204,7 @@ export default defineComponent({
       } else {
         console.log(selected);
         const animate = createAnimation()
-          .addElement(parentRef.value.childNodes[0])
+          .addElement(parentRef.value.childNodes[1])
           .fromTo('boxShadow', 'grey 0px 2px 1px 2px, grey 0px 2px 1px 2px, grey 0px 2px 1px 2px, grey 0px 2px 1px 2px', 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px')
           .fromTo('opacity', '0.3', '1')
           .addAnimation([removeAnimation]);
@@ -235,23 +235,23 @@ export default defineComponent({
 .section-grid {
   grid-template-columns: repeat(auto-fill, 200px);
 }
+
+.parentDiv {
+  position: relative;
+}
 ion-card {
   cursor: pointer;
   position: relative;
 }
-ion-card > ion-icon {
-  /* width: 100%;
-  height: 100%; */
+.parentDiv > ion-icon {
   position: absolute;
-  /* backdrop-filter: contrast(0.5); */
+  top: 120px;
+  left: 90px;
   color: black;
 }
-
-/* .icon{
+.icon{
   display: none;
-} */
-
-
+}
 
 ion-item::part(native) {
   background: none;
