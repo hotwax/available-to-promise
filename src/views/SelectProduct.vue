@@ -162,12 +162,10 @@ export default defineComponent({
 
 @media (min-width: 991px) {
   .action {
-    text-align: center;
-    margin-top: 80px;
-  }
-
-  .desktop-only {
-    display: block;
+    position: absolute;
+    bottom: 25%;
+    left: 50%;
+    transform: translate(-50%, 0);
   }
 }
 </style>
