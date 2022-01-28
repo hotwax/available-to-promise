@@ -61,6 +61,7 @@
                   <p>Color: Blue</p>
                   <p>Size: XL</p>
                 </ion-label>
+                <ion-checkbox slot="end" />
               </ion-item>
             </ion-card>
             <ion-card>
@@ -71,6 +72,7 @@
                   <p>Color: Blue</p>
                   <p>Size: XL</p>
                 </ion-label>
+                <ion-checkbox slot="end" />
               </ion-item>
             </ion-card>
           </section>
@@ -100,6 +102,7 @@ import {
   IonButton,
   IonButtons,
   IonCard,
+  IonCheckbox,
   IonContent,
   IonFab,
   IonFabButton,
@@ -124,6 +127,7 @@ export default defineComponent({
     IonButton,
     IonButtons,
     IonCard,
+    IonCheckbox,
     IonContent,
     IonFab,
     IonFabButton,
