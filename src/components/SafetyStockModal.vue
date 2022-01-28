@@ -15,22 +15,23 @@
       <ion-label>{{ $t("Safety stock") }}</ion-label>
       <ion-input placeholder="new safety stock" />
     </ion-item>
+    
+    <ion-list>
+      <ion-list-header>{{ $t("Info") }}</ion-list-header>
+    
+      <ion-item>
+        <ion-icon :icon="shirtOutline" slot="start" />
+        <ion-label>56 SKUs</ion-label>
+      </ion-item>
+      <ion-item>
+        <ion-icon :icon="businessOutline" slot="start" />
+        <ion-label>20 locations</ion-label>
+      </ion-item>
 
-    <ion-item lines="none">
-      <ion-label>{{ $t("Info") }}</ion-label>
-    </ion-item>
-    <ion-item>
-      <ion-icon :icon="shirtOutline" slot="start" />
-      <ion-label>56 SKUs</ion-label>
-    </ion-item>
-    <ion-item>
-      <ion-icon :icon="businessOutline" slot="start" />
-      <ion-label>20 locations</ion-label>
-    </ion-item>
-
-    <ion-item lines="none">
-      <ion-label class="ion-text-wrap">{{ $t("You can also download the products, locations and safety stock you selected in a CSV to upload in other systems") }}</ion-label>
-    </ion-item>
+      <ion-item lines="none">
+        <ion-label class="ion-text-wrap">{{ $t("You can also download the products, locations and safety stock you selected in a CSV to upload in other systems") }}</ion-label>
+      </ion-item>
+    </ion-list>
 
     <ion-button fill="outline" color="medium">{{ $t("Download data in csv") }}</ion-button>
 
@@ -55,6 +56,8 @@ import {
   IonInput,
   IonItem,
   IonLabel,
+  IonList,
+  IonListHeader,
   IonTitle,
   IonToolbar,
   modalController
@@ -79,6 +82,8 @@ export default defineComponent({
     IonInput,
     IonItem,
     IonLabel,
+    IonList,
+    IonListHeader,
     IonTitle,
     IonToolbar
   },

@@ -210,17 +210,16 @@ export default defineComponent({
   border-right: 1px solid var(--ion-color-medium);
 }
 
-ion-item-divider > ion-checkbox[slot="end"] {
+ion-item-divider > ion-checkbox {
    margin-inline-end: 16px;
 }
 
 @media (min-width: 991px) {
   .action {
-    /* desktop-only class is setting display to unset and below properties were not getting applied that is why display is set block here */
-    display: block;
-    /* TODO use spacer variable */
-    margin: 250px 0;
-    text-align: center;
+    position: absolute;
+    bottom: 25%;
+    left: 50%;
+    transform: translate(-50%, 0);
   }
 }
 </style>
