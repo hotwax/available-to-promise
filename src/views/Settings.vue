@@ -7,11 +7,13 @@
     </ion-header>
     
     <ion-content :fullscreen="true">
-      <!-- Profile of user logged in -->
+      <!-- Select store -->
       <ion-item>
-        <ion-icon :icon="personCircleOutline" slot="start" />
-        <ion-label>{{ userProfile !== null ? userProfile.partyName : '' }}</ion-label>
-        <ion-button slot="end" fill="outline" color="dark" @click="logout()">{{ $t("Logout") }}</ion-button>
+        <ion-icon :icon="storefrontOutline" slot="start" />
+        <ion-label>{{ currentFacility.facilityId ? currentFacility.facilityId : '' }}</ion-label>
+        <ion-select interface="popover" :placeholder="$t('store name')" :selected-text="currentFacility.facilityId" @ionChange="setFacility($event)">
+          <ion-select-option v-for="facility in userProfile.facilities" :key="facility.facilityId" :value="facility.facilityId" >{{ facility.facilityId }}</ion-select-option>
+        </ion-select>
       </ion-item>
 
       <!-- OMS information -->
@@ -21,13 +23,11 @@
         <p slot="end">{{ instanceUrl }}<p>
       </ion-item>
 
-      <!-- Select store -->
-       <ion-item>
-        <ion-icon :icon="storefrontOutline" slot="start" />
-        <ion-label>{{ currentFacility.facilityId ? currentFacility.facilityId : '' }}</ion-label>
-      <ion-select interface="popover" :placeholder="$t('store name')" :selected-text="currentFacility.facilityId" @ionChange="setFacility($event)">
-        <ion-select-option v-for="facility in userProfile.facilities" :key="facility.facilityId" :value="facility.facilityId" >{{ facility.facilityId }}</ion-select-option>
-      </ion-select>
+      <!-- Profile of user logged in -->
+      <ion-item>
+        <ion-icon :icon="personCircleOutline" slot="start" />
+        <ion-label>{{ userProfile !== null ? userProfile.partyName : '' }}</ion-label>
+        <ion-button slot="end" fill="outline" color="dark" @click="logout()">{{ $t("Logout") }}</ion-button>
       </ion-item>
 
     </ion-content>
