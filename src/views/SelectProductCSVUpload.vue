@@ -7,7 +7,7 @@
       </ion-toolbar>
     </ion-header>
 
-    <ion-content :fullscreen="true">
+    <ion-content>
       <main>
         <ion-item>
           <ion-label>{{ $t("Product list") }}</ion-label>
