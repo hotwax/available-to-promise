@@ -81,7 +81,7 @@
       </div>
 
       <div class="action desktop-only">
-        <ion-button>
+        <ion-button @click="() => router.push('/select-facility')">
           {{ $t("Select locations") }}
           <ion-icon :icon="arrowForwardOutline" />
         </ion-button>

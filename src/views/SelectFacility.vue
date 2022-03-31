@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header :translucent="true">
       <ion-toolbar>
-        <ion-menu-button />
+        <ion-back-button default-href="/" slot="start" />
         <ion-title>{{ $t("Select facility") }}</ion-title>
         <ion-buttons slot="end">
           <ion-button fill="clear" class="mobile-only">
@@ -128,6 +128,7 @@
 
 <script lang="ts">
 import {
+  IonBackButton,
   IonButton,
   IonButtons,
   IonCard,
@@ -142,7 +143,6 @@ import {
   IonLabel,
   IonList,
   IonListHeader,
-  IonMenuButton,
   IonPage,
   IonSearchbar,
   IonSelect,
@@ -163,6 +163,7 @@ import SafetyStockModal from "@/components/SafetyStockModal.vue";
 export default defineComponent({
   name: "SelectFacility",
   components: {
+    IonBackButton,
     IonButton,
     IonButtons,
     IonCard,
@@ -177,7 +178,6 @@ export default defineComponent({
     IonLabel,
     IonList,
     IonListHeader,
-    IonMenuButton,
     IonPage,
     IonSearchbar,
     IonSelect,

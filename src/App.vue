@@ -8,11 +8,11 @@
       </ion-header>
       <ion-content>
         <ion-list>
-          <ion-item>
+          <ion-item button @click="closeMenu(); router.push('/select-product')">
             <ion-icon :icon="options" slot="start" />
             <ion-label>{{ $t("Threshold Management") }}</ion-label>
           </ion-item>
-          <ion-item>
+          <ion-item button @click="closeMenu(); router.push('/settings')">
             <ion-icon :icon="settings" slot="start" />
             <ion-label>{{ $t("Settings") }}</ion-label>
           </ion-item>
@@ -24,11 +24,12 @@
 </template>
 
 <script lang="ts">
-import { IonApp, IonContent, IonHeader, IonItem, IonIcon, IonLabel, IonList, IonMenu, IonTitle, IonToolbar, IonRouterOutlet } from '@ionic/vue';
+import { IonApp, IonContent, IonHeader, IonItem, IonIcon, IonLabel, IonList, IonMenu, IonTitle, IonToolbar, IonRouterOutlet, menuController } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { loadingController } from '@ionic/vue';
 import { options, settings } from 'ionicons/icons';
 import emitter from "@/event-bus"
+import { useRouter } from 'vue-router';
 
 export default defineComponent({
   name: 'App',
@@ -57,6 +58,9 @@ export default defineComponent({
         this.loader.dismiss();
         this.loader = null as any;
       }
+    },
+    async closeMenu() {
+      await menuController.close();
     }
   },
   async mounted() {
@@ -74,9 +78,12 @@ export default defineComponent({
     emitter.off('dismissLoader', this.dismissLoader);
   },
   setup() {
+    const router = useRouter();
+
     return {
       options,
-      settings
+      settings,
+      router
     }
   }
 });
