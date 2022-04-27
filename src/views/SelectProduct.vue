@@ -23,13 +23,13 @@
         </section>
 
         <aside class="filters desktop-only">
-          <ion-item>
+          <ion-item lines="none">
             <ion-label>{{ $t("Only show selected products") }}</ion-label>
-            <ion-toggle slot="end" />
+            <ion-toggle slot="end" color="secondary" />
           </ion-item>
         </aside>
 
-        <main class="main">
+        <main>
           <section class="sort"></section>
 
           <section class="section-header">
@@ -157,14 +157,25 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.filters {
-  border-right: 1px solid var(--ion-color-medium);
-}
 .section-grid {
   grid-template-columns: repeat(auto-fill, 200px);
 }
 
 @media (min-width: 991px) {
+  .find {
+    grid: "search  filters"
+          "main    main"
+          / 440px 400px;        
+    justify-content: space-between;   
+    row-gap: var(--spacer-xl);
+    margin: var(--spacer-lg) var(--spacer-base);               
+  }
+
+  main {
+    padding: var(--spacer-sm) 0;
+    border-top: 1px solid var(--ion-color-medium)
+  }
+  
   .action {
     position: absolute;
     bottom: 25%;
