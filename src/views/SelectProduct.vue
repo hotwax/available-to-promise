@@ -19,7 +19,7 @@
     <ion-content>
       <div class="find">
         <section class="search">
-          <ion-searchbar :placeholder="$t('Search products')" />
+          <ion-searchbar placeholder="Search products" v-model="queryString" @keyup.enter="searchProducts($event)"/>
         </section>
 
         <aside class="filters desktop-only">
@@ -142,7 +142,16 @@ export default defineComponent({
       products: 'product/getProducts'
     })
   },
+  data(){
+    return {
+      queryString: '',
+    }
+  },
   methods:{
+    searchProducts(event: any){
+      this.queryString = event.target.value;
+      this.getProducts();
+    },
     selectAllVariants(product: any){
       product.variants.forEach((variant: any) => {
         variant.isSelected = !product.isSelected
@@ -165,6 +174,12 @@ export default defineComponent({
           "query": "*:*",
           "filter": "docType: PRODUCT"
         }
+      }
+      if(this.queryString) {
+        payload.json.params.defType = 'edismax'
+        payload.json.params.qf = 'productId productName sku internalName brandName'
+        payload.json.params['q.op'] = 'AND'
+        payload.json.query = `*${this.queryString}*`
       }
       this.store.dispatch("product/getProducts", payload);
     }
