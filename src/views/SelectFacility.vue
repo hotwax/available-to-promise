@@ -70,42 +70,16 @@
           </ion-item>
 
           <section class="section-grid">
-            <ion-card>
-              <ion-item-divider>
-                Store Group
-                <ion-checkbox slot="end"/>
-              </ion-item-divider>
-              <ion-item>
-                <ion-label>Store name</ion-label>
-                <ion-checkbox slot="end" />
-              </ion-item>
-              <ion-item>
-                <ion-label>Store name</ion-label>
-                <ion-checkbox slot="end" />
-              </ion-item>
-              <ion-item>
-                <ion-label>Store name</ion-label>
-                <ion-checkbox slot="end" />
-              </ion-item>
-            </ion-card>
-            <ion-card>
-              <ion-item-divider>
-                Store Group
-                <ion-checkbox slot="end"/>
-              </ion-item-divider>
-              <ion-item>
-                <ion-label>Store name</ion-label>
-                <ion-checkbox slot="end" />
-              </ion-item>
-              <ion-item>
-                <ion-label>Store name</ion-label>
-                <ion-checkbox slot="end" />
-              </ion-item>
-              <ion-item>
-                <ion-label>Store name</ion-label>
-                <ion-checkbox slot="end" />
-              </ion-item>
-            </ion-card>
+              <ion-card v-for="(facilityType, index) in getFacilityTypes(facilities)" :key="index">
+                <ion-item-divider>
+                  {{ facilityType }}
+                  <ion-checkbox slot="end"/>
+                </ion-item-divider>
+                <ion-item v-for="facility in getFacilityByType(facilityType, facilities)" :key="facility?.facilityId">
+                  <ion-label>{{ facility?.facilityName }}</ion-label>
+                  <ion-checkbox slot="end" />
+                </ion-item>
+              </ion-card>
           </section>
         </main>
       </div>
@@ -159,6 +133,8 @@ import {
 } from "ionicons/icons";
 import { useRouter } from "vue-router";
 import SafetyStockModal from "@/components/SafetyStockModal.vue";
+import { useStore } from "@/store";
+import { mapGetters } from "vuex";
 
 export default defineComponent({
   name: "SelectFacility",
@@ -185,6 +161,11 @@ export default defineComponent({
     IonTitle,
     IonToolbar
   },
+  computed: {
+    ...mapGetters({
+      facilities: 'util/getFacilityLocations',
+    })
+  },
   methods: {
     async setSafetyStock() {
       const safetystockmodal = await modalController.create({
@@ -192,14 +173,42 @@ export default defineComponent({
       });
       return safetystockmodal.present();
     },
+    getFacilityTypes (facilities: any) {
+      console.log(Array.from(new Set(facilities.map((fac: any) => fac.facilityTypeId))));
+      return Array.from(new Set(facilities.map((fac: any) => fac.facilityTypeId)))
+    },
+    getFacilityByType(facilityType: any, facilities: any) {
+      return facilities.filter((fac: any) => fac.facilityTypeId === facilityType)
+    },
+    async getFacilities(vSize?: any, vIndex?: any) {
+      const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
+      const viewIndex = vIndex ? vIndex : '0';
+      const payload = {
+        "inputFields": {},
+        "fieldList": ["facilityId", "facilityName", "facilityTypeId"],
+        viewSize,
+        viewIndex,
+        "entityName": "ProductStoreFacilityDetail",
+        "noConditionFind": "Y",
+        "distinct": "Y"
+      }
+      await this.store.dispatch('util/getFacilities', payload);
+    },
+  },
+  mounted() {
+    this.getFacilities();
+    console.log(this.facilities)
   },
   setup() {
     const router = useRouter();
+    const store = useStore();
+
     return {
       checkmarkDoneOutline,
       downloadOutline,
       filterOutline,
-      router
+      router,
+      store
     };
   },
 });
