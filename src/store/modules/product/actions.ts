@@ -46,6 +46,98 @@ const actions: ActionTree<ProductState, RootState> = {
     // TODO Handle specific error
     return resp;
   },
+
+  async fetchProducts({ commit, state }, { productIds }) {
+    const cachedProducts = JSON.parse(JSON.stringify(state.cached));
+    const cachedProductIds = Object.keys(state.cached);
+    const productIdFilter = productIds.reduce((filter: string, productId: any) => {
+      if (cachedProductIds.includes(productId)) {
+        return filter;
+      } else {
+        if (filter !== '') filter += ' OR '
+        return filter += productId;
+      }
+    }, '');
+
+    if (productIdFilter === '') return cachedProducts;
+
+    const resp = await ProductService.fetchProducts({
+      "filters": ['productId: (' + productIdFilter + ')'],
+      "viewSize": productIds.length
+    })
+    if (resp.status === 200 && !hasError(resp)) {
+      const products = resp.data.response.docs;
+      if (resp.data) {
+        products.forEach((product: any) => {
+          cachedProducts[product.productId] = product
+        });
+      }
+      commit(types.PRODUCT_CACHED_UPDATED, { cached: cachedProducts });
+      return cachedProducts;
+    }
+    return resp;
+  },
+
+  async getProducts({ commit, state }, payload) {
+    let resp;
+
+    try {
+      resp = await ProductService.getProducts(payload);
+
+      if (resp.status === 200 && resp.data.grouped.groupId?.ngroups > 0 && !hasError(resp)) {
+        let products = resp.data.grouped.groupId?.groups;
+        const totalProductsCount = resp.data.grouped.groupId.ngroups;
+        
+        products = products.map((product: any) => {
+          return {
+            productId: product.groupValue,
+            productName: product.doclist.docs[0]?.parentProductName,
+            variants: product.doclist.docs
+          }
+        })
+
+        let productIds: any = new Set();
+        products.forEach((product: any) => {
+          if(product.productId) productIds.add(product.productId);
+        })
+        productIds = [...productIds]
+        const productInformation = await this.dispatch("product/fetchProducts", { productIds });
+
+        products = products.map((product: any) => {
+          product.variants.forEach((variant: any) => {
+            variant.isSelected = false;
+          });
+          const virtual = productInformation[product.productId]
+
+          return {
+            ...product,
+            isSelected: false,
+            brandName: virtual?.brandName,
+            productName: virtual?.productName,
+            internalName: virtual?.internalName,
+            mainImageUrl: virtual?.mainImageUrl,
+            featureHierarchy: virtual?.featureHierarchy
+          }
+        })
+
+        // We are commenting this code because we will be releasing this feature in next release.
+
+        // const variantIds = products.reduce((acc: any, product: any) => {
+        //   return acc.concat(product.variants.map((variant: any) => variant.productId ))
+        // }, [])
+        // this.dispatch("stock/addProducts", { variantIds });
+        
+        if(payload.json.params.start && payload.json.params.start > 0) products = state.products.list.concat(products);
+        commit(types.PRODUCT_LIST_UPDATED, { products, totalProductsCount });
+      } else {
+        showToast(translate("Products not found"));
+      }
+    } catch (error) {
+      console.error(error);
+      showToast(translate("Something went wrong"));
+    }
+    return resp;
+  },
 }
 
 export default actions;

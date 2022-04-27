@@ -29,15 +29,16 @@
           </ion-item>
         </aside>
 
-        <main class="main">
+        <section class="main">
+          <div  v-for="product in products" :key="product">
           <section class="sort"></section>
 
           <section class="section-header">
             <div class="primary-info">
               <ion-item lines="none">
                 <ion-label>
-                  Parent Product
-                  <p>5 {{ $t("variants") }}</p>
+                  {{ product.productName }}
+                  <p>{{ product.variants.length}} {{ $t("variants") }}</p>
                 </ion-label>
               </ion-item>
             </div>
@@ -47,37 +48,29 @@
             <div class="metadata desktop-only">
               <ion-item lines="none">
                 <ion-label>{{ $t("Select all variants") }}</ion-label>
-                <ion-toggle />
+                <ion-toggle v-model="product.isSelected" @click="selectAllVariants(product)" />
               </ion-item>
             </div>
           </section>
 
           <section class="section-grid">
+            <div v-for="variant in product.variants" :key="variant">
             <ion-card>
-              <Image src="https://cdn.shopify.com/s/files/1/0069/7384/9727/products/test-track.jpg?v=1626255137" />
+              <Image :src="variant.mainImageUrl" />
               <ion-item lines="none">
                 <ion-label>
-                  SKU
-                  <p>Color: Blue</p>
-                  <p>Size: XL</p>
+                  {{ variant.productName }}
+                  <p>{{ $t("Color") }}: {{ $filters.getFeature(variant.featureHierarchy, '1/COLOR/') }}</p>
+                  <p>{{ $t("Size") }}: {{ $filters.getFeature(variant.featureHierarchy, '1/SIZE/') }}</p>
                 </ion-label>
-                <ion-checkbox slot="end" />
+                <ion-checkbox v-model="variant.isSelected" @click="select(variant)" slot="end" />
               </ion-item>
             </ion-card>
-            <ion-card>
-              <Image src="https://cdn.shopify.com/s/files/1/0069/7384/9727/products/test-track.jpg?v=1626255137" />
-              <ion-item lines="none">
-                <ion-label>
-                  SKU
-                  <p>Color: Blue</p>
-                  <p>Size: XL</p>
-                </ion-label>
-                <ion-checkbox slot="end" />
-              </ion-item>
-            </ion-card>
+            </div>
           </section>
           <hr />
-        </main>
+          </div>
+        </section>
       </div>
 
       <div class="action desktop-only">
@@ -120,6 +113,7 @@ import {
 import { defineComponent } from 'vue';
 import { arrowForwardOutline, downloadOutline, filterOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
+import { mapGetters, useStore } from "vuex";
 
 export default defineComponent({
   name: 'SelectProduct',
@@ -143,14 +137,51 @@ export default defineComponent({
     IonToolbar,
     Image
   },
+  computed:{
+    ...mapGetters({
+      products: 'product/getProducts'
+    })
+  },
+  methods:{
+    selectAllVariants(product: any){
+      product.variants.forEach((variant: any) => {
+        variant.isSelected = !product.isSelected
+      })
+    },
+    async getProducts(vSize?: any, vIndex?: any) {
+      const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
+      const viewIndex = vIndex ? vIndex : 0;
+
+      const payload = {
+        "json": {
+          "params": {
+            "rows": viewSize,
+            "start": viewIndex * viewSize,
+            "group": true,
+            "group.field": "groupId",
+            "group.limit": 10000,
+            "group.ngroups": true,
+          } as any,
+          "query": "*:*",
+          "filter": "docType: PRODUCT"
+        }
+      }
+      this.store.dispatch("product/getProducts", payload);
+    }
+  },
+  mounted() {
+    this.getProducts();
+  },
   setup() {
     const router = useRouter();
+    const store = useStore();
 
     return {
       arrowForwardOutline,
       downloadOutline,
       filterOutline,
-      router
+      router,
+      store
     };
   },
 });
@@ -167,7 +198,7 @@ export default defineComponent({
 @media (min-width: 991px) {
   .action {
     position: absolute;
-    bottom: 25%;
+    bottom: 25px;
     left: 50%;
     transform: translate(-50%, 0);
   }

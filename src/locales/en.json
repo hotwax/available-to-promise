@@ -1,6 +1,7 @@
 {
   "Blank": "Blank",
   "Click the backdrop to dismiss.": "Click the backdrop to dismiss.",
+  "Color": "Color",
   "Download": "Download",
   "Download data in csv": "Download data in csv",
   "Filter stores": "Filter stores",
@@ -26,6 +27,7 @@
   "Select the column index for the following information in the uploaded CSV": "Select the column index for the following information in the uploaded CSV",
   "Set safety stock": "Set safety stock",
   "Settings": "Settings",
+  "Size": "Size",
   "Start with Ionic": "Start with Ionic",
   "State": "State",
   "Store ID column": "Store ID column",
