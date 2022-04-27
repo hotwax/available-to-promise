@@ -219,6 +219,10 @@ export default defineComponent({
   border-right: 1px solid var(--ion-color-medium);
 }
 
+.section-grid {
+  align-items: start;
+}
+
 ion-item-divider > ion-checkbox {
    margin-inline-end: 16px;
 }
