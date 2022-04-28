@@ -77,7 +77,7 @@
                 </ion-item-divider>
                 <ion-item v-for="facility in warehouseFacilities" :key="facility?.facilityId">
                   <ion-label>{{ facility?.facilityName }}</ion-label>
-                  <ion-checkbox slot="end" :checked="isFacilitySelected(facility?.facilityId)" @ionChange="updateFacilityList($event['detail'].checked, facility)" />
+                  <ion-checkbox slot="end" :checked="isFacilitySelected(facility?.facilityId)" @ionChange="updateSelectedFacilities($event['detail'].checked, facility)" />
                 </ion-item>
               </ion-card>
 
@@ -88,7 +88,7 @@
                 </ion-item-divider>
                 <ion-item v-for="facility in retailFacilities" :key="facility?.facilityId">
                   <ion-label>{{ facility?.facilityName }}</ion-label>
-                  <ion-checkbox slot="end" :checked="isFacilitySelected(facility?.facilityId)" @ionChange="updateFacilityList($event['detail'].checked, facility)" />
+                  <ion-checkbox slot="end" :checked="isFacilitySelected(facility?.facilityId)" @ionChange="updateSelectedFacilities($event['detail'].checked, facility)" />
                 </ion-item>
               </ion-card>
           </section>
@@ -207,7 +207,7 @@ export default defineComponent({
         this.retailFacilities = this.getFacilitiesByType('RETAIL_STORE', this.facilities);   
       })
     },
-    async updateFacilityList( checked: boolean, facility: any) {
+    async updateSelectedFacilities( checked: boolean, facility: any) {
       const selectedFacility = this.selectedFacilities.find((fac: any) => fac?.facilityId === facility?.facilityId)
       if(selectedFacility && checked || !selectedFacility && !checked) {
         return;
