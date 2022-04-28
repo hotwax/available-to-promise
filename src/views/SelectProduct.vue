@@ -171,8 +171,8 @@ export default defineComponent({
   }
 
   main {
-    padding: var(--spacer-sm) 0;
     border-top: var(--border-medium);
+    padding: var(--spacer-sm) 0;
   }
 }
 </style>
