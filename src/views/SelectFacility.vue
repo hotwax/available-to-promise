@@ -73,11 +73,11 @@
               <ion-card v-for="(facilityType, index) in getFacilityTypes(facilities)" :key="index">
                 <ion-item-divider>
                   {{ facilityType }}
-                  <ion-checkbox slot="end"/>
+                  <ion-checkbox slot="end" :checked="isAllFacilitiesSelected(getFacilityByType(facilityType, facilities))" @ionChange="selectAllFacilities($event['detail'].checked, getFacilityByType(facilityType, facilities))" />
                 </ion-item-divider>
                 <ion-item v-for="facility in getFacilityByType(facilityType, facilities)" :key="facility?.facilityId">
                   <ion-label>{{ facility?.facilityName }}</ion-label>
-                  <ion-checkbox slot="end" />
+                  <ion-checkbox slot="end" :checked="isFacilitySelected(facility?.facilityId)" @ionChange="updateFacilityList($event['detail'].checked, facility)" />
                 </ion-item>
               </ion-card>
           </section>
@@ -161,6 +161,11 @@ export default defineComponent({
     IonTitle,
     IonToolbar
   },
+  data() {
+    return {
+      facilityLocations: [] as any
+    }
+  },
   computed: {
     ...mapGetters({
       facilities: 'util/getFacilityLocations',
@@ -174,26 +179,60 @@ export default defineComponent({
       return safetystockmodal.present();
     },
     getFacilityTypes (facilities: any) {
-      console.log(Array.from(new Set(facilities.map((fac: any) => fac.facilityTypeId))));
       return Array.from(new Set(facilities.map((fac: any) => fac.facilityTypeId)))
     },
     getFacilityByType(facilityType: any, facilities: any) {
       return facilities.filter((fac: any) => fac.facilityTypeId === facilityType)
     },
-    async getFacilities(vSize?: any, vIndex?: any) {
-      const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
-      const viewIndex = vIndex ? vIndex : '0';
+    async getFacilities() {
       const payload = {
-        "inputFields": {},
         "fieldList": ["facilityId", "facilityName", "facilityTypeId"],
-        viewSize,
-        viewIndex,
-        "entityName": "ProductStoreFacilityDetail",
+        "viewSize": 50,
+        "entityName": "ProductStoreAndFacility",
         "noConditionFind": "Y",
         "distinct": "Y"
       }
       await this.store.dispatch('util/getFacilities', payload);
     },
+    async updateFacilityList( checked: boolean, facility: any) {
+      const selectedFacility = this.facilityLocations.find((fac: any) => fac?.facilityId === facility?.facilityId)
+      if(selectedFacility && checked || !selectedFacility && !checked) {
+        return;
+      }
+
+      checked ? this.facilityLocations.push(facility) : this.facilityLocations.splice(this.facilityLocations.indexOf(facility?.facilityId), 1);
+    },
+    isFacilitySelected(id: any): boolean {
+      const facility = this.facilityLocations.find((fac: any) => fac?.facilityId === id);
+      return facility?.facilityId === id;
+    },
+    isAllFacilitiesSelected(facilities: any) {
+      const selectedFacilities = this.getFacilityByType(facilities[0]?.facilityTypeId, this.facilityLocations);
+      return selectedFacilities.length === facilities.length
+    },
+    selectAllFacilities(checked: boolean, facilities: any) {
+      const selectedFacilities = this.getFacilityByType(facilities[0]?.facilityTypeId, this.facilityLocations);
+
+      if(checked) {
+        if(selectedFacilities.length === facilities.length) {
+          return;
+        } else {
+          facilities.forEach((fac: any) => {
+            const facility = selectedFacilities.find((selectedFac: any) => selectedFac?.facilityId === fac?.facilityId);
+            if(!facility?.facilityId) this.facilityLocations.push(fac);
+          })
+        }
+      } else {
+        if(selectedFacilities.length === facilities.length) {
+          this.facilityLocations = this.facilityLocations.reduce((remainingFac: any, facility: any) => {
+            if(facility?.facilityTypeId !== facilities[0]?.facilityTypeId) {
+              remainingFac.push(facility)
+            }
+            return remainingFac;
+          }, []) 
+        }
+      }
+    }
   },
   mounted() {
     this.getFacilities();
