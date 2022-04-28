@@ -197,7 +197,6 @@ export default defineComponent({
   },
   mounted() {
     this.getFacilities();
-    console.log(this.facilities)
   },
   setup() {
     const router = useRouter();
