@@ -70,7 +70,7 @@
           </ion-item>
 
           <section class="section-grid">
-            <ion-card v-for="item in 10" :key="item">
+            <ion-card>
               <ion-item-divider>
                 Store Group
                 <ion-checkbox slot="end"/>
@@ -110,7 +110,7 @@
         </main>
       </div>
     </ion-content>
-    
+
     <div class="action desktop-only">
       <ion-button @click="setSafetyStock()">
         {{ $t("Set safety stock") }}

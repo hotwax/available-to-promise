@@ -53,7 +53,7 @@
           </section>
 
           <section class="section-grid">
-            <ion-card v-for="item in 50" :key="item">
+            <ion-card>
               <Image src="https://cdn.shopify.com/s/files/1/0069/7384/9727/products/test-track.jpg?v=1626255137" />
               <ion-item lines="none">
                 <ion-label>
@@ -80,7 +80,7 @@
         </main>
       </div>
     </ion-content>
-    
+
     <div class="action desktop-only">
       <ion-button @click="() => router.push('/select-facility')">
         {{ $t("Select locations") }}
