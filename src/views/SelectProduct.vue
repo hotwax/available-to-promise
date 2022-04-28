@@ -53,7 +53,7 @@
           </section>
 
           <section class="section-grid">
-            <ion-card>
+            <ion-card v-for="item in 50" :key="item">
               <Image src="https://cdn.shopify.com/s/files/1/0069/7384/9727/products/test-track.jpg?v=1626255137" />
               <ion-item lines="none">
                 <ion-label>
@@ -79,20 +79,20 @@
           <hr />
         </main>
       </div>
-
-      <div class="action desktop-only">
-        <ion-button @click="() => router.push('/select-facility')">
-          {{ $t("Select locations") }}
-          <ion-icon :icon="arrowForwardOutline" />
-        </ion-button>
-      </div>
-
-      <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="mobile-only">
-        <ion-fab-button>
-          <ion-icon :icon="arrowForwardOutline" />
-        </ion-fab-button>
-      </ion-fab>
     </ion-content>
+    
+    <div class="action desktop-only">
+      <ion-button @click="() => router.push('/select-facility')">
+        {{ $t("Select locations") }}
+        <ion-icon :icon="arrowForwardOutline" />
+      </ion-button>
+    </div>
+
+    <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="mobile-only">
+      <ion-fab-button>
+        <ion-icon :icon="arrowForwardOutline" />
+      </ion-fab-button>
+    </ion-fab>
   </ion-page>
 </template>
 
