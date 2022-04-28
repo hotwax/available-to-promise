@@ -213,13 +213,4 @@ export default defineComponent({
 ion-item-divider > ion-checkbox {
    margin-inline-end: 16px;
 }
-
-@media (min-width: 991px) {
-  .action {
-    position: absolute;
-    bottom: 25%;
-    left: 50%;
-    transform: translate(-50%, 0);
-  }
-}
 </style>

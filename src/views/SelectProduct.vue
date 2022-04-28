@@ -164,8 +164,7 @@ export default defineComponent({
 @media (min-width: 991px) {
   .find {
     grid: "search  filters"
-          "main    main"
-          / 440px 400px;        
+          "main    main";        
     justify-content: space-between;   
     row-gap: var(--spacer-xl);
     margin: var(--spacer-lg) var(--spacer-base);               
@@ -173,14 +172,7 @@ export default defineComponent({
 
   main {
     padding: var(--spacer-sm) 0;
-    border-top: 1px solid var(--ion-color-medium)
-  }
-  
-  .action {
-    position: absolute;
-    bottom: 25%;
-    left: 50%;
-    transform: translate(-50%, 0);
+    border-top: var(--border-medium);
   }
 }
 </style>
