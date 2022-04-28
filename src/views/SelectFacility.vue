@@ -206,7 +206,7 @@ export default defineComponent({
       const facility = this.facilityLocations.find((fac: any) => fac?.facilityId === id);
       return facility?.facilityId === id;
     },
-    isAllFacilitiesSelected(facilities: any) {
+    isAllFacilitiesSelected(facilities: any): boolean {
       const selectedFacilities = this.getFacilityByType(facilities[0]?.facilityTypeId, this.facilityLocations);
       return selectedFacilities.length === facilities.length
     },
