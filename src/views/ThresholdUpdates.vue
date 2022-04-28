@@ -3,7 +3,7 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-menu-button slot="start" />
-        <ion-title>{{ $t("Threshold Updates") }}</ion-title>
+        <ion-title>{{ $t("Threshold updates") }}</ion-title>
       </ion-toolbar>
 
       <ion-toolbar>
@@ -115,7 +115,7 @@
               </ion-item>
               <ion-item>
                 <ion-icon slot="start" :icon="timeOutline" />
-                <!-- <ion-label class="ion-text-wrap">{{ job.runTime ? getTime(job.runTime) : "-"  }}</ion-label> -->
+                <ion-label class="ion-text-wrap">{{ job.runTime ? getTime(job.runTime) : "-"  }}</ion-label>
               </ion-item>
 
               <ion-item>
@@ -233,8 +233,8 @@ import {
 } from "@ionic/vue";
 // import JobConfiguration from '@/components/JobConfiguration.vue'
 import { codeWorkingOutline, copyOutline, refreshOutline, timeOutline, timerOutline } from "ionicons/icons";
-import emitter from '@/event-bus';
-// import JobHistoryModal from '@/components/JobHistoryModal.vue';
+// import emitter from '@/event-bus';
+import JobHistoryModal from '@/components/JobHistoryModal.vue';
 import { DateTime } from 'luxon';
 
 export default defineComponent({
@@ -298,12 +298,12 @@ export default defineComponent({
     })
   },
   methods: {
-    // async viewJobHistory() {
-    //   const jobHistoryModal = await modalController.create({
-    //     component: JobHistoryModal
-    //   });
-    //   return jobHistoryModal.present();
-    // },
+    async viewJobHistory() {
+      const jobHistoryModal = await modalController.create({
+        component: JobHistoryModal
+      });
+      return jobHistoryModal.present();
+    },
     getTime (time: any) {
       return DateTime.fromMillis(time).toLocaleString(DateTime.TIME_SIMPLE);
     },
