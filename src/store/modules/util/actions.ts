@@ -7,20 +7,18 @@ import { UtilService } from '@/services/UtilService'
 import { translate } from '@/i18n'
 
 const actions: ActionTree<UtilState, RootState> = {
-  async getFacilities({ commit, state }, payload) {
+  async getFacilities({ commit }, payload) {
     let resp 
 
     try{
       resp = await UtilService.getFacilities(payload);
       if(resp.status === 200 && resp.data.docs?.length && resp.data.docs?.length > 0 && !hasError(resp)) {
-        let facilities = resp.data.docs;
-        const total = resp.data.count;
+        const facilities = resp.data.docs;
         
-        if(payload.viewIndex && payload.viewIndex > 0) facilities = state.facilityLocations.list.concat(facilities);
-        commit(types.UTIL_FACILITY_LOCATIONS_UPDATED, { facilities, total });
+        commit(types.UTIL_FACILITY_LOCATIONS_UPDATED, facilities);
       } else {
         showToast(translate("Something went wrong"));
-        commit(types.UTIL_FACILITY_LOCATIONS_UPDATED, { facilities: [], total: 0 });
+        commit(types.UTIL_FACILITY_LOCATIONS_UPDATED, []);
       }
     } catch (error) {
       showToast(translate("Something went wrong"));

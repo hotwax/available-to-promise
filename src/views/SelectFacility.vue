@@ -70,12 +70,23 @@
           </ion-item>
 
           <section class="section-grid">
-              <ion-card v-for="(facilityType, index) in getFacilityTypes(facilities)" :key="index">
+              <ion-card>
                 <ion-item-divider>
-                  {{ facilityType }}
-                  <ion-checkbox slot="end" :checked="isAllFacilitiesSelected(getFacilityByType(facilityType, facilities))" @ionChange="selectAllFacilities($event['detail'].checked, getFacilityByType(facilityType, facilities))" />
+                  {{ $t('WAREHOUSE') }}
+                  <ion-checkbox slot="end" :checked="isAllFacilitiesSelected(warehouseFacilities, 'WAREHOUSE')" @ionChange="selectAllFacilities($event['detail'].checked, warehouseFacilities)" />
                 </ion-item-divider>
-                <ion-item v-for="facility in getFacilityByType(facilityType, facilities)" :key="facility?.facilityId">
+                <ion-item v-for="facility in warehouseFacilities" :key="facility?.facilityId">
+                  <ion-label>{{ facility?.facilityName }}</ion-label>
+                  <ion-checkbox slot="end" :checked="isFacilitySelected(facility?.facilityId)" @ionChange="updateFacilityList($event['detail'].checked, facility)" />
+                </ion-item>
+              </ion-card>
+
+              <ion-card>
+                <ion-item-divider>
+                  {{ $t('RETAIL_STORE') }}
+                  <ion-checkbox slot="end" :checked="isAllFacilitiesSelected(retailFacilities, 'RETAIL_STORE')" @ionChange="selectAllFacilities($event['detail'].checked, retailFacilities)" />
+                </ion-item-divider>
+                <ion-item v-for="facility in retailFacilities" :key="facility?.facilityId">
                   <ion-label>{{ facility?.facilityName }}</ion-label>
                   <ion-checkbox slot="end" :checked="isFacilitySelected(facility?.facilityId)" @ionChange="updateFacilityList($event['detail'].checked, facility)" />
                 </ion-item>
@@ -163,7 +174,9 @@ export default defineComponent({
   },
   data() {
     return {
-      facilityLocations: [] as any
+      selectedFacilities: [] as any,
+      warehouseFacilities: [] as any,
+      retailFacilities: [] as any,
     }
   },
   computed: {
@@ -178,11 +191,8 @@ export default defineComponent({
       });
       return safetystockmodal.present();
     },
-    getFacilityTypes (facilities: any) {
-      return Array.from(new Set(facilities.map((fac: any) => fac.facilityTypeId)))
-    },
-    getFacilityByType(facilityType: any, facilities: any) {
-      return facilities.filter((fac: any) => fac.facilityTypeId === facilityType)
+    getFacilitiesByType(facilityTypeId: any, facilities: any) {
+      return facilities.filter((facility: any) => facilityTypeId === facility.facilityTypeId)
     },
     async getFacilities() {
       const payload = {
@@ -192,39 +202,41 @@ export default defineComponent({
         "noConditionFind": "Y",
         "distinct": "Y"
       }
-      await this.store.dispatch('util/getFacilities', payload);
+      await this.store.dispatch('util/getFacilities', payload).then(() => {
+        this.warehouseFacilities = this.getFacilitiesByType('WAREHOUSE', this.facilities);
+        this.retailFacilities = this.getFacilitiesByType('RETAIL_STORE', this.facilities);   
+      })
     },
     async updateFacilityList( checked: boolean, facility: any) {
-      const selectedFacility = this.facilityLocations.find((fac: any) => fac?.facilityId === facility?.facilityId)
+      const selectedFacility = this.selectedFacilities.find((fac: any) => fac?.facilityId === facility?.facilityId)
       if(selectedFacility && checked || !selectedFacility && !checked) {
         return;
       }
-
-      checked ? this.facilityLocations.push(facility) : this.facilityLocations.splice(this.facilityLocations.indexOf(facility?.facilityId), 1);
+      checked ? this.selectedFacilities.push(facility) : this.selectedFacilities.splice(this.selectedFacilities.indexOf(facility), 1);
     },
     isFacilitySelected(id: any): boolean {
-      const facility = this.facilityLocations.find((fac: any) => fac?.facilityId === id);
+      const facility = this.selectedFacilities.find((fac: any) => fac?.facilityId === id);
       return facility?.facilityId === id;
     },
-    isAllFacilitiesSelected(facilities: any): boolean {
-      const selectedFacilities = this.getFacilityByType(facilities[0]?.facilityTypeId, this.facilityLocations);
-      return selectedFacilities.length === facilities.length
+    isAllFacilitiesSelected(facilities: any, facilityType: any): boolean {
+      const facilitySelectedByType = this.selectedFacilities.filter((facility: any) => facility?.facilityTypeId === facilityType);
+      return facilities.length === facilitySelectedByType.length;
     },
-    selectAllFacilities(checked: boolean, facilities: any) {
-      const selectedFacilities = this.getFacilityByType(facilities[0]?.facilityTypeId, this.facilityLocations);
+    selectAllFacilities(value: boolean, facilities: any) {
+      const facilitySelectedByType = this.selectedFacilities.filter((facility: any) => facility?.facilityTypeId === facilities[0]?.facilityTypeId);
 
-      if(checked) {
-        if(selectedFacilities.length === facilities.length) {
+      if(value) {
+        if(facilitySelectedByType.length === facilities.length) {
           return;
         } else {
           facilities.forEach((fac: any) => {
-            const facility = selectedFacilities.find((selectedFac: any) => selectedFac?.facilityId === fac?.facilityId);
-            if(!facility?.facilityId) this.facilityLocations.push(fac);
+            const facility = facilitySelectedByType.find((selectedFac: any) => selectedFac?.facilityId === fac?.facilityId);
+            if(!facility?.facilityId) this.selectedFacilities.push(fac);
           })
         }
       } else {
-        if(selectedFacilities.length === facilities.length) {
-          this.facilityLocations = this.facilityLocations.reduce((remainingFac: any, facility: any) => {
+        if(facilitySelectedByType.length === facilities.length) {
+          this.selectedFacilities = this.selectedFacilities.reduce((remainingFac: any, facility: any) => {
             if(facility?.facilityTypeId !== facilities[0]?.facilityTypeId) {
               remainingFac.push(facility)
             }

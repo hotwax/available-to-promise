@@ -8,10 +8,7 @@ import UtilState from './UtilState'
 const utilModule: Module<UtilState, RootState> = {
   namespaced: true,
   state: {
-    facilityLocations: {
-      list: [],
-      total: 0
-    },
+    facilityLocations: [],
   },
   getters,
   actions,

@@ -13,6 +13,7 @@
   "products selected": "products selected",
   "OMS": "OMS",
   "Ready to create an app?": "Ready to create an app?",
+  "RETAIL_STORE": "RETAIL_STORE",
   "Safety stock": "Safety stock",
   "Save": "Save",
   "Search orders": "Search orders",
@@ -42,5 +43,6 @@
   "Upload": "Upload",
   "Upload CSV": "Upload CSV",
   "variants": "variants",
+  "WAREHOUSE": "WAREHOUSE",
   "You can also download the products, locations and safety stock you selected in a CSV to upload in other systems": "You can also download the products, locations and safety stock you selected in a CSV to upload in other systems"
 }
