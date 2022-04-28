@@ -8,12 +8,12 @@
     </ion-header>
     
     <ion-content>
-      <!-- Select store -->
+       <!-- Select eCom store -->
       <ion-item>
-        <ion-icon :icon="storefrontOutline" slot="start" />
-        <ion-label>{{ $t("Store") }}</ion-label>
-        <ion-select interface="popover" :placeholder="$t('store name')" :value="currentFacility.facilityId" @ionChange="setFacility($event)">
-          <ion-select-option v-for="facility in userProfile.facilities" :key="facility.facilityId" :value="facility.facilityId" >{{ facility.name }}</ion-select-option>
+        <ion-icon :icon="globeOutline" slot="start" />
+        <ion-label>{{$t("Shop")}}</ion-label>
+        <ion-select interface="popover" :value="currentEComStore.productStoreId" @ionChange="setEComStore($event)">
+          <ion-select-option v-for="store in (userProfile ? userProfile.stores : [])" :key="store.productStoreId" :value="store.productStoreId" >{{ store.storeName }}</ion-select-option>
         </ion-select>
       </ion-item>
 
@@ -38,7 +38,7 @@
 <script lang="ts">
 import { IonBackButton, IonButton, IonContent, IonHeader,IonIcon, IonItem, IonLabel, IonMenuButton, IonPage, IonSelect, IonSelectOption, IonTitle, IonToolbar, popoverController } from '@ionic/vue';
 import { defineComponent } from 'vue';
-import { codeWorkingOutline, ellipsisVertical, personCircleOutline, storefrontOutline} from 'ionicons/icons'
+import { codeWorkingOutline, ellipsisVertical, globeOutline, personCircleOutline, storefrontOutline} from 'ionicons/icons'
 import { mapGetters, useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
@@ -62,10 +62,18 @@ export default defineComponent({
     ...mapGetters({
       userProfile: 'user/getUserProfile',
       currentFacility: 'user/getCurrentFacility',
+      currentEComStore: 'user/getCurrentEComStore',
       instanceUrl: 'user/getInstanceUrl'
     })
   },
   methods: {
+    setEComStore(store: any) {
+      if(this.userProfile) {
+        this.store.dispatch('user/setEcomStore', {
+          'eComStore': this.userProfile.stores.find((str: any) => str.productStoreId == store['detail'].value)
+        })
+      }
+    },
     setFacility (facility: any) {
       this.userProfile.facilities.map((fac: any) => {
         if (fac.facilityId == facility['detail'].value) {
@@ -87,6 +95,7 @@ export default defineComponent({
     return {
       codeWorkingOutline,
       ellipsisVertical,
+      globeOutline,
       personCircleOutline,
       storefrontOutline,
       store,

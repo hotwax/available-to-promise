@@ -4,6 +4,7 @@ import SelectFacility from '@/views/SelectFacility.vue'
 import SelectFacilityCSVUpload from '@/views/SelectFacilityCSVUpload.vue'
 import SelectProduct from '@/views/SelectProduct.vue'
 import SelectProductCSVUpload from '@/views/SelectProductCSVUpload.vue'
+import ThresholdUpdates from '@/views/ThresholdUpdates.vue'
 import Login from '@/views/Login.vue'
 import Settings from "@/views/Settings.vue"
 import store from '@/store'
@@ -50,6 +51,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/select-facility-csv-upload',
     name: 'SelectFacilityCSVUpload',
     component: SelectFacilityCSVUpload
+  },
+  {
+    path: '/threshold-updates',
+    name: 'ThresholdUpdates',
+    component: ThresholdUpdates,
+    beforeEnter: authGuard
   },
   {
     path: '/login',

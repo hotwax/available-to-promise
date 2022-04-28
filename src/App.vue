@@ -12,6 +12,10 @@
             <ion-icon :icon="options" slot="start" />
             <ion-label>{{ $t("Threshold Management") }}</ion-label>
           </ion-item>
+          <ion-item button @click="closeMenu(); router.push('/threshold-updates')">
+            <ion-icon :icon="pulseOutline" slot="start" />
+            <ion-label>{{ $t("Threshold Updates") }}</ion-label>
+          </ion-item>
           <ion-item button @click="closeMenu(); router.push('/settings')">
             <ion-icon :icon="settings" slot="start" />
             <ion-label>{{ $t("Settings") }}</ion-label>
@@ -27,7 +31,7 @@
 import { IonApp, IonContent, IonHeader, IonItem, IonIcon, IonLabel, IonList, IonMenu, IonTitle, IonToolbar, IonRouterOutlet, menuController } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { loadingController } from '@ionic/vue';
-import { options, settings } from 'ionicons/icons';
+import { options, settings, pulseOutline } from 'ionicons/icons';
 import emitter from "@/event-bus"
 import { useRouter } from 'vue-router';
 
@@ -82,6 +86,7 @@ export default defineComponent({
 
     return {
       options,
+      pulseOutline,
       settings,
       router
     }
