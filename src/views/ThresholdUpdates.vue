@@ -194,9 +194,9 @@
           </div>          
         </section>
 
-        <!-- <aside class="desktop-only" v-show="segmentSelected === 'pending' && currentJob">
+        <aside class="desktop-only" v-show="segmentSelected === 'pending' && currentJob">
           <JobConfiguration :title="title" :job="currentJob" :status="currentJobStatus" :type="freqType" :key="currentJob"/>
-        </aside> -->
+        </aside>
       </main>
     </ion-content>
   </ion-page>
@@ -229,11 +229,12 @@ import {
   IonSegmentButton,
   IonSpinner,
   isPlatform,
-  modalController
+  modalController,
+  createAnimation
 } from "@ionic/vue";
-// import JobConfiguration from '@/components/JobConfiguration.vue'
+import JobConfiguration from '@/components/JobConfiguration.vue'
 import { codeWorkingOutline, copyOutline, refreshOutline, timeOutline, timerOutline } from "ionicons/icons";
-// import emitter from '@/event-bus';
+import emitter from '@/event-bus';
 import JobHistoryModal from '@/components/JobHistoryModal.vue';
 import { DateTime } from 'luxon';
 
@@ -262,7 +263,7 @@ export default defineComponent({
     IonSegment,
     IonSegmentButton,
     IonSpinner,
-    // JobConfiguration
+    JobConfiguration
   },
   data() {
     return {
@@ -417,25 +418,46 @@ export default defineComponent({
         });
 
        return alert.present();
+    },    
+    viewJobConfiguration(job: any) {
+      if(!this.isDesktop) {
+        return;
+      }
+
+      this.currentJob = {id: job.jobId, ...job}
+      this.title = this.getEnumName(job.systemJobEnumId)
+      this.currentJobStatus = job.tempExprId
+      const id = Object.entries(this.jobEnums).find((enums) => enums[1] == job.systemJobEnumId) as any
+      this.freqType = id && (Object.entries(this.jobFrequencyType).find((freq) => freq[0] == id[0]) as any)[1]
+
+      if (this.currentJob && !this.isJobDetailAnimationCompleted) {
+        this.playAnimation();
+        this.isJobDetailAnimationCompleted = true;
+      }
     },
-    // Have to discuss whether we want job configuration on this page or not
-    
-    // viewJobConfiguration(job: any) {
-    //   if(!this.isDesktop) {
-    //     return;
-    //   }
+    playAnimation() {
+      const aside = document.querySelector('aside') as Element
+      const main = document.querySelector('main') as Element
 
-    //   this.currentJob = {id: job.jobId, ...job}
-    //   this.title = this.getEnumName(job.systemJobEnumId)
-    //   this.currentJobStatus = job.tempExprId
-    //   const id = Object.entries(this.jobEnums).find((enums) => enums[1] == job.systemJobEnumId) as any
-    //   this.freqType = id && (Object.entries(this.jobFrequencyType).find((freq) => freq[0] == id[0]) as any)[1]
+      const revealAnimation = createAnimation()
+        .addElement(aside)
+        .duration(1500)
+        .easing('ease')
+        .keyframes([
+          { offset: 0, flex: '0', opacity: '0' },
+          { offset: 0.5, flex: '1', opacity: '0' },
+          { offset: 1, flex: '1', opacity: '1' }
+        ])
 
-    //   if (this.currentJob && !this.isJobDetailAnimationCompleted) {
-    //     emitter.emit('playAnimation');
-    //     this.isJobDetailAnimationCompleted = true;
-    //   }
-    // },
+      const gapAnimation = createAnimation()
+        .addElement(main)
+        .duration(500)
+        .fromTo('gap', '0', 'var(--spacer-2xl)');
+
+      createAnimation()
+        .addAnimation([gapAnimation, revealAnimation])
+        .play();
+    }
   },
   created() {
     this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0});
@@ -476,6 +498,13 @@ ion-item {
   --background: transparent;
 }
 
+aside {
+  flex: 1 0 355px;
+  position: sticky;
+  top: var(--spacer-lg);
+  flex: 1;
+}
+
 .actions {
   display: flex;
   justify-content: space-between;
@@ -487,8 +516,22 @@ ion-item {
   }
 
   main {
-   max-width: 50ch;
-   margin: auto;
+    display: flex;
+    justify-content: center;
+    align-items: start;
+    gap: var(--spacer-2xl);
+    max-width: 990px;
+    margin: var(--spacer-base) auto 0;
+  } 
+
+  main > section {
+    max-width: 50ch;
+    margin: auto;
+  } 
+
+  aside {
+    width: 0px;
+    opacity: 0;
   }
 }
 </style>
