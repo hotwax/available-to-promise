@@ -128,7 +128,6 @@ const actions: ActionTree<JobState, RootState> = {
   },
 
   async fetchPendingJobs({ commit, dispatch, state }, payload){
-    console.log(payload)
     await JobService.fetchJobInformation({
       "inputFields": {
         "productStoreId": payload.eComStoreId,

@@ -336,10 +336,8 @@ export default defineComponent({
       })
     },
     async refreshJobs(event: any) {
-        console.log(this.getCurrentEComStore.productStoreId)
       this.isRetrying = true;
       if(this.segmentSelected === 'pending') {
-          console.log(this.getCurrentEComStore.productStoreId)
         this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0}).then(() => {
           if(event) event.target.complete();
           this.isRetrying = false;
@@ -420,6 +418,8 @@ export default defineComponent({
 
        return alert.present();
     },
+    // Have to discuss whether we want job configuration on this page or not
+    
     // viewJobConfiguration(job: any) {
     //   if(!this.isDesktop) {
     //     return;
@@ -438,7 +438,6 @@ export default defineComponent({
     // },
   },
   created() {
-      console.log(this.getCurrentEComStore.productStoreId)
     this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0});
   },
   setup() {
