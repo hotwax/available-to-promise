@@ -119,13 +119,6 @@ const actions: ActionTree<ProductState, RootState> = {
             featureHierarchy: virtual?.featureHierarchy
           }
         })
-
-        // We are commenting this code because we will be releasing this feature in next release.
-
-        // const variantIds = products.reduce((acc: any, product: any) => {
-        //   return acc.concat(product.variants.map((variant: any) => variant.productId ))
-        // }, [])
-        // this.dispatch("stock/addProducts", { variantIds });
         
         if(payload.json.params.start && payload.json.params.start > 0) products = state.products.list.concat(products);
         commit(types.PRODUCT_LIST_UPDATED, { products, totalProductsCount });
