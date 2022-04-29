@@ -266,8 +266,15 @@ body {
   grid-area: filters;
 }
 
+.sort {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
 main {
   grid-area: main;
+  margin-left: var(--spacer-xl);
 }
 
 .section-header {
@@ -321,7 +328,8 @@ hr {
   .find {
     grid: "search  main" min-content
           "filters main" 1fr 
-          / 375px;                    
+          / 375px;    
+    margin: var(--spacer-lg);                
   }
   
   .section-header {

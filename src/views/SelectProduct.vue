@@ -23,14 +23,65 @@
         </section>
 
         <aside class="filters desktop-only">
-          <ion-item lines="none">
-            <ion-label>{{ $t("Only show selected products") }}</ion-label>
-            <ion-toggle slot="end" color="secondary" />
-          </ion-item>
+          <ion-list>
+            <ion-list-header><h3>{{ $t("Catalog") }}</h3></ion-list-header>
+            <ion-item>
+              <ion-label>{{ $t("Categories") }}</ion-label>
+              <ion-select value="any" interface="popover">
+                <ion-select-option value="any">all</ion-select-option>
+              </ion-select>
+            </ion-item>
+
+            <ion-card>
+              <ion-card-header>
+                <ion-card-title>{{ $t("Tags") }}</ion-card-title>
+              </ion-card-header>
+              <ion-card-content>
+                <ion-chip>
+                  <ion-label>Tag 1</ion-label>
+                </ion-chip>
+                <ion-chip>
+                  <ion-label>Tag 2</ion-label>
+                </ion-chip>
+              </ion-card-content>
+            </ion-card>
+          </ion-list>
+
+          <ion-list>
+            <ion-list-header><h3>{{ $t("Order") }}</h3></ion-list-header>
+            <ion-item>
+              <ion-label>{{ $t("Pre-order") }}</ion-label>
+              <ion-checkbox />
+            </ion-item>
+            <ion-item>
+              <ion-label>{{ $t("Back order") }}</ion-label>
+              <ion-checkbox />
+            </ion-item>
+          </ion-list>
+
+          <ion-list>
+            <ion-list-header><h3>{{ $t("Shop") }}</h3></ion-list-header>
+            <ion-item>
+              <ion-label>{{ $t("Product Store") }}</ion-label>
+              <ion-select value="any" interface="popover">
+                <ion-select-option value="any">Australia</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </ion-list>
         </aside>
 
         <main>
-          <section class="sort"></section>
+          <section class="sort">
+            <ion-item lines="none">
+              <h2>{{ $t("Results") }}:</h2>
+            </ion-item>
+            <ion-item lines="none">
+              <ion-label>{{ $t("Only show selected products") }}</ion-label>
+              <ion-toggle slot="end" color="secondary" />
+            </ion-item>
+          </section>
+
+          <hr />
 
           <section class="section-header">
             <div class="primary-info">
@@ -159,20 +210,5 @@ export default defineComponent({
 <style scoped>
 .section-grid {
   grid-template-columns: repeat(auto-fill, 200px);
-}
-
-@media (min-width: 991px) {
-  .find {
-    grid: "search  filters"
-          "main    main";        
-    justify-content: space-between;   
-    row-gap: var(--spacer-xl);
-    margin: var(--spacer-lg) var(--spacer-base);               
-  }
-
-  main {
-    border-top: var(--border-medium);
-    padding: var(--spacer-sm) 0;
-  }
 }
 </style>
