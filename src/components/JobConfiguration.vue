@@ -283,7 +283,7 @@ ion-list {
 @media (min-width: 991px) {  
   section {
     overflow: hidden;
-    border: 1px solid var(--ion-color-medium);
+    border: var(--border-medium);
     border-radius: 16px;
   }
   .actions {

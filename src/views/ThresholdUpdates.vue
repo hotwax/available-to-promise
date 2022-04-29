@@ -499,10 +499,8 @@ ion-item {
 }
 
 aside {
-  flex: 1 0 355px;
   position: sticky;
   top: var(--spacer-lg);
-  flex: 1;
 }
 
 .actions {
@@ -526,7 +524,6 @@ aside {
 
   main > section {
     max-width: 50ch;
-    margin: auto;
   } 
 
   aside {
