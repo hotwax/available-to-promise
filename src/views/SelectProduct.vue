@@ -11,7 +11,9 @@
           <ion-button fill="clear" class="mobile-only">
             <ion-icon :icon="filterOutline" />
           </ion-button>
-          <ion-button class="desktop-only" @click="() => router.push('/select-product-csv-upload')">{{ $t("Upload CSV") }}</ion-button>
+          <ion-button class="desktop-only" @click="() => router.push('/select-product-csv-upload')">
+            {{ $t("Upload CSV") }}
+          </ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
@@ -24,7 +26,9 @@
 
         <aside class="filters desktop-only">
           <ion-list>
-            <ion-list-header><h3>{{ $t("Catalog") }}</h3></ion-list-header>
+            <ion-list-header>
+              <h3>{{ $t("Catalog") }}</h3>
+            </ion-list-header>
             <ion-item>
               <ion-label>{{ $t("Categories") }}</ion-label>
               <ion-select value="any" interface="popover">
@@ -48,7 +52,9 @@
           </ion-list>
 
           <ion-list>
-            <ion-list-header><h3>{{ $t("Order") }}</h3></ion-list-header>
+            <ion-list-header>
+              <h3>{{ $t("Order") }}</h3>
+            </ion-list-header>
             <ion-item>
               <ion-label>{{ $t("Pre-order") }}</ion-label>
               <ion-checkbox />
@@ -60,7 +66,9 @@
           </ion-list>
 
           <ion-list>
-            <ion-list-header><h3>{{ $t("Shop") }}</h3></ion-list-header>
+            <ion-list-header>
+              <h3>{{ $t("Shop") }}</h3>
+            </ion-list-header>
             <ion-item>
               <ion-label>{{ $t("Product Store") }}</ion-label>
               <ion-select value="any" interface="popover">
@@ -153,7 +161,11 @@ import {
   IonButton,
   IonButtons,
   IonCard,
+  IonCardContent,
+  IonCardHeader,
+  IonCardTitle,
   IonCheckbox,
+  IonChip,
   IonContent,
   IonFab,
   IonFabButton,
@@ -161,15 +173,23 @@ import {
   IonIcon,
   IonItem,
   IonLabel,
+  IonList,
+  IonListHeader,
   IonMenuButton,
   IonPage,
   IonSearchbar,
+  IonSelect,
+  IonSelectOption,
   IonTitle,
   IonToggle,
   IonToolbar
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
-import { arrowForwardOutline, downloadOutline, filterOutline } from 'ionicons/icons';
+import {
+  arrowForwardOutline,
+  downloadOutline,
+  filterOutline
+} from 'ionicons/icons';
 import { useRouter } from 'vue-router';
 
 export default defineComponent({
@@ -178,7 +198,11 @@ export default defineComponent({
     IonButton,
     IonButtons,
     IonCard,
+    IonCardContent,
+    IonCardHeader,
+    IonCardTitle,
     IonCheckbox,
+    IonChip,
     IonContent,
     IonFab,
     IonFabButton,
@@ -186,13 +210,17 @@ export default defineComponent({
     IonIcon,
     IonItem,
     IonLabel,
+    IonList,
+    IonListHeader,
     IonMenuButton,
     IonPage,
     IonSearchbar,
+    IonSelect,
+    IonSelectOption,
     IonTitle,
     IonToggle,
     IonToolbar,
-    Image
+    Image,
   },
   setup() {
     const router = useRouter();
