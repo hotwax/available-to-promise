@@ -63,7 +63,7 @@
                   <p>{{ $t("Color") }}: {{ $filters.getFeature(variant.featureHierarchy, '1/COLOR/') }}</p>
                   <p>{{ $t("Size") }}: {{ $filters.getFeature(variant.featureHierarchy, '1/SIZE/') }}</p>
                 </ion-label>
-                <ion-checkbox v-model="variant.isSelected" @click="select(variant)" slot="end" />
+                <ion-checkbox v-model="variant.isSelected" slot="end" />
               </ion-item>
             </ion-card>
             </div>

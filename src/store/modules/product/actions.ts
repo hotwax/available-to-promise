@@ -32,7 +32,6 @@ const actions: ActionTree<ProductState, RootState> = {
         const totalProductsCount = resp.data.response.numFound;
 
         if (payload.viewIndex && payload.viewIndex > 0) products = state.products.list.concat(products)
-        commit(types.PRODUCT_SEARCH_UPDATED, { products: products, totalProductsCount: totalProductsCount })
       } else {
         //showing error whenever getting no products in the response or having any other error
         showToast(translate("Product not found"));
@@ -104,8 +103,11 @@ const actions: ActionTree<ProductState, RootState> = {
         const productInformation = await this.dispatch("product/fetchProducts", { productIds });
 
         products = products.map((product: any) => {
-          product.variants.forEach((variant: any) => {
-            variant.isSelected = false;
+          product.variants.map((variant: any) => {
+            return {
+              ...variant,
+              isSelected: false
+            }
           });
           const virtual = productInformation[product.productId]
 
@@ -120,12 +122,6 @@ const actions: ActionTree<ProductState, RootState> = {
           }
         })
 
-        // We are commenting this code because we will be releasing this feature in next release.
-
-        // const variantIds = products.reduce((acc: any, product: any) => {
-        //   return acc.concat(product.variants.map((variant: any) => variant.productId ))
-        // }, [])
-        // this.dispatch("stock/addProducts", { variantIds });
         
         if(payload.json.params.start && payload.json.params.start > 0) products = state.products.list.concat(products);
         commit(types.PRODUCT_LIST_UPDATED, { products, totalProductsCount });
