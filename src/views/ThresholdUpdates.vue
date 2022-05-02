@@ -456,10 +456,8 @@ export default defineComponent({
       this.currentJob = {id: job.jobId, ...job}
       this.title = this.getEnumName(job.systemJobEnumId)
       this.currentJobStatus = job.tempExprId
-      console.log(this.jobEnums)
       const id = this.jobEnums.find((enums) => enums === job.systemJobEnumId)
-      this.freqType = id && (Object.entries(this.jobFrequencyType).find((freq) => freq[0] == id) as any)
-
+      this.freqType = id && (Object.entries(this.jobFrequencyType).find((freq) => freq[0] == id) as any)[1]
       if (this.currentJob && !this.isJobDetailAnimationCompleted) {
         this.playAnimation();
         this.isJobDetailAnimationCompleted = true;
