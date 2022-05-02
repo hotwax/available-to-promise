@@ -303,6 +303,14 @@ hr {
   display: unset;
 }
 
+.sort {
+  margin: var(--spacer-sm) 0;
+}
+
+.sort > div > :first-child{
+  border-bottom: var(--border-medium);
+}
+
 @media (min-width: 991px) {
   .find {
     grid: "search  main" min-content
@@ -324,7 +332,33 @@ hr {
 
   .find > .filters{
     display: unset;
-  }  
+  }
+
+  .sort {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-bottom: var(--spacer-lg);
+  }
+
+  .sort > ion-item {
+    flex-grow: 1;
+  }
+
+  .sort > div {
+    display: flex;
+    flex-grow: 2;
+    justify-content: end;
+  }
+
+  .sort > div > ion-item {
+    flex: 0 1 343px;
+    border-left: var(--border-medium);
+  }
+
+  .sort > div > :first-child{
+    border-bottom: unset;
+  }
 }
 
 @media (prefers-color-scheme: dark) {

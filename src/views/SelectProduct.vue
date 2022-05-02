@@ -11,7 +11,6 @@
           <ion-button fill="clear" class="mobile-only">
             <ion-icon :icon="filterOutline" />
           </ion-button>
-          <ion-button class="desktop-only" @click="() => router.push('/select-product-csv-upload')">{{ $t("Upload CSV") }}</ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
@@ -23,14 +22,89 @@
         </section>
 
         <aside class="filters desktop-only">
-          <ion-item>
-            <ion-label>{{ $t("Only show selected products") }}</ion-label>
-            <ion-toggle slot="end" />
-          </ion-item>
+          <ion-list>
+            <ion-list-header><h3>{{ $t("Include") }}</h3></ion-list-header>
+            <ion-card>
+              <ion-toolbar>
+                <ion-title>{{ $t("Tags") }}</ion-title>
+              </ion-toolbar>
+              <ion-card-content>
+                <ion-chip outline>
+                  <ion-label>{{ 'Sample' }}</ion-label>
+                </ion-chip>
+              </ion-card-content>
+            </ion-card>
+            <ion-card>
+              <ion-toolbar>
+                <ion-title>{{ $t("Categories") }}</ion-title>
+              </ion-toolbar>
+              <ion-card-content>
+                <ion-chip outline>
+                  <ion-label>{{ 'Sample' }}</ion-label>
+                </ion-chip>
+              </ion-card-content>
+            </ion-card>
+            <ion-card>
+              <ion-toolbar>
+                <ion-title>{{ $t("Shop") }}</ion-title>
+              </ion-toolbar>
+              <ion-card-content>
+                <ion-chip outline>
+                  <ion-label>{{ 'Sample' }}</ion-label>
+                </ion-chip>
+              </ion-card-content>
+            </ion-card>
+          </ion-list>
+          <ion-list>
+            <ion-list-header><h3>{{ $t("Exclude") }}</h3></ion-list-header>
+            <ion-card>
+              <ion-toolbar>
+                <ion-title>{{ $t("Tags") }}</ion-title>
+              </ion-toolbar>
+              <ion-card-content>
+                <ion-chip outline>
+                  <ion-label>{{ 'Sample' }}</ion-label>
+                </ion-chip>
+              </ion-card-content>
+            </ion-card>
+            <ion-card>
+              <ion-toolbar>
+                <ion-title>{{ $t("Categories") }}</ion-title>
+              </ion-toolbar>
+              <ion-card-content>
+                <ion-chip outline>
+                  <ion-label>{{ 'Sample' }}</ion-label>
+                </ion-chip>
+              </ion-card-content>
+            </ion-card>
+            <ion-card>
+              <ion-toolbar>
+                <ion-title>{{ $t("Shop") }}</ion-title>
+              </ion-toolbar>
+              <ion-card-content>
+                <ion-chip outline>
+                  <ion-label>{{ 'Sample' }}</ion-label>
+                </ion-chip>
+              </ion-card-content>
+            </ion-card>
+          </ion-list>
         </aside>
 
         <main class="main">
-          <section class="sort"></section>
+          <section class="sort">
+            <ion-item lines="none">
+              <h2>{{ $t("Results") }}:</h2>
+            </ion-item>
+
+            <div>
+              <ion-item>
+                <ion-label position="fixed">{{ $t("Threshold") }}</ion-label>
+                <ion-input type="text" :placeholder="$t('global threshold')"/>
+              </ion-item>
+            </div>
+          </section>
+
+          <hr />
 
           <section class="section-header">
             <div class="primary-info">
@@ -43,13 +117,6 @@
             </div>
 
             <div class="tags"></div>
-
-            <div class="metadata desktop-only">
-              <ion-item lines="none">
-                <ion-label>{{ $t("Select all variants") }}</ion-label>
-                <ion-toggle />
-              </ion-item>
-            </div>
           </section>
 
           <section class="section-grid">
@@ -61,18 +128,6 @@
                   <p>Color: Blue</p>
                   <p>Size: XL</p>
                 </ion-label>
-                <ion-checkbox slot="end" />
-              </ion-item>
-            </ion-card>
-            <ion-card>
-              <Image src="https://cdn.shopify.com/s/files/1/0069/7384/9727/products/test-track.jpg?v=1626255137" />
-              <ion-item lines="none">
-                <ion-label>
-                  SKU
-                  <p>Color: Blue</p>
-                  <p>Size: XL</p>
-                </ion-label>
-                <ion-checkbox slot="end" />
               </ion-item>
             </ion-card>
           </section>
@@ -81,9 +136,9 @@
       </div>
 
       <div class="action desktop-only">
-        <ion-button @click="() => router.push('/select-facility')">
-          {{ $t("Select locations") }}
-          <ion-icon :icon="arrowForwardOutline" />
+        <ion-button>
+          <ion-icon :icon="saveOutline" />
+          {{ $t("Save threshold rule") }}
         </ion-button>
       </div>
 
@@ -102,23 +157,26 @@ import {
   IonButton,
   IonButtons,
   IonCard,
-  IonCheckbox,
+  IonCardContent,
+  IonChip,
   IonContent,
   IonFab,
   IonFabButton,
   IonHeader,
   IonIcon,
+  IonInput,
   IonItem,
   IonLabel,
+  IonList,
+  IonListHeader,
   IonMenuButton,
   IonPage,
   IonSearchbar,
   IonTitle,
-  IonToggle,
   IonToolbar
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
-import { arrowForwardOutline, downloadOutline, filterOutline } from 'ionicons/icons';
+import { arrowForwardOutline, downloadOutline, filterOutline, saveOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
 
 export default defineComponent({
@@ -127,19 +185,22 @@ export default defineComponent({
     IonButton,
     IonButtons,
     IonCard,
-    IonCheckbox,
+    IonCardContent,
+    IonChip,
     IonContent,
     IonFab,
     IonFabButton,
     IonHeader,
     IonIcon,
+    IonInput,
     IonItem,
     IonLabel,
+    IonList,
+    IonListHeader,
     IonMenuButton,
     IonPage,
     IonSearchbar,
     IonTitle,
-    IonToggle,
     IonToolbar,
     Image
   },
@@ -150,16 +211,14 @@ export default defineComponent({
       arrowForwardOutline,
       downloadOutline,
       filterOutline,
-      router
+      router,
+      saveOutline
     };
   },
 });
 </script>
 
 <style scoped>
-.filters {
-  border-right: 1px solid var(--ion-color-medium);
-}
 .section-grid {
   grid-template-columns: repeat(auto-fill, 200px);
 }
@@ -167,7 +226,7 @@ export default defineComponent({
 @media (min-width: 991px) {
   .action {
     position: absolute;
-    bottom: 25%;
+    bottom: 10%;
     left: 50%;
     transform: translate(-50%, 0);
   }
