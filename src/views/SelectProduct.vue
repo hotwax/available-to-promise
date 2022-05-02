@@ -23,16 +23,72 @@
         </section>
 
         <aside class="filters desktop-only">
-          <ion-card>
-            <ion-toolbar>
-              <ion-title>{{ $t("Tags") }}</ion-title>
-            </ion-toolbar>
-            <ion-card-content>
-              <ion-chip outline>
-                <ion-label>{{ 'Sample' }}</ion-label>
-              </ion-chip>
-            </ion-card-content>
-          </ion-card>
+          <ion-list>
+            <ion-list-header><h3>{{ $t("Include") }}</h3></ion-list-header>
+            <ion-card>
+              <ion-toolbar>
+                <ion-title>{{ $t("Tags") }}</ion-title>
+              </ion-toolbar>
+              <ion-card-content>
+                <ion-chip outline>
+                  <ion-label>{{ 'Sample' }}</ion-label>
+                </ion-chip>
+              </ion-card-content>
+            </ion-card>
+            <ion-card>
+              <ion-toolbar>
+                <ion-title>{{ $t("Categories") }}</ion-title>
+              </ion-toolbar>
+              <ion-card-content>
+                <ion-chip outline>
+                  <ion-label>{{ 'Sample' }}</ion-label>
+                </ion-chip>
+              </ion-card-content>
+            </ion-card>
+            <ion-card>
+              <ion-toolbar>
+                <ion-title>{{ $t("Shop") }}</ion-title>
+              </ion-toolbar>
+              <ion-card-content>
+                <ion-chip outline>
+                  <ion-label>{{ 'Sample' }}</ion-label>
+                </ion-chip>
+              </ion-card-content>
+            </ion-card>
+          </ion-list>
+          <ion-list>
+            <ion-list-header><h3>{{ $t("Exclude") }}</h3></ion-list-header>
+            <ion-card>
+              <ion-toolbar>
+                <ion-title>{{ $t("Tags") }}</ion-title>
+              </ion-toolbar>
+              <ion-card-content>
+                <ion-chip outline>
+                  <ion-label>{{ 'Sample' }}</ion-label>
+                </ion-chip>
+              </ion-card-content>
+            </ion-card>
+            <ion-card>
+              <ion-toolbar>
+                <ion-title>{{ $t("Categories") }}</ion-title>
+              </ion-toolbar>
+              <ion-card-content>
+                <ion-chip outline>
+                  <ion-label>{{ 'Sample' }}</ion-label>
+                </ion-chip>
+              </ion-card-content>
+            </ion-card>
+            <ion-card>
+              <ion-toolbar>
+                <ion-title>{{ $t("Shop") }}</ion-title>
+              </ion-toolbar>
+              <ion-card-content>
+                <ion-chip outline>
+                  <ion-label>{{ 'Sample' }}</ion-label>
+                </ion-chip>
+              </ion-card-content>
+            </ion-card>
+          </ion-list>
         </aside>
 
         <main class="main">
@@ -42,10 +98,9 @@
             </ion-item>
 
             <div>
-              <ion-item lines="none">
-                <ion-icon :icon="documentTextOutline" slot="start" />
-                <ion-label class="ion-text-wrap">{{ $t("Show order items") }}</ion-label>
-                <ion-toggle slot="end" checked></ion-toggle>
+              <ion-item>
+                <ion-label position="fixed">{{ $t("Threshold") }}</ion-label>
+                <ion-input type="text" placeholder="global threshold"/>
               </ion-item>
             </div>
           </section>
@@ -74,18 +129,6 @@
                   <p>Color: Blue</p>
                   <p>Size: XL</p>
                 </ion-label>
-                <ion-checkbox slot="end" />
-              </ion-item>
-            </ion-card>
-            <ion-card>
-              <Image src="https://cdn.shopify.com/s/files/1/0069/7384/9727/products/test-track.jpg?v=1626255137" />
-              <ion-item lines="none">
-                <ion-label>
-                  SKU
-                  <p>Color: Blue</p>
-                  <p>Size: XL</p>
-                </ion-label>
-                <ion-checkbox slot="end" />
               </ion-item>
             </ion-card>
           </section>
@@ -95,8 +138,8 @@
 
       <div class="action desktop-only">
         <ion-button @click="() => router.push('/select-facility')">
-          {{ $t("Select locations") }}
-          <ion-icon :icon="arrowForwardOutline" />
+          <ion-icon :icon="saveOutline" />
+          {{ $t("Save threshold rule") }}
         </ion-button>
       </div>
 
@@ -116,15 +159,17 @@ import {
   IonButtons,
   IonCard,
   IonCardContent,
-  IonCheckbox,
   IonChip,
   IonContent,
   IonFab,
   IonFabButton,
   IonHeader,
   IonIcon,
+  IonInput,
   IonItem,
   IonLabel,
+  IonList,
+  IonListHeader,
   IonMenuButton,
   IonPage,
   IonSearchbar,
@@ -132,7 +177,7 @@ import {
   IonToolbar
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
-import { arrowForwardOutline, downloadOutline, filterOutline } from 'ionicons/icons';
+import { arrowForwardOutline, downloadOutline, filterOutline, saveOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
 
 export default defineComponent({
@@ -142,15 +187,17 @@ export default defineComponent({
     IonButtons,
     IonCard,
     IonCardContent,
-    IonCheckbox,
     IonChip,
     IonContent,
     IonFab,
     IonFabButton,
     IonHeader,
     IonIcon,
+    IonInput,
     IonItem,
     IonLabel,
+    IonList,
+    IonListHeader,
     IonMenuButton,
     IonPage,
     IonSearchbar,
@@ -165,7 +212,8 @@ export default defineComponent({
       arrowForwardOutline,
       downloadOutline,
       filterOutline,
-      router
+      router,
+      saveOutline
     };
   },
 });
@@ -179,7 +227,7 @@ export default defineComponent({
 @media (min-width: 991px) {
   .action {
     position: absolute;
-    bottom: 25%;
+    bottom: 10%;
     left: 50%;
     transform: translate(-50%, 0);
   }
