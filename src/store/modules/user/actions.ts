@@ -5,9 +5,8 @@ import UserState from './UserState'
 import * as types from './mutation-types'
 import { hasError, showToast } from '@/utils'
 import { translate } from '@/i18n'
-import moment from 'moment';
 import emitter from '@/event-bus'
-import "moment-timezone";
+import { DateTime } from 'luxon';
 
 const actions: ActionTree<UserState, RootState> = {
 
@@ -64,7 +63,7 @@ const actions: ActionTree<UserState, RootState> = {
         "distinct": "Y",
         "noConditionFind": "Y"
       }
-      const localTimeZone = moment.tz.guess();
+      const localTimeZone = DateTime.local().zoneName;
       if (resp.data.userTimeZone !== localTimeZone) {
         emitter.emit('timeZoneDifferent', { profileTimeZone: resp.data.userTimeZone, localTimeZone});
       }
