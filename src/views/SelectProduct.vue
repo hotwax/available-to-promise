@@ -11,7 +11,6 @@
           <ion-button fill="clear" class="mobile-only">
             <ion-icon :icon="filterOutline" />
           </ion-button>
-          <ion-button class="desktop-only" @click="() => router.push('/select-product-csv-upload')">{{ $t("Upload CSV") }}</ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
@@ -137,7 +136,7 @@
       </div>
 
       <div class="action desktop-only">
-        <ion-button @click="() => router.push('/select-facility')">
+        <ion-button>
           <ion-icon :icon="saveOutline" />
           {{ $t("Save threshold rule") }}
         </ion-button>
