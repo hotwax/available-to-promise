@@ -99,7 +99,7 @@
             <div>
               <ion-item>
                 <ion-label position="fixed">{{ $t("Threshold") }}</ion-label>
-                <ion-input type="text" placeholder="global threshold"/>
+                <ion-input type="text" :placeholder="$t('global threshold')"/>
               </ion-item>
             </div>
           </section>
