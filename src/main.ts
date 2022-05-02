@@ -2,8 +2,6 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router';
 import './registerServiceWorker'
-import moment from 'moment'
-import "moment-timezone";
 import { DateTime } from 'luxon';
 
 import { IonicVue } from '@ionic/vue';
