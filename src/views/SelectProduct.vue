@@ -23,14 +23,34 @@
         </section>
 
         <aside class="filters desktop-only">
-          <ion-item>
-            <ion-label>{{ $t("Only show selected products") }}</ion-label>
-            <ion-toggle slot="end" />
-          </ion-item>
+          <ion-card>
+            <ion-toolbar>
+              <ion-title>{{ $t("Tags") }}</ion-title>
+            </ion-toolbar>
+            <ion-card-content>
+              <ion-chip outline>
+                <ion-label>{{ 'Sample' }}</ion-label>
+              </ion-chip>
+            </ion-card-content>
+          </ion-card>
         </aside>
 
         <main class="main">
-          <section class="sort"></section>
+          <section class="sort">
+            <ion-item lines="none">
+              <h2>{{ $t("Results") }}:</h2>
+            </ion-item>
+
+            <div>
+              <ion-item lines="none">
+                <ion-icon :icon="documentTextOutline" slot="start" />
+                <ion-label class="ion-text-wrap">{{ $t("Show order items") }}</ion-label>
+                <ion-toggle slot="end" checked></ion-toggle>
+              </ion-item>
+            </div>
+          </section>
+
+          <hr />
 
           <section class="section-header">
             <div class="primary-info">
@@ -43,13 +63,6 @@
             </div>
 
             <div class="tags"></div>
-
-            <div class="metadata desktop-only">
-              <ion-item lines="none">
-                <ion-label>{{ $t("Select all variants") }}</ion-label>
-                <ion-toggle />
-              </ion-item>
-            </div>
           </section>
 
           <section class="section-grid">
@@ -102,7 +115,9 @@ import {
   IonButton,
   IonButtons,
   IonCard,
+  IonCardContent,
   IonCheckbox,
+  IonChip,
   IonContent,
   IonFab,
   IonFabButton,
@@ -114,7 +129,6 @@ import {
   IonPage,
   IonSearchbar,
   IonTitle,
-  IonToggle,
   IonToolbar
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
@@ -127,7 +141,9 @@ export default defineComponent({
     IonButton,
     IonButtons,
     IonCard,
+    IonCardContent,
     IonCheckbox,
+    IonChip,
     IonContent,
     IonFab,
     IonFabButton,
@@ -139,7 +155,6 @@ export default defineComponent({
     IonPage,
     IonSearchbar,
     IonTitle,
-    IonToggle,
     IonToolbar,
     Image
   },
@@ -157,9 +172,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.filters {
-  border-right: 1px solid var(--ion-color-medium);
-}
 .section-grid {
   grid-template-columns: repeat(auto-fill, 200px);
 }
