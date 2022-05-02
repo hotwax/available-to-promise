@@ -41,6 +41,12 @@ const actions: ActionTree<JobState, RootState> = {
   async fetchJobHistory({ commit, dispatch, state }, payload){ 
     await JobService.fetchJobInformation({
       "inputFields": {
+        "systemJobEnumId_fld0_value": payload.jobEnums[0],
+        "systemJobEnumId_fld0_grp": "1",
+        "systemJobEnumId_fld0_op": "equals",
+        "systemJobEnumId_fld1_value": payload.jobEnums[1],
+        "systemJobEnumId_fld1_grp": "2",
+        "systemJobEnumId_fld1_op": "equals",
         "productStoreId": payload.eComStoreId,
         "statusId": ["SERVICE_CANCELLED", "SERVICE_CRASHED", "SERVICE_FAILED", "SERVICE_FINISHED"],
         "statusId_op": "in",
@@ -87,6 +93,12 @@ const actions: ActionTree<JobState, RootState> = {
   async fetchRunningJobs({ commit, dispatch, state }, payload){
     await JobService.fetchJobInformation({
       "inputFields": {
+        "systemJobEnumId_fld0_value": payload.jobEnums[0],
+        "systemJobEnumId_fld0_grp": "1",
+        "systemJobEnumId_fld0_op": "equals",
+        "systemJobEnumId_fld1_value": payload.jobEnums[1],
+        "systemJobEnumId_fld1_grp": "2",
+        "systemJobEnumId_fld1_op": "equals",
         "productStoreId": payload.eComStoreId,
         "systemJobEnumId_op": "not-empty",
         "statusId_fld0_value": "SERVICE_RUNNING",
@@ -137,6 +149,12 @@ const actions: ActionTree<JobState, RootState> = {
   async fetchPendingJobs({ commit, dispatch, state }, payload){
     await JobService.fetchJobInformation({
       "inputFields": {
+        "systemJobEnumId_fld0_value": payload.jobEnums[0],
+        "systemJobEnumId_fld0_grp": "1",
+        "systemJobEnumId_fld0_op": "equals",
+        "systemJobEnumId_fld1_value": payload.jobEnums[1],
+        "systemJobEnumId_fld1_grp": "2",
+        "systemJobEnumId_fld1_op": "equals",
         "productStoreId": payload.eComStoreId,
         "statusId": "SERVICE_PENDING",
         "systemJobEnumId_op": "not-empty"

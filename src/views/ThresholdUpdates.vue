@@ -273,13 +273,9 @@ export default defineComponent({
   data() {
     return {
       jobFrequencyType: JSON.parse(process.env?.VUE_APP_JOB_FREQUENCY_TYPE as string) as any,
-      jobEnums: {
-        ...JSON.parse(process.env?.VUE_APP_ODR_JOB_ENUMS as string) as any,
-        ...JSON.parse(process.env?.VUE_APP_PRODR_JOB_ENUMS as string) as any,
-        ...JSON.parse(process.env?.VUE_APP_PRD_JOB_ENUMS as string) as any,
-        ...JSON.parse(process.env?.VUE_APP_INV_JOB_ENUMS as string) as any,
-        ...JSON.parse(process.env?.VUE_APP_INITIAL_JOB_ENUMS as string) as any,
-      },
+      jobEnums: [
+        ...JSON.parse(process.env?.VUE_APP_JOB_ENUMS as string) as any
+      ],
       currentJob: '' as any,
       title: '',
       currentJobStatus: '',
@@ -372,17 +368,17 @@ export default defineComponent({
     async refreshJobs(event: any) {
       this.isRetrying = true;
       if(this.segmentSelected === 'pending') {
-        this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0}).then(() => {
+        this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums}).then(() => {
           if(event) event.target.complete();
           this.isRetrying = false;
         });
       } else if(this.segmentSelected === 'running') {
-        this.store.dispatch('job/fetchRunningJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0}).then(() => {
+        this.store.dispatch('job/fetchRunningJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums}).then(() => {
           if(event) event.target.complete();
           this.isRetrying = false;
         });
       } else {
-        this.store.dispatch('job/fetchJobHistory', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0}).then(() => {
+        this.store.dispatch('job/fetchJobHistory', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums}).then(() => {
           if(event) event.target.complete();
           this.isRetrying = false;
         });
@@ -390,9 +386,9 @@ export default defineComponent({
     },
     segmentChanged (e: CustomEvent) {
       this.segmentSelected = e.detail.value
-      this.segmentSelected === 'pending' ? this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0}) : 
-      this.segmentSelected === 'running' ? this.store.dispatch('job/fetchRunningJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0}) :
-      this.store.dispatch('job/fetchJobHistory', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0});
+      this.segmentSelected === 'pending' ? this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums}) : 
+      this.segmentSelected === 'running' ? this.store.dispatch('job/fetchRunningJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums}) :
+      this.store.dispatch('job/fetchJobHistory', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums});
     },
     async skipJob (job: any) {
       const alert = await alertController
@@ -408,7 +404,7 @@ export default defineComponent({
               text: this.$t('Skip'),
               handler: async () => {
                 await this.store.dispatch('job/skipJob', job);
-                await this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewIndex: 0})
+                await this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewIndex: 0, jobEnums: this.jobEnums})
               },
             }
           ]
@@ -418,17 +414,17 @@ export default defineComponent({
     async getPendingJobs(vSize: any, vIndex: any) {
       const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
       const viewIndex = vIndex ? vIndex : 0;
-      await this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize, viewIndex});
+      await this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize, viewIndex, jobEnums: this.jobEnums});
     },
     async getRunningJobs(vSize: any, vIndex: any) {
       const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
       const viewIndex = vIndex ? vIndex : 0;
-      await this.store.dispatch('job/fetchRunningJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize, viewIndex});
+      await this.store.dispatch('job/fetchRunningJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize, viewIndex, jobEnums: this.jobEnums});
     },
     async getJobHistory(vSize: any, vIndex: any) {
       const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
       const viewIndex = vIndex ? vIndex : 0;
-      await this.store.dispatch('job/fetchJobHistory', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize, viewIndex});
+      await this.store.dispatch('job/fetchJobHistory', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize, viewIndex, jobEnums: this.jobEnums});
     },
     async cancelJob(job: any){
       const alert = await alertController
@@ -444,7 +440,7 @@ export default defineComponent({
               text: this.$t("CANCEL"),
               handler: async () => {
                 await this.store.dispatch('job/cancelJob', job);
-                await this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewIndex: 0});
+                await this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewIndex: 0, jobEnums: this.jobEnums});
               },
             }
           ],
@@ -460,8 +456,9 @@ export default defineComponent({
       this.currentJob = {id: job.jobId, ...job}
       this.title = this.getEnumName(job.systemJobEnumId)
       this.currentJobStatus = job.tempExprId
-      const id = Object.entries(this.jobEnums).find((enums) => enums[1] == job.systemJobEnumId) as any
-      this.freqType = id && (Object.entries(this.jobFrequencyType).find((freq) => freq[0] == id[0]) as any)[1]
+      console.log(this.jobEnums)
+      const id = this.jobEnums.find((enums) => enums === job.systemJobEnumId)
+      this.freqType = id && (Object.entries(this.jobFrequencyType).find((freq) => freq[0] == id) as any)
 
       if (this.currentJob && !this.isJobDetailAnimationCompleted) {
         this.playAnimation();
@@ -493,7 +490,7 @@ export default defineComponent({
     }
   },
   created() {
-    this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0});
+    this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums});
   },
   setup() {
     const store = useStore();
