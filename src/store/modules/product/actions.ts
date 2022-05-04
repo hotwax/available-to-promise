@@ -47,7 +47,7 @@ const actions: ActionTree<ProductState, RootState> = {
     return resp;
   },
 
-  async fetchProductsFacets({ commit }) {
+  async fetchProductFacets({ commit }) {
     const payload = {
       "json": {
         "query": "*:*",

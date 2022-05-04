@@ -206,7 +206,7 @@ export default defineComponent({
     Image
   },
   mounted() {
-    this.store.dispatch("product/fetchProductsFacets")
+    this.store.dispatch("product/fetchProductFacets")
   },
   data () {
     return {
