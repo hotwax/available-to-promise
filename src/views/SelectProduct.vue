@@ -17,73 +17,84 @@
 
     <ion-content>
       <div class="find">
-        <section class="search">
-          <ion-searchbar :placeholder="$t('Search products')" />
-        </section>
 
         <aside class="filters desktop-only">
           <ion-list>
-            <ion-list-header><h3>{{ $t("Include") }}</h3></ion-list-header>
+            <ion-item lines="inset">
+              <ion-label position="fixed">{{ $t("Threshold") }}</ion-label>
+              <ion-input type="text" :placeholder="$t('global threshold')"/>
+            </ion-item>
+            <ion-list-header>
+              <ion-label>{{ $t("Include") }}</ion-label>
+              <ion-button fill="clear" color="warning">RESET</ion-button>
+            </ion-list-header>
             <ion-card>
               <ion-toolbar>
                 <ion-title>{{ $t("Tags") }}</ion-title>
+                <ion-button fill="clear" slot="end">
+                 <ion-label>Add</ion-label>
+                 <ion-icon :icon="addCircleOutline" />
+                </ion-button>
               </ion-toolbar>
               <ion-card-content>
                 <ion-chip @click="updateInclusionQuery(tag, 'tag')" :outline="!includedTags.includes(tag)" v-for="(tag, index) in filters['tagsFacet']" :key="index" :disabled="excludedTags.includes(tag)">
+                  <ion-icon :icon="pricetagOutline" />
                   <ion-label>{{ tag }}</ion-label>
+                  <ion-icon :icon="closeCircle" />
                 </ion-chip>
               </ion-card-content>
             </ion-card>
             <ion-card>
               <ion-toolbar>
                 <ion-title>{{ $t("Categories") }}</ion-title>
+                <ion-button fill="clear" slot="end">
+                 <ion-label>Add</ion-label>
+                 <ion-icon :icon="addCircleOutline" />
+                </ion-button>
               </ion-toolbar>
               <ion-card-content>
                 <ion-chip @click="updateInclusionQuery(category, 'category')" :outline="!includedCategories.includes(category)" v-for="(category, index) in filters['productCategoryNameFacet']" :key="index" :disabled="excludedCategories.includes(category)">
+                  <ion-icon :icon="albumsOutline" />
                   <ion-label>{{ category }}</ion-label>
-                </ion-chip>
-              </ion-card-content>
-            </ion-card>
-            <ion-card>
-              <ion-toolbar>
-                <ion-title>{{ $t("Shop") }}</ion-title>
-              </ion-toolbar>
-              <ion-card-content>
-                <ion-chip @click="updateInclusionQuery(shop, 'shop')" :outline="!includedShops.includes(shop)" v-for="(shop, index) in filters['productStoreIdFacet']" :key="index" :disabled="excludedShops.includes(shop)">
-                  <ion-label>{{ shop }}</ion-label>
+                  <ion-icon :icon="closeCircle" />
                 </ion-chip>
               </ion-card-content>
             </ion-card>
           </ion-list>
           <ion-list>
-            <ion-list-header><h3>{{ $t("Exclude") }}</h3></ion-list-header>
+            <ion-list-header>
+              <ion-label>{{ $t("Exclude") }}</ion-label>
+              <ion-button fill="clear" color="warning">RESET</ion-button>
+            </ion-list-header>
             <ion-card>
               <ion-toolbar>
                 <ion-title>{{ $t("Tags") }}</ion-title>
+                <ion-button fill="clear" slot="end">
+                 <ion-label>Add</ion-label>
+                 <ion-icon :icon="addCircleOutline" />
+                </ion-button>
               </ion-toolbar>
               <ion-card-content>
                 <ion-chip @click="updateExclusionQuery(tag, 'tag')" :outline="!excludedTags.includes(tag)" v-for="(tag, index) in filters['tagsFacet']" :key="index" :disabled="includedTags.includes(tag)">
+                  <ion-icon :icon="pricetagOutline" />
                   <ion-label>{{ tag }}</ion-label>
+                  <ion-icon :icon="closeCircle" />
                 </ion-chip>
               </ion-card-content>
             </ion-card>
             <ion-card>
               <ion-toolbar>
                 <ion-title>{{ $t("Categories") }}</ion-title>
+                <ion-button fill="clear" slot="end">
+                 <ion-label>Add</ion-label>
+                 <ion-icon :icon="addCircleOutline" />
+                </ion-button>
               </ion-toolbar>
               <ion-card-content>
                 <ion-chip @click="updateExclusionQuery(category, 'category')" :outline="!excludedCategories.includes(category)" v-for="(category, index) in filters['productCategoryNameFacet']" :key="index" :disabled="includedCategories.includes(category)">
+                  <ion-icon :icon="albumsOutline" />
                   <ion-label>{{ category }}</ion-label>
-                </ion-chip>
-              </ion-card-content>
-            </ion-card>
-            <ion-card>
-              <ion-toolbar>
-                <ion-title>{{ $t("Shop") }}</ion-title>
-              </ion-toolbar>
-              <ion-card-content>
-                <ion-chip @click="updateExclusionQuery(shop, 'shop')" :outline="!excludedShops.includes(shop)" v-for="(shop, index) in filters['productStoreIdFacet']" :key="index" :disabled="includedShops.includes(shop)">
-                  <ion-label>{{ shop }}</ion-label>
+                  <ion-icon :icon="closeCircle" />
                 </ion-chip>
               </ion-card-content>
             </ion-card>
@@ -96,12 +107,9 @@
               <h2>{{ $t("Results") }}:</h2>
             </ion-item>
 
-            <div>
-              <ion-item>
-                <ion-label position="fixed">{{ $t("Threshold") }}</ion-label>
-                <ion-input type="text" :placeholder="$t('global threshold')"/>
-              </ion-item>
-            </div>
+            <section class="search">
+              <ion-searchbar :placeholder="$t('Search products')" />
+            </section>  
           </section>
 
           <hr />
@@ -176,7 +184,7 @@ import {
   IonToolbar
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
-import { arrowForwardOutline, downloadOutline, filterOutline, saveOutline } from 'ionicons/icons';
+import { arrowForwardOutline, downloadOutline, filterOutline, saveOutline, pricetagOutline, closeCircle, addCircleOutline, albumsOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
 import { mapGetters, useStore } from 'vuex';
 
@@ -277,7 +285,11 @@ export default defineComponent({
       filterOutline,
       router,
       saveOutline,
-      store
+      store,
+      pricetagOutline,
+      closeCircle,
+      addCircleOutline,
+      albumsOutline
     };
   },
 });
