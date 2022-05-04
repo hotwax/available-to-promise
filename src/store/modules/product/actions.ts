@@ -47,29 +47,6 @@ const actions: ActionTree<ProductState, RootState> = {
     return resp;
   },
 
-  async updateSearchPreference({ commit }) {
-    try {
-      const payload = {
-        "json": {
-          "params": {
-            "sort": '',
-            "rows": 10,
-            "start": 0,
-            "group": true,
-            "group.field": "orderId",
-            "group.limit": 10000,
-            "group.ngroups": true,
-            "q.op": "AND"
-          } as any,
-          "query": "*:*",
-          "filter": "docType: ORDER AND orderTypeId: SALES_ORDER"
-        }
-      }
-    } catch (err) {
-      console.error(err)
-    }
-  },
-
   async fetchProductsFacets({ commit }) {
     const payload = {
       "json": {
