@@ -159,7 +159,7 @@ const actions: ActionTree<JobState, RootState> = {
         "statusId": "SERVICE_PENDING",
         "systemJobEnumId_op": "not-empty"
       },
-      "fieldList": [ "systemJobEnumId", "runTime", "tempExprId", "parentJobId", "serviceName", "jobId", "jobName", "currentRetryCount" ],
+      "fieldList": [ "systemJobEnumId", "runTime", "tempExprId", "parentJobId", "serviceName", "jobId", "jobName", "currentRetryCount", "statusId" ],
       "entityName": "JobSandbox",
       "noConditionFind": "Y",
       "viewSize": payload.viewSize,

@@ -554,9 +554,5 @@ aside {
     max-width: 50ch;
   } 
 
-  aside {
-    width: 0px;
-    opacity: 0;
-  }
 }
 </style>
