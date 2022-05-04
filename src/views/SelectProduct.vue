@@ -215,14 +215,14 @@ export default defineComponent({
     IonToolbar,
     Image
   },
-  computed:{
+  computed: {
     ...mapGetters({
       products: 'product/getProducts',
       isScrollable: 'product/isScrollable',
       filters: 'product/getProductFacets'
     })
   },
-  data(){
+  data () {
     return {
       queryString: '',
       includedTags: [] as Array<string>,
@@ -233,7 +233,7 @@ export default defineComponent({
       excludedShops: [] as Array<string>
     }
   },
-  methods:{
+  methods: {
     searchProducts(event: any){
       this.queryString = event.target.value;
       this.getProducts();
@@ -313,7 +313,7 @@ export default defineComponent({
       payload.json.filter = this.excludedShops.length > 0 ? payload.json.filter.concat(` AND -productStoreIds: (${this.excludedShops.join(' OR ')})`) : payload.json.filter
     }
   },
-  mounted() {
+  mounted () {
     this.getProducts();
     this.store.dispatch("product/fetchProductFacets")
   },
