@@ -46,6 +46,72 @@ const actions: ActionTree<ProductState, RootState> = {
     // TODO Handle specific error
     return resp;
   },
-}
 
+  async updateSearchPreference({ commit }) {
+    try {
+      const payload = {
+        "json": {
+          "params": {
+            "sort": '',
+            "rows": 10,
+            "start": 0,
+            "group": true,
+            "group.field": "orderId",
+            "group.limit": 10000,
+            "group.ngroups": true,
+            "q.op": "AND"
+          } as any,
+          "query": "*:*",
+          "filter": "docType: ORDER AND orderTypeId: SALES_ORDER"
+        }
+      }
+    } catch (err) {
+      console.error(err)
+    }
+  },
+
+  async fetchProductsFacets({ commit }) {
+    const payload = {
+      "json": {
+        "query": "*:*",
+        "filter": "docType: PRODUCT",
+        "facet": {
+          "tagsFacet": {
+            "field": "tags",
+            "mincount": 1,
+            "limit": -1,
+            "sort": "index",
+            "type": "terms"
+          },
+          "productStoreIdFacet": {
+            "field": "productStoreIds",
+            "limit": -1,
+            "sort": "index",
+            "type": "terms"
+          },
+          "productCategoryNameFacet": {
+            "field": "productCategoryNames",
+            "limit": -1,
+            "sort": "index",
+            "type": "terms"
+          }
+        }
+      }
+    }
+    try {
+      const resp = await ProductService.fetchProductFacets(payload);
+      if (resp.status == 200 && !hasError(resp)) {
+        const facets = resp.data.facets;
+        const updatedFacets = {} as any;
+        delete facets.count;
+        Object.entries(facets).map(([facet, value]) => {
+          updatedFacets[facet] = (value as any).buckets.map((bucket: any) => bucket.val)
+        })
+        commit(types.PRODUCT_FACETS_UPDATED, updatedFacets)
+      }
+    } catch (err) {
+      console.error(err)
+    }
+  }
+}
 export default actions;
