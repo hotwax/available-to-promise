@@ -62,13 +62,11 @@ const actions: ActionTree<ProductState, RootState> = {
       "filters": ['productId: (' + productIdFilter + ')'],
       "viewSize": productIds.length
     })
-    if (resp.status === 200 && !hasError(resp)) {
+    if (resp.status === 200 && !hasError(resp) && resp.data.response.docs) {
       const products = resp.data.response.docs;
-      if (resp.data) {
-        products.map((product: any) => {
-          cachedProducts[product.productId] = product
-        });
-      }
+      products.map((product: any) => {
+        cachedProducts[product.productId] = product
+      });
       commit(types.PRODUCT_CACHED_UPDATED, { cached: cachedProducts });
       return cachedProducts;
     }
@@ -94,9 +92,8 @@ const actions: ActionTree<ProductState, RootState> = {
         })
 
         let productIds: any = new Set();
-         products = products.map((product: any) => {
+        products.map((product: any) => {
           if(product.productId) productIds.add(product.productId);
-          return product;
         })
         productIds = [...productIds]
         const productInformation = await this.dispatch("product/fetchProducts", { productIds });
