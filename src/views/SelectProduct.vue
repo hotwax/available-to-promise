@@ -93,7 +93,7 @@
         <main class="main">
           <section class="sort">
             <ion-item lines="none">
-              <h2>{{ $t("Results") }}:</h2>
+              <h2>{{ $t("Results") }}: {{ products.count.virtual }} {{ $t("virtual, ") }} {{ products.count.variant }} {{ $t("variants") }}</h2>
             </ion-item>
 
             <div>
@@ -105,7 +105,7 @@
           </section>
 
           <hr />
-          <div v-for="product in products" :key="product">
+          <div v-for="product in products.list" :key="product">
             <section class="section-header">
               <div class="primary-info">
                 <ion-item lines="none">
@@ -200,6 +200,8 @@ export default defineComponent({
     IonFabButton,
     IonHeader,
     IonIcon,
+    IonInfiniteScroll,
+    IonInfiniteScrollContent,
     IonInput,
     IonItem,
     IonLabel,
@@ -210,9 +212,7 @@ export default defineComponent({
     IonSearchbar,
     IonTitle,
     IonToolbar,
-    Image,
-    IonInfiniteScroll,
-    IonInfiniteScrollContent
+    Image
   },
   computed:{
     ...mapGetters({
@@ -258,7 +258,7 @@ export default defineComponent({
     async loadMoreProducts(event: any){
       this.getProducts(
         undefined,
-        Math.ceil(this.products.length / process.env.VUE_APP_VIEW_SIZE).toString()
+        Math.ceil(this.products.list.length / process.env.VUE_APP_VIEW_SIZE).toString()
       ).then(() => {
         event.target.complete();
       })

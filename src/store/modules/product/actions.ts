@@ -32,7 +32,6 @@ const actions: ActionTree<ProductState, RootState> = {
         const totalProductsCount = resp.data.response.numFound;
 
         if (payload.viewIndex && payload.viewIndex > 0) products = state.products.list.concat(products)
-        commit(types.PRODUCT_SEARCH_UPDATED, { products: products, totalProductsCount: totalProductsCount })
       } else {
         //showing error whenever getting no products in the response or having any other error
         showToast(translate("Product not found"));
@@ -85,8 +84,8 @@ const actions: ActionTree<ProductState, RootState> = {
 
       if (resp.status === 200 && resp.data.grouped.groupId?.ngroups > 0 && !hasError(resp)) {
         let products = resp.data.grouped.groupId?.groups;
-        const totalProductsCount = resp.data.grouped.groupId.ngroups;
-
+        const virtualCount = resp.data.grouped.groupId.ngroups;
+        const variantCount = resp.data.grouped.groupId.matches;
         products = products.map((product: any) => {
           return {
             productId: product.groupValue,
@@ -96,16 +95,14 @@ const actions: ActionTree<ProductState, RootState> = {
         })
 
         let productIds: any = new Set();
-        products.forEach((product: any) => {
+         products = products.map((product: any) => {
           if(product.productId) productIds.add(product.productId);
+          return product;
         })
         productIds = [...productIds]
         const productInformation = await this.dispatch("product/fetchProducts", { productIds });
 
         products = products.map((product: any) => {
-          product.variants.forEach((variant: any) => {
-            variant.isSelected = false;
-          });
           const virtual = productInformation[product.productId]
 
           return {
@@ -119,7 +116,7 @@ const actions: ActionTree<ProductState, RootState> = {
         })
 
         if(payload.json.params.start && payload.json.params.start > 0) products = state.products.list.concat(products);
-        commit(types.PRODUCT_LIST_UPDATED, { products, totalProductsCount });
+        commit(types.PRODUCT_LIST_UPDATED, { products, virtualCount, variantCount });
       } else {
         showToast(translate("Products not found"));
       }

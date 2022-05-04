@@ -2,6 +2,9 @@ export default interface ProductState {
   cached: any;
   products: {
     list: any;
-    total: number;
+    count:{
+      variant: number;
+      virtual: number;
+    }
   }
 }
