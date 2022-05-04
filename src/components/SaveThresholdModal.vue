@@ -24,12 +24,12 @@
 
       <ion-item>
         <ion-label>{{ $t("Rule name") }}</ion-label>
-        <ion-input placeholder="rule name" v-model="currentUser.partyName"/>
+        <ion-input placeholder="rule name" v-model="jobName"/>
       </ion-item>
     </ion-list>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button>
+      <ion-fab-button @click="createSearchPreference()">
         <ion-icon :icon="cloudUploadOutline" />
       </ion-fab-button>
     </ion-fab>
@@ -64,7 +64,9 @@ import {
 import { ProductService } from '@/services/ProductService';
 import { hasError, showToast } from '@/utils';
 import { translate } from '@/i18n';
-import { mapGetters } from 'vuex';
+import { mapGetters, useStore } from 'vuex';
+import { DateTime } from 'luxon';
+import { JobService } from '@/services/JobService';
 
 export default defineComponent({
   name: 'SaveThresholdModal',
@@ -87,12 +89,14 @@ export default defineComponent({
   props: ["threshold", "query"],
   data () {
     return {
-      jobName: this.currentUser
+      jobName: ''
     }
   },
   computed: {
     ...mapGetters({
-      currentUser: 'user/getUserProfile'
+      currentEComStore: 'user/getCurrentEComStore',
+      shopifyConfigs: 'util/getShopifyConfig',
+      jobs: 'job/getJobs'
     })
   },
   methods: {
@@ -100,66 +104,81 @@ export default defineComponent({
       modalController.dismiss({ dismissed: true });
     },
     async createSearchPreference() {
-      try {
-        const resp = await ProductService.createSearchPreference({
-          searchPrefValue: this.query
-        });
+      this.scheduleService('sample', this.threshold);
+      // try {
+      //   const resp = await ProductService.createSearchPreference({
+      //     searchPrefValue: this.query
+      //   });
 
-        if (resp.status == 200) {
-          const searchPrefId = resp.data.searchPrefId;
-          this.scheduleService(searchPrefId)
-        }
-      } catch (err) {
-        console.error(err)
-      }
+      //   console.log(resp)
+
+      //   if (resp.status == 200 && resp?.data?.searchPrefId) {
+      //     const searchPrefId = resp.data.searchPrefId;
+      //     console.log(searchPrefId)
+      //     // this.scheduleService(searchPrefId)
+      //   }
+      // } catch (err) {
+      //   console.error(err)
+      //   showToast(translate('Something went wrong'))
+      // }
     },
-    async scheduleService(searchPrefId: string) {
+    async scheduleService(searchPrefId: string, threshold: string) {
+      const job = this.jobs['SAMPLE_JOB']
+      const productStoreId = this.currentEComStore.productStoreId
+      let shopifyConfigId = this.shopifyConfigs[productStoreId]
       let resp = '' as any;
 
-      // const payload = {
-      //   'JOB_NAME': job.jobName,
-      //   'SERVICE_NAME': job.serviceName,
-      //   'SERVICE_COUNT': '0',
-      //   'jobFields': {
-      //     'productStoreId': this.state.user.currentEComStore.productStoreId,
-      //     'systemJobEnumId': job.systemJobEnumId,
-      //     'tempExprId': job.jobStatus,
-      //     'maxRecurrenceCount': '-1',
-      //     'parentJobId': job.parentJobId,
-      //     'runAsUser': 'system', // default system, but empty in run now
-      //     'recurrenceTimeZone': DateTime.now().zoneName,
-      //     searchPrefId
-      //   },
-      //   'shopifyConfigId': this.state.user.shopifyConfig,
-      //   'statusId': "SERVICE_PENDING",
-      //   'systemJobEnumId': "SAMPLE_JOB"
-      // } as any
-
-      // // checking if the runtimeData has productStoreId, and if present then adding it on root level
-      // job?.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = this.state.user.currentEComStore.productStoreId)
-      // job?.priority && (payload['SERVICE_PRIORITY'] = job.priority.toString())
-      // job?.runTime && (payload['SERVICE_TIME'] = job.runTime.toString())
-
-      try {
-        // resp = await JobService.scheduleJob({ ...job.runtimeData, ...payload });
-        if (resp.status == 200 && !hasError(resp)) {
-          showToast(translate('Service has been scheduled'))
-        } else {
-          showToast(translate('Something went wrong'))
-        }
-      } catch (err) {
-        showToast(translate('Something went wrong'))
-        console.error(err)
+      if(!shopifyConfigId) {
+        shopifyConfigId = await (this.store.dispatch('util/getShopifyConfig', productStoreId) as any)?.shopifyConfigId
       }
+
+      const payload = job ? {
+        'JOB_NAME': this.jobName ? this.jobName : job.jobName,
+        'SERVICE_NAME': job.serviceName,
+        'SERVICE_COUNT': '0',
+        'jobFields': {
+          'productStoreId': productStoreId,
+          'systemJobEnumId': job.systemJobEnumId,
+          'tempExprId': job.tempExprId,
+          'maxRecurrenceCount': '-1',
+          'parentJobId': job.parentJobId,
+          'runAsUser': 'system', // default system, but empty in run now
+          'recurrenceTimeZone': DateTime.now().zoneName,
+          searchPrefId,
+          threshold
+        },
+        'shopifyConfigId': shopifyConfigId,
+        'statusId': "SERVICE_PENDING",
+        'systemJobEnumId': "SAMPLE_JOB"
+      } as any : {}
+
+      // checking if the runtimeData has productStoreId, and if present then adding it on root level
+      job?.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = productStoreId)
+      job?.priority && (payload['SERVICE_PRIORITY'] = job.priority.toString())
+
+      // try {
+      //   resp = await JobService.scheduleJob({ ...job.runtimeData, ...payload });
+      //   if (resp.status == 200 && !hasError(resp)) {
+      //     showToast(translate('Service has been scheduled'))
+      //   } else {
+      //     showToast(translate('Something went wrong'))
+      //   }
+      // } catch (err) {
+      //   showToast(translate('Something went wrong'))
+      //   console.error(err)
+      // }
       return resp;
     }
   },
   setup() {
+    const store = useStore();
+
     return {
       closeOutline,
       cloudUploadOutline,
       shirtOutline,
       optionsOutline,
+      store
     };
   },
 });

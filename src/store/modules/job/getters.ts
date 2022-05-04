@@ -38,6 +38,9 @@ const getters: GetterTree <JobState, RootState> = {
     getJobHistory (state){
       return state.history.list;
     },
+    getJobs: (state) => {
+      return state.cached;
+    }
   }
 
   export default getters;
