@@ -99,7 +99,7 @@
             <div>
               <ion-item>
                 <ion-label position="fixed">{{ $t("Threshold") }}</ion-label>
-                <ion-input type="text" :placeholder="$t('global threshold')"/>
+                <ion-input type="text" :placeholder="$t('global threshold')" v-model="threshold"/>
               </ion-item>
             </div>
           </section>
@@ -136,7 +136,7 @@
       </div>
 
       <div class="action desktop-only">
-        <ion-button>
+        <ion-button @click="saveThreshold()">
           <ion-icon :icon="saveOutline" />
           {{ $t("Save threshold rule") }}
         </ion-button>
@@ -173,12 +173,14 @@ import {
   IonPage,
   IonSearchbar,
   IonTitle,
-  IonToolbar
+  IonToolbar,
+  modalController
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { arrowForwardOutline, downloadOutline, filterOutline, saveOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
 import { mapGetters, useStore } from 'vuex';
+import SaveThresholdModal from '@/components/SaveThresholdModal.vue';
 
 export default defineComponent({
   name: 'SelectProduct',
@@ -215,7 +217,8 @@ export default defineComponent({
       includedShops: [] as Array<string>,
       excludedTags: [] as Array<string>,
       excludedCategories: [] as Array<string>,
-      excludedShops: [] as Array<string>
+      excludedShops: [] as Array<string>,
+      threshold: '' as any
     }
   },
   methods: {
@@ -260,6 +263,16 @@ export default defineComponent({
       payload.json.filter = this.excludedCategories.length > 0 ? payload.json.filter.concat(` AND -productCategoryNames: (${this.excludedCategories.join(' OR ')})`) : payload.json.filter
       payload.json.filter = this.includedShops.length > 0 ? payload.json.filter.concat(` AND productStoreIds: (${this.includedShops.join(' OR ')})`) : payload.json.filter
       payload.json.filter = this.excludedShops.length > 0 ? payload.json.filter.concat(` AND -productStoreIds: (${this.excludedShops.join(' OR ')})`) : payload.json.filter
+    },
+    async saveThreshold() {
+      const saveThresholdModal = await modalController.create({
+        component: SaveThresholdModal,
+        componentProps: {
+          threshold: this.threshold
+        }
+      })
+
+      saveThresholdModal.present();
     }
   },
   computed: {
