@@ -7,6 +7,9 @@ const mutations: MutationTree <UtilState> = {
     payload.map((status: any) => {
       state.statusDesc[status.statusId] = status.description;
     })
+  },
+  [types.UTIL_SHOPIFY_CONFIG_UPDATED] (state, payload) {
+    state.shopifyConfig[payload.productStoreId] = payload.shopifyConfigId;
   }
 }
 export default mutations;
