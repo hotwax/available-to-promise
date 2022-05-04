@@ -11,7 +11,7 @@ const productModule: Module<ProductState, RootState> = {
       cached: {},
       products: {
         list: [],
-        count: {
+        total: {
           virtual: 0,
           variant: 0
         }

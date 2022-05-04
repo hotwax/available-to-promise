@@ -93,7 +93,7 @@
         <main class="main">
           <section class="sort">
             <ion-item lines="none">
-              <h2>{{ $t("Results") }}: {{ products.count.virtual }} {{ $t("virtual, ") }} {{ products.count.variant }} {{ $t("variants") }}</h2>
+              <h2>{{ $t("Results") }}: {{ products.total.virtual }} {{ $t("virtual, ") }} {{ products.total.variant }} {{ $t("variants") }}</h2>
             </ion-item>
 
             <div>

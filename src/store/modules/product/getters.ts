@@ -9,7 +9,7 @@ const getters: GetterTree<ProductState, RootState> = {
   isScrollable(state) {
     return (
       state.products.list.length > 0 &&
-      state.products.list.length < state.products.count.virtual
+      state.products.list.length < state.products.total.virtual
     );
   },
   getProducts(state) {

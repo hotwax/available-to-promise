@@ -44,34 +44,6 @@ const actions: ActionTree<ProductState, RootState> = {
     // TODO Handle specific error
     return resp;
   },
-  async fetchProducts({ commit, state }, { productIds }) {
-    const cachedProducts = JSON.parse(JSON.stringify(state.cached));
-    const cachedProductIds = Object.keys(state.cached);
-    const productIdFilter = productIds.reduce((filter: string, productId: any) => {
-      if (cachedProductIds.includes(productId)) {
-        return filter;
-      } else {
-        if (filter !== '') filter += ' OR '
-        return filter += productId;
-      }
-    }, '');
-
-    if (productIdFilter === '') return cachedProducts;
-
-    const resp = await ProductService.fetchProducts({
-      "filters": ['productId: (' + productIdFilter + ')'],
-      "viewSize": productIds.length
-    })
-    if (resp.status === 200 && !hasError(resp) && resp.data.response.docs) {
-      const products = resp.data.response.docs;
-      products.map((product: any) => {
-        cachedProducts[product.productId] = product
-      });
-      commit(types.PRODUCT_CACHED_UPDATED, { cached: cachedProducts });
-      return cachedProducts;
-    }
-    return resp;
-  },
 
   async getProducts({ commit, state }, payload) {
     let resp;
@@ -88,26 +60,6 @@ const actions: ActionTree<ProductState, RootState> = {
             productId: product.groupValue,
             productName: product.doclist.docs[0]?.parentProductName,
             variants: product.doclist.docs
-          }
-        })
-
-        let productIds: any = new Set();
-        products.map((product: any) => {
-          if(product.productId) productIds.add(product.productId);
-        })
-        productIds = [...productIds]
-        const productInformation = await this.dispatch("product/fetchProducts", { productIds });
-
-        products = products.map((product: any) => {
-          const virtual = productInformation[product.productId]
-
-          return {
-            ...product,
-            brandName: virtual?.brandName,
-            productName: virtual?.productName,
-            internalName: virtual?.internalName,
-            mainImageUrl: virtual?.mainImageUrl,
-            featureHierarchy: virtual?.featureHierarchy
           }
         })
 
