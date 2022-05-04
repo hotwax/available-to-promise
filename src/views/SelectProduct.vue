@@ -18,7 +18,7 @@
     <ion-content>
       <div class="find">
         <section class="search">
-          <ion-searchbar :placeholder="$t('Search products')" />
+          <ion-searchbar :placeholder="$t('Search products')" v-model="queryString" @keyup.enter="searchProducts($event)" />
         </section>
 
         <aside class="filters desktop-only">
@@ -105,33 +105,39 @@
           </section>
 
           <hr />
-
-          <section class="section-header">
-            <div class="primary-info">
-              <ion-item lines="none">
-                <ion-label>
-                  Parent Product
-                  <p>5 {{ $t("variants") }}</p>
-                </ion-label>
-              </ion-item>
-            </div>
-
+          <div v-for="product in products" :key="product">
+            <section class="section-header">
+              <div class="primary-info">
+                <ion-item lines="none">
+                  <ion-label>
+                    {{ product.productName }}
+                    <p>{{ product.variants.length}} {{ $t("variants") }}</p>
+                  </ion-label>
+                </ion-item>
+              </div>
+  
             <div class="tags"></div>
-          </section>
-
-          <section class="section-grid">
-            <ion-card>
-              <Image src="https://cdn.shopify.com/s/files/1/0069/7384/9727/products/test-track.jpg?v=1626255137" />
-              <ion-item lines="none">
-                <ion-label>
-                  SKU
-                  <p>Color: Blue</p>
-                  <p>Size: XL</p>
-                </ion-label>
-              </ion-item>
-            </ion-card>
-          </section>
-          <hr />
+            </section>
+  
+            <section class="section-grid">
+              <div v-for="variant in product.variants" :key="variant">
+                <ion-card>
+                  <Image :src="variant.mainImageUrl" />
+                  <ion-item lines="none">
+                    <ion-label>
+                      {{ variant.productName }}
+                      <p>{{ $t("Color") }}: {{ $filters.getFeature(variant.featureHierarchy, '1/COLOR/') }}</p>
+                      <p>{{ $t("Size") }}: {{ $filters.getFeature(variant.featureHierarchy, '1/SIZE/') }}</p>
+                    </ion-label>
+                  </ion-item>
+                </ion-card>
+              </div>
+            </section>
+            <hr />
+          </div>
+          <ion-infinite-scroll @ionInfinite="loadMoreProducts($event)" threshold="100px" :disabled="!isScrollable">
+            <ion-infinite-scroll-content loading-spinner="crescent" :loading-text="$t('Loading')"/>
+          </ion-infinite-scroll>
         </main>
       </div>
 
@@ -173,12 +179,14 @@ import {
   IonPage,
   IonSearchbar,
   IonTitle,
-  IonToolbar
+  IonToolbar,
+  IonInfiniteScroll,
+  IonInfiniteScrollContent
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { arrowForwardOutline, downloadOutline, filterOutline, saveOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
-
+import { mapGetters, useStore } from "vuex";
 export default defineComponent({
   name: 'SelectProduct',
   components: {
@@ -202,17 +210,74 @@ export default defineComponent({
     IonSearchbar,
     IonTitle,
     IonToolbar,
-    Image
+    Image,
+    IonInfiniteScroll,
+    IonInfiniteScrollContent
+  },
+  computed:{
+    ...mapGetters({
+      products: 'product/getProducts',
+      isScrollable: 'product/isScrollable'
+    })
+  },
+  data(){
+    return {
+      queryString: '',
+    }
+  },
+  methods:{
+    searchProducts(event: any){
+      this.queryString = event.target.value;
+      this.getProducts();
+    },
+    async getProducts(vSize?: any, vIndex?: any) {
+      const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
+      const viewIndex = vIndex ? vIndex : 0;
+      const payload = {
+        "json": {
+          "params": {
+            "rows": viewSize,
+            "start": viewIndex * viewSize,
+            "group": true,
+            "group.field": "groupId",
+            "group.limit": 10000,
+            "group.ngroups": true,
+          } as any,
+          "query": "*:*",
+          "filter": "docType: PRODUCT AND groupId: *"
+        }
+      }
+      if(this.queryString) {
+        payload.json.params.defType = 'edismax'
+        payload.json.params.qf = 'productId productName sku internalName brandName'
+        payload.json.params['q.op'] = 'AND'
+        payload.json.query = `*${this.queryString}*`
+      }
+      this.store.dispatch("product/getProducts", payload);
+    },
+    async loadMoreProducts(event: any){
+      this.getProducts(
+        undefined,
+        Math.ceil(this.products.length / process.env.VUE_APP_VIEW_SIZE).toString()
+      ).then(() => {
+        event.target.complete();
+      })
+    },
+  },
+  mounted() {
+    this.getProducts();
   },
   setup() {
     const router = useRouter();
+    const store = useStore();
 
     return {
       arrowForwardOutline,
       downloadOutline,
       filterOutline,
       router,
-      saveOutline
+      saveOutline,
+      store
     };
   },
 });
