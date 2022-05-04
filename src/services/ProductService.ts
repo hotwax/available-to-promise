@@ -15,7 +15,7 @@ const getProducts = async (payload: any): Promise<any> => {
     url: "/solr-query",
     method: "POST",
     data: payload
-  });
+  })
 }
 
 const fetchProductFacets = async (payload: any): Promise<any> => {

@@ -65,7 +65,7 @@ const actions: ActionTree<ProductState, RootState> = {
     if (resp.status === 200 && !hasError(resp)) {
       const products = resp.data.response.docs;
       if (resp.data) {
-        products.forEach((product: any) => {
+        products.map((product: any) => {
           cachedProducts[product.productId] = product
         });
       }
