@@ -110,7 +110,6 @@ const actions: ActionTree<ProductState, RootState> = {
 
           return {
             ...product,
-            isSelected: false,
             brandName: virtual?.brandName,
             productName: virtual?.productName,
             internalName: virtual?.internalName,
