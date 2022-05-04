@@ -15,5 +15,8 @@ const getters: GetterTree<ProductState, RootState> = {
   getProducts(state) {
     return state.products;
   },
+  getProductFacets(state) {
+    return state.facets;
+  }
 };
 export default getters;

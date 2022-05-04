@@ -10,6 +10,9 @@ const mutations: MutationTree <ProductState> = {
     state.products.list = payload.products;
     state.products.count.variant = payload.variantCount;
     state.products.count.virtual = payload.virtualCount;
+  },
+  [types.PRODUCT_FACETS_UPDATED] (state, payload) {
+    state.facets = payload
   }
 }
 export default mutations;

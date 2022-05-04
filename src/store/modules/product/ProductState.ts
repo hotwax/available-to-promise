@@ -6,5 +6,6 @@ export default interface ProductState {
       variant: number;
       virtual: number;
     }
-  }
+  };
+  facets: any;
 }

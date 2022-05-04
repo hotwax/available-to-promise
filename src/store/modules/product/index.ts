@@ -15,7 +15,8 @@ const productModule: Module<ProductState, RootState> = {
           virtual: 0,
           variant: 0
         }
-      }  
+      },  
+      facets: {}
     },
     getters,
     actions,

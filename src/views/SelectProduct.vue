@@ -29,8 +29,8 @@
                 <ion-title>{{ $t("Tags") }}</ion-title>
               </ion-toolbar>
               <ion-card-content>
-                <ion-chip outline>
-                  <ion-label>{{ 'Sample' }}</ion-label>
+                <ion-chip @click="updateInclusionQuery(tag, 'tag')" :outline="!includedTags.includes(tag)" v-for="(tag, index) in filters['tagsFacet']" :key="index" :disabled="excludedTags.includes(tag)">
+                  <ion-label>{{ tag }}</ion-label>
                 </ion-chip>
               </ion-card-content>
             </ion-card>
@@ -39,8 +39,8 @@
                 <ion-title>{{ $t("Categories") }}</ion-title>
               </ion-toolbar>
               <ion-card-content>
-                <ion-chip outline>
-                  <ion-label>{{ 'Sample' }}</ion-label>
+                <ion-chip @click="updateInclusionQuery(category, 'category')" :outline="!includedCategories.includes(category)" v-for="(category, index) in filters['productCategoryNameFacet']" :key="index" :disabled="excludedCategories.includes(category)">
+                  <ion-label>{{ category }}</ion-label>
                 </ion-chip>
               </ion-card-content>
             </ion-card>
@@ -49,8 +49,8 @@
                 <ion-title>{{ $t("Shop") }}</ion-title>
               </ion-toolbar>
               <ion-card-content>
-                <ion-chip outline>
-                  <ion-label>{{ 'Sample' }}</ion-label>
+                <ion-chip @click="updateInclusionQuery(shop, 'shop')" :outline="!includedShops.includes(shop)" v-for="(shop, index) in filters['productStoreIdFacet']" :key="index" :disabled="excludedShops.includes(shop)">
+                  <ion-label>{{ shop }}</ion-label>
                 </ion-chip>
               </ion-card-content>
             </ion-card>
@@ -62,8 +62,8 @@
                 <ion-title>{{ $t("Tags") }}</ion-title>
               </ion-toolbar>
               <ion-card-content>
-                <ion-chip outline>
-                  <ion-label>{{ 'Sample' }}</ion-label>
+                <ion-chip @click="updateExclusionQuery(tag, 'tag')" :outline="!excludedTags.includes(tag)" v-for="(tag, index) in filters['tagsFacet']" :key="index" :disabled="includedTags.includes(tag)">
+                  <ion-label>{{ tag }}</ion-label>
                 </ion-chip>
               </ion-card-content>
             </ion-card>
@@ -72,8 +72,8 @@
                 <ion-title>{{ $t("Categories") }}</ion-title>
               </ion-toolbar>
               <ion-card-content>
-                <ion-chip outline>
-                  <ion-label>{{ 'Sample' }}</ion-label>
+                <ion-chip @click="updateExclusionQuery(category, 'category')" :outline="!excludedCategories.includes(category)" v-for="(category, index) in filters['productCategoryNameFacet']" :key="index" :disabled="includedCategories.includes(category)">
+                  <ion-label>{{ category }}</ion-label>
                 </ion-chip>
               </ion-card-content>
             </ion-card>
@@ -82,8 +82,8 @@
                 <ion-title>{{ $t("Shop") }}</ion-title>
               </ion-toolbar>
               <ion-card-content>
-                <ion-chip outline>
-                  <ion-label>{{ 'Sample' }}</ion-label>
+                <ion-chip @click="updateExclusionQuery(shop, 'shop')" :outline="!excludedShops.includes(shop)" v-for="(shop, index) in filters['productStoreIdFacet']" :key="index" :disabled="includedShops.includes(shop)">
+                  <ion-label>{{ shop }}</ion-label>
                 </ion-chip>
               </ion-card-content>
             </ion-card>
@@ -186,7 +186,8 @@ import {
 import { defineComponent } from 'vue';
 import { arrowForwardOutline, downloadOutline, filterOutline, saveOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
-import { mapGetters, useStore } from "vuex";
+import { mapGetters, useStore } from 'vuex';
+
 export default defineComponent({
   name: 'SelectProduct',
   components: {
@@ -217,12 +218,19 @@ export default defineComponent({
   computed:{
     ...mapGetters({
       products: 'product/getProducts',
-      isScrollable: 'product/isScrollable'
+      isScrollable: 'product/isScrollable',
+      filters: 'product/getProductFacets'
     })
   },
   data(){
     return {
       queryString: '',
+      includedTags: [] as Array<string>,
+      includedCategories: [] as Array<string>,
+      includedShops: [] as Array<string>,
+      excludedTags: [] as Array<string>,
+      excludedCategories: [] as Array<string>,
+      excludedShops: [] as Array<string>
     }
   },
   methods:{
@@ -263,9 +271,51 @@ export default defineComponent({
         event.target.complete();
       })
     },
+    updateInclusionQuery(value: string, type: string) {
+      if (type === 'tag') {
+        this.includedTags.includes(value) ? this.includedTags.splice(this.includedTags.indexOf(value), 1) : this.includedTags.push(value)
+      } else if (type === 'category') {
+        this.includedCategories.includes(value) ? this.includedCategories.splice(this.includedCategories.indexOf(value), 1) : this.includedCategories.push(value)
+      } else if (type === 'shop') {
+        this.includedShops.includes(value) ? this.includedShops.splice(this.includedShops.indexOf(value), 1) : this.includedShops.push(value)
+      }
+      this.updateQuery();
+    },
+    updateExclusionQuery(value: string, type: string) {
+      if (type === 'tag') {
+        this.excludedTags.includes(value) ? this.excludedTags.splice(this.excludedTags.indexOf(value), 1) : this.excludedTags.push(value)
+      } else if (type === 'category') {
+        this.excludedCategories.includes(value) ? this.excludedCategories.splice(this.excludedCategories.indexOf(value), 1) : this.excludedCategories.push(value)
+      } else if (type === 'shop') {
+        this.excludedShops.includes(value) ? this.excludedShops.splice(this.excludedShops.indexOf(value), 1) : this.excludedShops.push(value)
+      }
+      this.updateQuery();
+    },
+    updateQuery() {
+      const payload = {
+        "json": {
+          "params": {
+            "group": true,
+            "group.field": "groupId",
+            "group.limit": 10000,
+            "group.ngroups": true,
+            "q.op": "AND"
+          } as any,
+          "query": "*:*",
+          "filter": "docType: PRODUCT"
+        }
+      }
+      payload.json.filter = this.includedTags.length > 0 ? payload.json.filter.concat(` AND tags: (${this.includedTags.join(' OR ')})`) : payload.json.filter
+      payload.json.filter = this.excludedTags.length > 0 ? payload.json.filter.concat(` AND -tags: (${this.excludedTags.join(' OR ')})`) : payload.json.filter
+      payload.json.filter = this.includedCategories.length > 0 ? payload.json.filter.concat(` AND productCategoryNames: (${this.includedCategories.join(' OR ')})`) : payload.json.filter
+      payload.json.filter = this.excludedCategories.length > 0 ? payload.json.filter.concat(` AND -productCategoryNames: (${this.excludedCategories.join(' OR ')})`) : payload.json.filter
+      payload.json.filter = this.includedShops.length > 0 ? payload.json.filter.concat(` AND productStoreIds: (${this.includedShops.join(' OR ')})`) : payload.json.filter
+      payload.json.filter = this.excludedShops.length > 0 ? payload.json.filter.concat(` AND -productStoreIds: (${this.excludedShops.join(' OR ')})`) : payload.json.filter
+    }
   },
   mounted() {
     this.getProducts();
+    this.store.dispatch("product/fetchProductFacets")
   },
   setup() {
     const router = useRouter();
