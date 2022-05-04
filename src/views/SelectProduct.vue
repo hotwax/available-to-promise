@@ -29,7 +29,7 @@
                 <ion-title>{{ $t("Tags") }}</ion-title>
               </ion-toolbar>
               <ion-card-content>
-                <ion-chip @click="updateInclusionQuery(tag, 'tag')" :outline="!includedTags.includes(tag)" v-for="(tag, index) in filters['tagsFacet']" :key="index" :disabled="excludedTags.includes(tag)">
+                <ion-chip @click="updateInclusionQuery(tag, 'tags')" :outline="!included['tags'].includes(tag)" v-for="(tag, index) in filters['tagsFacet']" :key="index" :disabled="excluded['tags'].includes(tag)">
                   <ion-label>{{ tag }}</ion-label>
                 </ion-chip>
               </ion-card-content>
@@ -39,7 +39,7 @@
                 <ion-title>{{ $t("Categories") }}</ion-title>
               </ion-toolbar>
               <ion-card-content>
-                <ion-chip @click="updateInclusionQuery(category, 'category')" :outline="!includedCategories.includes(category)" v-for="(category, index) in filters['productCategoryNameFacet']" :key="index" :disabled="excludedCategories.includes(category)">
+                <ion-chip @click="updateInclusionQuery(category, 'productCategoryNames')" :outline="!included['productCategoryNames'].includes(category)" v-for="(category, index) in filters['productCategoryNameFacet']" :key="index" :disabled="excluded['productCategoryNames'].includes(category)">
                   <ion-label>{{ category }}</ion-label>
                 </ion-chip>
               </ion-card-content>
@@ -49,8 +49,8 @@
                 <ion-title>{{ $t("Shop") }}</ion-title>
               </ion-toolbar>
               <ion-card-content>
-                <ion-chip @click="updateInclusionQuery(shop, 'shop')" :outline="!includedShops.includes(shop)" v-for="(shop, index) in filters['productStoreIdFacet']" :key="index" :disabled="excludedShops.includes(shop)">
-                  <ion-label>{{ shop }}</ion-label>
+                <ion-chip @click="updateInclusionQuery(productStoreId, 'productStoreIds')" :outline="!included['productStoreIds'].includes(productStoreId)" v-for="(productStoreId, index) in filters['productStoreIdFacet']" :key="index" :disabled="excluded['productStoreIds'].includes(productStoreId)">
+                  <ion-label>{{ productStoreId }}</ion-label>
                 </ion-chip>
               </ion-card-content>
             </ion-card>
@@ -62,7 +62,7 @@
                 <ion-title>{{ $t("Tags") }}</ion-title>
               </ion-toolbar>
               <ion-card-content>
-                <ion-chip @click="updateExclusionQuery(tag, 'tag')" :outline="!excludedTags.includes(tag)" v-for="(tag, index) in filters['tagsFacet']" :key="index" :disabled="includedTags.includes(tag)">
+                <ion-chip @click="updateExclusionQuery(tag, 'tags')" :outline="!excluded['tags'].includes(tag)" v-for="(tag, index) in filters['tagsFacet']" :key="index" :disabled="included['tags'].includes(tag)">
                   <ion-label>{{ tag }}</ion-label>
                 </ion-chip>
               </ion-card-content>
@@ -72,7 +72,7 @@
                 <ion-title>{{ $t("Categories") }}</ion-title>
               </ion-toolbar>
               <ion-card-content>
-                <ion-chip @click="updateExclusionQuery(category, 'category')" :outline="!excludedCategories.includes(category)" v-for="(category, index) in filters['productCategoryNameFacet']" :key="index" :disabled="includedCategories.includes(category)">
+                <ion-chip @click="updateExclusionQuery(category, 'productCategoryNames')" :outline="!excluded['productCategoryNames'].includes(category)" v-for="(category, index) in filters['productCategoryNameFacet']" :key="index" :disabled="included['productCategoryNames'].includes(category)">
                   <ion-label>{{ category }}</ion-label>
                 </ion-chip>
               </ion-card-content>
@@ -82,8 +82,8 @@
                 <ion-title>{{ $t("Shop") }}</ion-title>
               </ion-toolbar>
               <ion-card-content>
-                <ion-chip @click="updateExclusionQuery(shop, 'shop')" :outline="!excludedShops.includes(shop)" v-for="(shop, index) in filters['productStoreIdFacet']" :key="index" :disabled="includedShops.includes(shop)">
-                  <ion-label>{{ shop }}</ion-label>
+                <ion-chip @click="updateExclusionQuery(productStoreId, 'productStoreIds')" :outline="!excluded['productStoreIds'].includes(productStoreId)" v-for="(productStoreId, index) in filters['productStoreIdFacet']" :key="index" :disabled="included['productStoreIds'].includes(productStoreId)">
+                  <ion-label>{{ productStoreId }}</ion-label>
                 </ion-chip>
               </ion-card-content>
             </ion-card>
@@ -212,38 +212,18 @@ export default defineComponent({
   },
   data () {
     return {
-      includedTags: [] as Array<string>,
-      includedCategories: [] as Array<string>,
-      includedShops: [] as Array<string>,
-      excludedTags: [] as Array<string>,
-      excludedCategories: [] as Array<string>,
-      excludedShops: [] as Array<string>,
-      threshold: '' as any
-    }
-  },
-  methods: {
-    updateInclusionQuery(value: string, type: string) {
-      if (type === 'tag') {
-        this.includedTags.includes(value) ? this.includedTags.splice(this.includedTags.indexOf(value), 1) : this.includedTags.push(value)
-      } else if (type === 'category') {
-        this.includedCategories.includes(value) ? this.includedCategories.splice(this.includedCategories.indexOf(value), 1) : this.includedCategories.push(value)
-      } else if (type === 'shop') {
-        this.includedShops.includes(value) ? this.includedShops.splice(this.includedShops.indexOf(value), 1) : this.includedShops.push(value)
-      }
-      this.updateQuery();
-    },
-    updateExclusionQuery(value: string, type: string) {
-      if (type === 'tag') {
-        this.excludedTags.includes(value) ? this.excludedTags.splice(this.excludedTags.indexOf(value), 1) : this.excludedTags.push(value)
-      } else if (type === 'category') {
-        this.excludedCategories.includes(value) ? this.excludedCategories.splice(this.excludedCategories.indexOf(value), 1) : this.excludedCategories.push(value)
-      } else if (type === 'shop') {
-        this.excludedShops.includes(value) ? this.excludedShops.splice(this.excludedShops.indexOf(value), 1) : this.excludedShops.push(value)
-      }
-      this.updateQuery();
-    },
-    updateQuery() {
-      const payload = {
+      included: {
+        tags: [] as Array<string>,
+        productCategoryNames: [] as Array<string>,
+        productStoreIds: [] as Array<string>
+      } as any,
+      excluded: {
+        tags: [] as Array<string>,
+        productCategoryNames: [] as Array<string>,
+        productStoreIds: [] as Array<string>
+      } as any,
+      threshold: '' as any,
+      query: {
         "json": {
           "params": {
             "group": true,
@@ -252,23 +232,37 @@ export default defineComponent({
             "group.ngroups": true,
             "q.op": "AND"
           } as any,
-          "query": "*:*",
-          "filter": "docType: PRODUCT"
+          "query": "*:*"
         }
-      }
+      } as any
+    }
+  },
+  methods: {
+    updateInclusionQuery(value: string, type: string) {
+      this.included[type].includes(value) ? this.included[type].splice(this.included[type].indexOf(value), 1) : this.included[type].push(value)
+      this.updateQuery();
+    },
+    updateExclusionQuery(value: string, type: string) {
+      this.excluded[type].includes(value) ? this.excluded[type].splice(this.excluded[type].indexOf(value), 1) : this.excluded[type].push(value)
+      this.updateQuery();
+    },
+    updateQuery() {
+      this.query.json['filter'] = ["docType: PRODUCT"]
 
-      payload.json.filter = this.includedTags.length > 0 ? payload.json.filter.concat(` AND tags: (${this.includedTags.join(' OR ')})`) : payload.json.filter
-      payload.json.filter = this.excludedTags.length > 0 ? payload.json.filter.concat(` AND -tags: (${this.excludedTags.join(' OR ')})`) : payload.json.filter
-      payload.json.filter = this.includedCategories.length > 0 ? payload.json.filter.concat(` AND productCategoryNames: (${this.includedCategories.join(' OR ')})`) : payload.json.filter
-      payload.json.filter = this.excludedCategories.length > 0 ? payload.json.filter.concat(` AND -productCategoryNames: (${this.excludedCategories.join(' OR ')})`) : payload.json.filter
-      payload.json.filter = this.includedShops.length > 0 ? payload.json.filter.concat(` AND productStoreIds: (${this.includedShops.join(' OR ')})`) : payload.json.filter
-      payload.json.filter = this.excludedShops.length > 0 ? payload.json.filter.concat(` AND -productStoreIds: (${this.excludedShops.join(' OR ')})`) : payload.json.filter
+      this.included['tags'].length > 0 && this.query.json['filter'].push(`tags: (${this.included['tags'].join(' OR ')})`)
+      this.included['productCategoryNames'].length > 0 && this.query.json['filter'].push(`productCategoryNames: (${this.included['productCategoryNames'].join(' OR ')})`)
+      this.included['productStoreIds'].length > 0 && this.query.json['filter'].push(`productStoreIds: (${this.included['productStoreIds'].join(' OR ')})`)
+
+      this.excluded['tags'].length > 0 && this.query.json['filter'].push(`-tags: (${this.excluded['tags'].join(' OR ')})`)
+      this.excluded['productCategoryNames'].length > 0 && this.query.json['filter'].push(`-productCategoryNames: (${this.excluded['productCategoryNames'].join(' OR ')})`)
+      this.excluded['productStoreIds'].length > 0 && this.query.json['filter'].push(`-productStoreIds: (${this.excluded['productStoreIds'].join(' OR ')})`)
     },
     async saveThreshold() {
       const saveThresholdModal = await modalController.create({
         component: SaveThresholdModal,
         componentProps: {
-          threshold: this.threshold
+          threshold: this.threshold,
+          query: this.query
         }
       })
 
