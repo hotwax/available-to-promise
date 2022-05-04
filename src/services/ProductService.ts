@@ -26,7 +26,16 @@ const fetchProductFacets = async (payload: any): Promise<any> => {
   })
 }
 
+const createSearchPreference = async (payload: any): Promise<any> => {
+  return api({
+    url: "service/createSearchPreference",
+    method: "post",
+    data: payload
+  });
+}
+
 export const ProductService = {
+  createSearchPreference,
   fetchProducts,
   fetchProductFacets,
   getProducts

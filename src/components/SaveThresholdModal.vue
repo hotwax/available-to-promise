@@ -19,12 +19,12 @@
       </ion-item>
       <ion-item>
         <ion-icon :icon="optionsOutline" slot="start" />
-        <ion-label>{{ threshold }} {{ $t('threshold') }}</ion-label>
+        <ion-label>{{ threshold ? threshold : '0' }} {{ $t('threshold') }}</ion-label>
       </ion-item>
 
       <ion-item>
         <ion-label>{{ $t("Rule name") }}</ion-label>
-        <ion-input placeholder="rule name" />
+        <ion-input placeholder="rule name" v-model="currentUser.partyName"/>
       </ion-item>
     </ion-list>
 
@@ -61,6 +61,10 @@ import {
   optionsOutline,
   cloudUploadOutline
 } from 'ionicons/icons';
+import { ProductService } from '@/services/ProductService';
+import { hasError, showToast } from '@/utils';
+import { translate } from '@/i18n';
+import { mapGetters } from 'vuex';
 
 export default defineComponent({
   name: 'SaveThresholdModal',
@@ -80,11 +84,75 @@ export default defineComponent({
     IonTitle,
     IonToolbar
   },
-  props: ["threshold"],
+  props: ["threshold", "query"],
+  data () {
+    return {
+      jobName: this.currentUser
+    }
+  },
+  computed: {
+    ...mapGetters({
+      currentUser: 'user/getUserProfile'
+    })
+  },
   methods: {
     closeModal() {
       modalController.dismiss({ dismissed: true });
     },
+    async createSearchPreference() {
+      try {
+        const resp = await ProductService.createSearchPreference({
+          searchPrefValue: this.query
+        });
+
+        if (resp.status == 200) {
+          const searchPrefId = resp.data.searchPrefId;
+          this.scheduleService(searchPrefId)
+        }
+      } catch (err) {
+        console.error(err)
+      }
+    },
+    async scheduleService(searchPrefId: string) {
+      let resp = '' as any;
+
+      // const payload = {
+      //   'JOB_NAME': job.jobName,
+      //   'SERVICE_NAME': job.serviceName,
+      //   'SERVICE_COUNT': '0',
+      //   'jobFields': {
+      //     'productStoreId': this.state.user.currentEComStore.productStoreId,
+      //     'systemJobEnumId': job.systemJobEnumId,
+      //     'tempExprId': job.jobStatus,
+      //     'maxRecurrenceCount': '-1',
+      //     'parentJobId': job.parentJobId,
+      //     'runAsUser': 'system', // default system, but empty in run now
+      //     'recurrenceTimeZone': DateTime.now().zoneName,
+      //     searchPrefId
+      //   },
+      //   'shopifyConfigId': this.state.user.shopifyConfig,
+      //   'statusId': "SERVICE_PENDING",
+      //   'systemJobEnumId': "SAMPLE_JOB"
+      // } as any
+
+      // // checking if the runtimeData has productStoreId, and if present then adding it on root level
+      // job?.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = this.state.user.currentEComStore.productStoreId)
+      // job?.priority && (payload['SERVICE_PRIORITY'] = job.priority.toString())
+      // job?.runTime && (payload['SERVICE_TIME'] = job.runTime.toString())
+
+      try {
+        // resp = await JobService.scheduleJob({ ...job.runtimeData, ...payload });
+        if (resp.status == 200 && !hasError(resp)) {
+          showToast(translate('Service has been scheduled'))
+        } else {
+          showToast(translate('Something went wrong'))
+        }
+      } catch (err) {
+        showToast(translate('Something went wrong'))
+        console.error(err)
+      }
+      return resp;
+    }
   },
   setup() {
     return {
