@@ -17,73 +17,92 @@
 
     <ion-content>
       <div class="find">
-        <section class="search">
-          <ion-searchbar :placeholder="$t('Search products')" />
-        </section>
 
         <aside class="filters desktop-only">
           <ion-list>
-            <ion-list-header><h3>{{ $t("Include") }}</h3></ion-list-header>
+            <ion-item lines="inset">
+              <ion-label>{{ $t("Threshold") }}</ion-label>
+              <ion-input type="number" :placeholder="$t('global threshold')" v-model="threshold"/>
+            </ion-item>
+            <ion-list-header>
+              <h3>{{ $t("Include") }}</h3>
+              <ion-button fill="clear" color="warning">{{ $t('reset') }}</ion-button>
+            </ion-list-header>
             <ion-card>
               <ion-toolbar>
-                <ion-title>{{ $t("Tags") }}</ion-title>
+                <ion-item lines="none">
+                  <ion-label>{{ $t("Tags") }}</ion-label>
+                  <ion-button fill="clear" slot="end" size="small">
+                    <ion-label>{{ $t('add') }}</ion-label>
+                    <ion-icon :icon="addCircleOutline" />
+                  </ion-button>
+                </ion-item>
               </ion-toolbar>
               <ion-card-content>
                 <ion-chip @click="updateInclusionQuery(tag, 'tags')" :outline="!included['tags'].includes(tag)" v-for="(tag, index) in filters['tagsFacet']" :key="index" :disabled="excluded['tags'].includes(tag)">
+                  <ion-icon :icon="pricetagOutline" />
                   <ion-label>{{ tag }}</ion-label>
+                  <ion-icon :icon="closeCircle" />
                 </ion-chip>
               </ion-card-content>
             </ion-card>
             <ion-card>
               <ion-toolbar>
-                <ion-title>{{ $t("Categories") }}</ion-title>
+                <ion-item lines="none">
+                  <ion-label>{{ $t("Categories") }}</ion-label>
+                  <ion-button fill="clear" slot="end" size="small">
+                    <ion-label>{{ $t('add') }}</ion-label>
+                    <ion-icon :icon="addCircleOutline" />
+                  </ion-button>
+                </ion-item>
               </ion-toolbar>
               <ion-card-content>
                 <ion-chip @click="updateInclusionQuery(category, 'productCategoryNames')" :outline="!included['productCategoryNames'].includes(category)" v-for="(category, index) in filters['productCategoryNameFacet']" :key="index" :disabled="excluded['productCategoryNames'].includes(category)">
+                  <ion-icon :icon="albumsOutline" />
                   <ion-label>{{ category }}</ion-label>
-                </ion-chip>
-              </ion-card-content>
-            </ion-card>
-            <ion-card>
-              <ion-toolbar>
-                <ion-title>{{ $t("Shop") }}</ion-title>
-              </ion-toolbar>
-              <ion-card-content>
-                <ion-chip @click="updateInclusionQuery(productStoreId, 'productStoreIds')" :outline="!included['productStoreIds'].includes(productStoreId)" v-for="(productStoreId, index) in filters['productStoreIdFacet']" :key="index" :disabled="excluded['productStoreIds'].includes(productStoreId)">
-                  <ion-label>{{ productStoreId }}</ion-label>
+                  <ion-icon :icon="closeCircle" />
                 </ion-chip>
               </ion-card-content>
             </ion-card>
           </ion-list>
           <ion-list>
-            <ion-list-header><h3>{{ $t("Exclude") }}</h3></ion-list-header>
+            <ion-list-header>
+              <h3>{{ $t("Exclude") }}</h3>
+              <ion-button fill="clear" color="warning">{{ $t('reset') }}</ion-button>
+            </ion-list-header>
             <ion-card>
               <ion-toolbar>
-                <ion-title>{{ $t("Tags") }}</ion-title>
+                <ion-item lines="none">
+                  <ion-label>{{ $t("Tags") }}</ion-label>
+                  <ion-button fill="clear" slot="end" size="small">
+                    <ion-label>{{ $t('add') }}</ion-label>
+                    <ion-icon :icon="addCircleOutline" />
+                  </ion-button>
+                </ion-item>
               </ion-toolbar>
               <ion-card-content>
                 <ion-chip @click="updateExclusionQuery(tag, 'tags')" :outline="!excluded['tags'].includes(tag)" v-for="(tag, index) in filters['tagsFacet']" :key="index" :disabled="included['tags'].includes(tag)">
+                  <ion-icon :icon="pricetagOutline" />
                   <ion-label>{{ tag }}</ion-label>
+                  <ion-icon :icon="closeCircle" />
                 </ion-chip>
               </ion-card-content>
             </ion-card>
             <ion-card>
               <ion-toolbar>
-                <ion-title>{{ $t("Categories") }}</ion-title>
+                <ion-item lines="none">
+                  <ion-label>{{ $t("Categories") }}</ion-label>
+                  <ion-button fill="clear" slot="end" size="small">
+                    <ion-label>{{ $t('add') }}</ion-label>
+                    <ion-icon :icon="addCircleOutline" />
+                  </ion-button>
+                </ion-item>
               </ion-toolbar>
               <ion-card-content>
                 <ion-chip @click="updateExclusionQuery(category, 'productCategoryNames')" :outline="!excluded['productCategoryNames'].includes(category)" v-for="(category, index) in filters['productCategoryNameFacet']" :key="index" :disabled="included['productCategoryNames'].includes(category)">
+                  <ion-icon :icon="albumsOutline" />
                   <ion-label>{{ category }}</ion-label>
-                </ion-chip>
-              </ion-card-content>
-            </ion-card>
-            <ion-card>
-              <ion-toolbar>
-                <ion-title>{{ $t("Shop") }}</ion-title>
-              </ion-toolbar>
-              <ion-card-content>
-                <ion-chip @click="updateExclusionQuery(productStoreId, 'productStoreIds')" :outline="!excluded['productStoreIds'].includes(productStoreId)" v-for="(productStoreId, index) in filters['productStoreIdFacet']" :key="index" :disabled="included['productStoreIds'].includes(productStoreId)">
-                  <ion-label>{{ productStoreId }}</ion-label>
+                  <ion-icon :icon="closeCircle" />
                 </ion-chip>
               </ion-card-content>
             </ion-card>
@@ -93,45 +112,48 @@
         <main class="main">
           <section class="sort">
             <ion-item lines="none">
-              <h2>{{ $t("Results") }}:</h2>
+              <h2>{{ $t("Results") }}: {{ products.total.virtual }} {{ $t("virtual, ") }} {{ products.total.variant }} {{ $t("variants") }}</h2>
             </ion-item>
 
-            <div>
-              <ion-item>
-                <ion-label position="fixed">{{ $t("Threshold") }}</ion-label>
-                <ion-input type="number" :placeholder="$t('global threshold')" v-model="threshold"/>
-              </ion-item>
-            </div>
+            <section class="search">
+              <ion-searchbar :placeholder="$t('Search products')" v-model="queryString" @keyup.enter="searchProducts($event)" />
+            </section>  
           </section>
 
           <hr />
-
-          <section class="section-header">
-            <div class="primary-info">
-              <ion-item lines="none">
-                <ion-label>
-                  Parent Product
-                  <p>5 {{ $t("variants") }}</p>
-                </ion-label>
-              </ion-item>
-            </div>
-
+          <div v-for="product in products.list" :key="product">
+            <section class="section-header">
+              <div class="primary-info">
+                <ion-item lines="none">
+                  <ion-label>
+                    {{ product.productName }}
+                    <p>{{ product.variants.length}} {{ $t("variants") }}</p>
+                  </ion-label>
+                </ion-item>
+              </div>
+  
             <div class="tags"></div>
-          </section>
-
-          <section class="section-grid">
-            <ion-card>
-              <Image src="https://cdn.shopify.com/s/files/1/0069/7384/9727/products/test-track.jpg?v=1626255137" />
-              <ion-item lines="none">
-                <ion-label>
-                  SKU
-                  <p>Color: Blue</p>
-                  <p>Size: XL</p>
-                </ion-label>
-              </ion-item>
-            </ion-card>
-          </section>
-          <hr />
+            </section>
+  
+            <section class="section-grid">
+              <div v-for="variant in product.variants" :key="variant">
+                <ion-card>
+                  <Image :src="variant.mainImageUrl" />
+                  <ion-item lines="none">
+                    <ion-label>
+                      {{ variant.productName }}
+                      <p>{{ $t("Color") }}: {{ variant.color }}</p>
+                      <p>{{ $t("Size") }}: {{ variant.size }}</p>
+                    </ion-label>
+                  </ion-item>
+                </ion-card>
+              </div>
+            </section>
+            <hr />
+          </div>
+          <ion-infinite-scroll @ionInfinite="loadMoreProducts($event)" threshold="100px" :disabled="!isScrollable">
+            <ion-infinite-scroll-content loading-spinner="crescent" :loading-text="$t('Loading')"/>
+          </ion-infinite-scroll>
         </main>
       </div>
 
@@ -175,10 +197,12 @@ import {
   IonSearchbar,
   IonTitle,
   IonToolbar,
-  modalController
+  modalController,
+  IonInfiniteScroll,
+  IonInfiniteScrollContent
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
-import { arrowForwardOutline, downloadOutline, filterOutline, saveOutline } from 'ionicons/icons';
+import { arrowForwardOutline, downloadOutline, filterOutline, saveOutline, pricetagOutline, closeCircle, addCircleOutline, albumsOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
 import { mapGetters, useStore } from 'vuex';
 import SaveThresholdModal from '@/components/SaveThresholdModal.vue';
@@ -196,6 +220,8 @@ export default defineComponent({
     IonFabButton,
     IonHeader,
     IonIcon,
+    IonInfiniteScroll,
+    IonInfiniteScrollContent,
     IonInput,
     IonItem,
     IonLabel,
@@ -208,8 +234,12 @@ export default defineComponent({
     IonToolbar,
     Image
   },
-  mounted() {
-    this.store.dispatch("product/fetchProductFacets")
+  computed: {
+    ...mapGetters({
+      products: 'product/getProducts',
+      isScrollable: 'product/isScrollable',
+      filters: 'product/getProductFacets'
+    })
   },
   data () {
     return {
@@ -224,6 +254,7 @@ export default defineComponent({
         productStoreIds: [] as Array<string>
       } as any,
       threshold: '' as any,
+      queryString: '',
       query: {
         "json": {
           "params": {
@@ -240,6 +271,43 @@ export default defineComponent({
     }
   },
   methods: {
+    searchProducts(event: any){
+      this.queryString = event.target.value;
+      this.getProducts();
+    },
+    async getProducts(vSize?: any, vIndex?: any) {
+      const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
+      const viewIndex = vIndex ? vIndex : 0;
+      const payload = {
+        "json": {
+          "params": {
+            "rows": viewSize,
+            "start": viewIndex * viewSize,
+            "group": true,
+            "group.field": "groupId",
+            "group.limit": 10000,
+            "group.ngroups": true,
+          } as any,
+          "query": "*:*",
+          "filter": "docType: PRODUCT AND groupId: *"
+        }
+      }
+      if(this.queryString) {
+        payload.json.params.defType = 'edismax'
+        payload.json.params.qf = 'productId productName sku internalName brandName'
+        payload.json.params['q.op'] = 'AND'
+        payload.json.query = `*${this.queryString}*`
+      }
+      this.store.dispatch("product/getProducts", payload);
+    },
+    async loadMoreProducts(event: any){
+      this.getProducts(
+        undefined,
+        Math.ceil(this.products.list.length / process.env.VUE_APP_VIEW_SIZE).toString()
+      ).then(() => {
+        event.target.complete();
+      })
+    },
     updateInclusionQuery(value: string, type: string) {
       this.included[type].includes(value) ? this.included[type].splice(this.included[type].indexOf(value), 1) : this.included[type].push(value)
       this.updateQuery();
@@ -288,10 +356,9 @@ export default defineComponent({
       saveThresholdModal.present();
     }
   },
-  computed: {
-    ...mapGetters({
-      filters: 'product/getProductFacets'
-    })
+  mounted () {
+    this.getProducts();
+    this.store.dispatch("product/fetchProductFacets")
   },
   setup() {
     const router = useRouter();
@@ -303,7 +370,11 @@ export default defineComponent({
       filterOutline,
       router,
       saveOutline,
-      store
+      store,
+      pricetagOutline,
+      closeCircle,
+      addCircleOutline,
+      albumsOutline
     };
   },
 });

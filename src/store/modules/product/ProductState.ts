@@ -1,7 +1,10 @@
 export default interface ProductState {
   products: {
     list: any;
-    total: number;
+    total: {
+      variant: number;
+      virtual: number;
+    }
   };
   facets: any;
 }
