@@ -260,7 +260,6 @@ export default defineComponent({
       this.excluded['productStoreIds'].length > 0 && this.query.json['filter'].push(`-productStoreIds: (${this.excluded['productStoreIds'].join(' OR ')})`)
     },
     async saveThreshold() {
-      console.log(this.query)
       if (!this.threshold) {
         const alert = await alertController
           .create({
