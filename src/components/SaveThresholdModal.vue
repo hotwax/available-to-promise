@@ -95,7 +95,7 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       currentEComStore: 'user/getCurrentEComStore',
-      shopifyConfigs: 'util/getShopifyConfig',
+      shopifyConfig: 'util/getShopifyConfig',
       jobs: 'job/getJobs'
     })
   },
@@ -104,29 +104,39 @@ export default defineComponent({
       modalController.dismiss({ dismissed: true });
     },
     async createSearchPreference() {
-      this.scheduleService('sample', this.threshold);
-      // try {
-      //   const resp = await ProductService.createSearchPreference({
-      //     searchPrefValue: this.query
-      //   });
+      const solrQuery = this.query
+      delete solrQuery.json.params
+      solrQuery.json['query'] = "*:*"
+      try {
+        const resp = await ProductService.createSearchPreference({
+          searchPrefValue: solrQuery
+        });
 
-      //   console.log(resp)
-
-      //   if (resp.status == 200 && resp?.data?.searchPrefId) {
-      //     const searchPrefId = resp.data.searchPrefId;
-      //     console.log(searchPrefId)
-      //     // this.scheduleService(searchPrefId)
-      //   }
-      // } catch (err) {
-      //   console.error(err)
-      //   showToast(translate('Something went wrong'))
-      // }
+        if (resp.status == 200 && resp?.data?.searchPrefId) {
+          const searchPrefId = resp.data.searchPrefId;
+          this.scheduleService(searchPrefId, this.threshold)
+        }
+      } catch (err) {
+        console.error(err)
+        showToast(translate('Something went wrong'))
+      }
     },
     async scheduleService(searchPrefId: string, threshold: string) {
-      const job = this.jobs['SAMPLE_JOB']
+      let job = this.jobs['ping']
       const productStoreId = this.currentEComStore.productStoreId
-      let shopifyConfigId = this.shopifyConfigs[productStoreId]
+      let shopifyConfigId = this.shopifyConfig[productStoreId]
       let resp = '' as any;
+
+      if (!job) {
+        await this.store.dispatch('job/fetchJobs', {
+          inputFields: {
+            statusId: "SERVICE_DRAFT",
+            statusId_op: "equals",
+            systemJobEnumId: "ping",
+          }
+        })
+        job = this.jobs['ping']
+      }
 
       if(!shopifyConfigId) {
         shopifyConfigId = await (this.store.dispatch('util/getShopifyConfig', productStoreId) as any)?.shopifyConfigId
@@ -143,30 +153,30 @@ export default defineComponent({
           'maxRecurrenceCount': '-1',
           'parentJobId': job.parentJobId,
           'runAsUser': 'system', // default system, but empty in run now
-          'recurrenceTimeZone': DateTime.now().zoneName,
-          searchPrefId,
-          threshold
+          'recurrenceTimeZone': DateTime.now().zoneName
         },
         'shopifyConfigId': shopifyConfigId,
         'statusId': "SERVICE_PENDING",
-        'systemJobEnumId': "SAMPLE_JOB"
+        'systemJobEnumId': "SAMPLE_JOB",
+        searchPrefId,
+        threshold
       } as any : {}
 
       // checking if the runtimeData has productStoreId, and if present then adding it on root level
       job?.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = productStoreId)
       job?.priority && (payload['SERVICE_PRIORITY'] = job.priority.toString())
 
-      // try {
-      //   resp = await JobService.scheduleJob({ ...job.runtimeData, ...payload });
-      //   if (resp.status == 200 && !hasError(resp)) {
-      //     showToast(translate('Service has been scheduled'))
-      //   } else {
-      //     showToast(translate('Something went wrong'))
-      //   }
-      // } catch (err) {
-      //   showToast(translate('Something went wrong'))
-      //   console.error(err)
-      // }
+      try {
+        resp = await JobService.scheduleJob({ ...job.runtimeData, ...payload });
+        if (resp.status == 200 && !hasError(resp)) {
+          showToast(translate('Service has been scheduled'))
+        } else {
+          showToast(translate('Something went wrong'))
+        }
+      } catch (err) {
+        showToast(translate('Something went wrong'))
+        console.error(err)
+      }
       return resp;
     }
   },
