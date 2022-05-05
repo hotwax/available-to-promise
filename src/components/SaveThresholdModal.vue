@@ -107,14 +107,17 @@ export default defineComponent({
       const solrQuery = this.query
       delete solrQuery.json.params
       solrQuery.json['query'] = "*:*"
+
       try {
         const resp = await ProductService.createSearchPreference({
-          searchPrefValue: solrQuery
+          searchPrefValue: JSON.stringify(solrQuery)
         });
 
         if (resp.status == 200 && resp?.data?.searchPrefId) {
           const searchPrefId = resp.data.searchPrefId;
           this.scheduleService(searchPrefId, this.threshold)
+        } else {
+          showToast(translate('Something went wrong'))
         }
       } catch (err) {
         console.error(err)
@@ -133,7 +136,8 @@ export default defineComponent({
             statusId: "SERVICE_DRAFT",
             statusId_op: "equals",
             systemJobEnumId: "ping",
-          }
+          },
+          viewSize: 1
         })
         job = this.jobs['ping']
       }
@@ -157,7 +161,7 @@ export default defineComponent({
         },
         'shopifyConfigId': shopifyConfigId,
         'statusId': "SERVICE_PENDING",
-        'systemJobEnumId': "SAMPLE_JOB",
+        'systemJobEnumId': job.systemJobEnumId,
         searchPrefId,
         threshold
       } as any : {}
