@@ -154,6 +154,7 @@
 <script lang="ts">
 import Image from '@/components/Image.vue';
 import {
+  alertController,
   IonButton,
   IonButtons,
   IonCard,
@@ -232,7 +233,8 @@ export default defineComponent({
             "group.ngroups": true,
             "q.op": "AND"
           } as any,
-          "query": "*:*"
+          "query": "*:*",
+          "filter": ["docType: PRODUCT"]
         }
       } as any
     }
@@ -258,6 +260,20 @@ export default defineComponent({
       this.excluded['productStoreIds'].length > 0 && this.query.json['filter'].push(`-productStoreIds: (${this.excluded['productStoreIds'].join(' OR ')})`)
     },
     async saveThreshold() {
+      console.log(this.query)
+      if (!this.threshold) {
+        const alert = await alertController
+          .create({
+            header: this.$t('Enter threshold value'),
+            message: this.$t('Please enter a threshold value to set for these products before proceeding.'),
+            buttons: [{
+              text: this.$t("Ok"),
+              role: 'cancel'
+            }],
+          });
+        return alert.present();
+      }
+
       const saveThresholdModal = await modalController.create({
         component: SaveThresholdModal,
         componentProps: {
