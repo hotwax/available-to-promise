@@ -89,14 +89,16 @@ export default defineComponent({
   props: ["threshold", "query", "totalSKUs"],
   data () {
     return {
-      jobName: ''
+      jobName: '',
+      jobEnumId: 'ping'
     }
   },
   computed: {
     ...mapGetters({
       currentEComStore: 'user/getCurrentEComStore',
       shopifyConfig: 'util/getShopifyConfig',
-      jobs: 'job/getJobs'
+      jobs: 'job/getJobs',
+      facility: 'util/getFacilities'
     })
   },
   methods: {
@@ -118,8 +120,8 @@ export default defineComponent({
         });
 
         if (resp.status == 200 && resp?.data?.searchPrefId) {
-          const searchPrefId = resp.data.searchPrefId;
-          this.scheduleService(searchPrefId, this.threshold)
+          const searchPreferenceId = resp.data.searchPrefId;
+          this.scheduleService(searchPreferenceId, this.threshold)
         } else {
           showToast(translate('Something went wrong'))
         }
@@ -128,10 +130,11 @@ export default defineComponent({
         showToast(translate('Something went wrong'))
       }
     },
-    async scheduleService(searchPrefId: string, threshold: string) {
-      let job = this.jobs['ping']
+    async scheduleService(searchPreferenceId: string, threshold: string) {
+      let job = this.jobs[this.jobEnumId]
       const productStoreId = this.currentEComStore.productStoreId
       let shopifyConfigId = this.shopifyConfig[productStoreId]
+      let facilityId = this.facility[productStoreId]
       let resp = '' as any;
 
       if (!job) {
@@ -139,16 +142,31 @@ export default defineComponent({
           inputFields: {
             statusId: "SERVICE_DRAFT",
             statusId_op: "equals",
-            systemJobEnumId: "ping",
+            systemJobEnumId: this.jobEnumId,
           },
           viewSize: 1
         })
-        job = this.jobs['ping']
+        job = this.jobs[this.jobEnumId]
       }
 
       if(!shopifyConfigId) {
         const resp = await this.store.dispatch('util/getShopifyConfig', productStoreId)
         shopifyConfigId = resp[productStoreId]
+      }
+
+      if (!facilityId) {
+        const resp = await this.store.dispatch('util/fetchFacilities', {
+          inputFields: {
+            productStoreId,
+            facilityTypeId: 'CONFIGURATION'
+          },
+          entityName: 'ProductStoreAndFacility',
+          fieldList: ['facilityId', 'productStoreId'],
+          distinct: 'Y',
+          noConditionFind: 'Y',
+          viewSize: 10
+        })
+        facilityId = resp[productStoreId]
       }
 
       const payload = job ? {
@@ -167,8 +185,9 @@ export default defineComponent({
         'shopifyConfigId': shopifyConfigId,
         'statusId': "SERVICE_PENDING",
         'systemJobEnumId': job.systemJobEnumId,
-        searchPrefId,
-        threshold
+        searchPreferenceId,
+        threshold,
+        facilityId
       } as any : {}
 
       // checking if the runtimeData has productStoreId, and if present then adding it on root level
