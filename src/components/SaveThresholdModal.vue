@@ -19,7 +19,7 @@
       </ion-item>
       <ion-item>
         <ion-icon :icon="optionsOutline" slot="start" />
-        <ion-label>{{ threshold ? threshold : '0' }} {{ $t('threshold') }}</ion-label>
+        <ion-label>{{ threshold }} {{ $t('threshold') }}</ion-label>
       </ion-item>
 
       <ion-item>

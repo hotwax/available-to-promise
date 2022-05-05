@@ -99,7 +99,7 @@
             <div>
               <ion-item>
                 <ion-label position="fixed">{{ $t("Threshold") }}</ion-label>
-                <ion-input type="text" :placeholder="$t('global threshold')" v-model="threshold"/>
+                <ion-input type="number" :placeholder="$t('global threshold')" v-model="threshold"/>
               </ion-item>
             </div>
           </section>
@@ -264,7 +264,7 @@ export default defineComponent({
     },
     async saveThreshold() {
       // an alert will be displayed, if the user does not enter a threshold value before proceeding to save page
-      if (!this.threshold) {
+      if (!this.threshold || this.threshold == 0) {
         const alert = await alertController
           .create({
             header: this.$t('Enter threshold value'),
