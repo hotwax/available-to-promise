@@ -21,20 +21,22 @@
         <aside class="filters desktop-only">
           <ion-list>
             <ion-item lines="inset">
-              <ion-label position="fixed">{{ $t("Threshold") }}</ion-label>
+              <ion-label>{{ $t("Threshold") }}</ion-label>
               <ion-input type="text" :placeholder="$t('global threshold')"/>
             </ion-item>
             <ion-list-header>
-              <ion-label>{{ $t("Include") }}</ion-label>
-              <ion-button fill="clear" color="warning">RESET</ion-button>
+              <h3>{{ $t("Include") }}</h3>
+              <ion-button fill="clear" color="warning">{{ $t('reset') }}</ion-button>
             </ion-list-header>
             <ion-card>
               <ion-toolbar>
-                <ion-title>{{ $t("Tags") }}</ion-title>
-                <ion-button fill="clear" slot="end">
-                 <ion-label>Add</ion-label>
-                 <ion-icon :icon="addCircleOutline" />
-                </ion-button>
+                <ion-item lines="none">
+                  <ion-label>{{ $t("Tags") }}</ion-label>
+                  <ion-button fill="clear" slot="end" size="small">
+                    <ion-label>{{ $t('add') }}</ion-label>
+                    <ion-icon :icon="addCircleOutline" />
+                  </ion-button>
+                </ion-item>
               </ion-toolbar>
               <ion-card-content>
                 <ion-chip @click="updateInclusionQuery(tag, 'tag')" :outline="!includedTags.includes(tag)" v-for="(tag, index) in filters['tagsFacet']" :key="index" :disabled="excludedTags.includes(tag)">
@@ -46,11 +48,13 @@
             </ion-card>
             <ion-card>
               <ion-toolbar>
-                <ion-title>{{ $t("Categories") }}</ion-title>
-                <ion-button fill="clear" slot="end">
-                 <ion-label>Add</ion-label>
-                 <ion-icon :icon="addCircleOutline" />
-                </ion-button>
+                <ion-item lines="none">
+                  <ion-label>{{ $t("Categories") }}</ion-label>
+                  <ion-button fill="clear" slot="end" size="small">
+                    <ion-label>{{ $t('add') }}</ion-label>
+                    <ion-icon :icon="addCircleOutline" />
+                  </ion-button>
+                </ion-item>
               </ion-toolbar>
               <ion-card-content>
                 <ion-chip @click="updateInclusionQuery(category, 'category')" :outline="!includedCategories.includes(category)" v-for="(category, index) in filters['productCategoryNameFacet']" :key="index" :disabled="excludedCategories.includes(category)">
@@ -63,16 +67,18 @@
           </ion-list>
           <ion-list>
             <ion-list-header>
-              <ion-label>{{ $t("Exclude") }}</ion-label>
-              <ion-button fill="clear" color="warning">RESET</ion-button>
+              <h3>{{ $t("Exclude") }}</h3>
+              <ion-button fill="clear" color="warning">{{ $t('reset') }}</ion-button>
             </ion-list-header>
             <ion-card>
               <ion-toolbar>
-                <ion-title>{{ $t("Tags") }}</ion-title>
-                <ion-button fill="clear" slot="end">
-                 <ion-label>Add</ion-label>
-                 <ion-icon :icon="addCircleOutline" />
-                </ion-button>
+                <ion-item lines="none">
+                  <ion-label>{{ $t("Tags") }}</ion-label>
+                  <ion-button fill="clear" slot="end" size="small">
+                    <ion-label>{{ $t('add') }}</ion-label>
+                    <ion-icon :icon="addCircleOutline" />
+                  </ion-button>
+                </ion-item>
               </ion-toolbar>
               <ion-card-content>
                 <ion-chip @click="updateExclusionQuery(tag, 'tag')" :outline="!excludedTags.includes(tag)" v-for="(tag, index) in filters['tagsFacet']" :key="index" :disabled="includedTags.includes(tag)">
@@ -84,11 +90,13 @@
             </ion-card>
             <ion-card>
               <ion-toolbar>
-                <ion-title>{{ $t("Categories") }}</ion-title>
-                <ion-button fill="clear" slot="end">
-                 <ion-label>Add</ion-label>
-                 <ion-icon :icon="addCircleOutline" />
-                </ion-button>
+                <ion-item lines="none">
+                  <ion-label>{{ $t("Categories") }}</ion-label>
+                  <ion-button fill="clear" slot="end" size="small">
+                    <ion-label>{{ $t('add') }}</ion-label>
+                    <ion-icon :icon="addCircleOutline" />
+                  </ion-button>
+                </ion-item>
               </ion-toolbar>
               <ion-card-content>
                 <ion-chip @click="updateExclusionQuery(category, 'category')" :outline="!excludedCategories.includes(category)" v-for="(category, index) in filters['productCategoryNameFacet']" :key="index" :disabled="includedCategories.includes(category)">
