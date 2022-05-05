@@ -22,7 +22,7 @@
           <ion-list>
             <ion-item lines="inset">
               <ion-label>{{ $t("Threshold") }}</ion-label>
-              <ion-input type="text" :placeholder="$t('global threshold')"/>
+              <ion-input type="number" :placeholder="$t('global threshold')" v-model="threshold"/>
             </ion-item>
             <ion-list-header>
               <h3>{{ $t("Include") }}</h3>
@@ -39,7 +39,7 @@
                 </ion-item>
               </ion-toolbar>
               <ion-card-content>
-                <ion-chip @click="updateInclusionQuery(tag, 'tag')" :outline="!includedTags.includes(tag)" v-for="(tag, index) in filters['tagsFacet']" :key="index" :disabled="excludedTags.includes(tag)">
+                <ion-chip @click="updateInclusionQuery(tag, 'tags')" :outline="!included['tags'].includes(tag)" v-for="(tag, index) in filters['tagsFacet']" :key="index" :disabled="excluded['tags'].includes(tag)">
                   <ion-icon :icon="pricetagOutline" />
                   <ion-label>{{ tag }}</ion-label>
                   <ion-icon :icon="closeCircle" />
@@ -57,7 +57,7 @@
                 </ion-item>
               </ion-toolbar>
               <ion-card-content>
-                <ion-chip @click="updateInclusionQuery(category, 'category')" :outline="!includedCategories.includes(category)" v-for="(category, index) in filters['productCategoryNameFacet']" :key="index" :disabled="excludedCategories.includes(category)">
+                <ion-chip @click="updateInclusionQuery(category, 'productCategoryNames')" :outline="!included['productCategoryNames'].includes(category)" v-for="(category, index) in filters['productCategoryNameFacet']" :key="index" :disabled="excluded['productCategoryNames'].includes(category)">
                   <ion-icon :icon="albumsOutline" />
                   <ion-label>{{ category }}</ion-label>
                   <ion-icon :icon="closeCircle" />
@@ -81,7 +81,7 @@
                 </ion-item>
               </ion-toolbar>
               <ion-card-content>
-                <ion-chip @click="updateExclusionQuery(tag, 'tag')" :outline="!excludedTags.includes(tag)" v-for="(tag, index) in filters['tagsFacet']" :key="index" :disabled="includedTags.includes(tag)">
+                <ion-chip @click="updateExclusionQuery(tag, 'tags')" :outline="!excluded['tags'].includes(tag)" v-for="(tag, index) in filters['tagsFacet']" :key="index" :disabled="included['tags'].includes(tag)">
                   <ion-icon :icon="pricetagOutline" />
                   <ion-label>{{ tag }}</ion-label>
                   <ion-icon :icon="closeCircle" />
@@ -99,7 +99,7 @@
                 </ion-item>
               </ion-toolbar>
               <ion-card-content>
-                <ion-chip @click="updateExclusionQuery(category, 'category')" :outline="!excludedCategories.includes(category)" v-for="(category, index) in filters['productCategoryNameFacet']" :key="index" :disabled="includedCategories.includes(category)">
+                <ion-chip @click="updateExclusionQuery(category, 'productCategoryNames')" :outline="!excluded['productCategoryNames'].includes(category)" v-for="(category, index) in filters['productCategoryNameFacet']" :key="index" :disabled="included['productCategoryNames'].includes(category)">
                   <ion-icon :icon="albumsOutline" />
                   <ion-label>{{ category }}</ion-label>
                   <ion-icon :icon="closeCircle" />
@@ -158,7 +158,7 @@
       </div>
 
       <div class="action desktop-only">
-        <ion-button>
+        <ion-button @click="saveThreshold()">
           <ion-icon :icon="saveOutline" />
           {{ $t("Save threshold rule") }}
         </ion-button>
@@ -176,6 +176,7 @@
 <script lang="ts">
 import Image from '@/components/Image.vue';
 import {
+  alertController,
   IonButton,
   IonButtons,
   IonCard,
@@ -196,6 +197,7 @@ import {
   IonSearchbar,
   IonTitle,
   IonToolbar,
+  modalController,
   IonInfiniteScroll,
   IonInfiniteScrollContent
 } from '@ionic/vue';
@@ -203,6 +205,7 @@ import { defineComponent } from 'vue';
 import { arrowForwardOutline, downloadOutline, filterOutline, saveOutline, pricetagOutline, closeCircle, addCircleOutline, albumsOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
 import { mapGetters, useStore } from 'vuex';
+import SaveThresholdModal from '@/components/SaveThresholdModal.vue';
 
 export default defineComponent({
   name: 'SelectProduct',
@@ -240,13 +243,29 @@ export default defineComponent({
   },
   data () {
     return {
+      included: {
+        tags: [] as Array<string>,
+        productCategoryNames: [] as Array<string>
+      } as any,
+      excluded: {
+        tags: [] as Array<string>,
+        productCategoryNames: [] as Array<string>
+      } as any,
+      threshold: '' as any,
       queryString: '',
-      includedTags: [] as Array<string>,
-      includedCategories: [] as Array<string>,
-      includedShops: [] as Array<string>,
-      excludedTags: [] as Array<string>,
-      excludedCategories: [] as Array<string>,
-      excludedShops: [] as Array<string>
+      query: {
+        "json": {
+          "params": {
+            "group": true,
+            "group.field": "groupId",
+            "group.limit": 10000,
+            "group.ngroups": true,
+            "q.op": "AND"
+          } as any,
+          "query": "*:*",
+          "filter": ["docType: PRODUCT"]
+        }
+      } as any
     }
   },
   methods: {
@@ -274,6 +293,7 @@ export default defineComponent({
       if(this.queryString) {
         payload.json.params.defType = 'edismax'
         payload.json.params.qf = 'productId productName sku internalName brandName'
+        // passed this operator to do not split search string and consider the search string as a single value
         payload.json.params['q.op'] = 'AND'
         payload.json.query = `*${this.queryString}*`
       }
@@ -288,45 +308,56 @@ export default defineComponent({
       })
     },
     updateInclusionQuery(value: string, type: string) {
-      if (type === 'tag') {
-        this.includedTags.includes(value) ? this.includedTags.splice(this.includedTags.indexOf(value), 1) : this.includedTags.push(value)
-      } else if (type === 'category') {
-        this.includedCategories.includes(value) ? this.includedCategories.splice(this.includedCategories.indexOf(value), 1) : this.includedCategories.push(value)
-      } else if (type === 'shop') {
-        this.includedShops.includes(value) ? this.includedShops.splice(this.includedShops.indexOf(value), 1) : this.includedShops.push(value)
-      }
+      const filter = this.included[type]
+      filter.includes(value) ? filter.splice(filter.indexOf(value), 1) : filter.push(value)
       this.updateQuery();
     },
     updateExclusionQuery(value: string, type: string) {
-      if (type === 'tag') {
-        this.excludedTags.includes(value) ? this.excludedTags.splice(this.excludedTags.indexOf(value), 1) : this.excludedTags.push(value)
-      } else if (type === 'category') {
-        this.excludedCategories.includes(value) ? this.excludedCategories.splice(this.excludedCategories.indexOf(value), 1) : this.excludedCategories.push(value)
-      } else if (type === 'shop') {
-        this.excludedShops.includes(value) ? this.excludedShops.splice(this.excludedShops.indexOf(value), 1) : this.excludedShops.push(value)
-      }
+      const filter = this.excluded[type]
+      filter.includes(value) ? filter.splice(filter.indexOf(value), 1) : filter.push(value)
       this.updateQuery();
     },
     updateQuery() {
-      const payload = {
-        "json": {
-          "params": {
-            "group": true,
-            "group.field": "groupId",
-            "group.limit": 10000,
-            "group.ngroups": true,
-            "q.op": "AND"
-          } as any,
-          "query": "*:*",
-          "filter": "docType: PRODUCT"
-        }
+      // initializing the filter always on updateQuery call because we are adding values in the filter
+      // as string and if some value is removed then we need to do multiple operations on the filter string
+      // to remove that value from the query filter
+      this.query.json['filter'] = ["docType: PRODUCT"]
+
+      this.query.json['filter'] = Object.keys(this.included).reduce((filter, value) => {
+        this.included[value].length > 0 && filter.push(`${value}: (${this.included[value].join(' OR ')})`)
+        return filter
+      }, this.query.json['filter'])
+
+      this.query.json['filter'] = Object.keys(this.excluded).reduce((filter, value) => {
+        this.excluded[value].length > 0 && filter.push(`-${value}: (${this.excluded[value].join(' OR ')})`)
+        return filter
+      }, this.query.json['filter'])
+    },
+    async saveThreshold() {
+      // an alert will be displayed, if the user does not enter a threshold value before proceeding to save page
+      if (!this.threshold || this.threshold == 0) {
+        const alert = await alertController
+          .create({
+            header: this.$t('Enter threshold value'),
+            message: this.$t('Please enter a threshold value to set for these products before proceeding.'),
+            buttons: [{
+              text: this.$t("Ok"),
+              role: 'cancel'
+            }],
+          });
+        return alert.present();
       }
-      payload.json.filter = this.includedTags.length > 0 ? payload.json.filter.concat(` AND tags: (${this.includedTags.join(' OR ')})`) : payload.json.filter
-      payload.json.filter = this.excludedTags.length > 0 ? payload.json.filter.concat(` AND -tags: (${this.excludedTags.join(' OR ')})`) : payload.json.filter
-      payload.json.filter = this.includedCategories.length > 0 ? payload.json.filter.concat(` AND productCategoryNames: (${this.includedCategories.join(' OR ')})`) : payload.json.filter
-      payload.json.filter = this.excludedCategories.length > 0 ? payload.json.filter.concat(` AND -productCategoryNames: (${this.excludedCategories.join(' OR ')})`) : payload.json.filter
-      payload.json.filter = this.includedShops.length > 0 ? payload.json.filter.concat(` AND productStoreIds: (${this.includedShops.join(' OR ')})`) : payload.json.filter
-      payload.json.filter = this.excludedShops.length > 0 ? payload.json.filter.concat(` AND -productStoreIds: (${this.excludedShops.join(' OR ')})`) : payload.json.filter
+
+      const saveThresholdModal = await modalController.create({
+        component: SaveThresholdModal,
+        componentProps: {
+          threshold: this.threshold,
+          query: this.query,
+          totalSKUs: this.products.total.variant
+        }
+      })
+
+      saveThresholdModal.present();
     }
   },
   mounted () {

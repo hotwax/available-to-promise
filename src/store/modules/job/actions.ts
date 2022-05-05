@@ -229,7 +229,7 @@ const actions: ActionTree<JobState, RootState> = {
       },
       "entityName": "JobSandbox",
       "noConditionFind": "Y",
-      "viewSize": (payload.inputFields?.systemJobEnumId?.length * 2)
+      "viewSize": payload.viewSize ? payload.viewSize : (payload.inputFields?.systemJobEnumId?.length * 2)
     })
     if (resp.status === 200 && !hasError(resp) && resp.data.docs) {
       const cached = JSON.parse(JSON.stringify(state.cached)); 

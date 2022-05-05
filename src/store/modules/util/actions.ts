@@ -28,6 +28,25 @@ const actions: ActionTree<UtilState, RootState> = {
       console.error(err)
     }
   },
+
+  async getShopifyConfig({ commit }, payload) {
+    // TODO: for now passing view size as 1 by considering that one product store id is associated with only
+    // one shopify config
+    const resp = await UtilService.getShopifyConfig({
+      "inputFields": {
+        "productStoreId": payload
+      },
+      "entityName": "ShopifyConfig",
+      "noConditionFind": "Y",
+      "fieldList": ["shopifyConfigId", "productStoreId"],
+      "viewSize": 1
+    })
+
+    if (resp.status === 200 && !hasError(resp)) {
+      commit(types.UTIL_SHOPIFY_CONFIG_UPDATED, resp.data.docs?.length > 0 ? resp.data.docs[0] : {});
+      return resp.data.docs[0];
+    }
+  },
 }
 
 export default actions;
