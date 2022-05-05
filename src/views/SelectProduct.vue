@@ -293,6 +293,7 @@ export default defineComponent({
       if(this.queryString) {
         payload.json.params.defType = 'edismax'
         payload.json.params.qf = 'productId productName sku internalName brandName'
+        // passed this operator to do not split search string and consider the search string as a single value
         payload.json.params['q.op'] = 'AND'
         payload.json.query = `*${this.queryString}*`
       }
@@ -351,7 +352,8 @@ export default defineComponent({
         component: SaveThresholdModal,
         componentProps: {
           threshold: this.threshold,
-          query: this.query
+          query: this.query,
+          totalSKUs: this.products.total.variant
         }
       })
 

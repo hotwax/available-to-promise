@@ -15,7 +15,7 @@
       <ion-list-header>{{ $t("Info") }}</ion-list-header>
       <ion-item>
         <ion-icon :icon="shirtOutline" slot="start" />
-        <ion-label>56 {{ $t('SKUs') }}</ion-label>
+        <ion-label>{{ totalSKUs }} {{ $t('SKUs') }}</ion-label>
       </ion-item>
       <ion-item>
         <ion-icon :icon="optionsOutline" slot="start" />
@@ -86,7 +86,7 @@ export default defineComponent({
     IonTitle,
     IonToolbar
   },
-  props: ["threshold", "query"],
+  props: ["threshold", "query", "totalSKUs"],
   data () {
     return {
       jobName: ''
