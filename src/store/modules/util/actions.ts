@@ -42,10 +42,34 @@ const actions: ActionTree<UtilState, RootState> = {
       "viewSize": 1
     })
 
-    if (resp.status === 200 && !hasError(resp)) {
+    if (resp.status === 200 && !hasError(resp) && resp?.data?.docs?.length > 0) {
       commit(types.UTIL_SHOPIFY_CONFIG_UPDATED, resp.data.docs?.length > 0 ? resp.data.docs[0] : {});
       return resp.data.docs[0];
     }
+    return {};
+  },
+
+  async fetchFacilities({ commit }, payload) {
+
+    try {
+      const resp = await UtilService.fetchFacilities(payload);
+
+      if (resp.status === 200 && !hasError(resp) && resp.data?.count > 0) {
+        const facilities = resp.data.docs.reduce((facilities: any, data: any) => {
+          if(!facilities[data.productStoreId]) {
+            facilities[data.productStoreId] = []
+          }
+
+          facilities[data.productStoreId].push(data.facilityId)
+          return facilities
+        }, {})
+        commit(types.UTIL_FACILITY_UPDATED, facilities);
+        return facilities;
+      }
+    } catch (err) {
+      console.error(err)
+    }
+    return {};
   },
 }
 

@@ -10,6 +10,9 @@ const mutations: MutationTree <UtilState> = {
   },
   [types.UTIL_SHOPIFY_CONFIG_UPDATED] (state, payload) {
     state.shopifyConfig[payload.productStoreId] = payload.shopifyConfigId;
+  },
+  [types.UTIL_FACILITY_UPDATED] (state, payload) {
+    state.facility = payload
   }
 }
 export default mutations;

@@ -17,7 +17,16 @@ const getShopifyConfig = async (payload: any): Promise <any>  => {
   });
 }
 
+const fetchFacilities = async (payload: any): Promise <any>  => {
+  return api({
+    url: "performFind",
+    method: "post",
+    data: payload
+  });
+}
+
 export const UtilService = {
+  fetchFacilities,
   getServiceStatusDesc,
   getShopifyConfig
 }
