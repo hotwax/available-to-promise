@@ -245,13 +245,11 @@ export default defineComponent({
     return {
       included: {
         tags: [] as Array<string>,
-        productCategoryNames: [] as Array<string>,
-        productStoreIds: [] as Array<string>
+        productCategoryNames: [] as Array<string>
       } as any,
       excluded: {
         tags: [] as Array<string>,
-        productCategoryNames: [] as Array<string>,
-        productStoreIds: [] as Array<string>
+        productCategoryNames: [] as Array<string>
       } as any,
       threshold: '' as any,
       queryString: '',
@@ -309,11 +307,13 @@ export default defineComponent({
       })
     },
     updateInclusionQuery(value: string, type: string) {
-      this.included[type].includes(value) ? this.included[type].splice(this.included[type].indexOf(value), 1) : this.included[type].push(value)
+      const filter = this.included[type]
+      filter.includes(value) ? filter.splice(filter.indexOf(value), 1) : filter.push(value)
       this.updateQuery();
     },
     updateExclusionQuery(value: string, type: string) {
-      this.excluded[type].includes(value) ? this.excluded[type].splice(this.excluded[type].indexOf(value), 1) : this.excluded[type].push(value)
+      const filter = this.excluded[type]
+      filter.includes(value) ? filter.splice(filter.indexOf(value), 1) : filter.push(value)
       this.updateQuery();
     },
     updateQuery() {
@@ -322,13 +322,15 @@ export default defineComponent({
       // to remove that value from the query filter
       this.query.json['filter'] = ["docType: PRODUCT"]
 
-      this.included['tags'].length > 0 && this.query.json['filter'].push(`tags: (${this.included['tags'].join(' OR ')})`)
-      this.included['productCategoryNames'].length > 0 && this.query.json['filter'].push(`productCategoryNames: (${this.included['productCategoryNames'].join(' OR ')})`)
-      this.included['productStoreIds'].length > 0 && this.query.json['filter'].push(`productStoreIds: (${this.included['productStoreIds'].join(' OR ')})`)
+      this.query.json['filter'] = Object.keys(this.included).reduce((filter, value) => {
+        this.included[value].length > 0 && filter.push(`${value}: (${this.included[value].join(' OR ')})`)
+        return filter
+      }, this.query.json['filter'])
 
-      this.excluded['tags'].length > 0 && this.query.json['filter'].push(`-tags: (${this.excluded['tags'].join(' OR ')})`)
-      this.excluded['productCategoryNames'].length > 0 && this.query.json['filter'].push(`-productCategoryNames: (${this.excluded['productCategoryNames'].join(' OR ')})`)
-      this.excluded['productStoreIds'].length > 0 && this.query.json['filter'].push(`-productStoreIds: (${this.excluded['productStoreIds'].join(' OR ')})`)
+      this.query.json['filter'] = Object.keys(this.excluded).reduce((filter, value) => {
+        this.excluded[value].length > 0 && filter.push(`-${value}: (${this.excluded[value].join(' OR ')})`)
+        return filter
+      }, this.query.json['filter'])
     },
     async saveThreshold() {
       // an alert will be displayed, if the user does not enter a threshold value before proceeding to save page
