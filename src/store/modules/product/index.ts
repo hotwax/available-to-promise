@@ -11,7 +11,8 @@ const productModule: Module<ProductState, RootState> = {
       products: {
         list: {},
         total: 0
-      }
+      },
+      facets: {}
     },
     getters,
     actions,
