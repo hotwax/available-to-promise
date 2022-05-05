@@ -142,8 +142,8 @@
                   <ion-item lines="none">
                     <ion-label>
                       {{ variant.productName }}
-                      <p>{{ $t("Color") }}: {{ $filters.getFeature(variant.featureHierarchy, '1/COLOR/') }}</p>
-                      <p>{{ $t("Size") }}: {{ $filters.getFeature(variant.featureHierarchy, '1/SIZE/') }}</p>
+                      <p>{{ $t("Color") }}: {{ variant.color }}</p>
+                      <p>{{ $t("Size") }}: {{ variant.size }}</p>
                     </ion-label>
                   </ion-item>
                 </ion-card>

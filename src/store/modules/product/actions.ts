@@ -3,7 +3,7 @@ import { ActionTree } from 'vuex'
 import RootState from '@/store/RootState'
 import ProductState from './ProductState'
 import * as types from './mutation-types'
-import { hasError, showToast } from '@/utils'
+import { hasError, showToast, getFeature } from '@/utils'
 import { translate } from '@/i18n'
 import emitter from '@/event-bus'
 
@@ -24,7 +24,13 @@ const actions: ActionTree<ProductState, RootState> = {
           return {
             productId: product.groupValue,
             productName: product.doclist.docs[0]?.parentProductName,
-            variants: product.doclist.docs
+            variants: product.doclist.docs.map((variant: any) => {
+              return {
+                ...variant,
+                'color': getFeature(variant.featureHierarchy, '1/COLOR/'),
+                'size': getFeature(variant.featureHierarchy, '1/SIZE/')
+              }
+            })
           }
         })
 

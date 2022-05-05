@@ -17,4 +17,14 @@ const showToast = async (message: string) => {
       return toast.present();
 }
 
-export { showToast, hasError }
+const getFeature = (featureHierarchy: any, featureKey: string) => {
+  let featureValue = ''
+  if (featureHierarchy) {
+    const feature = featureHierarchy.find((featureItem: any) => featureItem.startsWith(featureKey))
+    const featureSplit = feature ? feature.split('/') : [];
+    featureValue = featureSplit[2] ? featureSplit[2] : '';
+  }
+  return featureValue;
+}
+
+export { showToast, hasError, getFeature }
