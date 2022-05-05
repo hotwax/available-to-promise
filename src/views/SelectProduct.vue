@@ -249,6 +249,9 @@ export default defineComponent({
       this.updateQuery();
     },
     updateQuery() {
+      // initializing the filter always on updateQuery call because we are adding values in the filter
+      // as string and if some value is removed then we need to do multiple operations on the filter string
+      // to remove that value from the query filter
       this.query.json['filter'] = ["docType: PRODUCT"]
 
       this.included['tags'].length > 0 && this.query.json['filter'].push(`tags: (${this.included['tags'].join(' OR ')})`)
@@ -260,6 +263,7 @@ export default defineComponent({
       this.excluded['productStoreIds'].length > 0 && this.query.json['filter'].push(`-productStoreIds: (${this.excluded['productStoreIds'].join(' OR ')})`)
     },
     async saveThreshold() {
+      // an alert will be displayed, if the user does not enter a threshold value before proceeding to save page
       if (!this.threshold) {
         const alert = await alertController
           .create({
