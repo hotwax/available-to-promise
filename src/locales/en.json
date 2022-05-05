@@ -1,4 +1,5 @@
 {
+  "add": "add",
   "Blank": "Blank",
   "Cancel": "Cancel",
   "CANCEL": "CANCEL",
@@ -23,6 +24,7 @@
   "Filter stores": "Filter stores",
   "global threshold": "global threshold",
   "Include": "Include",
+  "Include tags": "Include tags",
   "Info": "Info",
   "Last run": "Last run",
   "Loading": "Loading",
@@ -37,6 +39,7 @@
   "products selected": "products selected",
   "OMS": "OMS",
   "Ready to create an app?": "Ready to create an app?",
+  "reset": "reset",
   "retry": "retry",
   "Running": "Running",
   "Run time": "Run time",
