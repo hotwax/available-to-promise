@@ -147,7 +147,8 @@ export default defineComponent({
       }
 
       if(!shopifyConfigId) {
-        shopifyConfigId = await (this.store.dispatch('util/getShopifyConfig', productStoreId) as any)?.shopifyConfigId
+        const resp = await this.store.dispatch('util/getShopifyConfig', productStoreId)
+        shopifyConfigId = resp[productStoreId]
       }
 
       const payload = job ? {
