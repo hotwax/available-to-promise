@@ -24,12 +24,12 @@
 
       <ion-item>
         <ion-label>{{ $t("Rule name") }}</ion-label>
-        <ion-input placeholder="rule name" v-model="jobName"/>
+        <ion-input :placeholder="$t('rule name')" v-model="jobName"/>
       </ion-item>
     </ion-list>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button @click="createSearchPreference()">
+      <ion-fab-button @click="saveThresholdRule()">
         <ion-icon :icon="cloudUploadOutline" />
       </ion-fab-button>
     </ion-fab>
@@ -103,7 +103,7 @@ export default defineComponent({
     closeModal() {
       modalController.dismiss({ dismissed: true });
     },
-    async createSearchPreference() {
+    async saveThresholdRule() {
       const solrQuery = this.query
 
       // removed params object from query as there is no need for grouping or pagination when storing the query
