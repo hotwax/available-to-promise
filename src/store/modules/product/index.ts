@@ -9,9 +9,12 @@ const productModule: Module<ProductState, RootState> = {
     namespaced: true,
     state: {
       products: {
-        list: {},
-        total: 0
-      },
+        list: [],
+        total: {
+          virtual: 0,
+          variant: 0
+        }
+      },  
       facets: {}
     },
     getters,
