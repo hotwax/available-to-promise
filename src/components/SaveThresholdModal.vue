@@ -160,10 +160,11 @@ export default defineComponent({
             productStoreId,
             facilityTypeId: 'CONFIGURATION'
           },
-          entityName: 'ProductStoreAndFacility',
+          entityName: 'ProductStoreFacilityDetail',
           fieldList: ['facilityId', 'productStoreId'],
           distinct: 'Y',
           noConditionFind: 'Y',
+          filterByDate: 'Y',
           viewSize: 10
         })
         facilityId = resp[productStoreId]
@@ -198,6 +199,7 @@ export default defineComponent({
         resp = await JobService.scheduleJob({ ...job.runtimeData, ...payload });
         if (resp.status == 200 && !hasError(resp)) {
           showToast(translate('Service has been scheduled'))
+          this.closeModal();
         } else {
           showToast(translate('Something went wrong'))
         }

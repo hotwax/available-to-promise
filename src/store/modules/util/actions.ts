@@ -37,6 +37,7 @@ const actions: ActionTree<UtilState, RootState> = {
         "productStoreId": payload
       },
       "entityName": "ShopifyConfig",
+      "distinct": "Y",
       "noConditionFind": "Y",
       "fieldList": ["shopifyConfigId", "productStoreId"],
       "viewSize": 1
