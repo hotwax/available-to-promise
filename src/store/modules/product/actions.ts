@@ -105,6 +105,11 @@ const actions: ActionTree<ProductState, RootState> = {
       commit(types.PRODUCT_APPLIED_FILTERS_UPDATED, {id, type: payload.type, value: []})
     })
     await dispatch('updateQuery')
+  },
+
+  async clearFilters({ commit, dispatch }, payload) {
+    commit(types.PRODUCT_APPLIED_FILTERS_UPDATED, {id: payload.id, type: payload.type, value: payload.value})
+    await dispatch('updateQuery')
   }
 }
 export default actions;

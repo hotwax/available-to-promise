@@ -7,6 +7,9 @@
         </ion-button>
       </ion-buttons>
       <ion-title>{{ $t(label) }}</ion-title>
+      <ion-buttons slot="end">
+        <ion-button fill="clear" color="danger" @click="clearFilters()">{{ $t("Clear All") }}</ion-button>
+      </ion-buttons>
     </ion-toolbar>
   </ion-header>
 
@@ -17,7 +20,7 @@
       <ion-item v-for="value in list" :key="value">
         <ion-label>{{ value }}</ion-label>
         <!-- Added key on checkbox as when clicking on the checkbox the checked value is changed but not reflected on UI -->
-        <ion-checkbox v-if="!isAlreadyApplied(value)" :checked="appliedFilters[type][searchfield].includes(value)" :key="appliedFilters[type][searchfield].includes(value)" @click="applyFilter(value)"/>
+        <ion-checkbox v-if="!isAlreadyApplied(value)" :checked="appliedFilters[type][searchfield].includes(value)" :key="appliedFilters[type][searchfield].includes(value)" @click="updateFilter(value)"/>
         <ion-note v-else slot="end" color="danger">{{ type === 'included' ? $t("excluded") : $t("included") }}</ion-note>
       </ion-item>
     </ion-list>
@@ -100,11 +103,18 @@ export default defineComponent({
         this.list = []
       }
     },
-    async applyFilter(value: string) {
+    async updateFilter(value: string) {
       await this.store.dispatch('product/updateAppliedFilters', {
         type: this.type,
         id: this.searchfield,
         value
+      })
+    },
+    async clearFilters() {
+      await this.store.dispatch('product/clearFilters', {
+        type: this.type,
+        id: this.searchfield,
+        value: []
       })
     },
     isAlreadyApplied(value: string) {
