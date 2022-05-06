@@ -313,6 +313,7 @@ export default defineComponent({
         id,
         value
       })
+      this.queryString = ''
     },
     async resetFilters(type: string) {
       await this.store.dispatch('product/resetFilters', { type })
