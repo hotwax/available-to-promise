@@ -38,6 +38,7 @@ const actions: ActionTree<ProductState, RootState> = {
         commit(types.PRODUCT_LIST_UPDATED, { products, totalVirtual, totalVariant });
       } else {
         showToast(translate("Products not found"));
+        commit(types.PRODUCT_LIST_UPDATED, { products: {}, totalVirtual: 0, totalVariant: 0 });
       }
     } catch (error) {
       console.error(error);
@@ -55,11 +56,17 @@ const actions: ActionTree<ProductState, RootState> = {
   },
 
   async updateQuery({ commit, dispatch, state }, payload) {
-    console.log('in updateQuery', payload)
     // initializing the filter always on updateQuery call because we are adding values in the filter
     // as string and if some value is removed then we need to do multiple operations on the filter string
     // to remove that value from the query filter
-    state.query.json['filter'] = ["docType: PRODUCT", "groupId: *"]
+    state.query.json['filter'] = ["docType: PRODUCT", "groupId: *", `productStoreIds: ${this.state.user.currentEComStore.productStoreId ? this.state.user.currentEComStore.productStoreId : '*'}`]
+    state.query.json['params'] = {
+      "group": true,
+      "group.field": "groupId",
+      "group.limit": 10000,
+      "group.ngroups": true
+    }
+    state.query.json['query'] = "*:*"
 
     if(payload && payload.queryString) {
       state.query.json.params.defType = 'edismax'
@@ -83,8 +90,6 @@ const actions: ActionTree<ProductState, RootState> = {
       (state.appliedFilters.excluded as any)[value].length > 0 && filter.push(`-${value}: (${(state.appliedFilters.excluded as any)[value].join(' OR ')})`)
       return filter
     }, state.query.json['filter'])
-
-    console.log(state.query)
 
     commit(types.PRODUCT_QUERY_UPDATED, state.query)
     await dispatch('getProducts')

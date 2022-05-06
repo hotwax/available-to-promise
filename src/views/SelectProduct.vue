@@ -116,7 +116,7 @@
             </ion-item>
 
             <section class="search">
-              <ion-searchbar :placeholder="$t('Search products')" v-model="queryString" @keyup.enter="searchProducts($event)" />
+              <ion-searchbar :placeholder="$t('Check products')" v-model="queryString" @keyup.enter="queryString = $event.target.value; searchProducts($event)" />
             </section>  
           </section>
 
@@ -250,7 +250,7 @@ export default defineComponent({
     }
   },
   methods: {
-    searchProducts(event: any){
+    searchProducts(event: any) {
       this.queryString = event.target.value;
       this.getProducts();
     },
@@ -286,7 +286,6 @@ export default defineComponent({
         component: SaveThresholdModal,
         componentProps: {
           threshold: this.threshold,
-          query: this.query,
           totalSKUs: this.products.total.variant
         }
       })

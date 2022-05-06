@@ -31,8 +31,7 @@ const productModule: Module<ProductState, RootState> = {
             "group": true,
             "group.field": "groupId",
             "group.limit": 10000,
-            "group.ngroups": true,
-            "q.op": "AND"
+            "group.ngroups": true
           } as any,
           "query": "*:*",
           "filter": ["docType: PRODUCT"]
