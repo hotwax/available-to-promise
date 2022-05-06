@@ -26,8 +26,8 @@
             </ion-item>
             <ion-list-header>
               <div>
-              <h3>{{ $t("Include") }}</h3>
-              <ion-button fill="clear" color="warning">{{ $t('reset') }}</ion-button>
+                <h3>{{ $t("Include") }}</h3>
+                <ion-button fill="clear" color="warning">{{ $t('reset') }}</ion-button>
               </div>
             </ion-list-header>
             <ion-card>
@@ -70,8 +70,8 @@
           <ion-list>
             <ion-list-header>
               <div>
-              <h3>{{ $t("Exclude") }}</h3>
-              <ion-button fill="clear" color="warning">{{ $t('reset') }}</ion-button>
+                <h3>{{ $t("Exclude") }}</h3>
+                <ion-button fill="clear" color="warning">{{ $t('reset') }}</ion-button>
               </div>
             </ion-list-header>
             <ion-card>
