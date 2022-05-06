@@ -25,8 +25,10 @@
               <ion-input type="number" :placeholder="$t('global threshold')" v-model="threshold"/>
             </ion-item>
             <ion-list-header>
-              <h3>{{ $t("Include") }}</h3>
-              <ion-button fill="clear" color="warning">{{ $t('reset') }}</ion-button>
+              <div>
+                <h3>{{ $t("Include") }}</h3>
+                <ion-button fill="clear" color="warning">{{ $t('reset') }}</ion-button>
+              </div>
             </ion-list-header>
             <ion-card>
               <ion-toolbar>
@@ -67,8 +69,10 @@
           </ion-list>
           <ion-list>
             <ion-list-header>
-              <h3>{{ $t("Exclude") }}</h3>
-              <ion-button fill="clear" color="warning">{{ $t('reset') }}</ion-button>
+              <div>
+                <h3>{{ $t("Exclude") }}</h3>
+                <ion-button fill="clear" color="warning">{{ $t('reset') }}</ion-button>
+              </div>
             </ion-list-header>
             <ion-card>
               <ion-toolbar>
@@ -385,13 +389,21 @@ export default defineComponent({
 </script>
 
 <style scoped>
+
 .section-grid {
   grid-template-columns: repeat(auto-fill, 200px);
 }
 
+ion-list-header > div {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+}
+
 @media (min-width: 991px) {
   .action {
-    position: absolute;
+    position: fixed;
+    z-index: 3;
     bottom: 10%;
     left: 50%;
     transform: translate(-50%, 0);
