@@ -332,6 +332,9 @@ export default defineComponent({
         this.excluded[value].length > 0 && filter.push(`-${value}: (${this.excluded[value].join(' OR ')})`)
         return filter
       }, this.query.json['filter'])
+      //clear keyword search when filters are applied again
+      this.queryString = '';
+      this.getProducts();
     },
     async saveThreshold() {
       // an alert will be displayed, if the user does not enter a threshold value before proceeding to save page
