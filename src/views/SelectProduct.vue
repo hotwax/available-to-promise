@@ -318,9 +318,6 @@ export default defineComponent({
       await this.store.dispatch('product/resetFilters', { type })
     }
   },
-  ionViewDidLeave(){
-    console.log("leave")
-  },
   mounted () {
     this.getProducts();
   },
