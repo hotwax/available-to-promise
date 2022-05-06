@@ -9,7 +9,8 @@ const utilModule: Module<UtilState, RootState> = {
   namespaced: true,
   state: {
     statusDesc: {},
-    shopifyConfig: {}
+    shopifyConfig: {},
+    facilitiesByProductStore: {}
   },
   getters,
   actions,
