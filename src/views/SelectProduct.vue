@@ -395,11 +395,11 @@ export default defineComponent({
   gap: var(--spacer-lg);
 }
 
-.find{
+.find {
   padding: var( --spacer-lg);
   gap: var(--spacer-lg);
 }
-ion-list-header > div{
+ion-list-header > div {
  flex: 1;
  display: flex;
  justify-content: space-between;
