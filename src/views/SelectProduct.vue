@@ -32,7 +32,7 @@
               <ion-toolbar>
                 <ion-item lines="none">
                   <ion-label>{{ $t("Tags") }}</ion-label>
-                  <ion-button fill="clear" slot="end" size="small">
+                  <ion-button fill="clear" slot="end" size="small" @click="openSearchModal('Include tags', 'tagsFacet', 'tags')">
                     <ion-label>{{ $t('add') }}</ion-label>
                     <ion-icon :icon="addCircleOutline" />
                   </ion-button>
@@ -50,7 +50,7 @@
               <ion-toolbar>
                 <ion-item lines="none">
                   <ion-label>{{ $t("Categories") }}</ion-label>
-                  <ion-button fill="clear" slot="end" size="small">
+                  <ion-button fill="clear" slot="end" size="small" @click="openSearchModal('Include categories', 'productCategoryNamesFacet', 'productCategoryNames')">
                     <ion-label>{{ $t('add') }}</ion-label>
                     <ion-icon :icon="addCircleOutline" />
                   </ion-button>
@@ -74,7 +74,7 @@
               <ion-toolbar>
                 <ion-item lines="none">
                   <ion-label>{{ $t("Tags") }}</ion-label>
-                  <ion-button fill="clear" slot="end" size="small">
+                  <ion-button fill="clear" slot="end" size="small" @click="openSearchModal('Exclude tags', 'tagsFacet', 'tags')">
                     <ion-label>{{ $t('add') }}</ion-label>
                     <ion-icon :icon="addCircleOutline" />
                   </ion-button>
@@ -92,7 +92,7 @@
               <ion-toolbar>
                 <ion-item lines="none">
                   <ion-label>{{ $t("Categories") }}</ion-label>
-                  <ion-button fill="clear" slot="end" size="small">
+                  <ion-button fill="clear" slot="end" size="small" @click="openSearchModal('Exclude categories', 'productCategoryNamesFacet', 'productCategoryNames')">
                     <ion-label>{{ $t('add') }}</ion-label>
                     <ion-icon :icon="addCircleOutline" />
                   </ion-button>
@@ -206,6 +206,7 @@ import { arrowForwardOutline, downloadOutline, filterOutline, saveOutline, price
 import { useRouter } from 'vue-router';
 import { mapGetters, useStore } from 'vuex';
 import SaveThresholdModal from '@/components/SaveThresholdModal.vue';
+import IncludeTagsModal from '@/components/IncludeTagsModal.vue';
 
 export default defineComponent({
   name: 'SelectProduct',
@@ -358,6 +359,18 @@ export default defineComponent({
       })
 
       saveThresholdModal.present();
+    },
+    async openSearchModal(label: string, facetToSelect: string, searchfield: string) {
+      const modal = await modalController.create({
+        component: IncludeTagsModal,
+        componentProps: {
+          label,
+          facetToSelect,
+          searchfield
+        }
+      })
+
+      modal.present();
     }
   },
   mounted () {
