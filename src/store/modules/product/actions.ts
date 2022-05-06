@@ -38,7 +38,7 @@ const actions: ActionTree<ProductState, RootState> = {
         commit(types.PRODUCT_LIST_UPDATED, { products, totalVirtual, totalVariant });
       } else {
         showToast(translate("Products not found"));
-        commit(types.PRODUCT_LIST_UPDATED, { products: {}, totalVirtual: 0, totalVariant: 0 });
+        commit(types.PRODUCT_LIST_UPDATED, { products: [], totalVirtual: 0, totalVariant: 0 });
       }
     } catch (error) {
       console.error(error);
@@ -51,7 +51,7 @@ const actions: ActionTree<ProductState, RootState> = {
     const value = payload.value
     const appliedFilters = JSON.parse(JSON.stringify((state.appliedFilters as any)[payload.type][payload.id]))
     appliedFilters.includes(value) ? appliedFilters.splice(appliedFilters.indexOf(value), 1) : appliedFilters.push(value)
-    commit(types.PRODUCT_APPLIED_FILTERS_UPDATED, {id: payload.id, type: payload.type, value: appliedFilters})
+    commit(types.PRODUCT_FILTER_UPDATED, {id: payload.id, type: payload.type, value: appliedFilters})
     dispatch('updateQuery')
   },
 
@@ -97,14 +97,20 @@ const actions: ActionTree<ProductState, RootState> = {
 
   async resetFilters({ commit, state, dispatch }, payload) {
     const appliedFilters = JSON.parse(JSON.stringify((state.appliedFilters as any)[payload.type]))
-    // iterating over all keys in the specific filter type and then clearning it's value
-    // done this as for now not creating a separate mutation for this or updating current mutation logic
-    // as per this functionality
-    // TODO: update this logic to simply update the filters state
-    Object.keys(appliedFilters).map((id: any) => {
-      commit(types.PRODUCT_APPLIED_FILTERS_UPDATED, {id, type: payload.type, value: []})
-    })
+    const value = Object.keys(appliedFilters).reduce((value: any, filter: any) => {
+      value[filter] = []
+      return value
+    }, {})
+    commit(types.PRODUCT_FILTERS_UPDATED, {type: payload.type, value: appliedFilters})
     await dispatch('updateQuery')
+  },
+
+  async clearFilters({ commit, dispatch }, payload) {
+    commit(types.PRODUCT_FILTER_UPDATED, {id: payload.id, type: payload.type, value: payload.value})
+    await dispatch('updateQuery')
+  },
+  clearProductList({ commit }){
+    commit(types.PRODUCT_LIST_UPDATED, { products: [], totalVirtual: 0, totalVariant: 0 });
   }
 }
 export default actions;
