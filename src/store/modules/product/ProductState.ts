@@ -6,5 +6,15 @@ export default interface ProductState {
       virtual: number;
     }
   };
-  facets: any;
+  appliedFilters: {
+    included: {
+      tags: Array<string>,
+      productCategoryNames: Array<string>
+    },
+    excluded: {
+      tags: Array<string>,
+      productCategoryNames: Array<string>
+    }
+  };
+  query: any;
 }

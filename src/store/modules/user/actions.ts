@@ -82,6 +82,7 @@ const actions: ActionTree<UserState, RootState> = {
    */
    async setEcomStore({ commit }, payload) {
     commit(types.USER_CURRENT_ECOM_STORE_UPDATED, payload.eComStore);
+    this.dispatch("product/updateQuery")
   },
 
   /**

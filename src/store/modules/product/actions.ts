@@ -5,16 +5,16 @@ import ProductState from './ProductState'
 import * as types from './mutation-types'
 import { hasError, showToast, getFeature } from '@/utils'
 import { translate } from '@/i18n'
-import emitter from '@/event-bus'
-
 
 const actions: ActionTree<ProductState, RootState> = {
 
-  async getProducts({ commit, state }, payload) {
+  async getProducts({ commit, state }) {
     let resp;
 
+    const query = state.query
+
     try {
-      resp = await ProductService.getProducts(payload);
+      resp = await ProductService.getProducts(query);
 
       if (resp.status === 200 && resp.data.grouped.groupId?.ngroups > 0 && !hasError(resp)) {
         let products = resp.data.grouped.groupId?.groups;
@@ -34,10 +34,11 @@ const actions: ActionTree<ProductState, RootState> = {
           }
         })
 
-        if(payload.json.params.start && payload.json.params.start > 0) products = state.products.list.concat(products);
+        if(query.json.params.start && query.json.params.start > 0) products = state.products.list.concat(products);
         commit(types.PRODUCT_LIST_UPDATED, { products, totalVirtual, totalVariant });
       } else {
         showToast(translate("Products not found"));
+        commit(types.PRODUCT_LIST_UPDATED, { products: [], totalVirtual: 0, totalVariant: 0 });
       }
     } catch (error) {
       console.error(error);
@@ -46,48 +47,67 @@ const actions: ActionTree<ProductState, RootState> = {
     return resp;
   },
 
-  async fetchProductFacets({ commit }) {
-    const payload = {
-      "json": {
-        "query": "*:*",
-        "filter": "docType: PRODUCT",
-        "facet": {
-          "tagsFacet": {
-            "field": "tags",
-            "mincount": 1,
-            "limit": -1,
-            "sort": "index",
-            "type": "terms"
-          },
-          "productStoreIdFacet": {
-            "field": "productStoreIds",
-            "limit": -1,
-            "sort": "index",
-            "type": "terms"
-          },
-          "productCategoryNameFacet": {
-            "field": "productCategoryNames",
-            "limit": -1,
-            "sort": "index",
-            "type": "terms"
-          }
-        }
-      }
+  async updateAppliedFilters({ commit, state, dispatch }, payload) {
+    const value = payload.value
+    const appliedFilters = JSON.parse(JSON.stringify((state.appliedFilters as any)[payload.type][payload.id]))
+    appliedFilters.includes(value) ? appliedFilters.splice(appliedFilters.indexOf(value), 1) : appliedFilters.push(value)
+    commit(types.PRODUCT_FILTER_UPDATED, {id: payload.id, type: payload.type, value: appliedFilters})
+    dispatch('updateQuery')
+  },
+
+  async updateQuery({ commit, dispatch, state }, payload) {
+    // initializing the filter always on updateQuery call because we are adding values in the filter
+    // as string and if some value is removed then we need to do multiple operations on the filter string
+    // to remove that value from the query filter
+    state.query.json['filter'] = ["docType: PRODUCT", "groupId: *", `productStoreIds: ${this.state.user.currentEComStore.productStoreId ? this.state.user.currentEComStore.productStoreId : '*'}`]
+    state.query.json['params'] = {
+      "group": true,
+      "group.field": "groupId",
+      "group.limit": 10000,
+      "group.ngroups": true
     }
-    try {
-      const resp = await ProductService.fetchProductFacets(payload);
-      if (resp.status == 200 && !hasError(resp)) {
-        const facets = resp.data.facets;
-        const updatedFacets = {} as any;
-        delete facets.count;
-        Object.entries(facets).map(([facet, value]) => {
-          updatedFacets[facet] = (value as any).buckets.map((bucket: any) => bucket.val)
-        })
-        commit(types.PRODUCT_FACETS_UPDATED, updatedFacets)
-      }
-    } catch (err) {
-      console.error(err)
+    state.query.json['query'] = "*:*"
+
+    if(payload && payload.queryString) {
+      state.query.json.params.defType = 'edismax'
+      state.query.json.params.qf = 'productId productName sku internalName brandName'
+      // passed this operator to do not split search string and consider the search string as a single value
+      state.query.json.params['q.op'] = 'AND'
+      state.query.json.query = `*${payload.queryString}*`
     }
+
+    if (payload) {
+      state.query.json.params.rows = payload.viewSize
+      state.query.json.params.start = payload.viewSize * payload.viewIndex
+    }
+
+    state.query.json['filter'] = Object.keys(state.appliedFilters.included).reduce((filter, value) => {
+      (state.appliedFilters.included as any)[value].length > 0 && filter.push(`${value}: (${(state.appliedFilters.included as any)[value].join(' OR ')})`)
+      return filter
+    }, state.query.json['filter'])
+
+    state.query.json['filter'] = Object.keys(state.appliedFilters.excluded).reduce((filter, value) => {
+      (state.appliedFilters.excluded as any)[value].length > 0 && filter.push(`-${value}: (${(state.appliedFilters.excluded as any)[value].join(' OR ')})`)
+      return filter
+    }, state.query.json['filter'])
+
+    commit(types.PRODUCT_QUERY_UPDATED, state.query)
+    await dispatch('getProducts')
+  },
+
+  async resetFilters({ commit, state, dispatch }, payload) {
+    const appliedFilters = JSON.parse(JSON.stringify((state.appliedFilters as any)[payload.type]))
+    const value = Object.keys(appliedFilters).reduce((value: any, filter: any) => {
+      value[filter] = []
+      return value
+    }, {})
+    commit(types.PRODUCT_FILTERS_UPDATED, {type: payload.type, value: appliedFilters})
+    await dispatch('updateQuery')
+  },
+
+  async clearFilters({ commit, dispatch }, payload) {
+    commit(types.PRODUCT_FILTER_UPDATED, {id: payload.id, type: payload.type, value: payload.value})
+    await dispatch('updateQuery')
   },
   clearProductList({ commit }){
     commit(types.PRODUCT_LIST_UPDATED, { products: [], totalVirtual: 0, totalVariant: 0 });
