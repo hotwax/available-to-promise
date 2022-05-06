@@ -17,7 +17,7 @@
       <ion-item v-for="value in list" :key="value">
         <ion-label>{{ value }}</ion-label>
         <!-- Added key on checkbox as when clicking on the checkbox the checked value is changed but not reflected on UI -->
-        <ion-checkbox v-if="!isSelected(value)" :checked="appliedFilters[type][searchfield].includes(value)" :key="appliedFilters[type][searchfield].includes(value)" @click="applyFilter(value)"/>
+        <ion-checkbox v-if="!isAlreadyApplied(value)" :checked="appliedFilters[type][searchfield].includes(value)" :key="appliedFilters[type][searchfield].includes(value)" @click="applyFilter(value)"/>
         <ion-note v-else slot="end" color="danger">{{ type === 'included' ? $t("excluded") : $t("included") }}</ion-note>
       </ion-item>
     </ion-list>
@@ -93,7 +93,7 @@ export default defineComponent({
         term: event.target.value
       }
 
-      const resp = await ProductService.fetchAutoCompleteSolrFacet(payload);
+      const resp = await ProductService.fetchFacets(payload);
       if (resp.status == 200 && resp.data.length > 0) {
         this.list = resp.data.map((obj: any) => obj.id)
       } else {
@@ -107,7 +107,7 @@ export default defineComponent({
         value
       })
     },
-    isSelected(value: string) {
+    isAlreadyApplied(value: string) {
       const type = this.type === 'included' ? 'excluded' : 'included'
       return this.appliedFilters[type][this.searchfield].includes(value)
     }
