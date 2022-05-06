@@ -34,7 +34,16 @@ const createSearchPreference = async (payload: any): Promise<any> => {
   });
 }
 
+const fetchAutoCompleteSolrFacet = async (payload: any): Promise<any> => {
+  return api({
+    url: "/AutoCompleteSolrFacet",
+    method: "get",
+    params: payload
+  });
+}
+
 export const ProductService = {
+  fetchAutoCompleteSolrFacet,
   createSearchPreference,
   fetchProducts,
   fetchProductFacets,
