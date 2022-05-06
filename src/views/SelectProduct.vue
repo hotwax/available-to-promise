@@ -364,11 +364,12 @@ export default defineComponent({
       saveThresholdModal.present();
     }
   },
-  ionViewDidLeave(){
+  ionViewDidLeave() {
+    //Cleared query string to clear search keyword whenever user navigates to SelectProduct page
     this.queryString = '';
     this.threshold = '';
   },
-  mounted () {
+  ionViewDidEnter () {
     this.getProducts();
     this.store.dispatch("product/fetchProductFacets")
   },
