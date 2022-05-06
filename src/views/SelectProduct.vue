@@ -32,17 +32,17 @@
               <ion-toolbar>
                 <ion-item lines="none">
                   <ion-label>{{ $t("Tags") }}</ion-label>
-                  <ion-button fill="clear" slot="end" size="small" @click="openSearchModal('Include tags', 'tagsFacet', 'tags')">
+                  <ion-button fill="clear" slot="end" size="small" @click="openSearchModal('Include tags', 'tagsFacet', 'tags', 'included')">
                     <ion-label>{{ $t('add') }}</ion-label>
                     <ion-icon :icon="addCircleOutline" />
                   </ion-button>
                 </ion-item>
               </ion-toolbar>
               <ion-card-content>
-                <ion-chip @click="updateInclusionQuery(tag, 'tags')" :outline="!included['tags'].includes(tag)" v-for="(tag, index) in filters['tagsFacet']" :key="index" :disabled="excluded['tags'].includes(tag)">
+                <ion-chip v-for="(tag, index) in appliedFilters['included']['tags']" :key="index">
                   <ion-icon :icon="pricetagOutline" />
                   <ion-label>{{ tag }}</ion-label>
-                  <ion-icon :icon="closeCircle" />
+                  <ion-icon :icon="closeCircle" @click="removeFilters('included', 'tags', tag)"/>
                 </ion-chip>
               </ion-card-content>
             </ion-card>
@@ -50,17 +50,17 @@
               <ion-toolbar>
                 <ion-item lines="none">
                   <ion-label>{{ $t("Categories") }}</ion-label>
-                  <ion-button fill="clear" slot="end" size="small" @click="openSearchModal('Include categories', 'productCategoryNamesFacet', 'productCategoryNames')">
+                  <ion-button fill="clear" slot="end" size="small" @click="openSearchModal('Include categories', 'productCategoryNamesFacet', 'productCategoryNames', 'included')">
                     <ion-label>{{ $t('add') }}</ion-label>
                     <ion-icon :icon="addCircleOutline" />
                   </ion-button>
                 </ion-item>
               </ion-toolbar>
               <ion-card-content>
-                <ion-chip @click="updateInclusionQuery(category, 'productCategoryNames')" :outline="!included['productCategoryNames'].includes(category)" v-for="(category, index) in filters['productCategoryNameFacet']" :key="index" :disabled="excluded['productCategoryNames'].includes(category)">
+                <ion-chip v-for="(category, index) in appliedFilters['included']['productCategoryNames']" :key="index">
                   <ion-icon :icon="albumsOutline" />
                   <ion-label>{{ category }}</ion-label>
-                  <ion-icon :icon="closeCircle" />
+                  <ion-icon :icon="closeCircle" @click="removeFilters('included', 'productCategoryNames', category)"/>
                 </ion-chip>
               </ion-card-content>
             </ion-card>
@@ -74,17 +74,17 @@
               <ion-toolbar>
                 <ion-item lines="none">
                   <ion-label>{{ $t("Tags") }}</ion-label>
-                  <ion-button fill="clear" slot="end" size="small" @click="openSearchModal('Exclude tags', 'tagsFacet', 'tags')">
+                  <ion-button fill="clear" slot="end" size="small" @click="openSearchModal('Exclude tags', 'tagsFacet', 'tags', 'excluded')">
                     <ion-label>{{ $t('add') }}</ion-label>
                     <ion-icon :icon="addCircleOutline" />
                   </ion-button>
                 </ion-item>
               </ion-toolbar>
               <ion-card-content>
-                <ion-chip @click="updateExclusionQuery(tag, 'tags')" :outline="!excluded['tags'].includes(tag)" v-for="(tag, index) in filters['tagsFacet']" :key="index" :disabled="included['tags'].includes(tag)">
+                <ion-chip v-for="(tag, index) in appliedFilters['excluded']['tags']" :key="index">
                   <ion-icon :icon="pricetagOutline" />
                   <ion-label>{{ tag }}</ion-label>
-                  <ion-icon :icon="closeCircle" />
+                  <ion-icon :icon="closeCircle" @click="removeFilters('excluded', 'tags', tag)"/>
                 </ion-chip>
               </ion-card-content>
             </ion-card>
@@ -92,17 +92,17 @@
               <ion-toolbar>
                 <ion-item lines="none">
                   <ion-label>{{ $t("Categories") }}</ion-label>
-                  <ion-button fill="clear" slot="end" size="small" @click="openSearchModal('Exclude categories', 'productCategoryNamesFacet', 'productCategoryNames')">
+                  <ion-button fill="clear" slot="end" size="small" @click="openSearchModal('Exclude categories', 'productCategoryNamesFacet', 'productCategoryNames', 'excluded')">
                     <ion-label>{{ $t('add') }}</ion-label>
                     <ion-icon :icon="addCircleOutline" />
                   </ion-button>
                 </ion-item>
               </ion-toolbar>
               <ion-card-content>
-                <ion-chip @click="updateExclusionQuery(category, 'productCategoryNames')" :outline="!excluded['productCategoryNames'].includes(category)" v-for="(category, index) in filters['productCategoryNameFacet']" :key="index" :disabled="included['productCategoryNames'].includes(category)">
+                <ion-chip v-for="(category, index) in appliedFilters['excluded']['productCategoryNames']" :key="index">
                   <ion-icon :icon="albumsOutline" />
                   <ion-label>{{ category }}</ion-label>
-                  <ion-icon :icon="closeCircle" />
+                  <ion-icon :icon="closeCircle" @click="removeFilters('excluded', 'productCategoryNames', category)"/>
                 </ion-chip>
               </ion-card-content>
             </ion-card>
@@ -239,7 +239,7 @@ export default defineComponent({
     ...mapGetters({
       products: 'product/getProducts',
       isScrollable: 'product/isScrollable',
-      filters: 'product/getProductFacets'
+      appliedFilters: 'product/getAppliedFilters'
     })
   },
   data () {
@@ -360,22 +360,29 @@ export default defineComponent({
 
       saveThresholdModal.present();
     },
-    async openSearchModal(label: string, facetToSelect: string, searchfield: string) {
+    async openSearchModal(label: string, facetToSelect: string, searchfield: string, type: string) {
       const modal = await modalController.create({
         component: IncludeTagsModal,
         componentProps: {
           label,
           facetToSelect,
-          searchfield
+          searchfield,
+          type
         }
       })
 
       modal.present();
+    },
+    removeFilters(type: string, id: string, value: string) {
+      this.store.dispatch('product/updateAppliedFilters', {
+        type,
+        id,
+        value
+      })
     }
   },
   mounted () {
     this.getProducts();
-    this.store.dispatch("product/fetchProductFacets")
   },
   setup() {
     const router = useRouter();
