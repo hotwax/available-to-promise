@@ -26,8 +26,8 @@
             </ion-item>
             <ion-list-header>
               <div>
-              <h3>{{ $t("Include") }}</h3>
-              <ion-button fill="clear" color="warning">{{ $t('reset') }}</ion-button>
+                <h3>{{ $t("Include") }}</h3>
+                <ion-button fill="clear" color="warning">{{ $t('reset') }}</ion-button>
               </div>
             </ion-list-header>
             <ion-card>
@@ -70,8 +70,8 @@
           <ion-list>
             <ion-list-header>
               <div>
-              <h3>{{ $t("Exclude") }}</h3>
-              <ion-button fill="clear" color="warning">{{ $t('reset') }}</ion-button>
+                <h3>{{ $t("Exclude") }}</h3>
+                <ion-button fill="clear" color="warning">{{ $t('reset') }}</ion-button>
               </div>
             </ion-list-header>
             <ion-card>
@@ -163,7 +163,7 @@
 
       <div class="action desktop-only">
         <ion-button @click="saveThreshold()">
-          <ion-icon :icon="saveOutline" />
+          <ion-icon slot="start" :icon="saveOutline" />
           {{ $t("Save threshold rule") }}
         </ion-button>
       </div>
@@ -390,22 +390,22 @@ export default defineComponent({
 
 <style scoped>
 .section-grid {
-grid-template-columns: repeat(auto-fill, 200px);
+  grid-template-columns: repeat(auto-fill, 200px);
 }
 
 ion-list-header > div{
-flex: 1;
-display: flex;
-justify-content: space-between;
+ flex: 1;
+ display: flex;
+ justify-content: space-between;
 }
 
 @media (min-width: 991px) {
-.action {
-position: fixed;
-z-index: 3;
-bottom: 10%;
-left: 50%;
-transform: translate(-50%, 0);
-}
+ .action {
+   position: fixed;
+   z-index: 3;
+   bottom: 10%;
+   left: 50%;
+   transform: translate(-50%, 0);
+  }
 }
 </style>
