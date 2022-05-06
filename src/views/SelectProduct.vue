@@ -306,8 +306,10 @@ export default defineComponent({
           type
         }
       })
-      modal.onDidDismiss().then(() => {
-        this.queryString = '';
+      modal.onDidDismiss().then((payload) => {
+        if(payload.data.clearQueryString){
+          this.queryString = '';
+        }
       })
       modal.present();
     },
