@@ -101,7 +101,7 @@ const actions: ActionTree<ProductState, RootState> = {
       value[filter] = []
       return value
     }, {})
-    commit(types.PRODUCT_FILTERS_UPDATED, {type: payload.type, value: appliedFilters})
+    commit(types.PRODUCT_FILTERS_UPDATED, {type: payload.type, value})
     await dispatch('updateQuery')
   },
 
