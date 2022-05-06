@@ -16,4 +16,5 @@ export default interface ProductState {
       productCategoryNames: Array<string>
     }
   };
+  query: any;
 }

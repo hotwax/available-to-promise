@@ -10,6 +10,9 @@ const mutations: MutationTree <ProductState> = {
   },
   [types.PRODUCT_APPLIED_FILTERS_UPDATED] (state, payload) {
     (state.appliedFilters as any)[payload.type][payload.id] = payload.value
+  },
+  [types.PRODUCT_QUERY_UPDATED] (state, payload) {
+    state.query = payload
   }
 }
 export default mutations;

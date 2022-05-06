@@ -24,6 +24,19 @@ const productModule: Module<ProductState, RootState> = {
           tags: [],
           productCategoryNames: []
         }
+      },
+      query: {
+        "json": {
+          "params": {
+            "group": true,
+            "group.field": "groupId",
+            "group.limit": 10000,
+            "group.ngroups": true,
+            "q.op": "AND"
+          } as any,
+          "query": "*:*",
+          "filter": ["docType: PRODUCT"]
+        }
       }
     },
     getters,

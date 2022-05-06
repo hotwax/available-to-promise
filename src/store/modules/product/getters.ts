@@ -17,6 +17,9 @@ const getters: GetterTree<ProductState, RootState> = {
   },
   getAppliedFilters(state) {
     return state.appliedFilters;
+  },
+  getQuery(state) {
+    return state.query;
   }
 };
 export default getters;
