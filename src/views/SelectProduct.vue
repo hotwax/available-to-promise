@@ -269,7 +269,7 @@ export default defineComponent({
     },
     async saveThreshold() {
       // an alert will be displayed, if the user does not enter a threshold value before proceeding to save page
-      if (!this.threshold || this.threshold == 0) {
+      if (!this.threshold) {
         const alert = await alertController
           .create({
             header: this.$t('Enter threshold value'),
