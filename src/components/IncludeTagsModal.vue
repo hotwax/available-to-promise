@@ -14,9 +14,10 @@
     <ion-searchbar :placeholder="$t(`Search ${searchfield}`)" v-model="queryString" @keyup.enter="search($event)"/>
 
     <ion-list>
-      <ion-item v-for="id in list" :key="id">
-        <ion-label>{{ id }}</ion-label>
-        <ion-checkbox />
+      <ion-item v-for="value in list" :key="value">
+        <ion-label>{{ value }}</ion-label>
+        <ion-checkbox v-if="!isSelected(value)" :checked="appliedFilters[type][searchfield].includes(value)" @click="applyFilter(value)"/>
+        <ion-note v-else slot="end" color="danger">{{ type === 'included' ? $t("excluded") : $t("included") }}</ion-note>
       </ion-item>
     </ion-list>
   </ion-content>
@@ -34,6 +35,7 @@ import {
   IonItem,
   IonLabel,
   IonList,
+  IonNote,
   IonSearchbar,
   IonTitle,
   IonToolbar,
@@ -41,6 +43,7 @@ import {
 } from "@ionic/vue";
 import { closeOutline } from 'ionicons/icons'
 import { ProductService } from "@/services/ProductService";
+import { mapGetters, useStore } from "vuex";
 
 export default defineComponent({
   name: "IncludeTagsModal",
@@ -54,6 +57,7 @@ export default defineComponent({
     IonItem,
     IonLabel,
     IonList,
+    IonNote,
     IonSearchbar,
     IonTitle,
     IonToolbar
@@ -64,18 +68,24 @@ export default defineComponent({
       list: []
     }
   },
-  props: ["label", "facetToSelect", "searchfield"],
+  computed: {
+    ...mapGetters({
+      appliedFilters: 'product/getAppliedFilters'
+    })
+  },
+  props: ["label", "facetToSelect", "searchfield", 'type'],
   methods: {
     closeModal() {
       modalController.dismiss({ dismissed: true });
     },
     async search(event: any) {
+      // TODO: need to implement infinite scroll on the modal search
       const payload = {
         facetToSelect: this.facetToSelect,
         docType: 'PRODUCT',
         coreName: 'enterpriseSearch',
         searchfield: this.searchfield,
-        jsonQuery: '{"query":"*:*","filter":["docType:PRODUCT","companyIds:NN_COMPANY"]}',
+        jsonQuery: '',
         noConditionFind: 'N',
         limit: 10,
         q: event.target.value,
@@ -87,13 +97,29 @@ export default defineComponent({
         this.list = resp.data.map((obj: any) => obj.id)
       } else {
         this.list = []
-        console.error('No results found')
+      }
+    },
+    applyFilter(value: string) {
+      this.store.dispatch('product/updateAppliedFilters', {
+        type: this.type,
+        id: this.searchfield,
+        value
+      })
+    },
+    isSelected(value: string) {
+      if (this.type === 'included') {
+        return this.appliedFilters['excluded'][this.searchfield].includes(value)
+      } else {
+        return this.appliedFilters['included'][this.searchfield].includes(value)
       }
     }
   },
   setup() {
+    const store = useStore();
+
     return {
-      closeOutline
+      closeOutline,
+      store
     }
   }
 })
