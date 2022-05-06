@@ -50,10 +50,10 @@ const actions: ActionTree<UtilState, RootState> = {
     return {};
   },
 
-  async fetchFacilities({ commit }, payload) {
+  async fetchFacilitiesForProductStore({ commit }, payload) {
 
     try {
-      const resp = await UtilService.fetchFacilities(payload);
+      const resp = await UtilService.fetchFacilitiesForProductStore(payload);
 
       if (resp.status === 200 && !hasError(resp) && resp.data?.count > 0) {
         const facilities = resp.data.docs.reduce((facilities: any, data: any) => {
@@ -64,7 +64,7 @@ const actions: ActionTree<UtilState, RootState> = {
           facilities[data.productStoreId].push(data.facilityId)
           return facilities
         }, {})
-        commit(types.UTIL_FACILITY_UPDATED, facilities);
+        commit(types.UTIL_PRODUCT_STORE_FACILITY_UPDATED, facilities);
         return facilities;
       }
     } catch (err) {

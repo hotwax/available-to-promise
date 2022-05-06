@@ -9,8 +9,8 @@ const getters: GetterTree <UtilState, RootState> = {
   getShopifyConfig(state) {
     return state.shopifyConfig
   },
-  getFacilities(state) {
-    return state.facility
+  getFacilityForProductStore(state) {
+    return state.facilitiesByProductStore
   }
 }
 export default getters;
