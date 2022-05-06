@@ -142,8 +142,8 @@
                   <ion-item lines="none">
                     <ion-label>
                       {{ variant.productName }}
-                      <p>{{ $t("Color") }}: {{ variant.color }}</p>
-                      <p>{{ $t("Size") }}: {{ variant.size }}</p>
+                      <p v-if="variant.color">{{ $t("Color") }}: {{ variant.color }}</p>
+                      <p v-if="variant.size">{{ $t("Size") }}: {{ variant.size }}</p>
                     </ion-label>
                   </ion-item>
                 </ion-card>
