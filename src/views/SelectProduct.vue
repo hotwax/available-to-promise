@@ -239,34 +239,14 @@ export default defineComponent({
     ...mapGetters({
       products: 'product/getProducts',
       isScrollable: 'product/isScrollable',
-      appliedFilters: 'product/getAppliedFilters'
+      appliedFilters: 'product/getAppliedFilters',
+      query: 'product/getQuery'
     })
   },
   data () {
     return {
-      included: {
-        tags: [] as Array<string>,
-        productCategoryNames: [] as Array<string>
-      } as any,
-      excluded: {
-        tags: [] as Array<string>,
-        productCategoryNames: [] as Array<string>
-      } as any,
       threshold: '' as any,
-      queryString: '',
-      query: {
-        "json": {
-          "params": {
-            "group": true,
-            "group.field": "groupId",
-            "group.limit": 10000,
-            "group.ngroups": true,
-            "q.op": "AND"
-          } as any,
-          "query": "*:*",
-          "filter": ["docType: PRODUCT"]
-        }
-      } as any
+      queryString: ''
     }
   },
   methods: {

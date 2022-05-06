@@ -69,6 +69,11 @@ const actions: ActionTree<ProductState, RootState> = {
       state.query.json.query = `*${payload.queryString}*`
     }
 
+    if (payload) {
+      state.query.json.params.rows = payload.viewSize
+      state.query.json.params.start = payload.viewSize * payload.viewIndex
+    }
+
     state.query.json['filter'] = Object.keys(state.appliedFilters.included).reduce((filter, value) => {
       (state.appliedFilters.included as any)[value].length > 0 && filter.push(`${value}: (${(state.appliedFilters.included as any)[value].join(' OR ')})`)
       return filter
