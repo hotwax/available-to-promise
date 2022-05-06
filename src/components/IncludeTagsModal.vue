@@ -85,7 +85,7 @@ export default defineComponent({
         docType: 'PRODUCT',
         coreName: 'enterpriseSearch',
         searchfield: this.searchfield,
-        jsonQuery: '',
+        jsonQuery: '{"query":"*:*","filter":["docType:PRODUCT"]}',
         noConditionFind: 'N',
         limit: 10,
         q: event.target.value,
@@ -99,8 +99,8 @@ export default defineComponent({
         this.list = []
       }
     },
-    applyFilter(value: string) {
-      this.store.dispatch('product/updateAppliedFilters', {
+    async applyFilter(value: string) {
+      await this.store.dispatch('product/updateAppliedFilters', {
         type: this.type,
         id: this.searchfield,
         value

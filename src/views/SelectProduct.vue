@@ -277,28 +277,7 @@ export default defineComponent({
     async getProducts(vSize?: any, vIndex?: any) {
       const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
       const viewIndex = vIndex ? vIndex : 0;
-      const payload = {
-        "json": {
-          "params": {
-            "rows": viewSize,
-            "start": viewIndex * viewSize,
-            "group": true,
-            "group.field": "groupId",
-            "group.limit": 10000,
-            "group.ngroups": true,
-          } as any,
-          "query": "*:*",
-          "filter": "docType: PRODUCT AND groupId: *"
-        }
-      }
-      if(this.queryString) {
-        payload.json.params.defType = 'edismax'
-        payload.json.params.qf = 'productId productName sku internalName brandName'
-        // passed this operator to do not split search string and consider the search string as a single value
-        payload.json.params['q.op'] = 'AND'
-        payload.json.query = `*${this.queryString}*`
-      }
-      this.store.dispatch("product/getProducts", payload);
+      this.store.dispatch("product/updateQuery", { viewSize, viewIndex, queryString: this.queryString })
     },
     async loadMoreProducts(event: any){
       this.getProducts(
@@ -307,32 +286,6 @@ export default defineComponent({
       ).then(() => {
         event.target.complete();
       })
-    },
-    updateInclusionQuery(value: string, type: string) {
-      const filter = this.included[type]
-      filter.includes(value) ? filter.splice(filter.indexOf(value), 1) : filter.push(value)
-      this.updateQuery();
-    },
-    updateExclusionQuery(value: string, type: string) {
-      const filter = this.excluded[type]
-      filter.includes(value) ? filter.splice(filter.indexOf(value), 1) : filter.push(value)
-      this.updateQuery();
-    },
-    updateQuery() {
-      // initializing the filter always on updateQuery call because we are adding values in the filter
-      // as string and if some value is removed then we need to do multiple operations on the filter string
-      // to remove that value from the query filter
-      this.query.json['filter'] = ["docType: PRODUCT"]
-
-      this.query.json['filter'] = Object.keys(this.included).reduce((filter, value) => {
-        this.included[value].length > 0 && filter.push(`${value}: (${this.included[value].join(' OR ')})`)
-        return filter
-      }, this.query.json['filter'])
-
-      this.query.json['filter'] = Object.keys(this.excluded).reduce((filter, value) => {
-        this.excluded[value].length > 0 && filter.push(`-${value}: (${this.excluded[value].join(' OR ')})`)
-        return filter
-      }, this.query.json['filter'])
     },
     async saveThreshold() {
       // an alert will be displayed, if the user does not enter a threshold value before proceeding to save page
@@ -373,8 +326,8 @@ export default defineComponent({
 
       modal.present();
     },
-    removeFilters(type: string, id: string, value: string) {
-      this.store.dispatch('product/updateAppliedFilters', {
+    async removeFilters(type: string, id: string, value: string) {
+      await this.store.dispatch('product/updateAppliedFilters', {
         type,
         id,
         value
