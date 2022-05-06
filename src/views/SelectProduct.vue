@@ -163,7 +163,7 @@
 
       <div class="action desktop-only">
         <ion-button @click="saveThreshold()">
-          <ion-icon :icon="saveOutline" />
+          <ion-icon slot="start" :icon="saveOutline" />
           {{ $t("Save threshold rule") }}
         </ion-button>
       </div>
@@ -352,6 +352,11 @@ export default defineComponent({
 
 .section-grid {
   grid-template-columns: repeat(auto-fill, 200px);
+}
+
+.find {
+  padding: var( --spacer-lg);
+  gap: var(--spacer-lg);
 }
 
 ion-list-header > div {
