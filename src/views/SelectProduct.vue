@@ -364,6 +364,10 @@ export default defineComponent({
       saveThresholdModal.present();
     }
   },
+  ionViewDidLeave(){
+    this.queryString = '';
+    this.threshold = '';
+  },
   mounted () {
     this.getProducts();
     this.store.dispatch("product/fetchProductFacets")
