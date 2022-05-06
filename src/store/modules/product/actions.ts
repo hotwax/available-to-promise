@@ -10,7 +10,7 @@ import emitter from '@/event-bus'
 
 const actions: ActionTree<ProductState, RootState> = {
 
-  async getProducts({ commit, state }, payload) {
+  async getProducts({ dispatch, state }, payload) {
     let resp;
 
     try {
@@ -35,7 +35,7 @@ const actions: ActionTree<ProductState, RootState> = {
         })
 
         if(payload.json.params.start && payload.json.params.start > 0) products = state.products.list.concat(products);
-        commit(types.PRODUCT_LIST_UPDATED, { products, totalVirtual, totalVariant });
+        dispatch('updateProductList', { products, totalVirtual, totalVariant })
       } else {
         showToast(translate("Products not found"));
       }
@@ -88,6 +88,9 @@ const actions: ActionTree<ProductState, RootState> = {
     } catch (err) {
       console.error(err)
     }
+  },
+  updateProductList({ commit }, payload){
+    commit(types.PRODUCT_LIST_UPDATED, payload);
   }
 }
 export default actions;

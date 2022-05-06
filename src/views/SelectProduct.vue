@@ -361,6 +361,7 @@ export default defineComponent({
     }
   },
   ionViewDidEnter () {
+    this.queryString = ''
     this.getProducts();
     this.store.dispatch("product/fetchProductFacets")
   },
