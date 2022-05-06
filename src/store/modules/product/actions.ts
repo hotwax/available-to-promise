@@ -46,48 +46,8 @@ const actions: ActionTree<ProductState, RootState> = {
     return resp;
   },
 
-  async fetchProductFacets({ commit }) {
-    const payload = {
-      "json": {
-        "query": "*:*",
-        "filter": "docType: PRODUCT",
-        "facet": {
-          "tagsFacet": {
-            "field": "tags",
-            "mincount": 1,
-            "limit": -1,
-            "sort": "index",
-            "type": "terms"
-          },
-          "productStoreIdFacet": {
-            "field": "productStoreIds",
-            "limit": -1,
-            "sort": "index",
-            "type": "terms"
-          },
-          "productCategoryNameFacet": {
-            "field": "productCategoryNames",
-            "limit": -1,
-            "sort": "index",
-            "type": "terms"
-          }
-        }
-      }
-    }
-    try {
-      const resp = await ProductService.fetchProductFacets(payload);
-      if (resp.status == 200 && !hasError(resp)) {
-        const facets = resp.data.facets;
-        const updatedFacets = {} as any;
-        delete facets.count;
-        Object.entries(facets).map(([facet, value]) => {
-          updatedFacets[facet] = (value as any).buckets.map((bucket: any) => bucket.val)
-        })
-        commit(types.PRODUCT_FACETS_UPDATED, updatedFacets)
-      }
-    } catch (err) {
-      console.error(err)
-    }
+  async updateAppliedFilters({ commit }, payload) {
+    commit(types.PRODUCT_APPLIED_FILTERS_UPDATED, payload)
   }
 }
 export default actions;

@@ -14,8 +14,17 @@ const productModule: Module<ProductState, RootState> = {
           virtual: 0,
           variant: 0
         }
-      },  
-      facets: {}
+      },
+      appliedFilters: {
+        included: {
+          tags: [],
+          productCategoryNames: []
+        },
+        excluded: {
+          tags: [],
+          productCategoryNames: []
+        }
+      }
     },
     getters,
     actions,

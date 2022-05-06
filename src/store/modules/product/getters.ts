@@ -15,8 +15,8 @@ const getters: GetterTree<ProductState, RootState> = {
   getProducts(state) {
     return state.products;
   },
-  getProductFacets(state) {
-    return state.facets;
+  getAppliedFilters(state) {
+    return state.appliedFilters;
   }
 };
 export default getters;
