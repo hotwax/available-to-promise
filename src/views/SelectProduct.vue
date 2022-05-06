@@ -361,6 +361,7 @@ export default defineComponent({
     }
   },
   ionViewDidEnter () {
+    //Cleared query string to clear search keyword whenever user navigates to SelectProduct page
     this.queryString = ''
     this.getProducts();
     this.store.dispatch("product/fetchProductFacets")
