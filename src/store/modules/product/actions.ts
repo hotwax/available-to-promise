@@ -93,6 +93,18 @@ const actions: ActionTree<ProductState, RootState> = {
 
     commit(types.PRODUCT_QUERY_UPDATED, state.query)
     await dispatch('getProducts')
+  },
+
+  async resetFilters({ commit, state, dispatch }, payload) {
+    const appliedFilters = JSON.parse(JSON.stringify((state.appliedFilters as any)[payload.type]))
+    // iterating over all keys in the specific filter type and then clearning it's value
+    // done this as for now not creating a separate mutation for this or updating current mutation logic
+    // as per this functionality
+    // TODO: update this logic to simply update the filters state
+    Object.keys(appliedFilters).map((id: any) => {
+      commit(types.PRODUCT_APPLIED_FILTERS_UPDATED, {id, type: payload.type, value: []})
+    })
+    await dispatch('updateQuery')
   }
 }
 export default actions;

@@ -26,7 +26,7 @@
             </ion-item>
             <ion-list-header>
               <h3>{{ $t("Include") }}</h3>
-              <ion-button fill="clear" color="warning">{{ $t('reset') }}</ion-button>
+              <ion-button fill="clear" color="warning" @click="resetFilters('included')">{{ $t('reset') }}</ion-button>
             </ion-list-header>
             <ion-card>
               <ion-toolbar>
@@ -68,7 +68,7 @@
           <ion-list>
             <ion-list-header>
               <h3>{{ $t("Exclude") }}</h3>
-              <ion-button fill="clear" color="warning">{{ $t('reset') }}</ion-button>
+              <ion-button fill="clear" color="warning" @click="resetFilters('excluded')">{{ $t('reset') }}</ion-button>
             </ion-list-header>
             <ion-card>
               <ion-toolbar>
@@ -311,6 +311,9 @@ export default defineComponent({
         id,
         value
       })
+    },
+    async resetFilters(type: string) {
+      await this.store.dispatch('product/resetFilters', { type })
     }
   },
   mounted () {
