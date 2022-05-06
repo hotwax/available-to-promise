@@ -18,14 +18,6 @@ const getProducts = async (payload: any): Promise<any> => {
   })
 }
 
-const fetchProductFacets = async (payload: any): Promise<any> => {
-  return api({
-    url: "/solr-query",
-    method: "POST",
-    data: payload
-  })
-}
-
 const createSearchPreference = async (payload: any): Promise<any> => {
   return api({
     url: "service/createSearchPreference",
@@ -46,6 +38,5 @@ export const ProductService = {
   fetchAutoCompleteSolrFacet,
   createSearchPreference,
   fetchProducts,
-  fetchProductFacets,
   getProducts
 }
