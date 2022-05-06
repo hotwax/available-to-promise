@@ -10,10 +10,7 @@ const mutations: MutationTree <UserState> = {
       state.token = ''
       state.current = null
       state.currentFacility = {}
-      state.currentEComStore = {
-        productStoreId: "",
-        storeName: "None"
-      }
+      state.currentEComStore = {}
     },
     [types.USER_INFO_UPDATED] (state, payload) {
         state.current = payload
