@@ -38,7 +38,7 @@ const actions: ActionTree<ProductState, RootState> = {
         commit(types.PRODUCT_LIST_UPDATED, { products, totalVirtual, totalVariant });
       } else {
         showToast(translate("Products not found"));
-        commit(types.PRODUCT_LIST_UPDATED, { products: {}, totalVirtual: 0, totalVariant: 0 });
+        commit(types.PRODUCT_LIST_UPDATED, { products: [], totalVirtual: 0, totalVariant: 0 });
       }
     } catch (error) {
       console.error(error);
@@ -108,6 +108,9 @@ const actions: ActionTree<ProductState, RootState> = {
   async clearFilters({ commit, dispatch }, payload) {
     commit(types.PRODUCT_FILTER_UPDATED, {id: payload.id, type: payload.type, value: payload.value})
     await dispatch('updateQuery')
+  },
+  clearProductList({ commit }){
+    commit(types.PRODUCT_LIST_UPDATED, { products: [], totalVirtual: 0, totalVariant: 0 });
   }
 }
 export default actions;
