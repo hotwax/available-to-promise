@@ -45,7 +45,7 @@ const actions: ActionTree<UserState, RootState> = {
   async logout ({ commit }) {
     // TODO add any other tasks if need
     commit(types.USER_END_SESSION)
-    
+    this.dispatch('product/clearProductList');
   },
 
   /**
@@ -68,11 +68,10 @@ const actions: ActionTree<UserState, RootState> = {
         emitter.emit('timeZoneDifferent', { profileTimeZone: resp.data.userTimeZone, localTimeZone});
       }
 
-      await dispatch('getEComStores', payload).then((stores: any) => { resp.data.stores = [{
-        productStoreId: "",
-        storeName: "None"
-        }, ...(stores ? stores : [])]
-      })
+      await dispatch('getEComStores', payload).then((stores: any) => {
+        resp.data.stores = stores ? stores : [];
+        commit(types.USER_CURRENT_ECOM_STORE_UPDATED, stores ? stores[0] : {});
+      });
 
       commit(types.USER_INFO_UPDATED, resp.data);
     }
@@ -81,18 +80,10 @@ const actions: ActionTree<UserState, RootState> = {
   /**
    * update current eComStore information
    */
-   async setEcomStore({ commit, dispatch }, payload) {
-    dispatch("job/clearPendingJobs", null, { root: true })
+   async setEcomStore({ commit }, payload) {
     commit(types.USER_CURRENT_ECOM_STORE_UPDATED, payload.eComStore);
   },
 
-  /**
-   * update current facility information
-   */
-  async setFacility ({ commit }, payload) {
-    commit(types.USER_CURRENT_FACILITY_UPDATED, payload.facility);
-  },
-  
   /**
    * Update user timeZone
    */
