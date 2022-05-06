@@ -17,7 +17,7 @@ const getShopifyConfig = async (payload: any): Promise <any>  => {
   });
 }
 
-const fetchFacilities = async (payload: any): Promise <any>  => {
+const fetchFacilitiesForProductStore = async (payload: any): Promise <any>  => {
   return api({
     url: "performFind",
     method: "post",
@@ -26,7 +26,7 @@ const fetchFacilities = async (payload: any): Promise <any>  => {
 }
 
 export const UtilService = {
-  fetchFacilities,
+  fetchFacilitiesForProductStore,
   getServiceStatusDesc,
   getShopifyConfig
 }

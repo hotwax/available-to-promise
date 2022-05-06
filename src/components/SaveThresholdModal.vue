@@ -98,7 +98,7 @@ export default defineComponent({
       currentEComStore: 'user/getCurrentEComStore',
       shopifyConfig: 'util/getShopifyConfig',
       jobs: 'job/getJobs',
-      facility: 'util/getFacilities'
+      facilitiesByProductStore: 'util/getFacilityForProductStore'
     })
   },
   methods: {
@@ -134,7 +134,7 @@ export default defineComponent({
       let job = this.jobs[this.jobEnumId]
       const productStoreId = this.currentEComStore.productStoreId
       let shopifyConfigId = this.shopifyConfig[productStoreId]
-      let facilityId = this.facility[productStoreId]
+      let facilityId = this.facilitiesByProductStore[productStoreId]
       let resp = '' as any;
 
       if (!job) {
