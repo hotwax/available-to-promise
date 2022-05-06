@@ -360,7 +360,7 @@ export default defineComponent({
       saveThresholdModal.present();
     }
   },
-  mounted () {
+  ionViewDidEnter () {
     this.getProducts();
     this.store.dispatch("product/fetchProductFacets")
   },

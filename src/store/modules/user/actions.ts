@@ -45,6 +45,7 @@ const actions: ActionTree<UserState, RootState> = {
   async logout ({ commit }) {
     // TODO add any other tasks if need
     commit(types.USER_END_SESSION)
+    this.commit('product/product/LIST_UPDATED', { products: [], totalVirtual: 0, totalVariant: 0 });
     
   },
 
