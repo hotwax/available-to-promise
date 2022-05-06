@@ -391,8 +391,14 @@ export default defineComponent({
 <style scoped>
 .section-grid {
   grid-template-columns: repeat(auto-fill, 200px);
+  padding: var( --spacer-lg);
+  gap: var(--spacer-lg);
 }
 
+.find{
+  padding: var( --spacer-lg);
+  gap: var(--spacer-lg);
+}
 ion-list-header > div{
  flex: 1;
  display: flex;
