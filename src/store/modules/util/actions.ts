@@ -50,10 +50,10 @@ const actions: ActionTree<UtilState, RootState> = {
     return {};
   },
 
-  async fetchFacilitiesForProductStore({ commit }, payload) {
+  async fetchFacilitiesByProductStore({ commit }, payload) {
 
     try {
-      const resp = await UtilService.fetchFacilitiesForProductStore(payload);
+      const resp = await UtilService.fetchFacilitiesByProductStore(payload);
 
       if (resp.status === 200 && !hasError(resp) && resp.data?.count > 0) {
         const facilities = resp.data.docs.reduce((facilities: any, data: any) => {

@@ -98,7 +98,7 @@ export default defineComponent({
       currentEComStore: 'user/getCurrentEComStore',
       shopifyConfig: 'util/getShopifyConfig',
       jobs: 'job/getJobs',
-      facilitiesByProductStore: 'util/getFacilityForProductStore'
+      facilitiesByProductStore: 'util/getFacilityByProductStore'
     })
   },
   methods: {
@@ -155,7 +155,7 @@ export default defineComponent({
       }
 
       if (!facilityId) {
-        const resp = await this.store.dispatch('util/fetchFacilities', {
+        const resp = await this.store.dispatch('util/fetchFacilitiesByProductStore', {
           inputFields: {
             productStoreId,
             facilityTypeId: 'CONFIGURATION'
