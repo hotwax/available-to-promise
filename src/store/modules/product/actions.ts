@@ -46,8 +46,11 @@ const actions: ActionTree<ProductState, RootState> = {
     return resp;
   },
 
-  async updateAppliedFilters({ commit }, payload) {
-    commit(types.PRODUCT_APPLIED_FILTERS_UPDATED, payload)
+  async updateAppliedFilters({ commit, state }, payload) {
+    const value = payload.value
+    const appliedFilters = JSON.parse(JSON.stringify((state.appliedFilters as any)[payload.type][payload.id]))
+    appliedFilters.includes(value) ? appliedFilters.splice(appliedFilters.indexOf(value), 1) : appliedFilters.push(value)
+    commit(types.PRODUCT_APPLIED_FILTERS_UPDATED, {id: payload.id, type: payload.type, value: appliedFilters})
   }
 }
 export default actions;
