@@ -21,7 +21,7 @@
       <ion-item>
         <ion-icon :icon="codeWorkingOutline" slot="start"/>
         <ion-label>{{ $t("OMS") }}</ion-label>
-        <p slot="end">{{ instanceUrl }}</p>
+        <p slot="end">{{ baseURL ? baseURL : instanceUrl }}</p>
       </ion-item>
 
       <!-- Profile of user logged in -->
@@ -58,10 +58,14 @@ export default defineComponent({
     IonTitle, 
     IonToolbar
   },
+  data() {
+    return {
+      baseURL: process.env.VUE_APP_BASE_URL
+    };
+  },
   computed: {
     ...mapGetters({
       userProfile: 'user/getUserProfile',
-      currentFacility: 'user/getCurrentFacility',
       currentEComStore: 'user/getCurrentEComStore',
       instanceUrl: 'user/getInstanceUrl'
     })
@@ -73,13 +77,6 @@ export default defineComponent({
           'eComStore': this.userProfile.stores.find((str: any) => str.productStoreId == store['detail'].value)
         })
       }
-    },
-    setFacility (facility: any) {
-      this.userProfile.facilities.map((fac: any) => {
-        if (fac.facilityId == facility['detail'].value) {
-          this.store.dispatch('user/setFacility', {'facility': fac});
-        }
-      })
     },
     logout () {
       this.store.dispatch('user/logout').then(() => {

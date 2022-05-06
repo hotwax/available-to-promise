@@ -88,6 +88,9 @@ const actions: ActionTree<ProductState, RootState> = {
     } catch (err) {
       console.error(err)
     }
+  },
+  clearProductList({ commit }){
+    commit(types.PRODUCT_LIST_UPDATED, { products: [], totalVirtual: 0, totalVariant: 0 });
   }
 }
 export default actions;
