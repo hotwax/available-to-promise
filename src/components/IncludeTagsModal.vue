@@ -17,10 +17,10 @@
     <ion-searchbar :placeholder="$t(`Search ${searchfield}`)" v-model="queryString" @keyup.enter="search($event)"/>
 
     <ion-list>
-      <ion-item v-for="value in list" :key="value">
-        <ion-label>{{ value }}</ion-label>
+      <ion-item v-for="option in facetOptions" :key="option.id">
+        <ion-label>{{ option.label }}</ion-label>
         <!-- Added key on checkbox as when clicking on the checkbox the checked value is changed but not reflected on UI -->
-        <ion-checkbox v-if="!isAlreadyApplied(value)" :checked="appliedFilters[type][searchfield].includes(value)" :key="appliedFilters[type][searchfield].includes(value)" @click="updateFilter(value)"/>
+        <ion-checkbox v-if="!isAlreadyApplied(option.id)" :checked="appliedFilters[type][searchfield].includes(option.id)" :key="appliedFilters[type][searchfield].includes(option.id)" @click="updateFilter(option.id)"/>
         <ion-note v-else slot="end" color="danger">{{ type === 'included' ? $t("excluded") : $t("included") }}</ion-note>
       </ion-item>
     </ion-list>
@@ -69,7 +69,7 @@ export default defineComponent({
   data() {
     return {
       queryString: '',
-      list: []
+      facetOptions: [] as any
     }
   },
   computed: {
@@ -98,9 +98,11 @@ export default defineComponent({
 
       const resp = await ProductService.fetchFacets(payload);
       if (resp.status == 200 && resp.data.length > 0) {
-        this.list = resp.data.map((obj: any) => obj.id)
+        resp.data.map((obj: any) => {
+          this.facetOptions.push({ id: obj.id, label: obj.label })
+        })
       } else {
-        this.list = []
+        this.facetOptions = []
       }
     },
     async updateFilter(value: string) {
