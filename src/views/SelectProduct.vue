@@ -302,7 +302,9 @@ export default defineComponent({
           type
         }
       })
-
+      modal.onDidDismiss().then(() => {
+        this.queryString = '';
+      })
       modal.present();
     },
     async removeFilters(type: string, id: string, value: string) {
@@ -315,6 +317,9 @@ export default defineComponent({
     async resetFilters(type: string) {
       await this.store.dispatch('product/resetFilters', { type })
     }
+  },
+  ionViewDidLeave(){
+    console.log("leave")
   },
   mounted () {
     this.getProducts();
