@@ -16,7 +16,8 @@
     <ion-list>
       <ion-item v-for="value in list" :key="value">
         <ion-label>{{ value }}</ion-label>
-        <ion-checkbox v-if="!isSelected(value)" :checked="appliedFilters[type][searchfield].includes(value)" @click="applyFilter(value)"/>
+        <!-- Added key on checkbox as when clicking on the checkbox the checked value is changed but not reflected on UI -->
+        <ion-checkbox v-if="!isSelected(value)" :checked="appliedFilters[type][searchfield].includes(value)" :key="appliedFilters[type][searchfield].includes(value)" @click="applyFilter(value)"/>
         <ion-note v-else slot="end" color="danger">{{ type === 'included' ? $t("excluded") : $t("included") }}</ion-note>
       </ion-item>
     </ion-list>
@@ -107,11 +108,8 @@ export default defineComponent({
       })
     },
     isSelected(value: string) {
-      if (this.type === 'included') {
-        return this.appliedFilters['excluded'][this.searchfield].includes(value)
-      } else {
-        return this.appliedFilters['included'][this.searchfield].includes(value)
-      }
+      const type = this.type === 'included' ? 'excluded' : 'included'
+      return this.appliedFilters[type][this.searchfield].includes(value)
     }
   },
   setup() {
