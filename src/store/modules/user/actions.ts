@@ -68,11 +68,10 @@ const actions: ActionTree<UserState, RootState> = {
         emitter.emit('timeZoneDifferent', { profileTimeZone: resp.data.userTimeZone, localTimeZone});
       }
 
-      await dispatch('getEComStores', payload).then((stores: any) => { resp.data.stores = [{
-        productStoreId: "",
-        storeName: "None"
-        }, ...(stores ? stores : [])]
-      })
+      await dispatch('getEComStores', payload).then((stores: any) => {
+        resp.data.stores = stores ? stores : [];
+        commit(types.USER_CURRENT_ECOM_STORE_UPDATED, stores ? stores[0] : {});
+      });
 
       commit(types.USER_INFO_UPDATED, resp.data);
     }
@@ -86,13 +85,6 @@ const actions: ActionTree<UserState, RootState> = {
     commit(types.USER_CURRENT_ECOM_STORE_UPDATED, payload.eComStore);
   },
 
-  /**
-   * update current facility information
-   */
-  async setFacility ({ commit }, payload) {
-    commit(types.USER_CURRENT_FACILITY_UPDATED, payload.facility);
-  },
-  
   /**
    * Update user timeZone
    */

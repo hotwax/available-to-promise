@@ -10,12 +10,8 @@ const userModule: Module<UserState, RootState> = {
     state: {
       token: '',
       current: null,
-      currentFacility: {},
       instanceUrl: '',
-      currentEComStore: {
-        productStoreId: "",
-        storeName: "None"
-      },
+      currentEComStore: {},
     },
     getters,
     actions,

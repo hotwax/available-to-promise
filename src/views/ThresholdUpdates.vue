@@ -487,7 +487,7 @@ export default defineComponent({
         .play();
     }
   },
-  created() {
+  ionViewDidEnter() {
     this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums});
   },
   setup() {
