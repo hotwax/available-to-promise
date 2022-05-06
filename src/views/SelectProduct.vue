@@ -389,23 +389,24 @@ export default defineComponent({
 </script>
 
 <style scoped>
+
 .section-grid {
-grid-template-columns: repeat(auto-fill, 200px);
+  grid-template-columns: repeat(auto-fill, 200px);
 }
 
-ion-list-header > div{
-flex: 1;
-display: flex;
-justify-content: space-between;
+ion-list-header > div {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
 }
 
 @media (min-width: 991px) {
-.action {
-position: fixed;
-z-index: 3;
-bottom: 10%;
-left: 50%;
-transform: translate(-50%, 0);
-}
+  .action {
+    position: fixed;
+    z-index: 3;
+    bottom: 10%;
+    left: 50%;
+    transform: translate(-50%, 0);
+  }
 }
 </style>
