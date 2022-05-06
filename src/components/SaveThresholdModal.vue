@@ -86,7 +86,7 @@ export default defineComponent({
     IonTitle,
     IonToolbar
   },
-  props: ["threshold", "query", "totalSKUs"],
+  props: ["threshold", "totalSKUs"],
   data () {
     return {
       jobName: '',
@@ -98,7 +98,8 @@ export default defineComponent({
       currentEComStore: 'user/getCurrentEComStore',
       shopifyConfig: 'util/getShopifyConfig',
       jobs: 'job/getJobs',
-      facilitiesByProductStore: 'util/getFacilityByProductStore'
+      facilitiesByProductStore: 'util/getFacilityByProductStore',
+      query: 'product/getQuery'
     })
   },
   methods: {

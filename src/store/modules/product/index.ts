@@ -14,8 +14,29 @@ const productModule: Module<ProductState, RootState> = {
           virtual: 0,
           variant: 0
         }
-      },  
-      facets: {}
+      },
+      appliedFilters: {
+        included: {
+          tags: [],
+          productCategoryNames: []
+        },
+        excluded: {
+          tags: [],
+          productCategoryNames: []
+        }
+      },
+      query: {
+        "json": {
+          "params": {
+            "group": true,
+            "group.field": "groupId",
+            "group.limit": 10000,
+            "group.ngroups": true
+          } as any,
+          "query": "*:*",
+          "filter": ["docType: PRODUCT"]
+        }
+      }
     },
     getters,
     actions,
