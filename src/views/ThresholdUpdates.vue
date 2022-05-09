@@ -44,6 +44,7 @@
 
               <ion-item lines="none">
                 <ion-label class="ion-text-wrap">
+                  <p>{{ job.jobName }}</p>
                   <p>{{ getEnumDescription(job.systemJobEnumId) }}</p>
                 </ion-label>
               </ion-item>
@@ -110,6 +111,7 @@
 
               <ion-item lines="none">
                 <ion-label class="ion-text-wrap">
+                  <p>{{ job.jobName }}</p>
                   <p>{{ getEnumDescription(job.systemJobEnumId) }}</p>
                 </ion-label>
               </ion-item>
@@ -165,6 +167,7 @@
 
             <ion-item lines="none">
               <ion-label class="ion-text-wrap">
+                <p>{{ job.jobName }}</p>
                 <p>{{ getEnumDescription(job.systemJobEnumId) }}</p>
               </ion-label>
             </ion-item>

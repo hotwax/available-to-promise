@@ -306,7 +306,11 @@ export default defineComponent({
           type
         }
       })
-
+      modal.onDidDismiss().then((payload) => {
+        if(payload.data.isFilterChanged){
+          this.queryString = '';
+        }
+      })
       modal.present();
     },
     async removeFilters(type: string, id: string, value: string) {
@@ -315,6 +319,7 @@ export default defineComponent({
         id,
         value
       })
+      this.queryString = ''
     },
     async resetFilters(type: string) {
       // checking that if any of the current type does not have any attribute selected than not making solr query
@@ -322,6 +327,7 @@ export default defineComponent({
         return;
       }
       await this.store.dispatch('product/resetFilters', { type })
+      this.queryString = ''
     }
   },
   ionViewDidLeave() {
