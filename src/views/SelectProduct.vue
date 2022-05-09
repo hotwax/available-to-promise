@@ -307,7 +307,7 @@ export default defineComponent({
         }
       })
       modal.onDidDismiss().then((payload) => {
-        if(payload.data.isFilterChnaged){
+        if(payload.data.isFilterChanged){
           this.queryString = '';
         }
       })
