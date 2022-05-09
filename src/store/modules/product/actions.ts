@@ -18,8 +18,8 @@ const actions: ActionTree<ProductState, RootState> = {
 
       if (resp.status === 200 && resp.data.grouped.groupId?.ngroups > 0 && !hasError(resp)) {
         let products = resp.data.grouped.groupId?.groups;
-        const totalVirtual = resp.data.grouped.groupId.ngroups;
-        const totalVariant = resp.data.grouped.groupId.matches;
+        let totalVirtual = resp.data.grouped.groupId.ngroups;
+        let totalVariant = resp.data.grouped.groupId.matches;
         products = products.map((product: any) => {
           return {
             productId: product.groupValue,
@@ -35,6 +35,10 @@ const actions: ActionTree<ProductState, RootState> = {
         })
 
         if(query.json.params.start && query.json.params.start > 0) products = state.products.list.concat(products);
+        if(query.json.query !== "*:*"){
+          totalVirtual = state.products.total.virtual
+          totalVariant = state.products.total.variant
+        }
         commit(types.PRODUCT_LIST_UPDATED, { products, totalVirtual, totalVariant });
       } else {
         showToast(translate("Products not found"));
