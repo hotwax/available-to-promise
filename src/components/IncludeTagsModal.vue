@@ -70,7 +70,7 @@ export default defineComponent({
     return {
       queryString: '',
       facetOptions: [] as any,
-      isFilterChnaged: false
+      isFilterChanged: false
     }
   },
   computed: {
@@ -81,7 +81,7 @@ export default defineComponent({
   props: ["label", "facetToSelect", "searchfield", 'type'],
   methods: {
     closeModal() {
-      modalController.dismiss({ dismissed: true, isFilterChnaged: this.isFilterChnaged });
+      modalController.dismiss({ dismissed: true, isFilterChanged: this.isFilterChanged });
     },
     async search(event: any) {
       // TODO: need to implement infinite scroll on the modal search
@@ -112,7 +112,7 @@ export default defineComponent({
         id: this.searchfield,
         value
       })
-      this.isFilterChnaged = true;
+      this.isFilterChanged = true;
     },
     async clearFilters() {
       await this.store.dispatch('product/clearFilters', {
@@ -120,7 +120,7 @@ export default defineComponent({
         id: this.searchfield,
         value: []
       })
-      this.isFilterChnaged = true;
+      this.isFilterChanged = true;
     },
     isAlreadyApplied(value: string) {
       const type = this.type === 'included' ? 'excluded' : 'included'
