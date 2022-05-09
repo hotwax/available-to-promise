@@ -68,7 +68,8 @@ const actions: ActionTree<ProductState, RootState> = {
       "group": true,
       "group.field": "groupId",
       "group.limit": 10000,
-      "group.ngroups": true
+      "group.ngroups": true,
+      "q.op": "AND"
     }
     state.query.json['query'] = "*:*"
 
