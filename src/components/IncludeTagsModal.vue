@@ -98,9 +98,7 @@ export default defineComponent({
 
       const resp = await ProductService.fetchFacets(payload);
       if (resp.status == 200 && resp.data.length > 0) {
-        resp.data.map((obj: any) => {
-          this.facetOptions.push({ id: obj.id, label: obj.label })
-        })
+        this.facetOptions = resp.data.map((obj: any) => ({ id: obj.id, label: obj.label }))
       } else {
         this.facetOptions = []
       }
