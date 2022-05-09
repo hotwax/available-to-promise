@@ -34,7 +34,7 @@
               <ion-toolbar>
                 <ion-item lines="none">
                   <ion-label>{{ $t("Tags") }}</ion-label>
-                  <ion-button fill="clear" slot="end" size="small" @click="searchFilter('Include tags', 'tagsFacet', 'tags', 'included')">
+                  <ion-button fill="clear" slot="end" size="small" @click="searchFilter('tags', 'tagsFacet', 'tags', 'included')">
                     <ion-label>{{ $t('add') }}</ion-label>
                     <ion-icon :icon="addCircleOutline" />
                   </ion-button>
@@ -52,7 +52,7 @@
               <ion-toolbar>
                 <ion-item lines="none">
                   <ion-label>{{ $t("Categories") }}</ion-label>
-                  <ion-button fill="clear" slot="end" size="small" @click="searchFilter('Include categories', 'productCategoryNamesFacet', 'productCategoryNames', 'included')">
+                  <ion-button fill="clear" slot="end" size="small" @click="searchFilter('categories', 'productCategoryNamesFacet', 'productCategoryNames', 'included')">
                     <ion-label>{{ $t('add') }}</ion-label>
                     <ion-icon :icon="addCircleOutline" />
                   </ion-button>
@@ -78,7 +78,7 @@
               <ion-toolbar>
                 <ion-item lines="none">
                   <ion-label>{{ $t("Tags") }}</ion-label>
-                  <ion-button fill="clear" slot="end" size="small" @click="searchFilter('Exclude tags', 'tagsFacet', 'tags', 'excluded')">
+                  <ion-button fill="clear" slot="end" size="small" @click="searchFilter('tags', 'tagsFacet', 'tags', 'excluded')">
                     <ion-label>{{ $t('add') }}</ion-label>
                     <ion-icon :icon="addCircleOutline" />
                   </ion-button>
@@ -96,7 +96,7 @@
               <ion-toolbar>
                 <ion-item lines="none">
                   <ion-label>{{ $t("Categories") }}</ion-label>
-                  <ion-button fill="clear" slot="end" size="small" @click="searchFilter('Exclude categories', 'productCategoryNamesFacet', 'productCategoryNames', 'excluded')">
+                  <ion-button fill="clear" slot="end" size="small" @click="searchFilter('categories', 'productCategoryNamesFacet', 'productCategoryNames', 'excluded')">
                     <ion-label>{{ $t('add') }}</ion-label>
                     <ion-icon :icon="addCircleOutline" />
                   </ion-button>
@@ -317,6 +317,10 @@ export default defineComponent({
       })
     },
     async resetFilters(type: string) {
+      // checking that if any of the current type does not have any attribute selected than not making solr query
+      if (Object.entries(this.appliedFilters[type]).every((filter: any) => filter[1].length <= 0)) {
+        return;
+      }
       await this.store.dispatch('product/resetFilters', { type })
     }
   },

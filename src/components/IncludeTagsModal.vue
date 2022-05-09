@@ -6,7 +6,7 @@
           <ion-icon slot="icon-only" :icon="closeOutline" />
         </ion-button>
       </ion-buttons>
-      <ion-title>{{ $t(label) }}</ion-title>
+      <ion-title>{{ $t(`${ type === 'included' ? `Include ${label}` : `Exclude ${label}` }`) }}</ion-title>
       <ion-buttons slot="end">
         <ion-button fill="clear" color="danger" @click="clearFilters()">{{ $t("Clear All") }}</ion-button>
       </ion-buttons>
@@ -14,7 +14,7 @@
   </ion-header>
 
   <ion-content>
-    <ion-searchbar :placeholder="$t(`Search ${searchfield}`)" v-model="queryString" @keyup.enter="search($event)"/>
+    <ion-searchbar :placeholder="$t(`Search ${label}`)" v-model="queryString" @keyup.enter="search($event)"/>
 
     <ion-list>
       <ion-item v-for="option in facetOptions" :key="option.id">
@@ -111,6 +111,10 @@ export default defineComponent({
       })
     },
     async clearFilters() {
+      // checking that if the current field does not have any attribute selected then not making the solr query
+      if (this.appliedFilters[this.type][this.searchfield].length <= 0) {
+        return;
+      }
       await this.store.dispatch('product/clearFilters', {
         type: this.type,
         id: this.searchfield,
