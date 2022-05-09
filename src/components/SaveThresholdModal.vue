@@ -109,8 +109,10 @@ export default defineComponent({
     async saveThresholdRule() {
       const solrQuery = this.query
 
-      // removed params object from query as there is no need for grouping or pagination when storing the query
-      delete solrQuery.json.params
+      // re-initialized params object from query as there is no need for grouping or pagination when storing the query
+      solrQuery.json.params = {
+        "q.op": "AND"
+      }
       // made the query to default (*:*) before storing, as the threshold will be set for all the products those
       // are fullfilling the filters condition
       solrQuery.json['query'] = "*:*"
