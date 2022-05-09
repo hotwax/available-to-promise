@@ -14,7 +14,7 @@
   </ion-header>
 
   <ion-content>
-    <ion-searchbar :placeholder="$t(`Search ${searchfield}`)" v-model="queryString" @keyup.enter="search($event)"/>
+    <ion-searchbar :placeholder="$t(`Search ${label.split(' ')[1]}`)" v-model="queryString" @keyup.enter="search($event)"/>
 
     <ion-list>
       <ion-item v-for="option in facetOptions" :key="option.id">

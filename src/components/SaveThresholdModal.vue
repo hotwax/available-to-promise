@@ -178,7 +178,7 @@ export default defineComponent({
         'jobFields': {
           'productStoreId': productStoreId,
           'systemJobEnumId': job.systemJobEnumId,
-          'tempExprId': job.tempExprId,
+          'tempExprId': 'EVERYDAY',
           'maxRecurrenceCount': '-1',
           'parentJobId': job.parentJobId,
           'runAsUser': 'system', // default system, but empty in run now
