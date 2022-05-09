@@ -125,16 +125,14 @@ export default defineComponent({
         if (resp.status == 200 && resp?.data?.searchPrefId) {
           const searchPreferenceId = resp.data.searchPrefId;
           await this.scheduleService(searchPreferenceId, this.threshold)
-          this.isServiceScheduling = false
         } else {
           showToast(translate('Something went wrong'))
-          this.isServiceScheduling = false
         }
       } catch (err) {
         console.error(err)
         showToast(translate('Something went wrong'))
-        this.isServiceScheduling = false
       }
+      this.isServiceScheduling = false
     },
     async scheduleService(searchPreferenceId: string, threshold: string) {
       let job = this.jobs[this.jobEnumId]
