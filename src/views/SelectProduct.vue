@@ -317,6 +317,10 @@ export default defineComponent({
       })
     },
     async resetFilters(type: string) {
+      // checking that if the current field does not have any attribute selected then not making the solr query
+      if (Object.entries(this.appliedFilters[type]).every((filter: any) => filter[1].length <= 0)) {
+        return;
+      }
       await this.store.dispatch('product/resetFilters', { type })
     }
   },

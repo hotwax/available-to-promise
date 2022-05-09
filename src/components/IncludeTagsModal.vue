@@ -111,6 +111,10 @@ export default defineComponent({
       })
     },
     async clearFilters() {
+      // checking that if the current field does not have any attribute selected then not making the solr query
+      if (this.appliedFilters[this.type][this.searchfield].length <= 0) {
+        return;
+      }
       await this.store.dispatch('product/clearFilters', {
         type: this.type,
         id: this.searchfield,
