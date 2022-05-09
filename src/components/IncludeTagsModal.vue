@@ -69,7 +69,8 @@ export default defineComponent({
   data() {
     return {
       queryString: '',
-      facetOptions: [] as any
+      facetOptions: [] as any,
+      isFilterChanged: false
     }
   },
   computed: {
@@ -80,7 +81,7 @@ export default defineComponent({
   props: ["label", "facetToSelect", "searchfield", 'type'],
   methods: {
     closeModal() {
-      modalController.dismiss({ dismissed: true });
+      modalController.dismiss({ dismissed: true, isFilterChanged: this.isFilterChanged });
     },
     async search(event: any) {
       // TODO: need to implement infinite scroll on the modal search
@@ -109,6 +110,7 @@ export default defineComponent({
         id: this.searchfield,
         value
       })
+      this.isFilterChanged = true;
     },
     async clearFilters() {
       // checking that if the current field does not have any attribute selected then not making the solr query
@@ -120,6 +122,7 @@ export default defineComponent({
         id: this.searchfield,
         value: []
       })
+      this.isFilterChanged = true;
     },
     isAlreadyApplied(value: string) {
       const type = this.type === 'included' ? 'excluded' : 'included'
