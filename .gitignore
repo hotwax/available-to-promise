@@ -31,3 +31,7 @@ npm-debug.log*
 /www
 
 .history
+
+.env
+.env.*
+!.env.example
