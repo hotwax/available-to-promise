@@ -29,7 +29,7 @@
     </ion-list>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button @click="saveThresholdRule()">
+      <ion-fab-button @click="saveThresholdRule()" :disabled="isServiceScheduling">
         <ion-icon :icon="cloudUploadOutline" />
       </ion-fab-button>
     </ion-fab>
@@ -90,7 +90,8 @@ export default defineComponent({
   data () {
     return {
       jobName: '',
-      jobEnumId: 'JOB_EXP_PROD_THRSHLD'
+      jobEnumId: 'JOB_EXP_PROD_THRSHLD',
+      isServiceScheduling: false
     }
   },
   computed: {
@@ -107,6 +108,7 @@ export default defineComponent({
       modalController.dismiss({ dismissed: true });
     },
     async saveThresholdRule() {
+      this.isServiceScheduling = true;
       const solrQuery = this.query
 
       // removed params object from query as there is no need for grouping or pagination when storing the query
@@ -122,7 +124,7 @@ export default defineComponent({
 
         if (resp.status == 200 && resp?.data?.searchPrefId) {
           const searchPreferenceId = resp.data.searchPrefId;
-          this.scheduleService(searchPreferenceId, this.threshold)
+          await this.scheduleService(searchPreferenceId, this.threshold)
         } else {
           showToast(translate('Something went wrong'))
         }
@@ -130,6 +132,7 @@ export default defineComponent({
         console.error(err)
         showToast(translate('Something went wrong'))
       }
+      this.isServiceScheduling = false
     },
     async scheduleService(searchPreferenceId: string, threshold: string) {
       let job = this.jobs[this.jobEnumId]
