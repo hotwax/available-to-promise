@@ -90,7 +90,7 @@ export default defineComponent({
   data () {
     return {
       jobName: '',
-      jobEnumId: 'ping'
+      jobEnumId: 'JOB_EXP_PROD_THRSHLD'
     }
   },
   computed: {
