@@ -317,7 +317,7 @@ export default defineComponent({
       })
     },
     async resetFilters(type: string) {
-      // checking that if the current field does not have any attribute selected then not making the solr query
+      // checking that if any of the current type does not have any attribute selected than not making solr query
       if (Object.entries(this.appliedFilters[type]).every((filter: any) => filter[1].length <= 0)) {
         return;
       }
