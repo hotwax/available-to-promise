@@ -96,6 +96,7 @@ export default defineComponent({
         term: event.target.value
       }
 
+      this.facetOptions = []
       const resp = await ProductService.fetchFacets(payload);
       if (resp.status == 200 && resp.data.length > 0) {
         resp.data.map((obj: any) => {
