@@ -323,6 +323,7 @@ export default defineComponent({
     },
     async resetFilters(type: string) {
       await this.store.dispatch('product/resetFilters', { type })
+      this.queryString = ''
     }
   },
   ionViewDidLeave() {
