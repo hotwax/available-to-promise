@@ -125,7 +125,8 @@ export default defineComponent({
       getJobStatus: 'job/getJobStatus',
       getJob: 'job/getJob',
       shopifyConfigId: 'user/getShopifyConfigId',
-      currentEComStore: 'user/getCurrentEComStore'
+      currentEComStore: 'user/getCurrentEComStore',
+      getUserProfile: 'user/getUserProfile'
     }),
     generateFrequencyOptions(): any {
       const optionDefault = [{
@@ -165,7 +166,7 @@ export default defineComponent({
   },
   methods: {
     getDateTime(time: any) {
-      return DateTime.fromMillis(time)
+      return DateTime.fromMillis(time, { zone: this.getUserProfile.userTimeZone })
     },
     async skipJob(job: any) {
       const alert = await alertController
@@ -239,11 +240,11 @@ export default defineComponent({
       }
     },
     getTime (time: any) {
-      return DateTime.fromMillis(time).toLocaleString(DateTime.DATETIME_MED);
+      return DateTime.fromMillis(time, { zone: this.getUserProfile.userTimeZone }).toLocaleString(DateTime.TIME_SIMPLE);
     },
     timeTillJob (time: any) {
-      const timeDiff = DateTime.fromMillis(time).diff(DateTime.local());
-      return DateTime.local().plus(timeDiff).toRelative();
+      const timeDiff = DateTime.fromMillis(time, { zone: this.getUserProfile.userTimeZone }).diff(DateTime.now().setZone(this.getUserProfile.userTimeZone));
+      return DateTime.now().setZone(this.getUserProfile.userTimeZone).plus(timeDiff).toRelative();
     },
     updateRunTime(ev: CustomEvent, job: any) {
       if (job) {
