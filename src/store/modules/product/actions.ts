@@ -87,12 +87,20 @@ const actions: ActionTree<ProductState, RootState> = {
     }
 
     state.query.json['filter'] = Object.keys(state.appliedFilters.included).reduce((filter, value) => {
-      (state.appliedFilters.included as any)[value].length > 0 && filter.push(`${value}: (${(state.appliedFilters.included as any)[value].join(' OR ')})`)
+      let filterValues = (state.appliedFilters.included as any)[value]
+      if (filterValues.length > 0) {
+        filterValues = filterValues.map((val: any) => '"' + val + '"')
+        filter.push(`${value}: (${filterValues.join(' OR ')})`)
+      }
       return filter
     }, state.query.json['filter'])
 
     state.query.json['filter'] = Object.keys(state.appliedFilters.excluded).reduce((filter, value) => {
-      (state.appliedFilters.excluded as any)[value].length > 0 && filter.push(`-${value}: (${(state.appliedFilters.excluded as any)[value].join(' OR ')})`)
+      let filterValues = (state.appliedFilters.excluded as any)[value]
+      if (filterValues.length > 0) {
+        filterValues = filterValues.map((val: any) => '"' + val + '"')
+        filter.push(`-${value}: (${filterValues.join(' OR ')})`)
+      }
       return filter
     }, state.query.json['filter'])
 
