@@ -48,24 +48,6 @@
                 </ion-chip>
               </ion-card-content>
             </ion-card>
-            <ion-card>
-              <ion-toolbar>
-                <ion-item lines="none">
-                  <ion-label>{{ $t("Categories") }}</ion-label>
-                  <ion-button fill="clear" slot="end" size="small" @click="searchFilter('categories', 'productCategoryNamesFacet', 'productCategoryNames', 'included')">
-                    <ion-label>{{ $t('add') }}</ion-label>
-                    <ion-icon :icon="addCircleOutline" />
-                  </ion-button>
-                </ion-item>
-              </ion-toolbar>
-              <ion-card-content>
-                <ion-chip v-for="(category, index) in appliedFilters['included']['productCategoryNames']" :key="index">
-                  <ion-icon :icon="albumsOutline" />
-                  <ion-label>{{ category }}</ion-label>
-                  <ion-icon :icon="closeCircle" @click="removeFilters('included', 'productCategoryNames', category)"/>
-                </ion-chip>
-              </ion-card-content>
-            </ion-card>
           </ion-list>
           <ion-list>
             <ion-list-header>
@@ -89,24 +71,6 @@
                   <ion-icon :icon="pricetagOutline" />
                   <ion-label>{{ tag }}</ion-label>
                   <ion-icon :icon="closeCircle" @click="removeFilters('excluded', 'tags', tag)"/>
-                </ion-chip>
-              </ion-card-content>
-            </ion-card>
-            <ion-card>
-              <ion-toolbar>
-                <ion-item lines="none">
-                  <ion-label>{{ $t("Categories") }}</ion-label>
-                  <ion-button fill="clear" slot="end" size="small" @click="searchFilter('categories', 'productCategoryNamesFacet', 'productCategoryNames', 'excluded')">
-                    <ion-label>{{ $t('add') }}</ion-label>
-                    <ion-icon :icon="addCircleOutline" />
-                  </ion-button>
-                </ion-item>
-              </ion-toolbar>
-              <ion-card-content>
-                <ion-chip v-for="(category, index) in appliedFilters['excluded']['productCategoryNames']" :key="index">
-                  <ion-icon :icon="albumsOutline" />
-                  <ion-label>{{ category }}</ion-label>
-                  <ion-icon :icon="closeCircle" @click="removeFilters('excluded', 'productCategoryNames', category)"/>
                 </ion-chip>
               </ion-card-content>
             </ion-card>
