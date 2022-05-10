@@ -96,10 +96,9 @@ const actions: ActionTree<ProductState, RootState> = {
     }, state.query.json['filter'])
 
     state.query.json['filter'] = Object.keys(state.appliedFilters.excluded).reduce((filter, value) => {
-      let filterValues = (state.appliedFilters.excluded as any)[value]
+      const filterValues = (state.appliedFilters.excluded as any)[value]
       if (filterValues.length > 0) {
-        filterValues = filterValues.map((val: any) => '"' + val + '"')
-        filter.push(`-${value}: (${filterValues.join(' OR ')})`)
+        filter.push(`-${value}: ("${filterValues.join('" OR "')}")`)
       }
       return filter
     }, state.query.json['filter'])
@@ -118,7 +117,7 @@ const actions: ActionTree<ProductState, RootState> = {
     await dispatch('updateQuery')
   },
 
-  async clearAllFilters({ commit, state, dispatch }) {
+  async clearAllFilters({ commit, state }) {
     const appliedFilters = JSON.parse(JSON.stringify(state.appliedFilters))
     const value = Object.keys(appliedFilters).reduce((value: any, type: any) => {
       const val = Object.keys(appliedFilters[type]).reduce((val: any, filter: any) => {
