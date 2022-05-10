@@ -187,7 +187,7 @@ export default defineComponent({
           'maxRecurrenceCount': '-1',
           'parentJobId': job.parentJobId,
           'runAsUser': 'system', // default system, but empty in run now
-          'recurrenceTimeZone': DateTime.now().zoneName
+          'recurrenceTimeZone': this.store.state.user.current.userTimeZone
         },
         'shopifyConfigId': shopifyConfigId,
         'statusId': "SERVICE_PENDING",
