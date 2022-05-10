@@ -24,6 +24,13 @@
         <p slot="end">{{ baseURL ? baseURL : instanceUrl }}</p>
       </ion-item>
 
+      <!-- User timezone -->
+      <ion-item>
+        <ion-icon :icon="timeOutline" slot="start"/>
+        <ion-label> {{ userProfile && userProfile.userTimeZone ? userProfile.userTimeZone : '-' }} </ion-label>
+        <ion-button slot="end" fill="outline" color="dark">{{ $t("Change") }}</ion-button>
+      </ion-item>
+
       <!-- Profile of user logged in -->
       <ion-item>
         <ion-icon :icon="personCircleOutline" slot="start" />
@@ -38,7 +45,7 @@
 <script lang="ts">
 import { IonBackButton, IonButton, IonContent, IonHeader,IonIcon, IonItem, IonLabel, IonMenuButton, IonPage, IonSelect, IonSelectOption, IonTitle, IonToolbar, popoverController } from '@ionic/vue';
 import { defineComponent } from 'vue';
-import { codeWorkingOutline, ellipsisVertical, globeOutline, personCircleOutline, storefrontOutline} from 'ionicons/icons'
+import { codeWorkingOutline, ellipsisVertical, globeOutline, personCircleOutline, storefrontOutline, timeOutline } from 'ionicons/icons'
 import { mapGetters, useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
@@ -95,7 +102,8 @@ export default defineComponent({
       personCircleOutline,
       storefrontOutline,
       store,
-      router
+      router,
+      timeOutline
     }
   }
 });
