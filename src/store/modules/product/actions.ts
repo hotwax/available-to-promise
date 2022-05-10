@@ -118,6 +118,19 @@ const actions: ActionTree<ProductState, RootState> = {
     await dispatch('updateQuery')
   },
 
+  async clearAllFilters({ commit, state, dispatch }) {
+    const appliedFilters = JSON.parse(JSON.stringify(state.appliedFilters))
+    const value = Object.keys(appliedFilters).reduce((value: any, type: any) => {
+      const val = Object.keys(appliedFilters[type]).reduce((val: any, filter: any) => {
+        val[filter] = []
+        return val
+      }, {})
+      value[type] = val
+      return value
+    }, {})
+    commit(types.PRODUCT_ALL_FILTERS_UPDATED, value)
+  },
+
   async clearFilters({ commit, dispatch }, payload) {
     commit(types.PRODUCT_FILTER_UPDATED, {id: payload.id, type: payload.type, value: payload.value})
     await dispatch('updateQuery')
