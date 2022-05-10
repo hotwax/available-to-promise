@@ -100,7 +100,8 @@ export default defineComponent({
       shopifyConfig: 'util/getShopifyConfig',
       jobs: 'job/getJobs',
       facilitiesByProductStore: 'util/getFacilityByProductStore',
-      query: 'product/getQuery'
+      query: 'product/getQuery',
+      getUserProfile: 'user/getUserProfile'
     })
   },
   methods: {
@@ -187,7 +188,7 @@ export default defineComponent({
           'maxRecurrenceCount': '-1',
           'parentJobId': job.parentJobId,
           'runAsUser': 'system', // default system, but empty in run now
-          'recurrenceTimeZone': this.store.state.user.current.userTimeZone
+          'recurrenceTimeZone': this.getUserProfile?.userTimeZone
         },
         'shopifyConfigId': shopifyConfigId,
         'statusId': "SERVICE_PENDING",
