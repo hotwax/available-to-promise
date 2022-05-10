@@ -67,6 +67,23 @@ import { DateTime } from 'luxon';
 
 export default defineComponent({
   name: "TimeZoneModal",
+  components: { 
+    IonButtons,
+    IonButton,
+    IonContent,
+    IonFab,
+    IonFabButton,
+    IonHeader,
+    IonIcon,
+    IonItem,
+    IonLabel,
+    IonList,
+    IonRadioGroup,
+    IonRadio,
+    IonSearchbar,
+    IonTitle,
+    IonToolbar 
+  },
   data() {
     return {
       queryString: '',
@@ -85,16 +102,16 @@ export default defineComponent({
         header: this.$t("Update time zone"),
         message,
         buttons: [
-            {
-              text: this.$t("Cancel"),
-            },
-            {
-              text: this.$t("Confirm"),
-              handler: () => {
-                this.setUserTimeZone();
-                }
-              }
-            ],
+          {
+            text: this.$t("Cancel"),
+          },
+          {
+            text: this.$t("Confirm"),
+            handler: () => {
+              this.setUserTimeZone();
+            }
+          }
+        ],
       });
       return alert.present();
     },
@@ -113,9 +130,9 @@ export default defineComponent({
     },
     async getAvailableTimeZones() {
       UserService.getAvailableTimeZones().then((resp: any) => {
-        if (resp.status === 200 && !hasError(resp)) {
-           this.timeZones = resp.data.filter((timeZone: any) => {
-              return DateTime.local().setZone(timeZone.id).isValid;
+        if(resp.status === 200 && !hasError(resp)) {
+          this.timeZones = resp.data.filter((timeZone: any) => {
+            return DateTime.local().setZone(timeZone.id).isValid;
           });
           this.findTimeZone();
         }
@@ -144,23 +161,6 @@ export default defineComponent({
       save,
       store
     };
-  },
-  components: { 
-    IonButtons,
-    IonButton,
-    IonContent,
-    IonFab,
-    IonFabButton,
-    IonHeader,
-    IonIcon,
-    IonItem,
-    IonLabel,
-    IonList,
-    IonRadioGroup,
-    IonRadio,
-    IonSearchbar,
-    IonTitle,
-    IonToolbar 
-    },
+  }
 });
 </script>
