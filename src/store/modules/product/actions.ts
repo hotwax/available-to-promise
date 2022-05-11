@@ -87,12 +87,18 @@ const actions: ActionTree<ProductState, RootState> = {
     }
 
     state.query.json['filter'] = Object.keys(state.appliedFilters.included).reduce((filter, value) => {
-      (state.appliedFilters.included as any)[value].length > 0 && filter.push(`${value}: (${(state.appliedFilters.included as any)[value].join(' OR ')})`)
+      const filterValues = (state.appliedFilters.included as any)[value]
+      if (filterValues.length > 0) {
+        filter.push(`${value}: ("${filterValues.join('" OR "')}")`)
+      }
       return filter
     }, state.query.json['filter'])
 
     state.query.json['filter'] = Object.keys(state.appliedFilters.excluded).reduce((filter, value) => {
-      (state.appliedFilters.excluded as any)[value].length > 0 && filter.push(`-${value}: (${(state.appliedFilters.excluded as any)[value].join(' OR ')})`)
+      const filterValues = (state.appliedFilters.excluded as any)[value]
+      if (filterValues.length > 0) {
+        filter.push(`-${value}: ("${filterValues.join('" OR "')}")`)
+      }
       return filter
     }, state.query.json['filter'])
 
@@ -108,6 +114,19 @@ const actions: ActionTree<ProductState, RootState> = {
     }, {})
     commit(types.PRODUCT_FILTERS_UPDATED, {type: payload.type, value})
     await dispatch('updateQuery')
+  },
+
+  async clearAllFilters({ commit, state }) {
+    const appliedFilters = JSON.parse(JSON.stringify(state.appliedFilters))
+    const value = Object.keys(appliedFilters).reduce((value: any, type: any) => {
+      const val = Object.keys(appliedFilters[type]).reduce((val: any, filter: any) => {
+        val[filter] = []
+        return val
+      }, {})
+      value[type] = val
+      return value
+    }, {})
+    commit(types.PRODUCT_ALL_FILTERS_UPDATED, value)
   },
 
   async clearFilters({ commit, dispatch }, payload) {
