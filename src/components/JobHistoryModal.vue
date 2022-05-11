@@ -92,6 +92,11 @@ export default defineComponent({
     async fetchJobHistory() {
       let resp;
 
+      if(!this.currentJob?.systemJobEnumId) {
+        this.jobHistory = [];
+        return
+      }
+
       try {
         resp = await JobService.fetchJobInformation({
           "inputFields": {
