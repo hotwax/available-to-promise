@@ -198,7 +198,7 @@
           </div>          
         </section>
 
-        <aside class="desktop-only" v-show="segmentSelected === 'pending' && currentJob">
+        <aside class="desktop-only" id="jobConfiguration" v-show="segmentSelected === 'pending' && currentJob">
           <JobConfiguration :title="title" :job="currentJob" :status="currentJobStatus" :type="freqType" :key="currentJob"/>
         </aside>
       </main>
@@ -467,7 +467,7 @@ export default defineComponent({
       }
     },
     playAnimation() {
-      const aside = document.querySelector('aside') as Element
+      const aside = document.querySelector('#jobConfiguration') as Element
       const main = document.querySelector('main') as Element
 
       const revealAnimation = createAnimation()
@@ -557,5 +557,9 @@ aside {
     max-width: 50ch;
   } 
 
+  aside {
+    width: 0px;
+    opacity: 0;
+  }
 }
 </style>
