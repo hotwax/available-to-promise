@@ -240,7 +240,7 @@ export default defineComponent({
       }
     },
     getTime (time: any) {
-      return DateTime.fromMillis(time, { zone: this.getUserProfile.userTimeZone }).toLocaleString(DateTime.TIME_SIMPLE);
+      return DateTime.fromMillis(time, { zone: this.getUserProfile.userTimeZone }).toLocaleString(DateTime.DATETIME_MED);
     },
     timeTillJob (time: any) {
       const timeDiff = DateTime.fromMillis(time, { zone: this.getUserProfile.userTimeZone }).diff(DateTime.now().setZone(this.getUserProfile.userTimeZone));
