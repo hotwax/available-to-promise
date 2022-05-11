@@ -490,7 +490,9 @@ export default defineComponent({
         .play();
     }
   },
-  ionViewDidEnter() {
+  ionViewWillEnter() {
+    // reassigning current job when entering in the view to not display the job config component if previously opened
+    this.currentJob = undefined
     this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums});
   },
   setup() {
