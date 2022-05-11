@@ -198,7 +198,7 @@
           </div>          
         </section>
 
-        <aside class="desktop-only" id="job-configuration" v-show="segmentSelected === 'pending' && currentJob">
+        <aside id="job-configuration" class="desktop-only" v-show="segmentSelected === 'pending' && currentJob">
           <JobConfiguration :title="title" :job="currentJob" :status="currentJobStatus" :type="freqType" :key="currentJob"/>
         </aside>
       </main>
