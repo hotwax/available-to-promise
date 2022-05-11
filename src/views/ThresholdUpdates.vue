@@ -131,6 +131,7 @@
               </ion-item>
 
               <div class="actions">
+                <div></div>
                 <div>
                   <ion-button fill="clear" color="medium" slot="end" @click.stop="copyJobInformation(job)">
                     <ion-icon slot="icon-only" :icon="copyOutline" />
@@ -199,6 +200,7 @@
             </ion-item>
 
             <div class="actions">
+              <div></div>
               <div>
                 <ion-button fill="clear" color="medium" slot="end" @click.stop="copyJobInformation(job)">
                   <ion-icon slot="icon-only" :icon="copyOutline" />
