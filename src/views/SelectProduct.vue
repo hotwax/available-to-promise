@@ -174,7 +174,7 @@ import { arrowForwardOutline, downloadOutline, filterOutline, saveOutline, price
 import { useRouter } from 'vue-router';
 import { mapGetters, useStore } from 'vuex';
 import SaveThresholdModal from '@/components/SaveThresholdModal.vue';
-import IncludeTagsModal from '@/components/IncludeTagsModal.vue';
+import ProductFilterModal from '@/components/ProductFilterModal.vue';
 
 export default defineComponent({
   name: 'SelectProduct',
@@ -262,7 +262,7 @@ export default defineComponent({
     },
     async searchFilter(label: string, facetToSelect: string, searchfield: string, type: string) {
       const modal = await modalController.create({
-        component: IncludeTagsModal,
+        component: ProductFilterModal,
         componentProps: {
           label,
           facetToSelect,
