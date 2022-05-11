@@ -99,11 +99,11 @@ const actions: ActionTree<UserState, RootState> = {
   },
 
   // Set User Instance Url
-  setUserInstanceUrl ({ state, commit }, payload){
+  setUserInstanceUrl ({ commit }, payload){
     commit(types.USER_INSTANCE_URL_UPDATED, payload)
   },
 
-  async getEComStores({ commit }, payload) {
+  async getEComStores(payload) {
     let resp;
 
     try{
@@ -118,7 +118,7 @@ const actions: ActionTree<UserState, RootState> = {
     }
   },
 
-  async setEComStore({ commit, dispatch }, payload) {
+  async setEComStore({ commit }, payload) {
     commit(types.USER_CURRENT_ECOM_STORE_UPDATED, payload.store);
   }
 }
