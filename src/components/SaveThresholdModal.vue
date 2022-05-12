@@ -100,7 +100,8 @@ export default defineComponent({
       shopifyConfig: 'util/getShopifyConfig',
       jobs: 'job/getJobs',
       facilitiesByProductStore: 'util/getFacilityByProductStore',
-      query: 'product/getQuery'
+      query: 'product/getQuery',
+      userProfile: 'user/getUserProfile'
     })
   },
   methods: {
@@ -177,7 +178,7 @@ export default defineComponent({
       }
 
       const payload = job ? {
-        'JOB_NAME': this.jobName ? this.jobName : job.jobName,
+        'JOB_NAME': this.jobName ? this.jobName : this.userProfile.partyName,
         'SERVICE_NAME': job.serviceName,
         'SERVICE_COUNT': '0',
         'jobFields': {
