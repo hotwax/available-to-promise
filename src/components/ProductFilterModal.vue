@@ -50,7 +50,7 @@ import { ProductService } from "@/services/ProductService";
 import { mapGetters, useStore } from "vuex";
 
 export default defineComponent({
-  name: "IncludeTagsModal",
+  name: "ProductFilterModal",
   components: {
     IonButton,
     IonButtons,
