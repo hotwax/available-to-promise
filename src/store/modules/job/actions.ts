@@ -232,9 +232,30 @@ const actions: ActionTree<JobState, RootState> = {
       "viewSize": payload.viewSize ? payload.viewSize : (payload.inputFields?.systemJobEnumId?.length * 2)
     })
     if (resp.status === 200 && !hasError(resp) && resp.data.docs) {
-      const cached = JSON.parse(JSON.stringify(state.cached)); 
+      const cached = JSON.parse(JSON.stringify(state.cached));
+
+      // added condition to store multiple pending jobs in the state for export products,
+      // getting job with status Service draft as well, as this information will be needed when scheduling
+      // a new batch
+      // TODO: this needs to be updated when we will be storing the draft and pending jobs separately
+      const exportProductThresholdJobs = [] as any
+      const exportProductThresholdEnum = 'JOB_EXP_PROD_THRSHLD'
+      resp.data.docs.filter((job: any) => job.systemJobEnumId === exportProductThresholdEnum).map((job: any) => {
+        exportProductThresholdJobs.push({
+          ...job,
+          id: job.jobId,
+          frequency: job.tempExprId,
+          enumId: job.systemJobEnumId,
+          status: job.statusId
+        })
+      })
 
       resp.data.docs.filter((job: any) => job.statusId === 'SERVICE_PENDING').map((job: any) => {
+
+        // added condition to store multiple pending jobs in the state for order batch jobs
+        if (job.systemJobEnumId === exportProductThresholdEnum) {
+          return cached[job.systemJobEnumId] = exportProductThresholdJobs
+        }
         
         return cached[job.systemJobEnumId] = {
           ...job,
