@@ -699,8 +699,8 @@ export default defineComponent({
       }
     },
     playAnimation() {
-      const aside = document.querySelector("aside") as Element;
-      const main = document.querySelector("main") as Element;
+      const aside = document.querySelector('#job-configuration') as Element
+      const main = document.querySelector('main') as Element
 
       const revealAnimation = createAnimation()
         .addElement(aside)
@@ -720,13 +720,10 @@ export default defineComponent({
       createAnimation().addAnimation([gapAnimation, revealAnimation]).play();
     },
   },
-  ionViewDidEnter() {
-    this.store.dispatch("job/fetchPendingJobs", {
-      eComStoreId: this.getCurrentEComStore.productStoreId,
-      viewSize: process.env.VUE_APP_VIEW_SIZE,
-      viewIndex: 0,
-      jobEnums: this.jobEnums,
-    });
+  ionViewWillEnter() {
+    // reassigning current job when entering in the view to not display the job config component if previously opened
+    this.currentJob = undefined
+    this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums});
   },
   setup() {
     const store = useStore();
@@ -795,6 +792,11 @@ aside {
 
   main > section {
     max-width: 50ch;
+  } 
+
+  aside {
+    width: 0px;
+    opacity: 0;
   }
 }
 </style>
