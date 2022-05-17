@@ -9,7 +9,7 @@
 
     <ion-content>
       <div class="find">
-        <aside class="filters">
+        <aside>
           <ion-list>
             <ion-list-header>{{ $t("Info") }}</ion-list-header>
             <ion-item>
@@ -30,8 +30,9 @@
 
         <main class="main">
           <ion-reorder-group @ionItemReorder="doReorder($event)" disabled="false">
-            <ion-card v-for="job in getJob(jobEnumId)" :key="job.jobId" v-show="job.statusId === 'SERVICE_PENDING'">
+            <ion-card v-for="job in jobsForReorder" :key="job.jobId" v-show="job.statusId === 'SERVICE_PENDING'">
               <ion-item>
+                <ion-label>{{ job.jobName }}</ion-label>
                 <ion-reorder slot="end"></ion-reorder>
               </ion-item>
               <ion-card-header>
@@ -65,6 +66,41 @@
               </div>
             </ion-card>
           </ion-reorder-group>
+          <!-- <ion-card>
+            <ion-item>
+              <ion-label>{{ job.jobName }}</ion-label>
+              <ion-reorder slot="end"></ion-reorder>
+            </ion-item>
+            <ion-card-header>
+              <ion-card-title>{{ getEnumDescription(job.systemJobEnumId) ? getEnumDescription(job.systemJobEnumId) : job.systemJobEnumId }}</ion-card-title>
+            </ion-card-header>
+
+            <ion-item>
+              <ion-icon slot="start" :icon="timeOutline" />
+              <ion-label class="ion-text-wrap">{{ job.runTime ? getTime(job.runTime) : "-"  }}</ion-label>
+              <ion-badge v-if="job.runTime" color="dark">{{ timeTillJob(job.runTime)}}</ion-badge>
+            </ion-item>
+
+            <ion-item>
+              <ion-icon slot="start" :icon="timerOutline" />
+              <ion-label class="ion-text-wrap">{{ job.tempExprId ? temporalExpr(job.tempExprId)?.description : "🙃"  }}</ion-label>
+            </ion-item>
+
+            <div class="actions">
+              <div>
+                <ion-button fill="clear" @click.stop="skipJob(job)">{{ $t("Skip") }}</ion-button>
+                <ion-button color="danger" fill="clear" @click.stop="cancelJob(job)">{{ $t("Cancel") }}</ion-button>
+              </div>
+              <div>
+                <ion-button fill="clear" color="medium" @click.stop="copyJobInformation(job)">
+                  <ion-icon slot="icon-only" :icon="copyOutline" />
+                </ion-button>
+                <ion-button fill="clear" color="medium" slot="end" @click.stop="viewJobHistory(job)">
+                  <ion-icon slot="icon-only" :icon="timeOutline" />
+                </ion-button>
+              </div>
+            </div>
+          </ion-card> -->
         </main>
       </div>
 
@@ -146,7 +182,8 @@ export default defineComponent({
     return {
       jobName: '',
       jobEnumId: 'JOB_EXP_PROD_THRSHLD',
-      isServiceScheduling: false
+      isServiceScheduling: false,
+      jobsForReorder: [] as any
     }
   },
   computed: {
@@ -159,7 +196,8 @@ export default defineComponent({
       query: 'product/getQuery',
       getStatusDesc: 'util/getStatusDesc',
       temporalExpr: 'job/getTemporalExpr',
-      getEnumDescription: 'job/getEnumDescription'
+      getEnumDescription: 'job/getEnumDescription',
+      userProfile: 'user/getUserProfile'
     })
   },
   methods: {
@@ -167,36 +205,22 @@ export default defineComponent({
       modalController.dismiss({ dismissed: true });
     },
     doReorder(event: CustomEvent) {
-      let jobs = this.getJob[this.jobEnumId]
-      // const jobRunTime = jobs.map((job: any) => job.runTime)
-      // const updatedSeq = event.detail.complete(JSON.parse(JSON.stringify(jobs)));
+      const jobRunTime = this.jobsForReorder.map((job: any) => job.runTime)
+      const updatedSeq = event.detail.complete(JSON.parse(JSON.stringify(this.jobsForReorder)));
 
-      event.detail.complete(jobs);
+      const diffSeq: any = Object.keys(this.jobsForReorder).reduce((diff, key) => {
+        if (updatedSeq[key].jobId === this.jobsForReorder[key].jobId) return diff
+        return {
+          ...diff,
+          [key]: updatedSeq[key]
+        }
+      }, {})
 
-      // const diffSeq: any = Object.keys(jobs).reduce((diff, key) => {
-      //   if (updatedSeq[key].jobId === jobs[key].jobId) return diff
-      //   return {
-      //     ...diff,
-      //     [key]: updatedSeq[key]
-      //   }
-      // }, {})
-
-      // Object.keys(diffSeq).map((key: any) => {
-      //   diffSeq[key].runTime = jobRunTime[key]
-      // })
-
-      // jobs = updatedSeq
-    },
-    async displayJobsInformation() {
-      const jobEnums = JSON.parse(process.env?.VUE_APP_JOB_ENUMS as string) as any
-      console.log(jobEnums)
-      await this.store.dispatch('job/fetchJobs', {
-        inputFields: {
-          systemJobEnumId: jobEnums,
-          systemJobEnumId_op: "in"
-        },
-        viewSize: 50
+      Object.keys(diffSeq).map((key: any) => {
+        diffSeq[key].runTime = jobRunTime[key]
       })
+
+      this.jobsForReorder = updatedSeq
     },
     getDate (runTime: any) {
       return DateTime.fromMillis(runTime).toLocaleString(DateTime.DATE_MED);
@@ -211,8 +235,6 @@ export default defineComponent({
     async saveThresholdRule() {
       this.isServiceScheduling = true;
       const solrQuery = this.query
-
-      this.displayJobsInformation();
 
       // // re-initialized params object from query as there is no need for grouping or pagination when storing the query
       // solrQuery.json.params = {
@@ -280,7 +302,7 @@ export default defineComponent({
       }
 
       const payload = job ? {
-        'JOB_NAME': this.jobName ? this.jobName : job.jobName,
+        'JOB_NAME': this.jobName ? this.jobName : this.userProfile.partyName,
         'SERVICE_NAME': job.serviceName,
         'SERVICE_COUNT': '0',
         'jobFields': {
@@ -327,6 +349,13 @@ export default defineComponent({
         systemJobEnumId_op: "in"
       },
       viewSize: 20
+    })
+    this.jobsForReorder = this.getJob(this.jobEnumId)
+    this.jobsForReorder?.push({
+      'jobName': (this as any).jobName,
+      'systemJobEnumId': 'JOB_EXP_PROD_THRSHLD',
+      'tempExprId': 'EVERYDAY',
+      'statusId': 'SERVICE_PENDING'
     })
   },
   setup() {
