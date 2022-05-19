@@ -215,7 +215,7 @@ export default defineComponent({
       const changedDateTime = DateTime.fromISO(ev['detail'].value).toMillis()
       const previousSeq = JSON.parse(JSON.stringify(this.jobsForReorder))
 
-      if (changedDateTime === previousSeq[1].runTime) return;
+      if (changedDateTime === previousSeq[0].runTime) return;
 
       let threshold = 0;
       this.jobsForReorder.map((job: any) => {
@@ -224,10 +224,19 @@ export default defineComponent({
       })
       const updatedSeq = JSON.parse(JSON.stringify(this.jobsForReorder))
       this.initialRunTime = this.jobsForReorder.find((job: any) => job.statusId !== 'SERVICE_DRAFT').runTime
-      this.updatedJobsOrder = this.findJobDiff(previousSeq, updatedSeq)
+
+      let diffSeq = this.findJobDiff(previousSeq, updatedSeq)
+
+      const updatedRunTime = updatedSeq.map((job: any) => job.runTime)
+      Object.keys(diffSeq).map((key: any) => {
+        diffSeq[key].runTime = updatedRunTime[key]
+      })
+
+      diffSeq = Object.keys(diffSeq).map((key) => diffSeq[key])
+
+      this.updatedJobsOrder = this.initialJobsOrder = diffSeq
     },
     findJobDiff(previousSeq: any, updatedSeq: any) {
-      const jobRunTime = previousSeq.map((job: any) => job.runTime)
       const diffSeq: any = Object.keys(previousSeq).reduce((diff, key) => {
         if (updatedSeq[key].jobId === previousSeq[key].jobId && updatedSeq[key].runTime === previousSeq[key].runTime) return diff
         return {
@@ -235,20 +244,23 @@ export default defineComponent({
           [key]: updatedSeq[key]
         }
       }, {})
-
-      Object.keys(diffSeq).map((key: any) => {
-        diffSeq[key].runTime = jobRunTime[key]
-      })
-
-      this.updatedJobsOrder = diffSeq;
+      return diffSeq;
     },
     doReorder(event: CustomEvent) {
       const previousSeq = JSON.parse(JSON.stringify(this.initialJobsOrder))
       const updatedSeq = event.detail.complete(JSON.parse(JSON.stringify(this.jobsForReorder)));
 
-      this.findJobDiff(previousSeq, updatedSeq)
+      let diffSeq = this.findJobDiff(previousSeq, updatedSeq)
+
+      const updatedRunTime = previousSeq.map((job: any) => job.runTime)
+      Object.keys(diffSeq).map((key: any) => {
+        diffSeq[key].runTime = updatedRunTime[key]
+      })
+
+      diffSeq = Object.keys(diffSeq).map((key) => diffSeq[key])
 
       this.jobsForReorder = updatedSeq
+      this.updatedJobsOrder = diffSeq
     },
     getDate (runTime: any) {
       return DateTime.fromMillis(runTime).toLocaleString(DateTime.DATE_MED);
