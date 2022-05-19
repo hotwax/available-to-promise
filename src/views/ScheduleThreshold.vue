@@ -25,6 +25,20 @@
               <ion-label>{{ $t("Rule name") }}</ion-label>
               <ion-input :placeholder="$t('rule name')" v-model="jobName"/>
             </ion-item>
+
+            <ion-item>
+              <ion-icon slot="start" :icon="timeOutline" />
+              <ion-label>{{ $t("Run time") }}</ion-label>
+              <ion-label id="open-run-time-modal" slot="end">{{ initialRunTime ? getTime(initialRunTime) : $t('Select run time') }}</ion-label>
+              <ion-modal trigger="open-run-time-modal">
+                <ion-content force-overscroll="false">
+                  <ion-datetime
+                    :value="initialRunTime ? getDateTime(initialRunTime) : ''"
+                    @ionChange="updateRunTime($event)"
+                  />
+                </ion-content>
+              </ion-modal>
+            </ion-item>
           </ion-list>
         </aside>
 
@@ -130,6 +144,7 @@ import {
   IonCardHeader,
   IonCardTitle,
   IonContent,
+  IonDatetime,
   IonFab,
   IonFabButton,
   IonHeader,
@@ -139,6 +154,7 @@ import {
   IonLabel,
   IonList,
   IonListHeader,
+  IonModal,
   IonPage,
   IonReorder,
   IonReorderGroup,
@@ -163,6 +179,7 @@ export default defineComponent({
     IonCardHeader,
     IonCardTitle,
     IonContent,
+    IonDatetime,
     IonFab,
     IonFabButton,
     IonHeader,
@@ -172,6 +189,7 @@ export default defineComponent({
     IonLabel,
     IonList,
     IonListHeader,
+    IonModal,
     IonPage,
     IonReorder,
     IonReorderGroup,
@@ -183,7 +201,10 @@ export default defineComponent({
       jobName: '',
       jobEnumId: 'JOB_EXP_PROD_THRSHLD',
       isServiceScheduling: false,
-      jobsForReorder: [] as any
+      jobsForReorder: [] as any,
+      initialJobsOrder: [] as any,
+      initialRunTime: '',
+      updatedJobsOrder: [] as any
     }
   },
   computed: {
@@ -204,12 +225,25 @@ export default defineComponent({
     closeModal() {
       modalController.dismiss({ dismissed: true });
     },
-    doReorder(event: CustomEvent) {
-      const jobRunTime = this.jobsForReorder.map((job: any) => job.runTime)
-      const updatedSeq = event.detail.complete(JSON.parse(JSON.stringify(this.jobsForReorder)));
+    updateRunTime(ev: CustomEvent, timeDiff = 900000) {
+      const changedDateTime = DateTime.fromISO(ev['detail'].value).toMillis()
+      const previousSeq = JSON.parse(JSON.stringify(this.jobsForReorder))
 
-      const diffSeq: any = Object.keys(this.jobsForReorder).reduce((diff, key) => {
-        if (updatedSeq[key].jobId === this.jobsForReorder[key].jobId) return diff
+      if (changedDateTime === previousSeq[1].runTime) return;
+
+      let threshold = 0;
+      this.jobsForReorder.map((job: any) => {
+        job.runTime = changedDateTime + threshold;
+        threshold += timeDiff
+      })
+      const updatedSeq = JSON.parse(JSON.stringify(this.jobsForReorder))
+      this.initialRunTime = this.jobsForReorder.find((job: any) => job.statusId !== 'SERVICE_DRAFT').runTime
+      this.updatedJobsOrder = this.findJobDiff(previousSeq, updatedSeq)
+    },
+    findJobDiff(previousSeq: any, updatedSeq: any) {
+      const jobRunTime = previousSeq.map((job: any) => job.runTime)
+      const diffSeq: any = Object.keys(previousSeq).reduce((diff, key) => {
+        if (updatedSeq[key].jobId === previousSeq[key].jobId && updatedSeq[key].runTime === previousSeq[key].runTime) return diff
         return {
           ...diff,
           [key]: updatedSeq[key]
@@ -220,6 +254,14 @@ export default defineComponent({
         diffSeq[key].runTime = jobRunTime[key]
       })
 
+      this.updatedJobsOrder = diffSeq;
+    },
+    doReorder(event: CustomEvent) {
+      const previousSeq = JSON.parse(JSON.stringify(this.initialJobsOrder))
+      const updatedSeq = event.detail.complete(JSON.parse(JSON.stringify(this.jobsForReorder)));
+
+      this.findJobDiff(previousSeq, updatedSeq)
+
       this.jobsForReorder = updatedSeq
     },
     getDate (runTime: any) {
@@ -227,6 +269,9 @@ export default defineComponent({
     },
     getTime (runTime: any) {
       return DateTime.fromMillis(runTime).toLocaleString(DateTime.TIME_SIMPLE);
+    },
+    getDateTime(time: any) {
+      return DateTime.fromMillis(time)
     },
     timeTillJob (time: any) {
       const timeDiff = DateTime.fromMillis(time).diff(DateTime.local());
@@ -350,13 +395,16 @@ export default defineComponent({
       },
       viewSize: 20
     })
-    this.jobsForReorder = this.getJob(this.jobEnumId)
+    this.jobsForReorder = this.getJob(this.jobEnumId).filter((job: any) => job.statusId === 'SERVICE_PENDING')
     this.jobsForReorder?.push({
       'jobName': (this as any).jobName,
       'systemJobEnumId': 'JOB_EXP_PROD_THRSHLD',
       'tempExprId': 'EVERYDAY',
-      'statusId': 'SERVICE_PENDING'
+      'statusId': 'SERVICE_PENDING',
+      'isNew': true
     })
+    this.initialRunTime = this.jobsForReorder[0].runTime
+    this.initialJobsOrder = JSON.parse(JSON.stringify(this.jobsForReorder))
   },
   setup() {
     const store = useStore();
@@ -405,5 +453,11 @@ ion-list-header > div {
     left: 50%;
     transform: translate(-50%, 0);
   }
+}
+
+ion-modal {
+  --width: 290px;
+  --height: 382px;
+  --border-radius: 8px;
 }
 </style>
