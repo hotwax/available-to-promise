@@ -135,6 +135,10 @@ const actions: ActionTree<ProductState, RootState> = {
   },
   clearProductList({ commit }){
     commit(types.PRODUCT_LIST_UPDATED, { products: [], totalVirtual: 0, totalVariant: 0 });
+  },
+
+  async updateThreshold({ commit }, value) {
+    commit(types.PRODUCT_THRESHOLD_UPDATED, value)
   }
 }
 export default actions;
