@@ -176,9 +176,6 @@ export default defineComponent({
     })
   },
   methods: {
-    closeModal() {
-      modalController.dismiss({ dismissed: true });
-    },
     updateRunTime(ev: CustomEvent, timeDiff = 900000) {
       const changedDateTime = DateTime.fromISO(ev['detail'].value).toMillis()
       const previousSeq = JSON.parse(JSON.stringify(this.jobsForReorder))
@@ -279,6 +276,7 @@ export default defineComponent({
     },
     async scheduleService(searchPreferenceId: string, threshold: string, runTime?: string) {
       let job = this.jobs[this.jobEnumId]
+      job = job?.find((job: any) => job.statusId === 'SERVICE_DRAFT')
       const productStoreId = this.currentEComStore.productStoreId
       let shopifyConfigId = this.shopifyConfig[productStoreId]
       let facilityId = this.facilitiesByProductStore[productStoreId]
@@ -347,7 +345,6 @@ export default defineComponent({
         resp = await JobService.scheduleJob({ ...job.runtimeData, ...payload });
         if (resp.status == 200 && !hasError(resp)) {
           showToast(translate('Service has been scheduled'))
-          this.closeModal();
         } else {
           showToast(translate('Something went wrong'))
         }
