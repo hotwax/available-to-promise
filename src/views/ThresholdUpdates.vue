@@ -72,7 +72,7 @@
                   <ion-button fill="clear" color="medium" slot="end" @click.stop="copyJobInformation(job)">
                     <ion-icon slot="icon-only" :icon="copyOutline" />
                   </ion-button>
-                  <ion-button fill="clear" color="medium" slot="end" @click.stop="viewJobHistory()">
+                  <ion-button fill="clear" color="medium" slot="end" @click.stop="viewJobHistory(job)">
                     <ion-icon slot="icon-only" :icon="timeOutline" />
                   </ion-button>
                 </div>
@@ -129,6 +129,18 @@
                 <ion-icon slot="start" :icon="codeWorkingOutline" />
                 <ion-label class="ion-text-wrap">{{ job.serviceName }}</ion-label>
               </ion-item>
+
+              <div class="actions">
+                <div></div>
+                <div>
+                  <ion-button fill="clear" color="medium" slot="end" @click.stop="copyJobInformation(job)">
+                    <ion-icon slot="icon-only" :icon="copyOutline" />
+                  </ion-button>
+                  <ion-button fill="clear" color="medium" slot="end" @click.stop="viewJobHistory(job)">
+                    <ion-icon slot="icon-only" :icon="timeOutline" />
+                  </ion-button>
+                </div>
+              </div>
             </ion-card>
 
             <ion-refresher slot="fixed" @ionRefresh="refreshJobs($event)">
@@ -187,6 +199,17 @@
               <ion-label class="ion-text-wrap">{{ job.serviceName }}</ion-label>
             </ion-item>
 
+            <div class="actions">
+              <div></div>
+              <div>
+                <ion-button fill="clear" color="medium" slot="end" @click.stop="copyJobInformation(job)">
+                  <ion-icon slot="icon-only" :icon="copyOutline" />
+                </ion-button>
+                <ion-button fill="clear" color="medium" slot="end" @click.stop="viewJobHistory(job)">
+                  <ion-icon slot="icon-only" :icon="timeOutline" />
+                </ion-button>
+              </div>
+            </div>
           </ion-card>
 
           <ion-refresher slot="fixed" @ionRefresh="refreshJobs($event)">
