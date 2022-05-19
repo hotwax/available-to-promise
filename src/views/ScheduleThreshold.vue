@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header :translucent="true">
       <ion-toolbar>
-        <ion-back-button slot="start" />
+        <ion-back-button slot="start" default-href="/select-product"/>
         <ion-title>{{ $t("Schedule new threshold") }}</ion-title>
       </ion-toolbar>
     </ion-header>
@@ -14,7 +14,7 @@
             <ion-list-header>{{ $t("Info") }}</ion-list-header>
             <ion-item>
               <ion-icon :icon="shirtOutline" slot="start" />
-              <ion-label>{{ totalSKUs }} {{ $t('SKUs') }}</ion-label>
+              <ion-label>{{ products.total.variant }} {{ $t('SKUs') }}</ion-label>
             </ion-item>
             <ion-item>
               <ion-icon :icon="optionsOutline" slot="start" />
@@ -59,53 +59,18 @@
                 <ion-badge v-if="job.runTime" color="dark">{{ timeTillJob(job.runTime)}}</ion-badge>
               </ion-item>
 
-              <ion-item>
+              <ion-item lines="none">
                 <ion-icon slot="start" :icon="timerOutline" />
                 <ion-label class="ion-text-wrap">{{ job.tempExprId ? temporalExpr(job.tempExprId)?.description : "🙃"  }}</ion-label>
               </ion-item>
 
             </ion-card>
           </ion-reorder-group>
-          <!-- <ion-card>
-            <ion-item>
-              <ion-label>{{ job.jobName }}</ion-label>
-              <ion-reorder slot="end"></ion-reorder>
-            </ion-item>
-            <ion-card-header>
-              <ion-card-title>{{ getEnumDescription(job.systemJobEnumId) ? getEnumDescription(job.systemJobEnumId) : job.systemJobEnumId }}</ion-card-title>
-            </ion-card-header>
-
-            <ion-item>
-              <ion-icon slot="start" :icon="timeOutline" />
-              <ion-label class="ion-text-wrap">{{ job.runTime ? getTime(job.runTime) : "-"  }}</ion-label>
-              <ion-badge v-if="job.runTime" color="dark">{{ timeTillJob(job.runTime)}}</ion-badge>
-            </ion-item>
-
-            <ion-item>
-              <ion-icon slot="start" :icon="timerOutline" />
-              <ion-label class="ion-text-wrap">{{ job.tempExprId ? temporalExpr(job.tempExprId)?.description : "🙃"  }}</ion-label>
-            </ion-item>
-
-            <div class="actions">
-              <div>
-                <ion-button fill="clear" @click.stop="skipJob(job)">{{ $t("Skip") }}</ion-button>
-                <ion-button color="danger" fill="clear" @click.stop="cancelJob(job)">{{ $t("Cancel") }}</ion-button>
-              </div>
-              <div>
-                <ion-button fill="clear" color="medium" @click.stop="copyJobInformation(job)">
-                  <ion-icon slot="icon-only" :icon="copyOutline" />
-                </ion-button>
-                <ion-button fill="clear" color="medium" slot="end" @click.stop="viewJobHistory(job)">
-                  <ion-icon slot="icon-only" :icon="timeOutline" />
-                </ion-button>
-              </div>
-            </div>
-          </ion-card> -->
         </main>
       </div>
 
       <div class="action desktop-only">
-        <ion-button>
+        <ion-button @click="saveThresholdRule()">
           <ion-icon slot="start" :icon="saveOutline" />
           {{ $t("Schedule Job") }}
         </ion-button>
@@ -154,6 +119,7 @@ import { translate } from '@/i18n';
 import { JobService } from '@/services/JobService';
 import { DateTime } from 'luxon';
 import { mapGetters, useStore } from 'vuex';
+import { ProductService } from '@/services/ProductService';
 
 export default defineComponent({
   name: 'SelectProduct',
@@ -204,7 +170,9 @@ export default defineComponent({
       getStatusDesc: 'util/getStatusDesc',
       temporalExpr: 'job/getTemporalExpr',
       getEnumDescription: 'job/getEnumDescription',
-      userProfile: 'user/getUserProfile'
+      userProfile: 'user/getUserProfile',
+      threshold: 'product/getThreshold',
+      products: 'product/getProducts',
     })
   },
   methods: {
@@ -279,32 +247,37 @@ export default defineComponent({
       this.isServiceScheduling = true;
       const solrQuery = this.query
 
-      // // re-initialized params object from query as there is no need for grouping or pagination when storing the query
-      // solrQuery.json.params = {
-      //   "q.op": "AND"
-      // }
-      // // made the query to default (*:*) before storing, as the threshold will be set for all the products those
-      // // are fullfilling the filters condition
-      // solrQuery.json['query'] = "*:*"
+      const jobRunTime = this.updatedJobsOrder.find((job: any) => job.isNew)?.runTime
+      const jobsToUpdate = this.updatedJobsOrder.filter((job: any) => !job.isNew)
 
-      // try {
-      //   const resp = await ProductService.createSearchPreference({
-      //     searchPrefValue: JSON.stringify(solrQuery)
-      //   });
+      await Promise.all(jobsToUpdate.map(async (job: any) => await this.store.dispatch('job/updateJob', job)))
 
-      //   if (resp.status == 200 && resp?.data?.searchPrefId) {
-      //     const searchPreferenceId = resp.data.searchPrefId;
-      //     await this.scheduleService(searchPreferenceId, this.threshold)
-      //   } else {
-      //     showToast(translate('Something went wrong'))
-      //   }
-      // } catch (err) {
-      //   console.error(err)
-      //   showToast(translate('Something went wrong'))
-      // }
+      // re-initialized params object from query as there is no need for grouping or pagination when storing the query
+      solrQuery.json.params = {
+        "q.op": "AND"
+      }
+      // made the query to default (*:*) before storing, as the threshold will be set for all the products those
+      // are fullfilling the filters condition
+      solrQuery.json['query'] = "*:*"
+
+      try {
+        const resp = await ProductService.createSearchPreference({
+          searchPrefValue: JSON.stringify(solrQuery)
+        });
+
+        if (resp.status == 200 && resp?.data?.searchPrefId) {
+          const searchPreferenceId = resp.data.searchPrefId;
+          await this.scheduleService(searchPreferenceId, this.threshold, jobRunTime)
+        } else {
+          showToast(translate('Something went wrong'))
+        }
+      } catch (err) {
+        console.error(err)
+        showToast(translate('Something went wrong'))
+      }
       this.isServiceScheduling = false
     },
-    async scheduleService(searchPreferenceId: string, threshold: string) {
+    async scheduleService(searchPreferenceId: string, threshold: string, runTime?: string) {
       let job = this.jobs[this.jobEnumId]
       const productStoreId = this.currentEComStore.productStoreId
       let shopifyConfigId = this.shopifyConfig[productStoreId]
@@ -368,6 +341,7 @@ export default defineComponent({
       // checking if the runtimeData has productStoreId, and if present then adding it on root level
       job?.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = productStoreId)
       job?.priority && (payload['SERVICE_PRIORITY'] = job.priority.toString())
+      runTime && (job['runTime'] = runTime)
 
       try {
         resp = await JobService.scheduleJob({ ...job.runtimeData, ...payload });
