@@ -249,6 +249,7 @@ import {
   IonPage,
   IonRefresher,
   IonRefresherContent,
+  IonSearchbar,
   IonToolbar,
   IonTitle,
   IonInfiniteScroll,
@@ -288,6 +289,7 @@ export default defineComponent({
     IonPage,
     IonRefresher,
     IonRefresherContent,
+    IonSearchbar,
     IonToolbar,
     IonTitle,
     IonInfiniteScroll,
@@ -401,7 +403,8 @@ export default defineComponent({
           this.isRetrying = false;
         });
       } else if(this.segmentSelected === 'running') {
-        this.store.dispatch('job/fetchRunningJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, queryString: this.queryString}).then(() => {          if(event) event.target.complete();
+        this.store.dispatch('job/fetchRunningJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, queryString: this.queryString}).then(() => {          
+          if(event) event.target.complete();
           this.isRetrying = false;
         });
       } else {
