@@ -133,7 +133,7 @@
       </div>
 
       <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="mobile-only">
-        <ion-fab-button>
+        <ion-fab-button @click="saveThreshold()">
           <ion-icon :icon="arrowForwardOutline" />
         </ion-fab-button>
       </ion-fab>
@@ -329,8 +329,7 @@ export default defineComponent({
 }
 
 .find {
-  padding: var( --spacer-lg);
-  gap: var(--spacer-lg);
+  padding: 0 var( --spacer-base);
 }
 
 ion-list-header > div {
@@ -340,6 +339,10 @@ ion-list-header > div {
 }
 
 @media (min-width: 991px) {
+  .find {
+    padding: var( --spacer-lg);
+    gap: var(--spacer-lg);
+   }
   .action {
     position: fixed;
     z-index: 3;
