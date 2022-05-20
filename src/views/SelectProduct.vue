@@ -72,7 +72,7 @@
                 <ion-card>
                   <Image :src="variant.mainImageUrl" />
                   <ion-item lines="none">
-                    <ion-label>
+                    <ion-label class="ion-text-wrap">
                       {{ variant.productName }}
                       <p v-if="variant.color">{{ $t("Color") }}: {{ variant.color }}</p>
                       <p v-if="variant.size">{{ $t("Size") }}: {{ variant.size }}</p>
@@ -167,12 +167,13 @@ export default defineComponent({
       products: 'product/getProducts',
       isScrollable: 'product/isScrollable',
       appliedFilters: 'product/getAppliedFilters',
-      query: 'product/getQuery'
+      query: 'product/getQuery',
+      threshold: 'product/getThreshold'
     })
   },
+
   data () {
     return {
-      threshold: '' as any,
       queryString: '',
       showFilterButton: false,
     }

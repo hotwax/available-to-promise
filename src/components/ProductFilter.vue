@@ -6,6 +6,7 @@
         type="number"
         :placeholder="$t('global threshold')"
         v-model="threshold"
+        @input="enterThreshold"
       />
     </ion-item>
     <ion-list-header>
@@ -140,6 +141,10 @@ export default defineComponent({
     }),
   },
   methods: {
+    async enterThreshold() {
+      console.log(this.threshold)  
+      await this.store.dispatch('product/updateThreshold', this.threshold)
+    }, 
     async resetFilters(type: string) {
       // checking that if any of the current type does not have any attribute selected than not making solr query
       if (
@@ -204,6 +209,13 @@ export default defineComponent({
 </script>
 
 <style scoped>
+ion-list-header > div {
+  display: flex;
+  justify-content: space-between;
+  flex: 1;
+  align-items: center;
+} 
+
 ion-modal {
   --width: 290px;
   --height: 382px;
