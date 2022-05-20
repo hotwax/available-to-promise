@@ -19,7 +19,7 @@ const actions: ActionTree<UserState, RootState> = {
       if (resp.status === 200 && resp.data) {
         if (resp.data.token) {
             commit(types.USER_TOKEN_CHANGED, { newToken: resp.data.token })
-            dispatch('getProfile')
+            await dispatch('getProfile')
             return resp.data;
         } else if (hasError(resp)) {
           showToast(translate('Sorry, your username or password is incorrect. Please try again.'));
@@ -62,7 +62,8 @@ const actions: ActionTree<UserState, RootState> = {
         "fieldList": ["productStoreId", "storeName"],
         "entityName": "ProductStore",
         "distinct": "Y",
-        "noConditionFind": "Y"
+        "noConditionFind": "Y",
+        "orderBy": "externalId DESC"
       }
       const localTimeZone = DateTime.local().zoneName;
       if (resp.data.userTimeZone !== localTimeZone) {
