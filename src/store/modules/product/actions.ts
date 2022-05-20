@@ -75,7 +75,7 @@ const actions: ActionTree<ProductState, RootState> = {
 
     if(payload && payload.queryString) {
       state.query.json.params.defType = 'edismax'
-      state.query.json.params.qf = 'productId productName sku internalName brandName parentProductName'
+      state.query.json.params.qf = 'productId productName upc sku internalName brandName parentProductName'
       // passed this operator to do not split search string and consider the search string as a single value
       state.query.json.params['q.op'] = 'AND'
       state.query.json.query = `*${payload.queryString}*`
