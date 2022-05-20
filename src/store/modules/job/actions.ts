@@ -48,6 +48,7 @@ const actions: ActionTree<JobState, RootState> = {
         "systemJobEnumId_fld1_grp": "2",
         "systemJobEnumId_fld1_op": "equals",
         "productStoreId": payload.eComStoreId,
+        "productStoreId_grp": "2",
         "statusId": ["SERVICE_CANCELLED", "SERVICE_CRASHED", "SERVICE_FAILED", "SERVICE_FINISHED"],
         "statusId_op": "in",
         "systemJobEnumId_op": "not-empty"
@@ -100,6 +101,7 @@ const actions: ActionTree<JobState, RootState> = {
         "systemJobEnumId_fld1_grp": "2",
         "systemJobEnumId_fld1_op": "equals",
         "productStoreId": payload.eComStoreId,
+        "productStoreId_grp": "2",
         "systemJobEnumId_op": "not-empty",
         "statusId_fld0_value": "SERVICE_RUNNING",
         "statusId_fld0_op": "equals",
@@ -156,6 +158,7 @@ const actions: ActionTree<JobState, RootState> = {
         "systemJobEnumId_fld1_grp": "2",
         "systemJobEnumId_fld1_op": "equals",
         "productStoreId": payload.eComStoreId,
+        "productStoreId_grp": "2",
         "statusId": "SERVICE_PENDING",
         "systemJobEnumId_op": "not-empty"
       },
