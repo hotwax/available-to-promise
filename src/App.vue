@@ -6,7 +6,7 @@
           <ion-title>{{ $t("Menu") }}</ion-title>
         </ion-toolbar>
       </ion-header>
-      <ion-content>
+      <ion-content id="main">
         <ion-list>
           <ion-item button @click="closeMenu(); router.push('/select-product')">
             <ion-icon :icon="options" slot="start" />
