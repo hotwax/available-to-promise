@@ -285,6 +285,7 @@ const actions: ActionTree<JobState, RootState> = {
         return job.tempExprId
       }).flat()
 
+      await dispatch('fetchJobDescription', Object.keys(cached).map((job: any) => job));
       await dispatch('fetchTemporalExpression', tempExpr)
 
       commit(types.JOB_UPDATED_BULK, cached);
