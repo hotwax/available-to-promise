@@ -122,6 +122,7 @@ import { JobService } from '@/services/JobService';
 import { DateTime } from 'luxon';
 import { mapGetters, useStore } from 'vuex';
 import { ProductService } from '@/services/ProductService';
+import { useRouter } from 'vue-router';
 
 export default defineComponent({
   name: 'SelectProduct',
@@ -291,6 +292,10 @@ export default defineComponent({
         showToast(translate('Something went wrong'))
       }
       this.isServiceScheduling = false
+
+      if (!this.failedJobs.length) {
+        this.router.push('/select-product')
+      }
     },
     async scheduleService(searchPreferenceId: string, threshold: string, runTime?: string) {
       let job = this.jobs[this.jobEnumId]
@@ -402,11 +407,13 @@ export default defineComponent({
   },
   setup() {
     const store = useStore();
+    const router = useRouter();
 
     return {
       arrowForwardOutline,
       copyOutline,
       optionsOutline,
+      router,
       saveOutline,
       shirtOutline,
       store,
