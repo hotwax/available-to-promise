@@ -42,7 +42,7 @@ const actions: ActionTree<ProductState, RootState> = {
         commit(types.PRODUCT_LIST_UPDATED, { products, totalVirtual, totalVariant });
       } else {
         showToast(translate("Products not found"));
-        commit(types.PRODUCT_LIST_UPDATED, { products: [], totalVirtual: 0, totalVariant: 0 });
+        commit(types.PRODUCT_LIST_UPDATED, { products: [], totalVirtual: state.products.total.virtual, totalVariant: state.products.total.variant });
       }
     } catch (error) {
       console.error(error);
@@ -75,7 +75,7 @@ const actions: ActionTree<ProductState, RootState> = {
 
     if(payload && payload.queryString) {
       state.query.json.params.defType = 'edismax'
-      state.query.json.params.qf = 'productId productName sku internalName brandName parentProductName'
+      state.query.json.params.qf = 'productId productName upc sku internalName brandName parentProductName'
       // passed this operator to do not split search string and consider the search string as a single value
       state.query.json.params['q.op'] = 'AND'
       state.query.json.query = `*${payload.queryString}*`

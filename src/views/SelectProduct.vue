@@ -173,7 +173,8 @@ import { defineComponent } from 'vue';
 import { arrowForwardOutline, downloadOutline, filterOutline, saveOutline, pricetagOutline, closeCircle, addCircleOutline, albumsOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
 import { mapGetters, useStore } from 'vuex';
-import IncludeTagsModal from '@/components/IncludeTagsModal.vue';
+import SaveThresholdModal from '@/components/SaveThresholdModal.vue';
+import ProductFilterModal from '@/components/ProductFilterModal.vue';
 
 export default defineComponent({
   name: 'SelectProduct',
@@ -253,7 +254,7 @@ export default defineComponent({
     },
     async searchFilter(label: string, facetToSelect: string, searchfield: string, type: string) {
       const modal = await modalController.create({
-        component: IncludeTagsModal,
+        component: ProductFilterModal,
         componentProps: {
           label,
           facetToSelect,
