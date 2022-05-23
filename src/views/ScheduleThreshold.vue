@@ -294,7 +294,7 @@ export default defineComponent({
       this.isServiceScheduling = false
 
       if (!this.failedJobs.length) {
-        this.store.commit('job/clearJobState')
+        this.store.dispatch('job/clearJobState')
         this.router.push('/select-product')
       }
     },
