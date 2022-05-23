@@ -63,7 +63,7 @@
 
               <ion-item lines="none">
                 <ion-icon slot="start" :icon="timerOutline" />
-                <ion-label class="ion-text-wrap">{{ job.tempExprId ? temporalExpr(job.tempExprId)?.description : "🙃"  }}</ion-label>
+                <ion-label class="ion-text-wrap">{{ job.tempExprId && temporalExpr(job.tempExprId)?.description ? temporalExpr(job.tempExprId)?.description : "🙃"  }}</ion-label>
               </ion-item>
 
             </ion-card>
@@ -294,6 +294,7 @@ export default defineComponent({
       this.isServiceScheduling = false
 
       if (!this.failedJobs.length) {
+        this.store.commit('job/clearJobState')
         this.router.push('/select-product')
       }
     },
@@ -392,8 +393,8 @@ export default defineComponent({
       viewSize: 20
     })
     this.jobsForReorder = this.getJob(this.jobEnumId).filter((job: any) => job.statusId === 'SERVICE_PENDING')
-    this.initialRunTime = this.jobsForReorder[0].runTime
-    let lastRunTime = this.jobsForReorder[this.jobsForReorder.length - 1].runTime
+    this.initialRunTime = this.jobsForReorder[0]?.runTime || DateTime.now().toMillis()
+    let lastRunTime = this.jobsForReorder[this.jobsForReorder.length - 1]?.runTime || DateTime.now().toMillis()
     this.jobsForReorder?.push({
       'jobName': (this as any).jobName,
       'systemJobEnumId': 'JOB_EXP_PROD_THRSHLD',
@@ -403,6 +404,7 @@ export default defineComponent({
       'runTime': lastRunTime + 900000,
       'jobId': 'newJob'
     })
+    await this.store.dispatch('job/fetchTemporalExpression', ['EVERYDAY'])
     this.initialJobsOrder = JSON.parse(JSON.stringify(this.jobsForReorder))
   },
   setup() {
