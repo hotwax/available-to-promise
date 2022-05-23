@@ -383,7 +383,16 @@ export default defineComponent({
       return resp;
     }
   },
-  async mounted() {
+  async ionViewWillEnter() {
+    // TODO: remove this initialization from the hook and update the code accordingly
+    this.jobName = ''
+    this.jobsForReorder = []
+    this.initialJobsOrder = []
+    this.initialRunTime = ''
+    this.updatedJobsOrder = []
+    this.failedJobs = []
+    this.successJobs = []
+
     const jobEnums = JSON.parse(process.env?.VUE_APP_JOB_ENUMS as string) as any
     await this.store.dispatch('job/fetchJobs', {
       inputFields: {
