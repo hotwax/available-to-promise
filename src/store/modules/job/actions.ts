@@ -155,9 +155,10 @@ const actions: ActionTree<JobState, RootState> = {
         "systemJobEnumId_fld1_value": payload.jobEnums[1],
         "systemJobEnumId_fld1_grp": "2",
         "systemJobEnumId_fld1_op": "equals",
-        "productStoreId": payload.eComStoreId,
-        "statusId": "SERVICE_PENDING",
-        "systemJobEnumId_op": "not-empty"
+        "productStoreId_fld0_value": payload.eComStoreId,
+        "productStoreId_fld0_op": "equals",
+        "productStoreId_fld0_grp": "2",
+        "statusId": "SERVICE_PENDING"
       },
       "fieldList": [ "systemJobEnumId", "runTime", "tempExprId", "parentJobId", "serviceName", "jobId", "jobName", "currentRetryCount", "statusId" ],
       "entityName": "JobSandbox",
@@ -222,9 +223,16 @@ const actions: ActionTree<JobState, RootState> = {
   
   async fetchJobs ({ state, commit, dispatch }, payload) {
     const resp = await JobService.fetchJobInformation({
-      "inputFields":{
-        "statusId": ['SERVICE_DRAFT', 'SERVICE_PENDING'],
-        "statusId_op": "in",
+      "inputFields": {
+        "statusId_fld0_value": "SERVICE_DRAFT",
+        "statusId_fld0_op": "equals",
+        "statusId_fld0_grp": "1",
+        "statusId_fld1_value": "SERVICE_PENDING",
+        "statusId_fld1_op": "equals",
+        "statusId_fld1_grp": "2",
+        "productStoreId_fld0_value": this.state.user.currentEComStore.productStoreId,
+        "productStoreId_fld0_op": "equals",
+        "productStoreId_fld0_grp": "2",
         ...payload.inputFields
       },
       "entityName": "JobSandbox",
@@ -268,13 +276,13 @@ const actions: ActionTree<JobState, RootState> = {
       })  
 
       resp.data.docs.filter((job: any) => job.statusId === 'SERVICE_DRAFT').map((job: any) => {
-        return cached[job.systemJobEnumId] = cached[job.systemJobEnumId] ? cached[job.systemJobEnumId] : {
+        return cached[job.systemJobEnumId] = cached[job.systemJobEnumId] ? cached[job.systemJobEnumId] : [{
           ...job,
           id: job.jobId,
           frequency: job.tempExprId,
           enumId: job.systemJobEnumId,
           status: job.statusId
-        }
+        }]
       });
 
       // fetching temp expressions
