@@ -229,7 +229,8 @@ const actions: ActionTree<JobState, RootState> = {
       },
       "entityName": "JobSandbox",
       "noConditionFind": "Y",
-      "viewSize": payload.viewSize ? payload.viewSize : (payload.inputFields?.systemJobEnumId?.length * 2)
+      "viewSize": payload.viewSize ? payload.viewSize : (payload.inputFields?.systemJobEnumId?.length * 2),
+      "orderBy": "runTime ASC"
     })
     if (resp.status === 200 && !hasError(resp) && resp.data.docs) {
       const cached = JSON.parse(JSON.stringify(state.cached));
@@ -277,44 +278,16 @@ const actions: ActionTree<JobState, RootState> = {
       });
 
       // fetching temp expressions
-      const tempExpr = Object.values(cached).map((job: any) => job.tempExprId)
+      const tempExpr = Object.values(cached).map((job: any) => {
+        // checked that if there is an array of jobs like in case of batch jobs then finding
+        // the tempExprId for all the nested jobs
+        if (job.length) return [...(job.map((jobInfo: any) => jobInfo.tempExprId))]
+        return job.tempExprId
+      }).flat()
+
       await dispatch('fetchTemporalExpression', tempExpr)
 
       commit(types.JOB_UPDATED_BULK, cached);
-    }
-    return resp;
-  },
-  async updateJob ({ dispatch }, job) {
-    let resp;
-
-    const payload = {
-      'jobId': job.jobId,
-      'systemJobEnumId': job.systemJobEnumId,
-      'recurrenceTimeZone': DateTime.now().zoneName,
-      'tempExprId': job.jobStatus,
-      'statusId': "SERVICE_PENDING"
-    } as any
-
-    job?.runTime && (payload['runTime'] = job.runTime)
-    job?.sinceId && (payload['sinceId'] = job.sinceId)
-    job?.jobName && (payload['jobName'] = job.jobName)
-
-    try {
-      resp = await JobService.updateJob(payload)
-      if (resp.status === 200 && !hasError(resp) && resp.data.successMessage) {
-        showToast(translate('Service updated successfully'))
-        dispatch('fetchJobs', {
-          inputFields: {
-            'systemJobEnumId': payload.systemJobEnumId,
-            'systemJobEnumId_op': 'equals'
-          }
-        })
-      } else {
-        showToast(translate('Something went wrong'))
-      }
-    } catch (err) {
-      showToast(translate('Something went wrong'))
-      console.error(err)
     }
     return resp;
   },
@@ -396,7 +369,7 @@ const actions: ActionTree<JobState, RootState> = {
       'statusId': "SERVICE_PENDING"
     } as any
 
-    const resp = await JobService.updateJob(payload)
+    const resp = await JobService.updateJobSandbox(payload)
     if (resp.status === 200 && !hasError(resp) && resp.data.docs) {
       commit(types.JOB_UPDATED, { job });
     }
@@ -407,7 +380,7 @@ const actions: ActionTree<JobState, RootState> = {
     let resp;
 
     try {
-      resp = await JobService.updateJob({
+      resp = await JobService.updateJobSandbox({
         jobId: job.jobId,
         systemJobEnumId: job.systemJobEnumId,
         statusId: "SERVICE_CANCELLED",
