@@ -51,6 +51,8 @@
               </ion-item>
               <ion-card-header>
                 <ion-card-title>{{ getEnumDescription(job.systemJobEnumId) ? getEnumDescription(job.systemJobEnumId) : job.systemJobEnumId }}</ion-card-title>
+                <p v-if="failedJobs.includes(job.jobId)">{{ $t('Failed') }}</p>
+                <p v-if="successJobs.includes(job.jobId)">{{ $t('Success') }}</p>
               </ion-card-header>
 
               <ion-item>
@@ -156,7 +158,9 @@ export default defineComponent({
       jobsForReorder: [] as any,
       initialJobsOrder: [] as any,
       initialRunTime: '',
-      updatedJobsOrder: [] as any
+      updatedJobsOrder: [] as any,
+      failedJobs: [] as any,
+      successJobs: [] as any
     }
   },
   computed: {
@@ -167,7 +171,6 @@ export default defineComponent({
       getJob: 'job/getJob',
       facilitiesByProductStore: 'util/getFacilityByProductStore',
       query: 'product/getQuery',
-      getStatusDesc: 'util/getStatusDesc',
       temporalExpr: 'job/getTemporalExpr',
       getEnumDescription: 'job/getEnumDescription',
       userProfile: 'user/getUserProfile',
@@ -247,7 +250,22 @@ export default defineComponent({
       const jobRunTime = this.updatedJobsOrder.find((job: any) => job.isNew)?.runTime
       const jobsToUpdate = this.updatedJobsOrder.filter((job: any) => !job.isNew)
 
-      await Promise.all(jobsToUpdate.map(async (job: any) => await this.store.dispatch('job/updateJob', job)))
+      await Promise.all(jobsToUpdate.map(async (job: any) => {
+        const resp = await JobService.updateJob(job)
+        if (!resp) {
+          this.failedJobs.push(job.jobId)
+        } else if (resp?.status === 200) {
+          this.successJobs.push(job.jobId)
+        }
+        return resp
+      }))
+
+      this.store.dispatch('job/fetchJobs', {
+        inputFields: {
+          'systemJobEnumId': this.jobEnumId,
+          'systemJobEnumId_op': 'equals'
+        }
+      })
 
       // re-initialized params object from query as there is no need for grouping or pagination when storing the query
       solrQuery.json.params = {
@@ -281,6 +299,7 @@ export default defineComponent({
       let shopifyConfigId = this.shopifyConfig[productStoreId]
       let facilityId = this.facilitiesByProductStore[productStoreId]
       let resp = '' as any;
+      job.jobId = 'newJob'
 
       if (!job) {
         await this.store.dispatch('job/fetchJobs', {
@@ -345,11 +364,14 @@ export default defineComponent({
         resp = await JobService.scheduleJob({ ...job.runtimeData, ...payload });
         if (resp.status == 200 && !hasError(resp)) {
           showToast(translate('Service has been scheduled'))
+          this.successJobs.push(job.jobId)
         } else {
           showToast(translate('Something went wrong'))
+          this.failedJobs.push(job.jobId)
         }
       } catch (err) {
         showToast(translate('Something went wrong'))
+        this.failedJobs.push(job.jobId)
         console.error(err)
       }
       return resp;
@@ -365,14 +387,17 @@ export default defineComponent({
       viewSize: 20
     })
     this.jobsForReorder = this.getJob(this.jobEnumId).filter((job: any) => job.statusId === 'SERVICE_PENDING')
+    this.initialRunTime = this.jobsForReorder[0].runTime
+    let lastRunTime = this.jobsForReorder[this.jobsForReorder.length - 1].runTime
     this.jobsForReorder?.push({
       'jobName': (this as any).jobName,
       'systemJobEnumId': 'JOB_EXP_PROD_THRSHLD',
       'tempExprId': 'EVERYDAY',
       'statusId': 'SERVICE_PENDING',
-      'isNew': true
+      'isNew': true,
+      'runTime': lastRunTime + 900000,
+      'jobId': 'newJob'
     })
-    this.initialRunTime = this.jobsForReorder[0].runTime
     this.initialJobsOrder = JSON.parse(JSON.stringify(this.jobsForReorder))
   },
   setup() {
