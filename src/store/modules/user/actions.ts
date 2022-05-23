@@ -69,9 +69,9 @@ const actions: ActionTree<UserState, RootState> = {
         emitter.emit('timeZoneDifferent', { profileTimeZone: resp.data.userTimeZone, localTimeZone});
       }
 
-        const newresp = await UserService.getEComStores(payload);
-        if (newresp.status === 200 && newresp.data.docs?.length > 0 && !hasError(newresp)) {
-          const stores = newresp.data.docs
+        const eComStoreResp = await UserService.getEComStores(payload);
+        if (eComStoreResp.status === 200 && eComStoreResp.data.docs?.length > 0 && !hasError(eComStoreResp)) {
+          const stores = eComStoreResp.data.docs
           resp.data.stores = stores ? stores : [];
           commit(types.USER_CURRENT_ECOM_STORE_UPDATED, stores ? stores[0] : {});
         }
