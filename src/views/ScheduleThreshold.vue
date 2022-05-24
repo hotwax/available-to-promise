@@ -180,12 +180,16 @@ export default defineComponent({
     })
   },
   methods: {
+    // method to update the run time for all the jobs, for now hardcoded the time diff of 15 mins.
     updateRunTime(ev: CustomEvent, timeDiff = 900000) {
       const changedDateTime = DateTime.fromISO(ev['detail'].value).toMillis()
       const previousSeq = JSON.parse(JSON.stringify(this.jobsForReorder))
 
+      // added this condition to handle the case of method called twice
       if (changedDateTime === previousSeq[0].runTime) return;
 
+      // assigning the selected time to the first job and then updating the runTime by timediff for
+      // each next jobs
       let threshold = 0;
       this.jobsForReorder.map((job: any) => {
         job.runTime = changedDateTime + threshold;
@@ -194,6 +198,7 @@ export default defineComponent({
       const updatedSeq = JSON.parse(JSON.stringify(this.jobsForReorder))
       this.initialRunTime = this.jobsForReorder.find((job: any) => job.statusId !== 'SERVICE_DRAFT').runTime
 
+      // return the jobs that have a difference from the original sequence
       let diffSeq = this.findJobDiff(previousSeq, updatedSeq)
 
       const updatedRunTime = updatedSeq.map((job: any) => job.runTime)
@@ -203,6 +208,9 @@ export default defineComponent({
 
       diffSeq = Object.keys(diffSeq).map((key) => diffSeq[key])
 
+      // assigned the diffSeq to the updatedJobsOrder and initialJobsOrder as the updatedJobsOrder will
+      // be used to determine which jobs to update and initialJobsOrder will be used when reordering the
+      // jobs
       this.updatedJobsOrder = this.initialJobsOrder = diffSeq
     },
     findJobDiff(previousSeq: any, updatedSeq: any) {
@@ -217,6 +225,8 @@ export default defineComponent({
     },
     doReorder(event: CustomEvent) {
       const previousSeq = JSON.parse(JSON.stringify(this.initialJobsOrder))
+
+      // returns the updated sequence after reordering
       const updatedSeq = event.detail.complete(JSON.parse(JSON.stringify(this.jobsForReorder)));
 
       let diffSeq = this.findJobDiff(previousSeq, updatedSeq)
@@ -254,8 +264,10 @@ export default defineComponent({
       await Promise.all(jobsToUpdate.map(async (job: any) => {
         const resp = await JobService.updateJob(job)
         if (!resp) {
+          // if the job failed when updating then adding the jobId to the failedJobs array
           this.failedJobs.push(job.jobId)
         } else if (resp?.status === 200) {
+          // if the job succeded when updating then adding the jobId to the successJobs array
           this.successJobs.push(job.jobId)
         }
         return resp
@@ -293,6 +305,7 @@ export default defineComponent({
       }
       this.isServiceScheduling = false
 
+      // If there are no failed jobs then redirecting the user to the select product page
       if (!this.failedJobs.length) {
         this.store.dispatch('job/clearJobState')
         this.router.push('/select-product')
@@ -300,6 +313,8 @@ export default defineComponent({
     },
     async scheduleService(searchPreferenceId: string, threshold: string, runTime?: string) {
       let job = this.jobs[this.jobEnumId]
+      // finding the job with draft status as in this case we may have an array of jobs with pending and
+      // draft status
       job = job?.find((job: any) => job.statusId === 'SERVICE_DRAFT')
       const productStoreId = this.currentEComStore.productStoreId
       let shopifyConfigId = this.shopifyConfig[productStoreId]
@@ -385,6 +400,9 @@ export default defineComponent({
   },
   async ionViewWillEnter() {
     // TODO: remove this initialization from the hook and update the code accordingly
+    // Done this as currently the component is not being unmounted when changing the route as there exist
+    // a connection between parent and child and ionViewWillEnter hook does not reinitialize the
+    // local data property
     this.jobName = ''
     this.jobsForReorder = []
     this.initialJobsOrder = []
@@ -401,9 +419,15 @@ export default defineComponent({
       },
       viewSize: 20
     })
+
+    // Filtered all the jobs that are in pending state as we will only use those jobs for reordering
     this.jobsForReorder = this.getJob(this.jobEnumId).filter((job: any) => job.statusId === 'SERVICE_PENDING')
+
+    // Finding the runTime of the first job or if there are no pending jobs then assigning current time
+    // to initialRunTime and similarly finding last run time to assign a time to the new job
     this.initialRunTime = this.jobsForReorder[0]?.runTime || DateTime.now().toMillis()
     let lastRunTime = this.jobsForReorder[this.jobsForReorder.length - 1]?.runTime || DateTime.now().toMillis()
+
     this.jobsForReorder?.push({
       'jobName': (this as any).jobName,
       'systemJobEnumId': 'JOB_EXP_PROD_THRSHLD',
@@ -413,7 +437,12 @@ export default defineComponent({
       'runTime': lastRunTime + 900000,
       'jobId': 'newJob'
     })
+
+    // dispatching temp expr action to fetch the description for EVERYDAY as if in some case we don't get
+    // the desc for temp expr and thus have an empty field
     await this.store.dispatch('job/fetchTemporalExpression', ['EVERYDAY'])
+
+    // maintaining the initial order of jobs to take the diff from the updated seq after reordering
     this.initialJobsOrder = JSON.parse(JSON.stringify(this.jobsForReorder))
   },
   setup() {
