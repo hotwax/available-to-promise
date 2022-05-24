@@ -323,13 +323,26 @@ export default defineComponent({
 </script>
 
 <style scoped>
-
 .section-grid {
   grid-auto-flow: column;
   grid-auto-columns: 200px;
-  grid-template-columns: repeat(auto-fill, 200px);
-  max-width: 100vw;
+  grid-template-columns: none;
+  width: 100vw;
   overflow-x: scroll;
+  scroll-snap-type: x mandatory;
+  /* column-gap: var(--spacer-2xs); */
+  /* border: 1px solid green; */
+}
+
+.section-grid > div {
+  scroll-snap-align: start;
+  /* border: 1px solid red;   */
+  margin-bottom: var(--spacer-sm);
+}
+
+.section-grid > div > ion-card {
+  height: 100%;
+ /* border: 1px solid black; */
 }
 
 ion-list-header > div {
@@ -353,8 +366,9 @@ ion-list-header > div {
   }
 
   .section-grid {
-    max-width: unset;
+    width: unset;
     grid-auto-columns: unset;
+    grid-template-columns: repeat(auto-fill, 200px);
     grid-auto-flow: unset;
     overflow: unset;
   }
