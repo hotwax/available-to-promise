@@ -131,6 +131,7 @@ export default defineComponent({
     async getAvailableTimeZones() {
       UserService.getAvailableTimeZones().then((resp: any) => {
         if(resp.status === 200 && !hasError(resp)) {
+          // We are filtering valid the timeZones coming with response here
           this.timeZones = resp.data.filter((timeZone: any) => {
             return DateTime.local().setZone(timeZone.id).isValid;
           });
