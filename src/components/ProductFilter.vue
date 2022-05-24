@@ -141,8 +141,7 @@ export default defineComponent({
     }),
   },
   methods: {
-    async enterThreshold() {
-      console.log(this.threshold)  
+    async enterThreshold() { 
       await this.store.dispatch('product/updateThreshold', this.threshold)
     }, 
     async resetFilters(type: string) {

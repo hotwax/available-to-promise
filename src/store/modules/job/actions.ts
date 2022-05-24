@@ -18,7 +18,7 @@ const actions: ActionTree<JobState, RootState> = {
       }
     });
     if(enumIds.length <= 0) return enumIds.map((id: any) => state.enumIds[id]);
-    const cachedEnum = payload.map((id: any) => state.enumIds[id]);
+
     const resp = await JobService.fetchJobDescription({
       "inputFields": {
         "enumId": enumIds,
@@ -48,6 +48,7 @@ const actions: ActionTree<JobState, RootState> = {
         "systemJobEnumId_fld1_grp": "2",
         "systemJobEnumId_fld1_op": "equals",
         "productStoreId": payload.eComStoreId,
+        "productStoreId_grp": "2",
         "statusId": ["SERVICE_CANCELLED", "SERVICE_CRASHED", "SERVICE_FAILED", "SERVICE_FINISHED"],
         "statusId_op": "in",
         "systemJobEnumId_op": "not-empty"
@@ -100,6 +101,7 @@ const actions: ActionTree<JobState, RootState> = {
         "systemJobEnumId_fld1_grp": "2",
         "systemJobEnumId_fld1_op": "equals",
         "productStoreId": payload.eComStoreId,
+        "productStoreId_grp": "2",
         "systemJobEnumId_op": "not-empty",
         "statusId_fld0_value": "SERVICE_RUNNING",
         "statusId_fld0_op": "equals",
@@ -156,6 +158,7 @@ const actions: ActionTree<JobState, RootState> = {
         "systemJobEnumId_fld1_grp": "2",
         "systemJobEnumId_fld1_op": "equals",
         "productStoreId": payload.eComStoreId,
+        "productStoreId_grp": "2",
         "statusId": "SERVICE_PENDING",
         "systemJobEnumId_op": "not-empty"
       },
@@ -203,7 +206,7 @@ const actions: ActionTree<JobState, RootState> = {
       }
     });
     if(tempIds.length <= 0) return tempExprIds.map((id: any) => state.temporalExp[id]);
-    const cachedTempExpr = tempExprIds.map((id: any) => state.temporalExp[id]);
+    
     const resp = await JobService.fetchTemporalExpression({
         "inputFields": {
         "tempExprId": tempIds,

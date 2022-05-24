@@ -2,20 +2,20 @@
   <ion-page>
     <ion-header :translucent="true">
       <ion-toolbar>
-        <ion-menu-button slot="start" id="first" menu="first" />
+        <ion-menu-button slot="start" id="navigation" menu="navigation" />
         <ion-title>{{ $t("Threshold management") }}</ion-title>
         <ion-buttons slot="end">
           <ion-button fill="clear" class="mobile-only">
             <ion-icon :icon="downloadOutline" />
           </ion-button>
-          <ion-menu-button menu="last" id="last" slot="end" v-show="showFilterButton"  @click="openProductFilter()">
+          <ion-menu-button menu="filter" id="filter" slot="end" v-show="showFilterButton"  @click="openProductFilter()">
             <ion-icon :icon="filterOutline" />
           </ion-menu-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
 
-     <ion-menu content-id="main" menu-id="last" type="overlay" side="end">
+     <ion-menu content-id="main" menu-id="filter" type="overlay" side="end">
       <ion-header>
         <ion-toolbar>
           <ion-buttons slot="start">
@@ -97,7 +97,7 @@
       </div>
 
       <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="mobile-only">
-        <ion-fab-button>
+        <ion-fab-button @click="saveThreshold()">
           <ion-icon :icon="arrowForwardOutline" />
         </ion-fab-button>
       </ion-fab>
@@ -193,7 +193,7 @@ export default defineComponent({
       observer.observe(el);
     },
     async openProductFilter() {
-      await menuController.open('last');
+      await menuController.open('filter');
     },
     async closeMenu() {
       await menuController.close();
@@ -313,8 +313,7 @@ ion-menu {
 }
 
 .find {
-  padding: var( --spacer-lg);
-  gap: var(--spacer-lg);
+  padding: 0 var( --spacer-base);
 }
 
 ion-list-header > div {
@@ -327,6 +326,10 @@ ion-list-header > div {
   ion-menu {
     --width: 375px;
   }
+  .find {
+    padding: var( --spacer-lg);
+    gap: var(--spacer-lg);
+   }
   .action {
     position: fixed;
     z-index: 3;

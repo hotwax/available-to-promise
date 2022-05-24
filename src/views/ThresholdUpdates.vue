@@ -262,7 +262,7 @@ import {
 } from "@ionic/vue";
 import JobConfiguration from '@/components/JobConfiguration.vue'
 import { codeWorkingOutline, copyOutline, refreshOutline, timeOutline, timerOutline } from "ionicons/icons";
-import emitter from '@/event-bus';
+
 import { Plugins } from '@capacitor/core';
 import { showToast } from '@/utils'
 import JobHistoryModal from '@/components/JobHistoryModal.vue';
