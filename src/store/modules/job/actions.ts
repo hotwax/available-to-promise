@@ -18,7 +18,7 @@ const actions: ActionTree<JobState, RootState> = {
       }
     });
     if(enumIds.length <= 0) return enumIds.map((id: any) => state.enumIds[id]);
-    const cachedEnum = payload.map((id: any) => state.enumIds[id]);
+
     const resp = await JobService.fetchJobDescription({
       "inputFields": {
         "enumId": enumIds,
@@ -206,7 +206,7 @@ const actions: ActionTree<JobState, RootState> = {
       }
     });
     if(tempIds.length <= 0) return tempExprIds.map((id: any) => state.temporalExp[id]);
-    const cachedTempExpr = tempExprIds.map((id: any) => state.temporalExp[id]);
+    
     const resp = await JobService.fetchTemporalExpression({
         "inputFields": {
         "tempExprId": tempIds,

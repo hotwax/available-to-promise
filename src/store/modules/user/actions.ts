@@ -52,7 +52,7 @@ const actions: ActionTree<UserState, RootState> = {
   /**
    * Get User profile
    */
-  async getProfile ( { commit, dispatch }) {
+  async getProfile ( { commit }) {
     const resp = await UserService.getProfile()
     if (resp.status === 200) {
       const payload = {
@@ -70,10 +70,12 @@ const actions: ActionTree<UserState, RootState> = {
         emitter.emit('timeZoneDifferent', { profileTimeZone: resp.data.userTimeZone, localTimeZone});
       }
 
-      await dispatch('getEComStores', payload).then((stores: any) => {
-        resp.data.stores = stores ? stores : [];
-        commit(types.USER_CURRENT_ECOM_STORE_UPDATED, stores ? stores[0] : {});
-      });
+        const eComStoreResp = await UserService.getEComStores(payload);
+        if (eComStoreResp.status === 200 && eComStoreResp.data.docs?.length > 0 && !hasError(eComStoreResp)) {
+          const stores = eComStoreResp.data.docs
+          resp.data.stores = stores ? stores : [];
+          commit(types.USER_CURRENT_ECOM_STORE_UPDATED, stores ? stores[0] : {});
+        }
 
       commit(types.USER_INFO_UPDATED, resp.data);
     }
@@ -102,26 +104,12 @@ const actions: ActionTree<UserState, RootState> = {
   },
 
   // Set User Instance Url
-  setUserInstanceUrl ({ state, commit }, payload){
+  setUserInstanceUrl ({ commit }, payload){
     commit(types.USER_INSTANCE_URL_UPDATED, payload)
   },
 
-  async getEComStores({ commit }, payload) {
-    let resp;
 
-    try{
-      resp = await UserService.getEComStores(payload);
-      if (resp.status === 200 && resp.data.docs?.length > 0 && !hasError(resp)) {
-        const stores = resp.data.docs
-
-        return stores
-      }
-    } catch(err) {
-      console.error(err)
-    }
-  },
-
-  async setEComStore({ commit, dispatch }, payload) {
+  async setEComStore({ commit }, payload) {
     commit(types.USER_CURRENT_ECOM_STORE_UPDATED, payload.store);
   }
 }

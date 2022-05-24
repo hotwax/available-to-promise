@@ -133,7 +133,7 @@
       </div>
 
       <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="mobile-only">
-        <ion-fab-button>
+        <ion-fab-button @click="saveThreshold()">
           <ion-icon :icon="arrowForwardOutline" />
         </ion-fab-button>
       </ion-fab>
