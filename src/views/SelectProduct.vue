@@ -330,19 +330,17 @@ export default defineComponent({
   width: 100vw;
   overflow-x: scroll;
   scroll-snap-type: x mandatory;
-  /* column-gap: var(--spacer-2xs); */
-  /* border: 1px solid green; */
 }
 
 .section-grid > div {
   scroll-snap-align: start;
-  /* border: 1px solid red;   */
-  margin-bottom: var(--spacer-sm);
+  /* Here 20px padding-bottom is given 
+    to match the 10px bottom and 10px top margin of card */
+  padding-bottom: 20px;
 }
 
 .section-grid > div > ion-card {
   height: 100%;
- /* border: 1px solid black; */
 }
 
 ion-list-header > div {
