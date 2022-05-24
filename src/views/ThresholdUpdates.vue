@@ -72,7 +72,7 @@
                   <ion-button fill="clear" color="medium" slot="end" @click.stop="copyJobInformation(job)">
                     <ion-icon slot="icon-only" :icon="copyOutline" />
                   </ion-button>
-                  <ion-button fill="clear" color="medium" slot="end" @click.stop="viewJobHistory()">
+                  <ion-button fill="clear" color="medium" slot="end" @click.stop="viewJobHistory(job)">
                     <ion-icon slot="icon-only" :icon="timeOutline" />
                   </ion-button>
                 </div>
@@ -129,6 +129,18 @@
                 <ion-icon slot="start" :icon="codeWorkingOutline" />
                 <ion-label class="ion-text-wrap">{{ job.serviceName }}</ion-label>
               </ion-item>
+
+              <div class="actions">
+                <div></div>
+                <div>
+                  <ion-button fill="clear" color="medium" slot="end" @click.stop="copyJobInformation(job)">
+                    <ion-icon slot="icon-only" :icon="copyOutline" />
+                  </ion-button>
+                  <ion-button fill="clear" color="medium" slot="end" @click.stop="viewJobHistory(job)">
+                    <ion-icon slot="icon-only" :icon="timeOutline" />
+                  </ion-button>
+                </div>
+              </div>
             </ion-card>
 
             <ion-refresher slot="fixed" @ionRefresh="refreshJobs($event)">
@@ -187,6 +199,17 @@
               <ion-label class="ion-text-wrap">{{ job.serviceName }}</ion-label>
             </ion-item>
 
+            <div class="actions">
+              <div></div>
+              <div>
+                <ion-button fill="clear" color="medium" slot="end" @click.stop="copyJobInformation(job)">
+                  <ion-icon slot="icon-only" :icon="copyOutline" />
+                </ion-button>
+                <ion-button fill="clear" color="medium" slot="end" @click.stop="viewJobHistory(job)">
+                  <ion-icon slot="icon-only" :icon="timeOutline" />
+                </ion-button>
+              </div>
+            </div>
           </ion-card>
 
           <ion-refresher slot="fixed" @ionRefresh="refreshJobs($event)">
@@ -198,7 +221,7 @@
           </div>          
         </section>
 
-        <aside id="job-configuration" class="desktop-only" v-show="segmentSelected === 'pending' && currentJob">
+        <aside class="desktop-only" v-show="segmentSelected === 'pending' && currentJob">
           <JobConfiguration :title="title" :job="currentJob" :status="currentJobStatus" :type="freqType" :key="currentJob"/>
         </aside>
       </main>
@@ -239,7 +262,7 @@ import {
 } from "@ionic/vue";
 import JobConfiguration from '@/components/JobConfiguration.vue'
 import { codeWorkingOutline, copyOutline, refreshOutline, timeOutline, timerOutline } from "ionicons/icons";
-import emitter from '@/event-bus';
+
 import { Plugins } from '@capacitor/core';
 import { showToast } from '@/utils'
 import JobHistoryModal from '@/components/JobHistoryModal.vue';
@@ -468,7 +491,7 @@ export default defineComponent({
       }
     },
     playAnimation() {
-      const aside = document.querySelector('#job-configuration') as Element
+      const aside = this.$el.querySelector('aside') as Element
       const main = document.querySelector('main') as Element
 
       const revealAnimation = createAnimation()
@@ -491,7 +514,9 @@ export default defineComponent({
         .play();
     }
   },
-  ionViewDidEnter() {
+  ionViewWillEnter() {
+    // reassigning current job when entering in the view to not display the job config component if previously opened
+    this.currentJob = undefined
     this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums});
   },
   setup() {

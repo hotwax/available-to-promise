@@ -101,7 +101,7 @@ export default defineComponent({
       jobs: 'job/getJobs',
       facilitiesByProductStore: 'util/getFacilityByProductStore',
       query: 'product/getQuery',
-      getUserProfile: 'user/getUserProfile'
+      userProfile: 'user/getUserProfile'
     })
   },
   methods: {
@@ -178,7 +178,7 @@ export default defineComponent({
       }
 
       const payload = job ? {
-        'JOB_NAME': this.jobName ? this.jobName : job.jobName,
+        'JOB_NAME': this.jobName ? this.jobName : this.userProfile.partyName,
         'SERVICE_NAME': job.serviceName,
         'SERVICE_COUNT': '0',
         'jobFields': {
@@ -188,7 +188,7 @@ export default defineComponent({
           'maxRecurrenceCount': '-1',
           'parentJobId': job.parentJobId,
           'runAsUser': 'system', // default system, but empty in run now
-          'recurrenceTimeZone': this.getUserProfile?.userTimeZone
+          'recurrenceTimeZone': this.userProfile?.userTimeZone
         },
         'shopifyConfigId': shopifyConfigId,
         'statusId': "SERVICE_PENDING",
