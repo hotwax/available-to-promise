@@ -390,6 +390,8 @@ const actions: ActionTree<JobState, RootState> = {
   async cancelJob({ dispatch, state }, job) {
     let resp;
 
+    const cachedJob = state.cached[job.systemJobEnumId]
+
     try {
       resp = await JobService.updateJobSandbox({
         jobId: job.jobId,
@@ -400,8 +402,9 @@ const actions: ActionTree<JobState, RootState> = {
       });
       if (resp.status == 200 && !hasError(resp)) {
         showToast(translate('Service updated successfully'))
-        state.cached[job.systemJobEnumId].statusId = 'SERVICE_DRAFT'
-        state.cached[job.systemJobEnumId].status = 'SERVICE_DRAFT'
+        if (cachedJob) {
+          state.cached[job.systemJobEnumId].statusId = state.cached[job.systemJobEnumId].status = 'SERVICE_DRAFT'
+        }
         dispatch('fetchJobs', {
           inputFields: {
             'systemJobEnumId': job.systemJobEnumId,
