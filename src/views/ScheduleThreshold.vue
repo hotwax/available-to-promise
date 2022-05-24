@@ -259,6 +259,7 @@ export default defineComponent({
       const solrQuery = this.query
 
       const jobRunTime = this.updatedJobsOrder.find((job: any) => job.isNew)?.runTime
+      // filtered jobs by removing the new job as we need to update already existing job
       const jobsToUpdate = this.updatedJobsOrder.filter((job: any) => !job.isNew)
 
       await Promise.all(jobsToUpdate.map(async (job: any) => {
@@ -307,7 +308,7 @@ export default defineComponent({
 
       // If there are no failed jobs then redirecting the user to the select product page
       if (!this.failedJobs.length) {
-        this.store.dispatch('job/clearJobState')
+        this.store.dispatch('product/clearAllFilters')
         this.router.push('/select-product')
       }
     },
@@ -379,7 +380,7 @@ export default defineComponent({
       // checking if the runtimeData has productStoreId, and if present then adding it on root level
       job?.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = productStoreId)
       job?.priority && (payload['SERVICE_PRIORITY'] = job.priority.toString())
-      runTime && (job['runTime'] = runTime)
+      runTime && (payload['SERVICE_TIME'] = runTime.toString())
 
       try {
         resp = await JobService.scheduleJob({ ...job.runtimeData, ...payload });
@@ -398,7 +399,7 @@ export default defineComponent({
       return resp;
     }
   },
-  async ionViewWillEnter() {
+  ionViewDidLeave() {
     // TODO: remove this initialization from the hook and update the code accordingly
     // Done this as currently the component is not being unmounted when changing the route as there exist
     // a connection between parent and child and ionViewWillEnter hook does not reinitialize the
@@ -410,7 +411,8 @@ export default defineComponent({
     this.updatedJobsOrder = []
     this.failedJobs = []
     this.successJobs = []
-
+  },
+  async ionViewWillEnter() {
     const jobEnums = JSON.parse(process.env?.VUE_APP_JOB_ENUMS as string) as any
     await this.store.dispatch('job/fetchJobs', {
       inputFields: {
@@ -427,8 +429,7 @@ export default defineComponent({
     // to initialRunTime and similarly finding last run time to assign a time to the new job
     this.initialRunTime = this.jobsForReorder[0]?.runTime || DateTime.now().toMillis()
     let lastRunTime = this.jobsForReorder[this.jobsForReorder.length - 1]?.runTime || DateTime.now().toMillis()
-
-    this.jobsForReorder?.push({
+    const newJob = {
       'jobName': (this as any).jobName,
       'systemJobEnumId': 'JOB_EXP_PROD_THRSHLD',
       'tempExprId': 'EVERYDAY',
@@ -436,7 +437,9 @@ export default defineComponent({
       'isNew': true,
       'runTime': lastRunTime + 900000,
       'jobId': 'newJob'
-    })
+    }
+
+    this.jobsForReorder?.push(newJob)
 
     // dispatching temp expr action to fetch the description for EVERYDAY as if in some case we don't get
     // the desc for temp expr and thus have an empty field
@@ -444,6 +447,7 @@ export default defineComponent({
 
     // maintaining the initial order of jobs to take the diff from the updated seq after reordering
     this.initialJobsOrder = JSON.parse(JSON.stringify(this.jobsForReorder))
+    this.updatedJobsOrder = [ newJob ]
   },
   setup() {
     const store = useStore();
