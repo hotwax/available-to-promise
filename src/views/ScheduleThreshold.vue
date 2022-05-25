@@ -44,6 +44,7 @@
 
         <main>
           <h2>{{ $t("Threshold pipeline") }}</h2>
+          
           <ion-reorder-group @ionItemReorder="doReorder($event)" disabled="false">
             <ion-card v-for="job in jobsForReorder" :key="job.jobId" v-show="job.statusId === 'SERVICE_PENDING'">
               <ion-card-header>
@@ -69,7 +70,6 @@
                 <ion-icon slot="start" :icon="timerOutline" />
                 <ion-label class="ion-text-wrap">{{ job.tempExprId && temporalExpr(job.tempExprId)?.description ? temporalExpr(job.tempExprId)?.description : "🙃"  }}</ion-label>
               </ion-item>
-
             </ion-card>
           </ion-reorder-group>
         </main>
@@ -492,7 +492,6 @@ h2 {
     display: grid;
     grid-template-columns: 600px 50ch;
     gap: var(--spacer-xl);
-    justify-content: center;
     width: max-content;
     margin: auto;
   }
