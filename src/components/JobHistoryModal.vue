@@ -76,8 +76,7 @@ export default defineComponent({
     ...mapGetters({
       getEnumName: 'job/getEnumName',
       getCurrentEComStore:'user/getCurrentEComStore',
-      getStatusDesc: 'util/getStatusDesc',
-      userProfile: 'user/getUserProfile'
+      getStatusDesc: 'util/getStatusDesc'
     })
   },
   methods: {
@@ -85,10 +84,10 @@ export default defineComponent({
       modalController.dismiss({ dismissed: true });
     },
     getDate (runTime: any) {
-      return DateTime.fromMillis(runTime, { zone: this.userProfile.userTimeZone }).toLocaleString(DateTime.DATE_MED);
+      return DateTime.fromMillis(runTime).toLocaleString(DateTime.DATE_MED);
     },
     getTime (runTime: any) {
-      return DateTime.fromMillis(runTime, { zone: this.userProfile.userTimeZone }).toLocaleString(DateTime.TIME_SIMPLE);
+      return DateTime.fromMillis(runTime).toLocaleString(DateTime.TIME_SIMPLE);
     },
     async fetchJobHistory() {
       let resp;

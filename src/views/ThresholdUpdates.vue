@@ -322,8 +322,7 @@ export default defineComponent({
       getCurrentEComStore:'user/getCurrentEComStore',
       isPendingJobsScrollable: 'job/isPendingJobsScrollable',
       isRunningJobsScrollable: 'job/isRunningJobsScrollable',
-      isHistoryJobsScrollable: 'job/isHistoryJobsScrollable',
-      getUserProfile: 'user/getUserProfile'
+      isHistoryJobsScrollable: 'job/isHistoryJobsScrollable'
     })
   },
   mounted(){
@@ -362,11 +361,11 @@ export default defineComponent({
       return jobHistoryModal.present();
     },
     getTime (time: any) {
-      return DateTime.fromMillis(time, { zone: this.getUserProfile.userTimeZone }).toLocaleString(DateTime.TIME_SIMPLE);
+      return DateTime.fromMillis(time).toLocaleString(DateTime.TIME_SIMPLE);
     },
     timeFromNow (time: any) {
-      const timeDiff = DateTime.fromMillis(time, { zone: this.getUserProfile.userTimeZone }).diff(DateTime.now().setZone(this.getUserProfile.userTimeZone));
-      return DateTime.now().setZone(this.getUserProfile.userTimeZone).plus(timeDiff).toRelative();
+      const timeDiff = DateTime.fromMillis(time).diff(DateTime.local());
+      return DateTime.local().plus(timeDiff).toRelative();
     },
     async loadMoreJobHistory(event: any){
       this.getJobHistory(

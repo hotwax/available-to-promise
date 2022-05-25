@@ -243,8 +243,8 @@ export default defineComponent({
       return DateTime.fromMillis(time).toLocaleString(DateTime.DATETIME_MED);
     },
     timeTillJob (time: any) {
-      const timeDiff = DateTime.fromMillis(time).diff(DateTime.now());
-      return DateTime.now().plus(timeDiff).toRelative();
+      const timeDiff = DateTime.fromMillis(time).diff(DateTime.local());
+      return DateTime.local().plus(timeDiff).toRelative();
     },
     updateRunTime(ev: CustomEvent, job: any) {
       if (job) {
