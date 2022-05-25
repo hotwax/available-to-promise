@@ -475,9 +475,7 @@ export default defineComponent({
 </script>
 
 <style scoped>
-ion-card-header,
-ion-list-header > div {
-  flex: 1;
+ion-card-header {
   display: flex;
   justify-content: space-between;
 }
@@ -518,7 +516,7 @@ h2 {
 
 ion-modal {
   --width: 290px;
-  --height: 382px;
+  --height: 385px;
   --border-radius: 8px;
 }
 </style>
