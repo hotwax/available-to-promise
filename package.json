@@ -1,6 +1,6 @@
 {
-  "name": "ionic-sdk",
-  "version": "0.0.1",
+  "name": "threshold-management",
+  "version": "1.0.1",
   "private": true,
   "description": "An Ionic project",
   "scripts": {
@@ -14,6 +14,7 @@
   "dependencies": {
     "@capacitor/android": "^2.4.7",
     "@capacitor/core": "^2.4.7",
+    "@capacitor/ios": "^2.5.0",
     "@ionic/vue": "^6.0.2",
     "@ionic/vue-router": "^6.0.2",
     "axios": "^0.21.1",
