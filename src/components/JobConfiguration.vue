@@ -95,6 +95,7 @@ import {
   personCircleOutline
 } from "ionicons/icons";
 import { mapGetters, useStore } from "vuex";
+import { handleDateTimeInput } from "@/utils";
 
 import { DateTime } from 'luxon';
 
@@ -165,7 +166,7 @@ export default defineComponent({
   },
   methods: {
     getDateTime(time: any) {
-      return DateTime.fromMillis(time)
+      return DateTime.fromMillis(time).toISO()
     },
     async skipJob(job: any) {
       const alert = await alertController
@@ -247,7 +248,7 @@ export default defineComponent({
     },
     updateRunTime(ev: CustomEvent, job: any) {
       if (job) {
-        job.runTime = DateTime.fromISO(ev['detail'].value).toMillis()
+        job.runTime = handleDateTimeInput(ev['detail'].value)
       }
     }
   },
