@@ -8,7 +8,7 @@
     </ion-header>
 
     <ion-content>
-      <div class="find">
+      <div>
         <aside>
           <ion-list>
             <ion-list-header>{{ $t("Info") }}</ion-list-header>
@@ -42,7 +42,58 @@
           </ion-list>
         </aside>
 
-        <main class="main">
+        <main>
+          <h2 class="ion-text-center">{{ $t("Threshold pipeline") }}</h2>
+          <ion-reorder-group @ionItemReorder="doReorder($event)" disabled="false">
+            <ion-card v-for="job in jobsForReorder" :key="job.jobId" v-show="job.statusId === 'SERVICE_PENDING'">
+              <ion-item>
+                <ion-label>{{ job.jobName }}</ion-label>
+                <ion-reorder slot="end"></ion-reorder>
+              </ion-item>
+              <ion-card-header>
+                <ion-card-title>{{ getEnumDescription(job.systemJobEnumId) ? getEnumDescription(job.systemJobEnumId) : job.systemJobEnumId }}</ion-card-title>
+                <p v-if="failedJobs.includes(job.jobId)">{{ $t('Failed') }}</p>
+                <p v-if="successJobs.includes(job.jobId)">{{ $t('Success') }}</p>
+              </ion-card-header>
+
+              <ion-item>
+                <ion-icon slot="start" :icon="timeOutline" />
+                <ion-label class="ion-text-wrap">{{ job.runTime ? getTime(job.runTime) : "-"  }}</ion-label>
+                <ion-badge v-if="job.runTime" color="dark">{{ timeTillJob(job.runTime)}}</ion-badge>
+              </ion-item>
+
+              <ion-item lines="none">
+                <ion-icon slot="start" :icon="timerOutline" />
+                <ion-label class="ion-text-wrap">{{ job.tempExprId && temporalExpr(job.tempExprId)?.description ? temporalExpr(job.tempExprId)?.description : "🙃"  }}</ion-label>
+              </ion-item>
+
+            </ion-card>
+          </ion-reorder-group>
+          <ion-reorder-group @ionItemReorder="doReorder($event)" disabled="false">
+            <ion-card v-for="job in jobsForReorder" :key="job.jobId" v-show="job.statusId === 'SERVICE_PENDING'">
+              <ion-item>
+                <ion-label>{{ job.jobName }}</ion-label>
+                <ion-reorder slot="end"></ion-reorder>
+              </ion-item>
+              <ion-card-header>
+                <ion-card-title>{{ getEnumDescription(job.systemJobEnumId) ? getEnumDescription(job.systemJobEnumId) : job.systemJobEnumId }}</ion-card-title>
+                <p v-if="failedJobs.includes(job.jobId)">{{ $t('Failed') }}</p>
+                <p v-if="successJobs.includes(job.jobId)">{{ $t('Success') }}</p>
+              </ion-card-header>
+
+              <ion-item>
+                <ion-icon slot="start" :icon="timeOutline" />
+                <ion-label class="ion-text-wrap">{{ job.runTime ? getTime(job.runTime) : "-"  }}</ion-label>
+                <ion-badge v-if="job.runTime" color="dark">{{ timeTillJob(job.runTime)}}</ion-badge>
+              </ion-item>
+
+              <ion-item lines="none">
+                <ion-icon slot="start" :icon="timerOutline" />
+                <ion-label class="ion-text-wrap">{{ job.tempExprId && temporalExpr(job.tempExprId)?.description ? temporalExpr(job.tempExprId)?.description : "🙃"  }}</ion-label>
+              </ion-item>
+
+            </ion-card>
+          </ion-reorder-group>
           <ion-reorder-group @ionItemReorder="doReorder($event)" disabled="false">
             <ion-card v-for="job in jobsForReorder" :key="job.jobId" v-show="job.statusId === 'SERVICE_PENDING'">
               <ion-item>
@@ -469,21 +520,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.actions {
-  display: flex;
-  justify-content: space-between;
-}
-
-aside {
-  position: sticky;
-  top: var(--spacer-lg);
-}
-
-.find {
-  padding: var( --spacer-lg);
-  gap: var(--spacer-lg);
-}
-
 ion-list-header > div {
   flex: 1;
   display: flex;
@@ -491,6 +527,21 @@ ion-list-header > div {
 }
 
 @media (min-width: 991px) {
+  ion-content > div:first-child {
+    display: grid;
+    grid-template-columns: 600px 50ch;
+    gap: var(--spacer-xl);
+    justify-content: center;
+    width: max-content;
+    margin: auto;
+  }
+
+  aside {
+    position: sticky;
+    top: var(--spacer-sm);   
+    height: max-content;    
+  }
+
   .action {
     position: fixed;
     z-index: 3;
