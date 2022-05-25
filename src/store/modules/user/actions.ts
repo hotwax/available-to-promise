@@ -6,7 +6,9 @@ import * as types from './mutation-types'
 import { hasError, showToast } from '@/utils'
 import { translate } from '@/i18n'
 import emitter from '@/event-bus'
-import { DateTime } from 'luxon';
+import { DateTime, Settings } from 'luxon';
+
+
 
 const actions: ActionTree<UserState, RootState> = {
 
@@ -65,6 +67,9 @@ const actions: ActionTree<UserState, RootState> = {
         "noConditionFind": "Y",
         "orderBy": "externalId DESC"
       }
+      if (resp.data.userTimeZone) {
+        Settings.defaultZone = resp.data.userTimeZone;
+      }
       const localTimeZone = DateTime.local().zoneName;
       if (resp.data.userTimeZone !== localTimeZone) {
         emitter.emit('timeZoneDifferent', { profileTimeZone: resp.data.userTimeZone, localTimeZone});
@@ -99,6 +104,7 @@ const actions: ActionTree<UserState, RootState> = {
       const current: any = state.current;
       current.userTimeZone = payload.tzId;
       commit(types.USER_INFO_UPDATED, current);
+      Settings.defaultZone = current.userTimeZone;
       showToast(translate("Time zone updated successfully"));
     }
   },

@@ -302,6 +302,40 @@ const actions: ActionTree<JobState, RootState> = {
     }
     return resp;
   },
+  async updateJob ({ dispatch }, job) {
+    let resp;
+
+    const payload = {
+      'jobId': job.jobId,
+      'systemJobEnumId': job.systemJobEnumId,
+      'recurrenceTimeZone': this.state.user.current.userTimeZone,
+      'tempExprId': job.jobStatus,
+      'statusId': "SERVICE_PENDING"
+    } as any
+
+    job?.runTime && (payload['runTime'] = job.runTime)
+    job?.sinceId && (payload['sinceId'] = job.sinceId)
+    job?.jobName && (payload['jobName'] = job.jobName)
+
+    try {
+      resp = await JobService.updateJob(payload)
+      if (resp.status === 200 && !hasError(resp) && resp.data.successMessage) {
+        showToast(translate('Service updated successfully'))
+        dispatch('fetchJobs', {
+          inputFields: {
+            'systemJobEnumId': payload.systemJobEnumId,
+            'systemJobEnumId_op': 'equals'
+          }
+        })
+      } else {
+        showToast(translate('Something went wrong'))
+      }
+    } catch (err) {
+      showToast(translate('Something went wrong'))
+      console.error(err)
+    }
+    return resp;
+  },
 
   async scheduleService({ dispatch }, job) {
     let resp;
@@ -317,7 +351,7 @@ const actions: ActionTree<JobState, RootState> = {
         'maxRecurrenceCount': '-1',
         'parentJobId': job.parentJobId,
         'runAsUser': 'system', // default system, but empty in run now
-        'recurrenceTimeZone': DateTime.now().zoneName
+        'recurrenceTimeZone': this.state.user.current.userTimeZone,
       },
       'shopifyConfigId': this.state.user.shopifyConfig,
       'statusId': "SERVICE_PENDING",
@@ -376,7 +410,7 @@ const actions: ActionTree<JobState, RootState> = {
       'jobId': job.jobId,
       'runTime': updatedRunTime,
       'systemJobEnumId': job.systemJobEnumId,
-      'recurrenceTimeZone': DateTime.now().zoneName,
+      'recurrenceTimeZone': this.state.user.current.userTimeZone,
       'statusId': "SERVICE_PENDING"
     } as any
 
@@ -397,7 +431,7 @@ const actions: ActionTree<JobState, RootState> = {
         jobId: job.jobId,
         systemJobEnumId: job.systemJobEnumId,
         statusId: "SERVICE_CANCELLED",
-        recurrenceTimeZone: DateTime.now().zoneName,
+        recurrenceTimeZone: this.state.user.current.userTimeZone,
         cancelDateTime: DateTime.now().toMillis()
       });
       if (resp.status == 200 && !hasError(resp)) {
