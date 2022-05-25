@@ -43,68 +43,21 @@
         </aside>
 
         <main>
-          <h2 class="ion-text-center">{{ $t("Threshold pipeline") }}</h2>
+          <h2>{{ $t("Threshold pipeline") }}</h2>
           <ion-reorder-group @ionItemReorder="doReorder($event)" disabled="false">
             <ion-card v-for="job in jobsForReorder" :key="job.jobId" v-show="job.statusId === 'SERVICE_PENDING'">
-              <ion-item>
-                <ion-label>{{ job.jobName }}</ion-label>
-                <ion-reorder slot="end"></ion-reorder>
-              </ion-item>
               <ion-card-header>
-                <ion-card-title>{{ getEnumDescription(job.systemJobEnumId) ? getEnumDescription(job.systemJobEnumId) : job.systemJobEnumId }}</ion-card-title>
-                <p v-if="failedJobs.includes(job.jobId)">{{ $t('Failed') }}</p>
-                <p v-if="successJobs.includes(job.jobId)">{{ $t('Success') }}</p>
+                <ion-card-title>
+                  {{ job.jobName }}
+                </ion-card-title>
+                <ion-reorder></ion-reorder>
               </ion-card-header>
-
+            
               <ion-item>
-                <ion-icon slot="start" :icon="timeOutline" />
-                <ion-label class="ion-text-wrap">{{ job.runTime ? getTime(job.runTime) : "-"  }}</ion-label>
-                <ion-badge v-if="job.runTime" color="dark">{{ timeTillJob(job.runTime)}}</ion-badge>
-              </ion-item>
-
-              <ion-item lines="none">
-                <ion-icon slot="start" :icon="timerOutline" />
-                <ion-label class="ion-text-wrap">{{ job.tempExprId && temporalExpr(job.tempExprId)?.description ? temporalExpr(job.tempExprId)?.description : "🙃"  }}</ion-label>
-              </ion-item>
-
-            </ion-card>
-          </ion-reorder-group>
-          <ion-reorder-group @ionItemReorder="doReorder($event)" disabled="false">
-            <ion-card v-for="job in jobsForReorder" :key="job.jobId" v-show="job.statusId === 'SERVICE_PENDING'">
-              <ion-item>
-                <ion-label>{{ job.jobName }}</ion-label>
-                <ion-reorder slot="end"></ion-reorder>
-              </ion-item>
-              <ion-card-header>
-                <ion-card-title>{{ getEnumDescription(job.systemJobEnumId) ? getEnumDescription(job.systemJobEnumId) : job.systemJobEnumId }}</ion-card-title>
-                <p v-if="failedJobs.includes(job.jobId)">{{ $t('Failed') }}</p>
-                <p v-if="successJobs.includes(job.jobId)">{{ $t('Success') }}</p>
-              </ion-card-header>
-
-              <ion-item>
-                <ion-icon slot="start" :icon="timeOutline" />
-                <ion-label class="ion-text-wrap">{{ job.runTime ? getTime(job.runTime) : "-"  }}</ion-label>
-                <ion-badge v-if="job.runTime" color="dark">{{ timeTillJob(job.runTime)}}</ion-badge>
-              </ion-item>
-
-              <ion-item lines="none">
-                <ion-icon slot="start" :icon="timerOutline" />
-                <ion-label class="ion-text-wrap">{{ job.tempExprId && temporalExpr(job.tempExprId)?.description ? temporalExpr(job.tempExprId)?.description : "🙃"  }}</ion-label>
-              </ion-item>
-
-            </ion-card>
-          </ion-reorder-group>
-          <ion-reorder-group @ionItemReorder="doReorder($event)" disabled="false">
-            <ion-card v-for="job in jobsForReorder" :key="job.jobId" v-show="job.statusId === 'SERVICE_PENDING'">
-              <ion-item>
-                <ion-label>{{ job.jobName }}</ion-label>
-                <ion-reorder slot="end"></ion-reorder>
-              </ion-item>
-              <ion-card-header>
-                <ion-card-title>{{ getEnumDescription(job.systemJobEnumId) ? getEnumDescription(job.systemJobEnumId) : job.systemJobEnumId }}</ion-card-title>
-                <p v-if="failedJobs.includes(job.jobId)">{{ $t('Failed') }}</p>
-                <p v-if="successJobs.includes(job.jobId)">{{ $t('Success') }}</p>
-              </ion-card-header>
+                <ion-label>{{ getEnumDescription(job.systemJobEnumId) ? getEnumDescription(job.systemJobEnumId) : job.systemJobEnumId }}</ion-label>
+                <ion-icon :icon="checkmarkCircleOutline" color="success" v-if="successJobs.includes(job.jobId)" />
+                <ion-icon :icon="closeCircleOutline" color="danger" v-if="failedJobs.includes(job.jobId)" />
+              </ion-item> 
 
               <ion-item>
                 <ion-icon slot="start" :icon="timeOutline" />
@@ -139,7 +92,7 @@
 </template>
 
 <script lang="ts">
-import { arrowForwardOutline, copyOutline, optionsOutline, saveOutline, shirtOutline, timerOutline, timeOutline } from 'ionicons/icons'
+import { arrowForwardOutline, checkmarkCircleOutline, closeCircleOutline, copyOutline, optionsOutline, saveOutline, shirtOutline, timerOutline, timeOutline } from 'ionicons/icons'
 import {
   IonBackButton,
   IonBadge,
@@ -506,6 +459,8 @@ export default defineComponent({
 
     return {
       arrowForwardOutline,
+      checkmarkCircleOutline,
+      closeCircleOutline,
       copyOutline,
       optionsOutline,
       router,
@@ -520,10 +475,16 @@ export default defineComponent({
 </script>
 
 <style scoped>
+ion-card-header,
 ion-list-header > div {
   flex: 1;
   display: flex;
   justify-content: space-between;
+}
+
+h2 {
+  font-size: 18px;
+  margin-left: 10px;
 }
 
 @media (min-width: 991px) {
@@ -534,6 +495,11 @@ ion-list-header > div {
     justify-content: center;
     width: max-content;
     margin: auto;
+  }
+
+  h2 {
+    font-size: revert;
+    text-align: center;
   }
 
   aside {
