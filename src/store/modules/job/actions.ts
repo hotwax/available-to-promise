@@ -157,10 +157,10 @@ const actions: ActionTree<JobState, RootState> = {
         "systemJobEnumId_fld1_value": payload.jobEnums[1],
         "systemJobEnumId_fld1_grp": "2",
         "systemJobEnumId_fld1_op": "equals",
-        "productStoreId": payload.eComStoreId,
-        "productStoreId_grp": "2",
-        "statusId": "SERVICE_PENDING",
-        "systemJobEnumId_op": "not-empty"
+        "productStoreId_fld0_value": payload.eComStoreId,
+        "productStoreId_fld0_op": "equals",
+        "productStoreId_fld0_grp": "2",
+        "statusId": "SERVICE_PENDING"
       },
       "fieldList": [ "systemJobEnumId", "runTime", "tempExprId", "parentJobId", "serviceName", "jobId", "jobName", "currentRetryCount", "statusId" ],
       "entityName": "JobSandbox",
@@ -225,19 +225,48 @@ const actions: ActionTree<JobState, RootState> = {
   
   async fetchJobs ({ state, commit, dispatch }, payload) {
     const resp = await JobService.fetchJobInformation({
-      "inputFields":{
-        "statusId": ['SERVICE_DRAFT', 'SERVICE_PENDING'],
-        "statusId_op": "in",
+      "inputFields": {
+        "statusId_fld0_value": "SERVICE_DRAFT",
+        "statusId_fld0_op": "equals",
+        "statusId_fld0_grp": "1",
+        "statusId_fld1_value": "SERVICE_PENDING",
+        "statusId_fld1_op": "equals",
+        "statusId_fld1_grp": "2",
+        "productStoreId_fld0_value": this.state.user.currentEComStore.productStoreId,
+        "productStoreId_fld0_op": "equals",
+        "productStoreId_fld0_grp": "2",
         ...payload.inputFields
       },
       "entityName": "JobSandbox",
       "noConditionFind": "Y",
-      "viewSize": payload.viewSize ? payload.viewSize : (payload.inputFields?.systemJobEnumId?.length * 2)
+      "viewSize": payload.viewSize ? payload.viewSize : (payload.inputFields?.systemJobEnumId?.length * 2),
+      "orderBy": "runTime ASC"
     })
     if (resp.status === 200 && !hasError(resp) && resp.data.docs) {
-      const cached = JSON.parse(JSON.stringify(state.cached)); 
+      const cached = JSON.parse(JSON.stringify(state.cached));
+
+      // added condition to store multiple pending jobs in the state for export products,
+      // getting job with status Service draft as well, as this information will be needed when scheduling
+      // a new batch
+      // TODO: this needs to be updated when we will be storing the draft and pending jobs separately
+      const exportProductThresholdJobs = [] as any
+      const exportProductThresholdEnum = 'JOB_EXP_PROD_THRSHLD'
+      resp.data.docs.filter((job: any) => job.systemJobEnumId === exportProductThresholdEnum).map((job: any) => {
+        exportProductThresholdJobs.push({
+          ...job,
+          id: job.jobId,
+          frequency: job.tempExprId,
+          enumId: job.systemJobEnumId,
+          status: job.statusId
+        })
+      })
 
       resp.data.docs.filter((job: any) => job.statusId === 'SERVICE_PENDING').map((job: any) => {
+
+        // added condition to store multiple pending jobs in the state for order batch jobs
+        if (job.systemJobEnumId === exportProductThresholdEnum) {
+          return cached[job.systemJobEnumId] = exportProductThresholdJobs
+        }
         
         return cached[job.systemJobEnumId] = {
           ...job,
@@ -249,54 +278,27 @@ const actions: ActionTree<JobState, RootState> = {
       })  
 
       resp.data.docs.filter((job: any) => job.statusId === 'SERVICE_DRAFT').map((job: any) => {
-        return cached[job.systemJobEnumId] = cached[job.systemJobEnumId] ? cached[job.systemJobEnumId] : {
+        return cached[job.systemJobEnumId] = cached[job.systemJobEnumId] ? cached[job.systemJobEnumId] : [{
           ...job,
           id: job.jobId,
           frequency: job.tempExprId,
           enumId: job.systemJobEnumId,
           status: job.statusId
-        }
+        }]
       });
 
       // fetching temp expressions
-      const tempExpr = Object.values(cached).map((job: any) => job.tempExprId)
+      const tempExpr = Object.values(cached).map((job: any) => {
+        // checked that if there is an array of jobs like in case of batch jobs then finding
+        // the tempExprId for all the nested jobs
+        if (job.length) return [...(job.map((jobInfo: any) => jobInfo.tempExprId))]
+        return job.tempExprId
+      }).flat()
+
+      await dispatch('fetchJobDescription', Object.keys(cached).map((job: any) => job));
       await dispatch('fetchTemporalExpression', tempExpr)
 
       commit(types.JOB_UPDATED_BULK, cached);
-    }
-    return resp;
-  },
-  async updateJob ({ dispatch }, job) {
-    let resp;
-
-    const payload = {
-      'jobId': job.jobId,
-      'systemJobEnumId': job.systemJobEnumId,
-      'recurrenceTimeZone': DateTime.now().zoneName,
-      'tempExprId': job.jobStatus,
-      'statusId': "SERVICE_PENDING"
-    } as any
-
-    job?.runTime && (payload['runTime'] = job.runTime)
-    job?.sinceId && (payload['sinceId'] = job.sinceId)
-    job?.jobName && (payload['jobName'] = job.jobName)
-
-    try {
-      resp = await JobService.updateJob(payload)
-      if (resp.status === 200 && !hasError(resp) && resp.data.successMessage) {
-        showToast(translate('Service updated successfully'))
-        dispatch('fetchJobs', {
-          inputFields: {
-            'systemJobEnumId': payload.systemJobEnumId,
-            'systemJobEnumId_op': 'equals'
-          }
-        })
-      } else {
-        showToast(translate('Something went wrong'))
-      }
-    } catch (err) {
-      showToast(translate('Something went wrong'))
-      console.error(err)
     }
     return resp;
   },
@@ -378,7 +380,7 @@ const actions: ActionTree<JobState, RootState> = {
       'statusId': "SERVICE_PENDING"
     } as any
 
-    const resp = await JobService.updateJob(payload)
+    const resp = await JobService.updateJobSandbox(payload)
     if (resp.status === 200 && !hasError(resp) && resp.data.docs) {
       commit(types.JOB_UPDATED, { job });
     }
@@ -388,8 +390,10 @@ const actions: ActionTree<JobState, RootState> = {
   async cancelJob({ dispatch, state }, job) {
     let resp;
 
+    const cachedJob = state.cached[job.systemJobEnumId]
+
     try {
-      resp = await JobService.updateJob({
+      resp = await JobService.updateJobSandbox({
         jobId: job.jobId,
         systemJobEnumId: job.systemJobEnumId,
         statusId: "SERVICE_CANCELLED",
@@ -398,8 +402,9 @@ const actions: ActionTree<JobState, RootState> = {
       });
       if (resp.status == 200 && !hasError(resp)) {
         showToast(translate('Service updated successfully'))
-        state.cached[job.systemJobEnumId].statusId = 'SERVICE_DRAFT'
-        state.cached[job.systemJobEnumId].status = 'SERVICE_DRAFT'
+        if (cachedJob) {
+          state.cached[job.systemJobEnumId].statusId = state.cached[job.systemJobEnumId].status = 'SERVICE_DRAFT'
+        }
         dispatch('fetchJobs', {
           inputFields: {
             'systemJobEnumId': job.systemJobEnumId,

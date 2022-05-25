@@ -8,6 +8,7 @@ import ThresholdUpdates from '@/views/ThresholdUpdates.vue'
 import Login from '@/views/Login.vue'
 import Settings from "@/views/Settings.vue"
 import store from '@/store'
+import ScheduleThreshold from '@/views/ScheduleThreshold.vue'
 
 const authGuard = (to: any, from: any, next: any) => {
   if (store.getters['user/isAuthenticated']) {
@@ -69,7 +70,13 @@ const routes: Array<RouteRecordRaw> = [
     name: "Settings",
     component: Settings,
     beforeEnter: authGuard
-  }
+  },
+  {
+    path: '/schedule-threshold',
+    name: 'ScheduleThreshold',
+    component: ScheduleThreshold,
+    beforeEnter: authGuard
+  },
 ]
 
 const router = createRouter({

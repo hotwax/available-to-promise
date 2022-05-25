@@ -20,6 +20,9 @@ const getters: GetterTree<ProductState, RootState> = {
   },
   getQuery(state) {
     return state.query;
+  },
+  getThreshold(state) {
+    return state.threshold;
   }
 };
 export default getters;

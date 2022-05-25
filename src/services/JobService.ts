@@ -1,4 +1,36 @@
 import api from '@/api'
+import { translate } from '@/i18n';
+import { hasError, showToast } from '@/utils';
+import { DateTime } from 'luxon';
+
+const updateJob = async (job: any) => {
+  let resp;
+
+  const payload = {
+    'jobId': job.jobId,
+    'systemJobEnumId': job.systemJobEnumId,
+    'recurrenceTimeZone': DateTime.now().zoneName,
+    'tempExprId': job.jobStatus,
+    'statusId': "SERVICE_PENDING"
+  } as any
+
+  job?.runTime && (payload['runTime'] = job.runTime)
+  job?.sinceId && (payload['sinceId'] = job.sinceId)
+  job?.jobName && (payload['jobName'] = job.jobName)
+
+  try {
+    resp = await updateJobSandbox(payload)
+    if (resp.status === 200 && !hasError(resp) && resp.data.successMessage) {
+      showToast(translate('Service updated successfully'))
+    } else {
+      showToast(translate('Something went wrong'))
+    }
+  } catch (err) {
+    showToast(translate('Something went wrong'))
+    console.error(err)
+  }
+  return resp;
+}
 
 const fetchJobInformation = async (payload: any): Promise <any>  => {
   return api({
@@ -15,7 +47,7 @@ const fetchJobDescription = async (payload: any): Promise <any>  => {
   });
 }
 
-const updateJob = async (payload: any): Promise <any>  => {
+const updateJobSandbox = async (payload: any): Promise <any>  => {
   return api({
     url: "service/updateJobSandbox",
     method: "post",
@@ -45,5 +77,6 @@ export const JobService = {
   fetchJobInformation,
   fetchTemporalExpression,
   updateJob,
+  updateJobSandbox,
   scheduleJob
 }

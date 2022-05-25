@@ -97,6 +97,7 @@ import {
 import { mapGetters, useStore } from "vuex";
 
 import { DateTime } from 'luxon';
+import { JobService } from "@/services/JobService";
 
 export default defineComponent({
   name: "JobConfiguration",
@@ -116,7 +117,8 @@ export default defineComponent({
   data() {
     return {
       jobStatus: this.status,
-      minDateTime: DateTime.now().toISO()
+      minDateTime: DateTime.now().toISO(),
+      jobEnums: JSON.parse(process.env?.VUE_APP_JOB_ENUMS as string) as any
     }
   },
   props: ["job", "title", "status", "type"],
@@ -235,7 +237,11 @@ export default defineComponent({
       if (job?.statusId === 'SERVICE_DRAFT') {
         this.store.dispatch('job/scheduleService', job)
       } else if (job?.statusId === 'SERVICE_PENDING') {
-        this.store.dispatch('job/updateJob', job)
+        await JobService.updateJob(job).then((resp: any) => {
+          if (resp && this.$route.path.includes('threshold-updates')) {
+            this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.currentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums})
+          }
+        })
       }
     },
     getTime (time: any) {
