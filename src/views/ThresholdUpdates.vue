@@ -24,6 +24,7 @@
     <ion-content>
       <main>
         <section v-if="segmentSelected === 'pending'">
+          <ion-button @click="openReorderModal">{{ 'Reorder export jobs' }}</ion-button>
           <!-- Empty state -->
           <div v-if="pendingJobs?.length === 0">
             <p class="ion-text-center">{{ $t("There are no jobs pending right now")}}</p>
@@ -267,6 +268,7 @@ import { Plugins } from '@capacitor/core';
 import { showToast } from '@/utils'
 import JobHistoryModal from '@/components/JobHistoryModal.vue';
 import { DateTime } from 'luxon';
+import JobsReorderModal from '@/components/JobsReorderModal.vue';
 
 export default defineComponent({
   name: "ThresholdUpdates",
@@ -511,6 +513,20 @@ export default defineComponent({
       createAnimation()
         .addAnimation([gapAnimation, revealAnimation])
         .play();
+    },
+    async openReorderModal() {
+      this.store.dispatch('job/fetchJobs', {
+        inputFields: {
+          systemJobEnumId: 'JOB_EXP_PROD_THRSHLD',
+          systemJobEnumId_op: "equals"
+        },
+        viewSize: 20
+      })
+      const reorderModal = await modalController.create({
+        component: JobsReorderModal
+      })
+
+      return reorderModal.present();
     }
   },
   ionViewWillEnter() {
