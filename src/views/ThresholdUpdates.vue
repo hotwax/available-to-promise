@@ -324,7 +324,8 @@ export default defineComponent({
       getCurrentEComStore:'user/getCurrentEComStore',
       isPendingJobsScrollable: 'job/isPendingJobsScrollable',
       isRunningJobsScrollable: 'job/isRunningJobsScrollable',
-      isHistoryJobsScrollable: 'job/isHistoryJobsScrollable'
+      isHistoryJobsScrollable: 'job/isHistoryJobsScrollable',
+      getJob: 'job/getJob'
     })
   },
   mounted(){
@@ -515,15 +516,27 @@ export default defineComponent({
         .play();
     },
     async openReorderModal() {
-      this.store.dispatch('job/fetchJobs', {
+      await this.store.dispatch('job/fetchJobs', {
         inputFields: {
+          statusId: 'SERVICE_PENDING',
+          statusId_op: 'equals',
           systemJobEnumId: 'JOB_EXP_PROD_THRSHLD',
           systemJobEnumId_op: "equals"
         },
         viewSize: 20
       })
       const reorderModal = await modalController.create({
-        component: JobsReorderModal
+        component: JobsReorderModal,
+        componentProps: {
+          "jobsForReorder": this.getJob('JOB_EXP_PROD_THRSHLD'),
+          "initialJobsOrder": JSON.parse(JSON.stringify(this.getJob('JOB_EXP_PROD_THRSHLD')))
+        }
+      })
+
+      reorderModal.onDidDismiss().then((data: any) => {
+        if (data?.data?.dismissed) {
+          this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums});
+        }
       })
 
       return reorderModal.present();
