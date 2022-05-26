@@ -413,11 +413,10 @@ export default defineComponent({
     this.successJobs = []
   },
   async ionViewWillEnter() {
-    const jobEnums = JSON.parse(process.env?.VUE_APP_JOB_ENUMS as string) as any
     await this.store.dispatch('job/fetchJobs', {
       inputFields: {
-        systemJobEnumId: jobEnums,
-        systemJobEnumId_op: "in"
+        systemJobEnumId: this.jobEnumId,
+        systemJobEnumId_op: "equals"
       },
       viewSize: 20
     })
