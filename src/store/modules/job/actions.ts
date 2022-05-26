@@ -225,19 +225,48 @@ const actions: ActionTree<JobState, RootState> = {
   
   async fetchJobs ({ state, commit, dispatch }, payload) {
     const resp = await JobService.fetchJobInformation({
-      "inputFields":{
-        "statusId": ['SERVICE_DRAFT', 'SERVICE_PENDING'],
-        "statusId_op": "in",
+      "inputFields": {
+        "statusId_fld0_value": "SERVICE_DRAFT",
+        "statusId_fld0_op": "equals",
+        "statusId_fld0_grp": "1",
+        "statusId_fld1_value": "SERVICE_PENDING",
+        "statusId_fld1_op": "equals",
+        "statusId_fld1_grp": "2",
+        "productStoreId_fld0_value": this.state.user.currentEComStore.productStoreId,
+        "productStoreId_fld0_op": "equals",
+        "productStoreId_fld0_grp": "2",
         ...payload.inputFields
       },
       "entityName": "JobSandbox",
       "noConditionFind": "Y",
-      "viewSize": payload.viewSize ? payload.viewSize : (payload.inputFields?.systemJobEnumId?.length * 2)
+      "viewSize": payload.viewSize ? payload.viewSize : (payload.inputFields?.systemJobEnumId?.length * 2),
+      "orderBy": "runTime ASC"
     })
     if (resp.status === 200 && !hasError(resp) && resp.data.docs) {
-      const cached = JSON.parse(JSON.stringify(state.cached)); 
+      const cached = JSON.parse(JSON.stringify(state.cached));
+
+      // added condition to store multiple pending jobs in the state for export products,
+      // getting job with status Service draft as well, as this information will be needed when scheduling
+      // a new batch
+      // TODO: this needs to be updated when we will be storing the draft and pending jobs separately
+      const exportProductThresholdJobs = [] as any
+      const exportProductThresholdEnum = 'JOB_EXP_PROD_THRSHLD'
+      resp.data.docs.filter((job: any) => job.systemJobEnumId === exportProductThresholdEnum).map((job: any) => {
+        exportProductThresholdJobs.push({
+          ...job,
+          id: job.jobId,
+          frequency: job.tempExprId,
+          enumId: job.systemJobEnumId,
+          status: job.statusId
+        })
+      })
 
       resp.data.docs.filter((job: any) => job.statusId === 'SERVICE_PENDING').map((job: any) => {
+
+        // added condition to store multiple pending jobs in the state for order batch jobs
+        if (job.systemJobEnumId === exportProductThresholdEnum) {
+          return cached[job.systemJobEnumId] = exportProductThresholdJobs
+        }
         
         return cached[job.systemJobEnumId] = {
           ...job,
@@ -249,17 +278,24 @@ const actions: ActionTree<JobState, RootState> = {
       })  
 
       resp.data.docs.filter((job: any) => job.statusId === 'SERVICE_DRAFT').map((job: any) => {
-        return cached[job.systemJobEnumId] = cached[job.systemJobEnumId] ? cached[job.systemJobEnumId] : {
+        return cached[job.systemJobEnumId] = cached[job.systemJobEnumId] ? cached[job.systemJobEnumId] : [{
           ...job,
           id: job.jobId,
           frequency: job.tempExprId,
           enumId: job.systemJobEnumId,
           status: job.statusId
-        }
+        }]
       });
 
       // fetching temp expressions
-      const tempExpr = Object.values(cached).map((job: any) => job.tempExprId)
+      const tempExpr = Object.values(cached).map((job: any) => {
+        // checked that if there is an array of jobs like in case of batch jobs then finding
+        // the tempExprId for all the nested jobs
+        if (job.length) return [...(job.map((jobInfo: any) => jobInfo.tempExprId))]
+        return job.tempExprId
+      }).flat()
+
+      await dispatch('fetchJobDescription', Object.keys(cached).map((job: any) => job));
       await dispatch('fetchTemporalExpression', tempExpr)
 
       commit(types.JOB_UPDATED_BULK, cached);
