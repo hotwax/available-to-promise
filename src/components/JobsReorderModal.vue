@@ -19,7 +19,12 @@
         <ion-reorder/>
       </ion-item>
     </ion-reorder-group>
-    <ion-button @click="save()">{{ 'Save' }}</ion-button>
+
+    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+      <ion-fab-button @click="save()">
+        <ion-icon :icon="saveOutline" />
+      </ion-fab-button>
+    </ion-fab>
   </ion-content>
 </template>
 
@@ -28,10 +33,12 @@ import {
   IonButtons,
   IonButton,
   IonContent,
-  IonLabel,
+  IonFab,
+  IonFabButton,
   IonHeader,
   IonIcon,
   IonItem,
+  IonLabel,
   IonReorder,
   IonReorderGroup,
   IonTitle,
@@ -39,7 +46,7 @@ import {
   modalController
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
-import { closeOutline } from 'ionicons/icons';
+import { closeOutline, saveOutline } from 'ionicons/icons';
 import { mapGetters, useStore } from 'vuex';
 import { DateTime } from 'luxon';
 import { JobService } from '@/services/JobService';
@@ -50,10 +57,12 @@ export default defineComponent({
     IonButtons,
     IonButton,
     IonContent,
-    IonLabel,
+    IonFab,
+    IonFabButton,
     IonHeader,
     IonIcon,
     IonItem,
+    IonLabel,
     IonReorder,
     IonReorderGroup,
     IonTitle,
@@ -144,6 +153,7 @@ export default defineComponent({
 
     return {
       closeOutline,
+      saveOutline,
       store
     };
   },
