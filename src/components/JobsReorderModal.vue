@@ -21,7 +21,7 @@
     </ion-reorder-group>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button @click="save()">
+      <ion-fab-button @click="save()" :disabled="!this.updatedJobsOrder.length">
         <ion-icon :icon="saveOutline" />
       </ion-fab-button>
     </ion-fab>
@@ -142,7 +142,7 @@ export default defineComponent({
         return resp
       }))
 
-      // If there are no failed jobs then redirecting the user to the select product page
+      // If there are no failed jobs then redirecting the user to the threshold updates page
       if (!this.failedJobs.length) {
         this.closeModal(true);
       }
