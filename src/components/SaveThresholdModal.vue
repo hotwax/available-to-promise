@@ -185,7 +185,7 @@ export default defineComponent({
         'jobFields': {
           'productStoreId': productStoreId,
           'systemJobEnumId': job.systemJobEnumId,
-          'tempExprId': 'EVERYDAY',  // Need to remove this as we are passing frequency in SERVICE_TEMP_EXPR, Kept it for now for backward compatibility
+          'tempExprId': 'EVERYDAY',  // Need to remove this as we are passing frequency in SERVICE_TEMP_EXPR, currently kept it for backward compatibility
           'maxRecurrenceCount': '-1',
           'parentJobId': job.parentJobId,
           'runAsUser': 'system', // default system, but empty in run now
