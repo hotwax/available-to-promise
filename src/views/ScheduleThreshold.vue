@@ -263,7 +263,14 @@ export default defineComponent({
       const jobsToUpdate = this.updatedJobsOrder.filter((job: any) => !job.isNew)
 
       await Promise.all(jobsToUpdate.map(async (job: any) => {
-        const resp = await JobService.updateJob(job)
+        const payload = {
+          'jobId': job.jobId,
+          'systemJobEnumId': job.systemJobEnumId,
+          'recurrenceTimeZone': this.userProfile.userTimeZone,
+          'statusId': "SERVICE_PENDING",
+          'runTime': job.runTime
+        }
+        const resp = await JobService.updateJob(payload)
         if (!resp) {
           // if the job failed when updating then adding the jobId to the failedJobs array
           this.failedJobs.push(job.jobId)
