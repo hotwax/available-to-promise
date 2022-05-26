@@ -44,29 +44,30 @@
 
         <main class="main">
           <ion-reorder-group @ionItemReorder="doReorder($event)" disabled="false">
-            <ion-card v-for="job in jobsForReorder" :key="job.jobId" v-show="job.statusId === 'SERVICE_PENDING'">
-              <ion-item>
-                <ion-label>{{ job.jobName }}</ion-label>
-                <ion-reorder slot="end"></ion-reorder>
-              </ion-item>
-              <ion-card-header>
-                <ion-card-title>{{ getEnumDescription(job.systemJobEnumId) ? getEnumDescription(job.systemJobEnumId) : job.systemJobEnumId }}</ion-card-title>
-                <p v-if="failedJobs.includes(job.jobId)">{{ $t('Failed') }}</p>
-                <p v-if="successJobs.includes(job.jobId)">{{ $t('Success') }}</p>
-              </ion-card-header>
+            <div v-for="job in jobsForReorder" :key="job.jobId">
+              <ion-card>
+                <ion-item>
+                  <ion-label>{{ job.jobName }}</ion-label>
+                  <ion-reorder slot="end"></ion-reorder>
+                </ion-item>
+                <ion-card-header>
+                  <ion-card-title>{{ getEnumDescription(job.systemJobEnumId) ? getEnumDescription(job.systemJobEnumId) : job.systemJobEnumId }}</ion-card-title>
+                  <p v-if="failedJobs.includes(job.jobId)">{{ $t('Failed') }}</p>
+                  <p v-if="successJobs.includes(job.jobId)">{{ $t('Success') }}</p>
+                </ion-card-header>
 
-              <ion-item>
-                <ion-icon slot="start" :icon="timeOutline" />
-                <ion-label class="ion-text-wrap">{{ job.runTime ? getTime(job.runTime) : "-"  }}</ion-label>
-                <ion-badge v-if="job.runTime" color="dark">{{ timeTillJob(job.runTime)}}</ion-badge>
-              </ion-item>
+                <ion-item>
+                  <ion-icon slot="start" :icon="timeOutline" />
+                  <ion-label class="ion-text-wrap">{{ job.runTime ? getTime(job.runTime) : "-"  }}</ion-label>
+                  <ion-badge v-if="job.runTime" color="dark">{{ timeTillJob(job.runTime)}}</ion-badge>
+                </ion-item>
 
-              <ion-item lines="none">
-                <ion-icon slot="start" :icon="timerOutline" />
-                <ion-label class="ion-text-wrap">{{ job.tempExprId && temporalExpr(job.tempExprId)?.description ? temporalExpr(job.tempExprId)?.description : "🙃"  }}</ion-label>
-              </ion-item>
-
-            </ion-card>
+                <ion-item lines="none">
+                  <ion-icon slot="start" :icon="timerOutline" />
+                  <ion-label class="ion-text-wrap">{{ job.tempExprId && temporalExpr(job.tempExprId)?.description ? temporalExpr(job.tempExprId)?.description : "🙃"  }}</ion-label>
+                </ion-item>
+              </ion-card>
+            </div>
           </ion-reorder-group>
         </main>
       </div>
@@ -112,8 +113,7 @@ import {
   IonReorder,
   IonReorderGroup,
   IonTitle,
-  IonToolbar,
-  modalController,
+  IonToolbar
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { hasError, showToast } from '@/utils';
