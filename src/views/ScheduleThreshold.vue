@@ -256,6 +256,8 @@ export default defineComponent({
     },
     async saveThresholdRule() {
       this.isServiceScheduling = true;
+      this.failedJobs = []
+      this.successJobs = []
       const solrQuery = this.query
 
       const jobRunTime = this.updatedJobsOrder.find((job: any) => job.isNew)?.runTime
@@ -278,7 +280,6 @@ export default defineComponent({
           // if the job succeded when updating then adding the jobId to the successJobs array
           this.successJobs.push(job.jobId)
         }
-        return resp
       }))
 
       this.store.dispatch('job/fetchJobs', {
