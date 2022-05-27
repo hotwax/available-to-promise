@@ -41,8 +41,8 @@
               <ion-item lines="none">
                 <ion-label>{{ $t("Operator") }}</ion-label>
                 <ion-select interface="popover" @ionChange="applyOperator('included', 'tags', $event.detail.value)" :value="appliedFilters['included']['tags'].operator">
-                  <ion-select-option :value="AND">AND</ion-select-option>
-                  <ion-select-option :value="OR">OR</ion-select-option>
+                  <ion-select-option value="AND">AND</ion-select-option>
+                  <ion-select-option value="OR">OR</ion-select-option>
                 </ion-select>
               </ion-item>
               <ion-card-content>
@@ -72,8 +72,8 @@
               <ion-item lines="none">
                 <ion-label>{{ $t("Operator") }}</ion-label>
                 <ion-select @ionChange="applyOperator('excluded', 'tags', $event.detail.value)" interface="popover" :value="appliedFilters['excluded']['tags'].operator">
-                  <ion-select-option :value="AND">AND</ion-select-option>
-                  <ion-select-option :value="OR">OR</ion-select-option>
+                  <ion-select-option value="AND">AND</ion-select-option>
+                  <ion-select-option value="OR">OR</ion-select-option>
                 </ion-select>
               </ion-item>
               <ion-card-content>

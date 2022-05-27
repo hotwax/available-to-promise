@@ -120,7 +120,10 @@ export default defineComponent({
       await this.store.dispatch('product/clearFilters', {
         type: this.type,
         id: this.searchfield,
-        value: []
+        value: {
+          list: [],
+          operator: 'OR'
+        }
       })
       this.isFilterChanged = true;
     },
