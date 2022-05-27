@@ -533,8 +533,8 @@ export default defineComponent({
         }
       })
 
-      reorderModal.onDidDismiss().then((data: any) => {
-        if (data?.data?.dismissed) {
+      reorderModal.onDidDismiss().then((result: any) => {
+        if (result?.data?.isJobsUpdated) {
           this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums});
         }
       })

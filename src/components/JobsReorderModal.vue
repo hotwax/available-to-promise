@@ -88,8 +88,8 @@ export default defineComponent({
       const timeDiff = DateTime.fromMillis(time).diff(DateTime.local());
       return DateTime.local().plus(timeDiff).toRelative();
     },
-    closeModal(dismissed = false) {
-      modalController.dismiss({ dismissed });
+    closeModal(isJobsUpdated = false) {
+      modalController.dismiss({ isJobsUpdated });
     },
     getTime (time: any) {
       return DateTime.fromMillis(time).toLocaleString(DateTime.TIME_SIMPLE);
