@@ -24,7 +24,7 @@
     <ion-content>
       <main>
         <section v-if="segmentSelected === 'pending'">
-          <ion-button @click="openReorderModal">{{ 'Reorder export jobs' }}</ion-button>
+          <ion-button @click="openReorderModal">{{ $t('Reorder export jobs') }}</ion-button>
           <!-- Empty state -->
           <div v-if="pendingJobs?.length === 0">
             <p class="ion-text-center">{{ $t("There are no jobs pending right now")}}</p>

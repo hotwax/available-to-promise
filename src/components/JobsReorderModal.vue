@@ -6,7 +6,7 @@
           <ion-icon slot="icon-only" :icon="closeOutline" />
         </ion-button>
       </ion-buttons>
-      <ion-title>{{ $t('Export Threshold Jobs') }}</ion-title>
+      <ion-title>{{ $t('Export product threshold jobs') }}</ion-title>
     </ion-toolbar>
   </ion-header>
 
