@@ -63,18 +63,18 @@
             </ion-list-header>
             <ion-card>
               <ion-item lines="none">
-                <ion-label>{{ $t("Operator") }}</ion-label>
-                <ion-select @ionChange="applyOperator('included', 'tags', $event.detail.value)" interface="popover" :value="appliedFilters['excluded']['tags'].operator">
-                  <ion-select-option :value="AND">AND</ion-select-option>
-                  <ion-select-option :value="OR">OR</ion-select-option>
-                </ion-select>
-              </ion-item>
-              <ion-item lines="none">
                 <ion-label>{{ $t("Tags") }}</ion-label>
                 <ion-button fill="clear" slot="end" size="small" @click="searchFilter('tags', 'tagsFacet', 'tags', 'excluded')">
                   <ion-label>{{ $t('add') }}</ion-label>
                   <ion-icon :icon="addCircleOutline" />
                 </ion-button>
+              </ion-item>
+              <ion-item lines="none">
+                <ion-label>{{ $t("Operator") }}</ion-label>
+                <ion-select @ionChange="applyOperator('excluded', 'tags', $event.detail.value)" interface="popover" :value="appliedFilters['excluded']['tags'].operator">
+                  <ion-select-option :value="AND">AND</ion-select-option>
+                  <ion-select-option :value="OR">OR</ion-select-option>
+                </ion-select>
               </ion-item>
               <ion-card-content>
                 <ion-chip v-for="(tag, index) in appliedFilters['excluded']['tags'].list" :key="index">
