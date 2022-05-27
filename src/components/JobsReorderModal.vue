@@ -123,6 +123,8 @@ export default defineComponent({
       this.updatedJobsOrder = diffSeq
     },
     async save() {
+      this.failedJobs = []
+      this.successJobs = []
       await Promise.all(this.updatedJobsOrder.map(async (job: any) => {
         const payload = {
           'jobId': job.jobId,
@@ -131,15 +133,18 @@ export default defineComponent({
           'statusId': "SERVICE_PENDING",
           'runTime': job.runTime
         }
-        const resp = await JobService.updateJob(payload)
-        if (!resp) {
-          // if the job failed when updating then adding the jobId to the failedJobs array
+        try {
+          const resp = await JobService.updateJob(payload)
+          if (!resp) {
+            // if the job failed when updating then adding the jobId to the failedJobs array
+            this.failedJobs.push(job.jobId)
+          } else if (resp?.status === 200) {
+            // if the job succeded when updating then adding the jobId to the successJobs array
+            this.successJobs.push(job.jobId)
+          }
+        } catch (err) {
           this.failedJobs.push(job.jobId)
-        } else if (resp?.status === 200) {
-          // if the job succeded when updating then adding the jobId to the successJobs array
-          this.successJobs.push(job.jobId)
         }
-        return resp
       }))
 
       // If there are no failed jobs then redirecting the user to the threshold updates page
