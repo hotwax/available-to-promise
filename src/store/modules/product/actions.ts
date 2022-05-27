@@ -117,7 +117,10 @@ const actions: ActionTree<ProductState, RootState> = {
   async resetFilters({ commit, state, dispatch }, payload) {
     const appliedFilters = JSON.parse(JSON.stringify((state.appliedFilters as any)[payload.type]))
     const value = Object.keys(appliedFilters).reduce((value: any, filter: any) => {
-      value[filter] = []
+      value[filter] = {
+        list: [],
+        operator: "OR"
+      }
       return value
     }, {})
     commit(types.PRODUCT_FILTERS_UPDATED, {type: payload.type, value})
@@ -128,7 +131,10 @@ const actions: ActionTree<ProductState, RootState> = {
     const appliedFilters = JSON.parse(JSON.stringify(state.appliedFilters))
     const value = Object.keys(appliedFilters).reduce((value: any, type: any) => {
       const val = Object.keys(appliedFilters[type]).reduce((val: any, filter: any) => {
-        val[filter] = []
+        val[filter] = {
+          list: [],
+          operator: 'OR'
+        }
         return val
       }, {})
       value[type] = val
