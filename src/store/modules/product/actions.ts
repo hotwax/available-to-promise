@@ -41,6 +41,8 @@ const actions: ActionTree<ProductState, RootState> = {
         }
         commit(types.PRODUCT_LIST_UPDATED, { products, totalVirtual, totalVariant });
       } else {
+        state.products.total.virtual = 0;
+        state.products.total.variant = 0;
         showToast(translate("Products not found"));
         commit(types.PRODUCT_LIST_UPDATED, { products: [], totalVirtual: state.products.total.virtual, totalVariant: state.products.total.variant });
       }
