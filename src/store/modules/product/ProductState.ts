@@ -8,10 +8,16 @@ export default interface ProductState {
   };
   appliedFilters: {
     included: {
-      tags: Array<string>
+      tags: {
+        list: any;
+        operator: string;
+      };
     },
     excluded: {
-      tags: Array<string>
+      tags: {
+        list: any;
+        operator: string;
+      };
     }
   };
   query: any;

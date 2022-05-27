@@ -31,17 +31,22 @@
               </div>
             </ion-list-header>
             <ion-card>
-              <ion-toolbar>
-                <ion-item lines="none">
-                  <ion-label>{{ $t("Tags") }}</ion-label>
-                  <ion-button fill="clear" slot="end" size="small" @click="searchFilter('tags', 'tagsFacet', 'tags', 'included')">
-                    <ion-label>{{ $t('add') }}</ion-label>
-                    <ion-icon :icon="addCircleOutline" />
-                  </ion-button>
-                </ion-item>
-              </ion-toolbar>
+              <ion-item lines="none">
+                <ion-label>{{ $t("Tags") }}</ion-label>
+                <ion-button fill="clear" slot="end" size="small" @click="searchFilter('tags', 'tagsFacet', 'tags', 'included')">
+                  <ion-label>{{ $t('add') }}</ion-label>
+                  <ion-icon :icon="addCircleOutline" />
+                </ion-button>
+              </ion-item>
+              <ion-item lines="none">
+                <ion-label>{{ $t("Operator") }}</ion-label>
+                <ion-select interface="popover" @ionChange="applyOperator('included', 'tags', $event.detail.value)" :value="appliedFilters['included']['tags'].operator">
+                  <ion-select-option :value="AND">AND</ion-select-option>
+                  <ion-select-option :value="OR">OR</ion-select-option>
+                </ion-select>
+              </ion-item>
               <ion-card-content>
-                <ion-chip v-for="(tag, index) in appliedFilters['included']['tags']" :key="index">
+                <ion-chip v-for="(tag, index) in appliedFilters['included']['tags'].list" :key="index">
                   <ion-icon :icon="pricetagOutline" />
                   <ion-label>{{ tag }}</ion-label>
                   <ion-icon :icon="closeCircle" @click="removeFilters('included', 'tags', tag)"/>
@@ -57,17 +62,22 @@
               </div>
             </ion-list-header>
             <ion-card>
-              <ion-toolbar>
-                <ion-item lines="none">
-                  <ion-label>{{ $t("Tags") }}</ion-label>
-                  <ion-button fill="clear" slot="end" size="small" @click="searchFilter('tags', 'tagsFacet', 'tags', 'excluded')">
-                    <ion-label>{{ $t('add') }}</ion-label>
-                    <ion-icon :icon="addCircleOutline" />
-                  </ion-button>
-                </ion-item>
-              </ion-toolbar>
+              <ion-item lines="none">
+                <ion-label>{{ $t("Tags") }}</ion-label>
+                <ion-button fill="clear" slot="end" size="small" @click="searchFilter('tags', 'tagsFacet', 'tags', 'excluded')">
+                  <ion-label>{{ $t('add') }}</ion-label>
+                  <ion-icon :icon="addCircleOutline" />
+                </ion-button>
+              </ion-item>
+              <ion-item lines="none">
+                <ion-label>{{ $t("Operator") }}</ion-label>
+                <ion-select @ionChange="applyOperator('excluded', 'tags', $event.detail.value)" interface="popover" :value="appliedFilters['excluded']['tags'].operator">
+                  <ion-select-option :value="AND">AND</ion-select-option>
+                  <ion-select-option :value="OR">OR</ion-select-option>
+                </ion-select>
+              </ion-item>
               <ion-card-content>
-                <ion-chip v-for="(tag, index) in appliedFilters['excluded']['tags']" :key="index">
+                <ion-chip v-for="(tag, index) in appliedFilters['excluded']['tags'].list" :key="index">
                   <ion-icon :icon="pricetagOutline" />
                   <ion-label>{{ tag }}</ion-label>
                   <ion-icon :icon="closeCircle" @click="removeFilters('excluded', 'tags', tag)"/>
@@ -163,6 +173,8 @@ import {
   IonMenuButton,
   IonPage,
   IonSearchbar,
+  IonSelect,
+  IonSelectOption,
   IonTitle,
   IonToolbar,
   modalController,
@@ -199,6 +211,8 @@ export default defineComponent({
     IonMenuButton,
     IonPage,
     IonSearchbar,
+    IonSelect,
+    IonSelectOption,
     IonTitle,
     IonToolbar,
     Image
@@ -279,6 +293,14 @@ export default defineComponent({
     },
     async removeFilters(type: string, id: string, value: string) {
       await this.store.dispatch('product/updateAppliedFilters', {
+        type,
+        id,
+        value
+      })
+      this.queryString = ''
+    },
+    async applyOperator(type: string, id: string, value: string) {
+      await this.store.dispatch('product/updateAppliedFilterOperator', {
         type,
         id,
         value

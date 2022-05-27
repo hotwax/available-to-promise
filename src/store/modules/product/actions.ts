@@ -54,9 +54,17 @@ const actions: ActionTree<ProductState, RootState> = {
   async updateAppliedFilters({ commit, state, dispatch }, payload) {
     const value = payload.value
     const appliedFilters = JSON.parse(JSON.stringify((state.appliedFilters as any)[payload.type][payload.id]))
-    appliedFilters.includes(value) ? appliedFilters.splice(appliedFilters.indexOf(value), 1) : appliedFilters.push(value)
+    appliedFilters.list.includes(value) ? appliedFilters.list.splice(appliedFilters.list.indexOf(value), 1) : appliedFilters.list.push(value)
     commit(types.PRODUCT_FILTER_UPDATED, {id: payload.id, type: payload.type, value: appliedFilters})
     dispatch('updateQuery')
+  },
+
+  async updateAppliedFilterOperator({ commit, state, dispatch }, payload) {
+    const appliedFilters = JSON.parse(JSON.stringify((state.appliedFilters as any)[payload.type][payload.id]))
+    appliedFilters.operator = payload.value;
+    commit(types.PRODUCT_FILTER_UPDATED, {id: payload.id, type: payload.type, value: appliedFilters})
+    // If we have list items then only apply filters again
+    if(appliedFilters.list.length) dispatch('updateQuery')
   },
 
   async updateQuery({ commit, dispatch, state }, payload) {
@@ -88,16 +96,16 @@ const actions: ActionTree<ProductState, RootState> = {
 
     state.query.json['filter'] = Object.keys(state.appliedFilters.included).reduce((filter, value) => {
       const filterValues = (state.appliedFilters.included as any)[value]
-      if (filterValues.length > 0) {
-        filter.push(`${value}: ("${filterValues.join('" OR "')}")`)
+      if (filterValues.list.length > 0) {
+        filter.push(`${value}: ("${filterValues.list.join('" ' + filterValues.operator + ' "')}")`)
       }
       return filter
     }, state.query.json['filter'])
 
     state.query.json['filter'] = Object.keys(state.appliedFilters.excluded).reduce((filter, value) => {
       const filterValues = (state.appliedFilters.excluded as any)[value]
-      if (filterValues.length > 0) {
-        filter.push(`-${value}: ("${filterValues.join('" OR "')}")`)
+      if (filterValues.list.length > 0) {
+        filter.push(`-${value}: ("${filterValues.list.join('" ' + filterValues.operator + ' "')}")`)
       }
       return filter
     }, state.query.json['filter'])

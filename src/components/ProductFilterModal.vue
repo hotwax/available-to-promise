@@ -20,7 +20,7 @@
       <ion-item v-for="option in facetOptions" :key="option.id">
         <ion-label>{{ option.label }}</ion-label>
         <!-- Added key on checkbox as when clicking on the checkbox the checked value is changed but not reflected on UI -->
-        <ion-checkbox v-if="!isAlreadyApplied(option.id)" :checked="appliedFilters[type][searchfield].includes(option.id)" :key="appliedFilters[type][searchfield].includes(option.id)" @click="updateFilter(option.id)"/>
+        <ion-checkbox v-if="!isAlreadyApplied(option.id)" :checked="appliedFilters[type][searchfield].list.includes(option.id)" :key="appliedFilters[type][searchfield].list.includes(option.id)" @click="updateFilter(option.id)"/>
         <ion-note v-else slot="end" color="danger">{{ type === 'included' ? $t("excluded") : $t("included") }}</ion-note>
       </ion-item>
     </ion-list>
@@ -126,7 +126,7 @@ export default defineComponent({
     },
     isAlreadyApplied(value: string) {
       const type = this.type === 'included' ? 'excluded' : 'included'
-      return this.appliedFilters[type][this.searchfield].includes(value)
+      return this.appliedFilters[type][this.searchfield].list.includes(value)
     }
   },
   setup() {

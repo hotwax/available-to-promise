@@ -17,10 +17,16 @@ const productModule: Module<ProductState, RootState> = {
       },
       appliedFilters: {
         included: {
-          tags: []
+          tags: {
+            list: [],
+            operator: "OR"
+          },
         },
         excluded: {
-          tags: []
+          tags: {
+            list: [],
+            operator: "OR"
+          },
         }
       },
       query: {
