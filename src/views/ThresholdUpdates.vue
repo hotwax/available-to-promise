@@ -28,7 +28,7 @@
           <div v-if="pendingJobs?.length === 0">
             <p class="ion-text-center">{{ $t("There are no jobs pending right now")}}</p>
             <div class="ion-text-center">
-              <ion-button fill="outline" @click="refreshJobs()">
+              <ion-button fill="outline" @click="refreshJobs(undefined, true)">
                 {{ $t('retry') }}
                 <ion-spinner v-if="isRetrying" name="crescent" />
               </ion-button>
@@ -92,7 +92,7 @@
           <div v-if="runningJobs?.length === 0">
             <p class="ion-text-center">{{ $t("There are no jobs running right now")}}</p>
             <div class="ion-text-center">
-              <ion-button fill="outline" @click="refreshJobs()">
+              <ion-button fill="outline" @click="refreshJobs(undefined, true)">
                 {{ $t('retry') }}
                 <ion-spinner v-if="isRetrying" name="crescent" />
               </ion-button>
@@ -157,7 +157,7 @@
           <div v-if="jobHistory?.length === 0">
             <p class="ion-text-center">{{ $t("No jobs have run yet")}}</p>
             <div class="ion-text-center">
-              <ion-button fill="outline" @click="refreshJobs()">
+              <ion-button fill="outline" @click="refreshJobs(undefined, true)">
                 {{ $t('retry') }}
                 <ion-spinner v-if="isRetrying" name="crescent" />
               </ion-button>
@@ -267,6 +267,7 @@ import { Plugins } from '@capacitor/core';
 import { showToast } from '@/utils'
 import JobHistoryModal from '@/components/JobHistoryModal.vue';
 import { DateTime } from 'luxon';
+import emitter from '@/event-bus';
 
 export default defineComponent({
   name: "ThresholdUpdates",
@@ -326,7 +327,11 @@ export default defineComponent({
     })
   },
   mounted(){
+    emitter.on("productStoreChanged", this.refreshJobs);
     this.store.dispatch('util/getServiceStatusDesc')
+  },
+  unmounted(){
+    emitter.on("productStoreChanged", this.refreshJobs);
   },
   methods: {
     getJobExecutionTime(startTime: any, endTime: any){
@@ -391,8 +396,8 @@ export default defineComponent({
         event.target.complete();
       })
     },
-    async refreshJobs(event: any) {
-      this.isRetrying = true;
+    async refreshJobs(event: any, isRetrying = false) {
+      this.isRetrying = isRetrying;
       if(this.segmentSelected === 'pending') {
         this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums}).then(() => {
           if(event) event.target.complete();
