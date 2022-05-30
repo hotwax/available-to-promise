@@ -129,7 +129,7 @@ export default defineComponent({
           const searchPreferenceId = resp.data.searchPrefId;
           const params = {
             "searchPrefId": searchPreferenceId,
-            // TODO: Need to add userSearchPrefTypeId here to associate a search preference with a user.
+            // TODO: Need to add userSearchPrefTypeId here to associate search preference with the user.
             "userSearchPrefTypeId": ""
           }
           // Handle the case whether we will schedule service if searchPrefId is not associated with user. 
