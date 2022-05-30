@@ -331,7 +331,7 @@ export default defineComponent({
     this.store.dispatch('util/getServiceStatusDesc')
   },
   unmounted(){
-    emitter.on("productStoreChanged", this.refreshJobs);
+    emitter.off("productStoreChanged", this.refreshJobs);
   },
   methods: {
     getJobExecutionTime(startTime: any, endTime: any){

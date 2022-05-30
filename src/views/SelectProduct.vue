@@ -236,7 +236,7 @@ export default defineComponent({
     emitter.on("productStoreChanged", this.getProducts);
   },
   unmounted() {
-    emitter.on("productStoreChanged", this.getProducts);
+    emitter.off("productStoreChanged", this.getProducts);
   },
   methods: {
     searchProducts(event: any) {
