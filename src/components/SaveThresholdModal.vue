@@ -127,6 +127,13 @@ export default defineComponent({
 
         if (resp.status == 200 && resp?.data?.searchPrefId) {
           const searchPreferenceId = resp.data.searchPrefId;
+          const params = {
+            "searchPrefId": searchPreferenceId,
+            // TODO: Need to add userSearchPrefTypeId here to associate a search preference with a user.
+            "userSearchPrefTypeId": ""
+          }
+          // Handle the case whether we will schedule service if searchPrefId is not associated with user. 
+          await ProductService.associateSearchPrefToUser(params);
           await this.scheduleService(searchPreferenceId, this.threshold)
         } else {
           showToast(translate('Something went wrong'))
