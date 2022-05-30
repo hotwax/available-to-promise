@@ -65,8 +65,7 @@ export default defineComponent({
     ...mapGetters({
       instanceUrl: 'user/getInstanceUrl',
       userProfile: 'user/getUserProfile',
-      eComStore: 'user/getCurrentEComStore',
-      currentEComStore: 'user/getCurrentEComStore',
+      eComStore: 'user/getCurrentEComStore'
     })
   },
   methods: {
