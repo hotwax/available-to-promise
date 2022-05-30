@@ -133,7 +133,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-
 ion-select {
   padding-inline-start: 0;
 }
