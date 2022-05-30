@@ -460,7 +460,7 @@ export default defineComponent({
           message: this.$t('Canceling this job will cancel this occurrence and all following occurrences. This job will have to be re-enabled manually to run it again.'),
           buttons: [
             {
-              text: this.$t("DON'T CANCEL"),
+              text: this.$t("Don't cancel"),
               role: 'cancel',
             },
             {
