@@ -187,6 +187,7 @@ import { useRouter } from 'vue-router';
 import { mapGetters, useStore } from 'vuex';
 import SaveThresholdModal from '@/components/SaveThresholdModal.vue';
 import ProductFilterModal from '@/components/ProductFilterModal.vue';
+import emitter from '@/event-bus';
 
 export default defineComponent({
   name: 'SelectProduct',
@@ -230,6 +231,12 @@ export default defineComponent({
       threshold: '' as any,
       queryString: ''
     }
+  },
+  mounted() {
+    emitter.on("productStoreChanged", this.getProducts);
+  },
+  unmounted() {
+    emitter.on("productStoreChanged", this.getProducts);
   },
   methods: {
     searchProducts(event: any) {
