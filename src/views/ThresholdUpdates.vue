@@ -303,7 +303,6 @@ export default defineComponent({
       jobEnums: [
         ...JSON.parse(process.env?.VUE_APP_JOB_ENUMS as string) as any
       ],
-      // currentJob: '' as any,
       title: '',
       currentJobStatus: '',
       freqType: '' as any,
