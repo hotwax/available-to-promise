@@ -21,6 +21,7 @@ const jobModule: Module<JobState, RootState> = {
         list: [],
         total: 0
       },
+      current: {},
       temporalExp: [],
       enumIds: {}
     },

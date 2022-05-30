@@ -38,6 +38,9 @@ const getters: GetterTree <JobState, RootState> = {
     },
     getJobs: (state) => {
       return state.cached;
+    },
+    getCurrentJob(state) {
+      return state.current;
     }
   }
 

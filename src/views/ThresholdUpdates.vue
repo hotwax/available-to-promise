@@ -221,8 +221,8 @@
           </div>          
         </section>
 
-        <aside class="desktop-only" v-show="segmentSelected === 'pending' && currentJob">
-          <JobConfiguration :title="title" :job="currentJob" :status="currentJobStatus" :type="freqType" :key="currentJob"/>
+        <aside class="desktop-only" v-show="segmentSelected === 'pending' && currentJob && Object.keys(currentJob).length">
+          <JobConfiguration :title="title" :status="currentJobStatus" :type="freqType" :key="currentJob"/>
         </aside>
       </main>
     </ion-content>
@@ -231,6 +231,7 @@
 <script lang="ts">
 import { mapGetters, useStore } from 'vuex'
 import { defineComponent, ref } from "vue";
+import emitter from '@/event-bus';
 import {
   IonBadge,
   IonButton,
@@ -302,7 +303,7 @@ export default defineComponent({
       jobEnums: [
         ...JSON.parse(process.env?.VUE_APP_JOB_ENUMS as string) as any
       ],
-      currentJob: '' as any,
+      // currentJob: '' as any,
       title: '',
       currentJobStatus: '',
       freqType: '' as any,
@@ -322,7 +323,8 @@ export default defineComponent({
       getCurrentEComStore:'user/getCurrentEComStore',
       isPendingJobsScrollable: 'job/isPendingJobsScrollable',
       isRunningJobsScrollable: 'job/isRunningJobsScrollable',
-      isHistoryJobsScrollable: 'job/isHistoryJobsScrollable'
+      isHistoryJobsScrollable: 'job/isHistoryJobsScrollable',
+      currentJob: 'job/getCurrentJob'
     })
   },
   mounted(){
@@ -437,7 +439,7 @@ export default defineComponent({
         });
       return alert.present();
     },
-    async getPendingJobs(vSize: any, vIndex: any) {
+    async getPendingJobs(vSize?: any, vIndex?: any) {
       const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
       const viewIndex = vIndex ? vIndex : 0;
       await this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize, viewIndex, jobEnums: this.jobEnums});
@@ -474,16 +476,17 @@ export default defineComponent({
 
        return alert.present();
     },    
-    viewJobConfiguration(job: any) {
+    async viewJobConfiguration(job: any) {
       if(!this.isDesktop) {
         return;
       }
 
-      this.currentJob = {id: job.jobId, ...job}
       this.title = this.getEnumName(job.systemJobEnumId)
       this.currentJobStatus = job.tempExprId
       const id = this.jobEnums.find((enums) => enums === job.systemJobEnumId)
       this.freqType = id && (Object.entries(this.jobFrequencyType).find((freq) => freq[0] == id) as any)[1]
+
+      await this.store.dispatch('job/updateCurrentJob', { job });
       if (this.currentJob && !this.isJobDetailAnimationCompleted) {
         this.playAnimation();
         this.isJobDetailAnimationCompleted = true;
@@ -511,12 +514,24 @@ export default defineComponent({
       createAnimation()
         .addAnimation([gapAnimation, revealAnimation])
         .play();
+    },
+    updateJobs() {
+      if (this.isDesktop) {
+        if (this.currentJob) {
+          this.viewJobConfiguration(this.currentJob);
+        }
+        this.getPendingJobs();
+      }
     }
   },
-  ionViewWillEnter() {
+  async ionViewWillEnter() {
     // reassigning current job when entering in the view to not display the job config component if previously opened
-    this.currentJob = undefined
+    await this.store.dispatch('job/updateCurrentJob', { job: {} });
     this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums});
+    emitter.on('jobUpdated', this.updateJobs);
+  },
+  unmounted() {
+    emitter.off('jobUpdated', this.updateJobs);
   },
   setup() {
     const store = useStore();
