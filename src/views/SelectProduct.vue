@@ -336,7 +336,7 @@ export default defineComponent({
   scroll-snap-align: start;
   /* Here 20px padding-bottom is given 
     to match the 10px bottom and 10px top margin of card */
-  padding-bottom: 20px;
+  padding-bottom: calc(10px * 2);
 }
 
 .section-grid > div > ion-card {
