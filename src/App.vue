@@ -28,7 +28,7 @@
             <ion-label class="ion-text-wrap">
               <p class="overline">{{ instanceUrl }}</p>
               <ion-select interface="popover" :value="eComStore.productStoreId" @ionChange="setEComStore($event)">
-                <ion-select-option v-for="store in (userProfile ? userProfile.stores : [])" :key="store.productStoreId" :value="store.productStoreId" >{{ store.storeName }}</ion-select-option>
+                <ion-select-option v-for="store in (userProfile.stores.length ? userProfile.stores : [])" :key="store.productStoreId" :value="store.productStoreId" >{{ store.storeName }}</ion-select-option>
               </ion-select>
             </ion-label>
             <ion-note slot="end">{{ userProfile?.userTimeZone }}</ion-note>
