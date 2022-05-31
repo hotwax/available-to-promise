@@ -47,9 +47,8 @@ import { loadingController } from '@ionic/vue';
 import { options, settings, pulseOutline } from 'ionicons/icons';
 import emitter from "@/event-bus"
 import { useRouter } from 'vue-router';
-import { mapGetters } from 'vuex';
+import { mapGetters, useStore } from 'vuex';
 import { Settings } from 'luxon'
-import { useStore } from "@/store";
 
 export default defineComponent({
   name: 'App',
