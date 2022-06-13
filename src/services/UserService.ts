@@ -40,7 +40,7 @@ const getEComStores = async (payload: any): Promise<any> => {
   });
 }
 
-const setUserPref = async (payload: any): Promise<any> => {
+const setUserPreference = async (payload: any): Promise<any> => {
   return api({
     url: "service/setUserPreference",
     method: "post",
@@ -48,7 +48,7 @@ const setUserPref = async (payload: any): Promise<any> => {
   });
 }
 
-const getUserPref = async (payload: any): Promise<any> => {
+const getUserPreference = async (payload: any): Promise<any> => {
   return api({
     url: "service/getUserPreference",
     method: "post",
@@ -61,7 +61,7 @@ export const UserService = {
     getAvailableTimeZones,
     getProfile,
     setUserTimeZone,
-    setUserPref,
-    getUserPref,
+    setUserPreference,
+    getUserPreference,
     getEComStores
 }

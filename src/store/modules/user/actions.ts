@@ -77,13 +77,13 @@ const actions: ActionTree<UserState, RootState> = {
 
         const eComStoreResp = await UserService.getEComStores(payload);
         if (eComStoreResp.status === 200 && eComStoreResp.data.docs?.length > 0 && !hasError(eComStoreResp)) {
-          const userPref =  await UserService.getUserPref({
+          const userPref =  await UserService.getUserPreference({
             'userPrefTypeId': 'SELECTED_BRAND'
           });
           const stores = eComStoreResp.data.docs
-          const store = stores.find((store: any) => store.productStoreId == userPref.data.userPrefValue)
+          const userPrefStore = stores.find((store: any) => store.productStoreId == userPref.data.userPrefValue)
           resp.data.stores = stores ? stores : [];
-          commit(types.USER_CURRENT_ECOM_STORE_UPDATED, stores ? (store ? store : stores[0]) : {});
+          commit(types.USER_CURRENT_ECOM_STORE_UPDATED, userPrefStore ? userPrefStore : stores ? stores[0]: {});
         }
 
       commit(types.USER_INFO_UPDATED, resp.data);
@@ -97,7 +97,7 @@ const actions: ActionTree<UserState, RootState> = {
     commit(types.USER_CURRENT_ECOM_STORE_UPDATED, payload.eComStore);
     this.dispatch('product/clearAllFilters')
     this.dispatch('product/clearProductList');
-    await UserService.setUserPref({
+    await UserService.setUserPreference({
       'userPrefTypeId': 'SELECTED_BRAND',
       'userPrefValue': payload.eComStore.productStoreId
     });
