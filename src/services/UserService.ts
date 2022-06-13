@@ -40,10 +40,28 @@ const getEComStores = async (payload: any): Promise<any> => {
   });
 }
 
+const setUserPref = async (payload: any): Promise<any> => {
+  return api({
+    url: "service/setUserPreference",
+    method: "post",
+    data: payload
+  });
+}
+
+const getUserPref = async (payload: any): Promise<any> => {
+  return api({
+    url: "service/getUserPreference",
+    method: "post",
+    data: payload,
+  });
+}
+
 export const UserService = {
     login,
     getAvailableTimeZones,
     getProfile,
     setUserTimeZone,
+    setUserPref,
+    getUserPref,
     getEComStores
 }
