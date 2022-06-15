@@ -156,6 +156,7 @@ export default defineComponent({
         job = this.jobs[this.jobEnumId]
       }
 
+      // Used Guard Clause
       if (!job) {
         showToast(translate('Configuration missing'))
         return;
@@ -203,9 +204,9 @@ export default defineComponent({
       } as any;
 
       // checking if the runtimeData has productStoreId, and if present then adding it on root level
-      job?.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = productStoreId)
-      job?.priority && (payload['SERVICE_PRIORITY'] = job.priority.toString())
-      
+      job.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = productStoreId)
+      job.priority && (payload['SERVICE_PRIORITY'] = job.priority.toString())
+
       try {
         const scheduleJobRequests = [];
         // Job will be scheduled for single run where include all will be true
