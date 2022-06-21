@@ -2,7 +2,7 @@
   "name": "threshold-management",
   "version": "1.0.1",
   "private": true,
-  "description": "An Ionic project",
+  "description": "Threshold Management",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
