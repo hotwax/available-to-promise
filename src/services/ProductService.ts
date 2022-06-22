@@ -29,8 +29,8 @@ const createSearchPreference = async (payload: any): Promise<any> => {
 const fetchFacets = async (payload: any): Promise<any> => {
   return api({
     url: "/AutoCompleteSolrFacet",
-    method: "get",
-    params: payload
+    method: "post",
+    data: payload
   });
 }
 
