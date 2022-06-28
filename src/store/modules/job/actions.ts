@@ -386,7 +386,7 @@ const actions: ActionTree<JobState, RootState> = {
     return resp;
   },
 
-  async cancelJob({ dispatch, state, commit }, job) {
+  async cancelJob({ dispatch, state }, job) {
     let resp;
 
     try {
