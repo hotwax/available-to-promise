@@ -386,7 +386,7 @@ const actions: ActionTree<JobState, RootState> = {
     return resp;
   },
 
-  async cancelJob({ dispatch, state }, job) {
+  async cancelJob({ dispatch, state, commit }, job) {
     let resp;
 
     try {
@@ -399,8 +399,8 @@ const actions: ActionTree<JobState, RootState> = {
       });
       if (resp.status == 200 && !hasError(resp)) {
         showToast(translate('Service updated successfully'))
-        state.cached[job.systemJobEnumId].statusId = 'SERVICE_DRAFT'
-        state.cached[job.systemJobEnumId].status = 'SERVICE_DRAFT'
+        // deleting the enum from cached job as we will not store the job with cancelled status
+        delete state.cached[job?.systemJobEnumId]
         dispatch('fetchJobs', {
           inputFields: {
             'systemJobEnumId': job.systemJobEnumId,
