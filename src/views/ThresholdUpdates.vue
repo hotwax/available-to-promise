@@ -49,7 +49,7 @@
                 </ion-label>
               </ion-item>
 
-              <ion-item v-if="job.runtimeData && job.runtimeData.threshold">
+              <ion-item v-if="job.runtimeData && job.runtimeData.threshold !== null && job.runtimeData.threshold !== undefined">
                 <ion-icon slot="start" :icon="optionsOutline"/>
                 <ion-label class="ion-text-wrap">{{ job.runtimeData.threshold }} {{ $t('threshold') }}</ion-label>
               </ion-item>
@@ -126,7 +126,7 @@
                   <p>{{ getEnumDescription(job.systemJobEnumId) }}</p>
                 </ion-label>
               </ion-item>
-              <ion-item v-if="job.runtimeData && job.runtimeData.threshold">
+              <ion-item v-if="job.runtimeData && job.runtimeData.threshold !== null && job.runtimeData.threshold !== undefined">
                 <ion-icon slot="start" :icon="optionsOutline"/>
                 <ion-label class="ion-text-wrap">{{ job.runtimeData.threshold }} {{ $t('threshold') }}</ion-label>
               </ion-item>
@@ -204,7 +204,7 @@
                 <p>{{ getEnumDescription(job.systemJobEnumId) }}</p>
               </ion-label>
             </ion-item>
-            <ion-item v-if="job.runtimeData && job.runtimeData.threshold">
+            <ion-item v-if="job.runtimeData && job.runtimeData.threshold !== null && job.runtimeData.threshold !== undefined">
               <ion-icon slot="start" :icon="optionsOutline"/>
               <ion-label class="ion-text-wrap">{{ job.runtimeData.threshold }} {{ $t('threshold') }}</ion-label>
             </ion-item>
