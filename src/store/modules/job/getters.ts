@@ -52,7 +52,7 @@ const getters: GetterTree <JobState, RootState> = {
       if (!thresholdRule) return "";
       const tagsExcluded = thresholdRule.json.filter.find((filter: any) => filter.startsWith("-tags:"))
       if (!tagsExcluded) return ""
-      return tagsExcluded.trim().substring(tagsExcluded.indexOf(":") + 1)
+      return tagsExcluded.substring(tagsExcluded.indexOf(":") + 1)
     },
   }
 
