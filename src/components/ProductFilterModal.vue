@@ -24,6 +24,9 @@
         <ion-note v-else slot="end" color="danger">{{ type === 'included' ? $t("excluded") : $t("included") }}</ion-note>
       </ion-item>
     </ion-list>
+    <ion-infinite-scroll @ionInfinite="search($event)" threshold="100px">
+      <ion-infinite-scroll-content loading-spinner="crescent" :loading-text="$t('Loading')"/>
+    </ion-infinite-scroll>
   </ion-content>
 </template>
 
@@ -36,6 +39,8 @@ import {
   IonContent,
   IonHeader,
   IonIcon,
+  IonInfiniteScroll,
+  IonInfiniteScrollContent,
   IonItem,
   IonLabel,
   IonList,
@@ -58,6 +63,8 @@ export default defineComponent({
     IonContent,
     IonHeader,
     IonIcon,
+    IonInfiniteScroll,
+    IonInfiniteScrollContent,
     IonItem,
     IonLabel,
     IonList,
@@ -86,10 +93,10 @@ export default defineComponent({
     async search(event: any) {
       // TODO: need to implement infinite scroll on the modal search
       const payload = {
-        facetToSelect: this.facetToSelect,
+        facetToSelect: 'productCategoryNamesFacet',
         docType: 'PRODUCT',
         coreName: 'enterpriseSearch',
-        searchfield: this.searchfield,
+        searchfield: 'productCategoryNames',
         jsonQuery: '{"query":"*:*","filter":["docType:PRODUCT"]}',
         noConditionFind: 'N',
         limit: 10,
