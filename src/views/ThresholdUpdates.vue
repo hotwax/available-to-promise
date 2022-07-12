@@ -49,17 +49,17 @@
                 </ion-label>
               </ion-item>
 
-              <ion-item lines="full" v-if="job.runtimeData && job.runtimeData.threshold">
+              <ion-item v-if="job.runtimeData && job.runtimeData.threshold">
                 <ion-icon slot="start" :icon="optionsOutline"/>
                 <ion-label class="ion-text-wrap">{{ job.runtimeData.threshold }} {{ $t('threshold') }}</ion-label>
               </ion-item>
 
-              <ion-item lines="full" v-if="job.runtimeData && job.runtimeData.searchPreferenceId">
+              <ion-item v-if="job.runtimeData && job.runtimeData.searchPreferenceId">
                 <ion-icon slot="start" :icon="checkmarkCircleOutline" />
                 <ion-label class="ion-text-wrap">{{ getTagsIncluded(job.runtimeData.searchPreferenceId) ? getTagsIncluded(job.runtimeData.searchPreferenceId) : "-" }}</ion-label>
               </ion-item>
 
-              <ion-item lines="full" v-if="job.runtimeData && job.runtimeData.searchPreferenceId">
+              <ion-item v-if="job.runtimeData && job.runtimeData.searchPreferenceId">
                 <ion-icon slot="start" :icon="closeCircleOutline" />
                 <ion-label class="ion-text-wrap">{{ getTagsExcluded(job.runtimeData.searchPreferenceId) ? getTagsExcluded(job.runtimeData.searchPreferenceId) : "-" }}</ion-label>
               </ion-item>
@@ -69,7 +69,7 @@
                 <ion-label class="ion-text-wrap">{{ job.runTime ? getTime(job.runTime) : "-"  }}</ion-label>
               </ion-item>
 
-              <ion-item>
+              <ion-item lines="full">
                 <ion-icon slot="start" :icon="timerOutline" />
                 <ion-label class="ion-text-wrap">{{ job.tempExprId ? temporalExpr(job.tempExprId)?.description : "🙃"  }}</ion-label>
               </ion-item>
@@ -126,17 +126,17 @@
                   <p>{{ getEnumDescription(job.systemJobEnumId) }}</p>
                 </ion-label>
               </ion-item>
-              <ion-item lines="full" v-if="job.runtimeData && job.runtimeData.threshold">
+              <ion-item v-if="job.runtimeData && job.runtimeData.threshold">
                 <ion-icon slot="start" :icon="optionsOutline"/>
                 <ion-label class="ion-text-wrap">{{ job.runtimeData.threshold }} {{ $t('threshold') }}</ion-label>
               </ion-item>
 
-              <ion-item lines="full" v-if="job.runtimeData && job.runtimeData.searchPreferenceId">
+              <ion-item v-if="job.runtimeData && job.runtimeData.searchPreferenceId">
                 <ion-icon slot="start" :icon="checkmarkCircleOutline" />
                 <ion-label class="ion-text-wrap">{{ getTagsIncluded(job.runtimeData.searchPreferenceId) ? getTagsIncluded(job.runtimeData.searchPreferenceId) : "-" }}</ion-label>
               </ion-item>
 
-              <ion-item lines="full" v-if="job.runtimeData && job.runtimeData.searchPreferenceId">
+              <ion-item v-if="job.runtimeData && job.runtimeData.searchPreferenceId">
                 <ion-icon slot="start" :icon="closeCircleOutline" />
                 <ion-label class="ion-text-wrap">{{ getTagsExcluded(job.runtimeData.searchPreferenceId) ? getTagsExcluded(job.runtimeData.searchPreferenceId) : "-" }}</ion-label>
               </ion-item>
@@ -146,7 +146,7 @@
                 <ion-label class="ion-text-wrap">{{ job.runTime ? getTime(job.runTime) : "-"  }}</ion-label>
               </ion-item>
 
-              <ion-item>
+              <ion-item lines="full">
                 <ion-icon slot="start" :icon="timerOutline" />
                 <ion-label class="ion-text-wrap">{{ job.tempExprId ? temporalExpr(job.tempExprId)?.description : "🙃"  }}</ion-label>
               </ion-item>
@@ -204,17 +204,17 @@
                 <p>{{ getEnumDescription(job.systemJobEnumId) }}</p>
               </ion-label>
             </ion-item>
-            <ion-item lines="full" v-if="job.runtimeData && job.runtimeData.threshold">
+            <ion-item v-if="job.runtimeData && job.runtimeData.threshold">
               <ion-icon slot="start" :icon="optionsOutline"/>
               <ion-label class="ion-text-wrap">{{ job.runtimeData.threshold }} {{ $t('threshold') }}</ion-label>
             </ion-item>
 
-            <ion-item lines="full" v-if="job.runtimeData && job.runtimeData.searchPreferenceId">
+            <ion-item v-if="job.runtimeData && job.runtimeData.searchPreferenceId">
               <ion-icon slot="start" :icon="checkmarkCircleOutline" />
               <ion-label class="ion-text-wrap">{{ getTagsIncluded(job.runtimeData.searchPreferenceId) ? getTagsIncluded(job.runtimeData.searchPreferenceId) : "-" }}</ion-label>
             </ion-item>
 
-            <ion-item lines="full" v-if="job.runtimeData && job.runtimeData.searchPreferenceId">
+            <ion-item v-if="job.runtimeData && job.runtimeData.searchPreferenceId">
               <ion-icon slot="start" :icon="closeCircleOutline" />
               <ion-label class="ion-text-wrap">{{ getTagsExcluded(job.runtimeData.searchPreferenceId) ? getTagsExcluded(job.runtimeData.searchPreferenceId) : "-" }}</ion-label>
             </ion-item>
@@ -225,7 +225,7 @@
               <ion-note slot="end">{{ job.statusId == "SERVICE_CANCELLED" || job.statusId == "SERVICE_CRASHED" ? getJobExecutionTime(job.startDateTime, job.cancelDateTime) : getJobExecutionTime(job.startDateTime, job.finishDateTime) }}</ion-note>
             </ion-item>
 
-            <ion-item>
+            <ion-item lines="full">
               <ion-icon slot="start" :icon="timerOutline" />
               <ion-label class="ion-text-wrap">{{ job.tempExprId ? temporalExpr(job.tempExprId)?.description : "🙃"  }}</ion-label>
             </ion-item>
