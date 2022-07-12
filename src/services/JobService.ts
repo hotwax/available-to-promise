@@ -39,11 +39,20 @@ const fetchTemporalExpression = async (payload: any): Promise <any>  => {
   });
 }
 
+const fetchThresholdRules = async (payload: any): Promise <any>  => {
+  return api({
+    url: "performFind",
+    method: "post",
+    data: payload
+  });
+}
+
 
 export const JobService = {
   fetchJobDescription,
   fetchJobInformation,
   fetchTemporalExpression,
+  fetchThresholdRules,
   updateJob,
   scheduleJob
 }

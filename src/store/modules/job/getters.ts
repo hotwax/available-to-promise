@@ -38,7 +38,22 @@ const getters: GetterTree <JobState, RootState> = {
     },
     getJobs: (state) => {
       return state.cached;
-    }
+    },
+    getTagsIncluded: (state) => (id: string): any => {
+      const thresholdRule = state.thresholdRules[id];
+
+      if (!thresholdRule) return "";
+      const tagsIncluded = thresholdRule.json.filter.find((filter: any) => filter.startsWith("tags:"))
+      if (!tagsIncluded) return ""
+      return tagsIncluded.substring(tagsIncluded.indexOf(":") + 1)
+    },
+    getTagsExcluded: (state) => (id: string): any => {
+      const thresholdRule = state.thresholdRules[id];
+      if (!thresholdRule) return "";
+      const tagsExcluded = thresholdRule.json.filter.find((filter: any) => filter.startsWith("-tags:"))
+      if (!tagsExcluded) return ""
+      return tagsExcluded.trim().substring(tagsExcluded.indexOf(":") + 1)
+    },
   }
 
   export default getters;
