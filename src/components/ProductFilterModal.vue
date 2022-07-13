@@ -24,7 +24,7 @@
         <ion-note v-else slot="end" color="danger">{{ type === 'included' ? $t("excluded") : $t("included") }}</ion-note>
       </ion-item>
     </ion-list>
-    <ion-infinite-scroll @ionInfinite="search($event)" threshold="100px">
+    <ion-infinite-scroll @ionInfinite="loadMoreTags($event, queryString)" threshold="100px">
       <ion-infinite-scroll-content loading-spinner="crescent" :loading-text="$t('Loading')"/>
     </ion-infinite-scroll>
   </ion-content>
@@ -77,7 +77,8 @@ export default defineComponent({
     return {
       queryString: '',
       facetOptions: [] as any,
-      isFilterChanged: false
+      isFilterChanged: false,
+      offset: 0,
     }
   },
   computed: {
@@ -133,6 +134,44 @@ export default defineComponent({
         }
       })
       this.isFilterChanged = true;
+    },
+    async getTags(queryString?: string) {
+      const viewIndex = this.facetOptions.length ? this.facetOptions.length : 0;
+      
+      const payload = {
+        facetToSelect: this.facetToSelect,
+        docType: 'PRODUCT',
+        coreName: 'enterpriseSearch',
+        searchfield: this.searchfield,
+        jsonQuery: '{"query":"*:*","filter":["docType:PRODUCT"]}',
+        noConditionFind: 'N',
+        limit: 10,
+        q: queryString,
+        term: queryString,
+        offset: this.offset,
+      }
+
+      
+      const resp = await ProductService.fetchFacets(payload);
+
+      console.log(resp);
+      
+      if (resp.status == 200 && resp.data.length > 0) {
+        if(!this.facetOptions.length) {
+          this.facetOptions = resp.data.map((obj: any) => ({ id: obj.id, label: obj.label }))
+        } else {
+          this.facetOptions.push(...resp.data.map((obj: any) => ({ id: obj.id, label: obj.label })))
+        }
+      }
+      this.offset += viewIndex;  
+      
+    },
+    async loadMoreTags(event: any, queryString: string){
+      this.getTags(
+        queryString
+      ).then(() => {
+        event.target.complete();
+      })
     },
     isAlreadyApplied(value: string) {
       const type = this.type === 'included' ? 'excluded' : 'included'
