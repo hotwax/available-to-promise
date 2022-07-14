@@ -14,7 +14,7 @@
   </ion-header>
 
   <ion-content>
-    <ion-searchbar :placeholder="$t(`Search ${label}`)" v-model="queryString" @keyup.enter="queryString = $event.target.value; search($event)"/>
+    <ion-searchbar :placeholder="$t(`Search ${label}`)" v-model="queryString" @keyup.enter="queryString = $event.target.value, search($event), isScrollable = true" :disabled="!isScrollable" />
 
     <ion-list>
       <ion-item v-for="option in facetOptions" :key="option.id">
@@ -24,7 +24,7 @@
         <ion-note v-else slot="end" color="danger">{{ type === 'included' ? $t("excluded") : $t("included") }}</ion-note>
       </ion-item>
     </ion-list>
-    <ion-infinite-scroll @ionInfinite="loadMoreTags($event, queryString)" threshold="100px">
+    <ion-infinite-scroll @ionInfinite="search($event)" threshold="100px" :disabled="!isScrollable">
       <ion-infinite-scroll-content loading-spinner="crescent" :loading-text="$t('Loading')"/>
     </ion-infinite-scroll>
   </ion-content>
@@ -79,6 +79,7 @@ export default defineComponent({
       facetOptions: [] as any,
       isFilterChanged: false,
       offset: 0,
+      isScrollable: true,
     }
   },
   computed: {
@@ -93,49 +94,12 @@ export default defineComponent({
     },
     async search(event: any) {
       // TODO: need to implement infinite scroll on the modal search
-      const payload = {
-        facetToSelect: 'productCategoryNamesFacet',
-        docType: 'PRODUCT',
-        coreName: 'enterpriseSearch',
-        searchfield: 'productCategoryNames',
-        jsonQuery: '{"query":"*:*","filter":["docType:PRODUCT"]}',
-        noConditionFind: 'N',
-        limit: 10,
-        q: event.target.value,
-        term: event.target.value
-      }
-
-      const resp = await ProductService.fetchFacets(payload);
-      if (resp.status == 200 && resp.data.length > 0) {
-        this.facetOptions = resp.data.map((obj: any) => ({ id: obj.id, label: obj.label }))
-      } else {
-        this.facetOptions = []
-      }
-    },
-    async updateFilter(value: string) {
-      await this.store.dispatch('product/updateAppliedFilters', {
-        type: this.type,
-        id: this.searchfield,
-        value
-      })
-      this.isFilterChanged = true;
-    },
-    async clearFilters() {
-      // checking that if the current field does not have any attribute selected then not making the solr query
-      if (this.appliedFilters[this.type][this.searchfield].length <= 0) {
-        return;
-      }
-      await this.store.dispatch('product/clearFilters', {
-        type: this.type,
-        id: this.searchfield,
-        value: {
-          list: [],
-          operator: 'OR'
-        }
-      })
-      this.isFilterChanged = true;
+      this.queryString = event.target.value;
+      this.getTags(this.queryString);
     },
     async getTags(queryString?: string) {
+      console.log("getTags executed");
+      
       const viewIndex = this.facetOptions.length ? this.facetOptions.length : 0;
       
       const payload = {
@@ -162,16 +126,41 @@ export default defineComponent({
         } else {
           this.facetOptions.push(...resp.data.map((obj: any) => ({ id: obj.id, label: obj.label })))
         }
+      } else {
+        this.isScrollable = false;
       }
-      this.offset += viewIndex;  
-      
+      this.offset += viewIndex;
     },
     async loadMoreTags(event: any, queryString: string){
+      console.log("getTags executed");
       this.getTags(
         queryString
       ).then(() => {
         event.target.complete();
       })
+    },
+    async updateFilter(value: string) {
+      await this.store.dispatch('product/updateAppliedFilters', {
+        type: this.type,
+        id: this.searchfield,
+        value
+      })
+      this.isFilterChanged = true;
+    },
+    async clearFilters() {
+      // checking that if the current field does not have any attribute selected then not making the solr query
+      if (this.appliedFilters[this.type][this.searchfield].length <= 0) {
+        return;
+      }
+      await this.store.dispatch('product/clearFilters', {
+        type: this.type,
+        id: this.searchfield,
+        value: {
+          list: [],
+          operator: 'OR'
+        }
+      })
+      this.isFilterChanged = true;
     },
     isAlreadyApplied(value: string) {
       const type = this.type === 'included' ? 'excluded' : 'included'
