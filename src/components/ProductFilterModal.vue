@@ -92,7 +92,7 @@ export default defineComponent({
         searchfield: this.searchfield,
         jsonQuery: '{"query":"*:*","filter":["docType:PRODUCT"]}',
         noConditionFind: 'N',
-        limit: 10,
+        limit: 50,
         q: event.target.value,
         term: event.target.value
       }
