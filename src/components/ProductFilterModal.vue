@@ -14,7 +14,7 @@
   </ion-header>
 
   <ion-content>
-    <ion-searchbar :placeholder="$t(`Search ${label}`)" v-model="queryString" @keyup.enter="isScrollable = true, queryString = $event.target.value, search($event)"/>
+    <ion-searchbar :placeholder="$t(`Search ${label}`)" v-model="queryString" @keyup.enter="queryString = $event.target.value; search($event)"/>
 
     <ion-list>
       <ion-item v-for="option in facetOptions" :key="option.id">
@@ -78,7 +78,6 @@ export default defineComponent({
       queryString: '',
       facetOptions: [] as any,
       isFilterChanged: false,
-      offset: 0,
       isScrollable: true,
     }
   },
@@ -111,7 +110,7 @@ export default defineComponent({
         limit: viewSize,
         q: this.queryString,
         term: this.queryString,
-        offset: viewIndex
+        offset: viewIndex * viewSize,
       }
 
       const resp = await ProductService.fetchFacets(payload);
@@ -128,7 +127,7 @@ export default defineComponent({
     async loadMoreTags(event: any){
       this.getTags(
         undefined,
-        Math.ceil((this.facetOptions.length / process.env.VUE_APP_VIEW_SIZE) * process.env.VUE_APP_VIEW_SIZE).toString() 
+        Math.ceil(this.facetOptions.length / process.env.VUE_APP_VIEW_SIZE).toString() 
       ).then(() => {
         event.target.complete();
       })
@@ -159,7 +158,7 @@ export default defineComponent({
     isAlreadyApplied(value: string) {
       const type = this.type === 'included' ? 'excluded' : 'included'
       return this.appliedFilters[type][this.searchfield].list.includes(value)
-    },
+    }
   },
   setup() {
     const store = useStore();
