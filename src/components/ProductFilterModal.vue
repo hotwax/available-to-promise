@@ -14,7 +14,7 @@
   </ion-header>
 
   <ion-content>
-    <ion-searchbar :placeholder="$t(`Search ${label}`)" v-model="queryString" @keyup.enter="queryString = $event.target.value, search($event), isScrollable = true" :disabled="!isScrollable" />
+    <ion-searchbar :placeholder="$t(`Search ${label}`)" v-model="queryString" @keyup.enter="isScrollable = true, queryString = $event.target.value, search($event)"/>
 
     <ion-list>
       <ion-item v-for="option in facetOptions" :key="option.id">
@@ -24,7 +24,7 @@
         <ion-note v-else slot="end" color="danger">{{ type === 'included' ? $t("excluded") : $t("included") }}</ion-note>
       </ion-item>
     </ion-list>
-    <ion-infinite-scroll @ionInfinite="search($event)" threshold="100px" :disabled="!isScrollable">
+    <ion-infinite-scroll @ionInfinite="loadMoreTags($event)" threshold="100px" :disabled="!isScrollable">
       <ion-infinite-scroll-content loading-spinner="crescent" :loading-text="$t('Loading')"/>
     </ion-infinite-scroll>
   </ion-content>
@@ -93,15 +93,14 @@ export default defineComponent({
       modalController.dismiss({ dismissed: true, isFilterChanged: this.isFilterChanged });
     },
     async search(event: any) {
-      // TODO: need to implement infinite scroll on the modal search
       this.queryString = event.target.value;
-      this.getTags(this.queryString);
+      this.facetOptions = [];
+      this.getTags();
     },
-    async getTags(queryString?: string) {
-      console.log("getTags executed");
-      
-      const viewIndex = this.facetOptions.length ? this.facetOptions.length : 0;
-      
+    async getTags(vSize?: any, vIndex?: any) {
+      const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
+      const viewIndex = vIndex ? vIndex : 0;
+
       const payload = {
         facetToSelect: this.facetToSelect,
         docType: 'PRODUCT',
@@ -109,17 +108,13 @@ export default defineComponent({
         searchfield: this.searchfield,
         jsonQuery: '{"query":"*:*","filter":["docType:PRODUCT"]}',
         noConditionFind: 'N',
-        limit: 10,
-        q: queryString,
-        term: queryString,
-        offset: this.offset,
+        limit: viewSize,
+        q: this.queryString,
+        term: this.queryString,
+        offset: viewIndex,
       }
 
-      
       const resp = await ProductService.fetchFacets(payload);
-
-      console.log(resp);
-      
       if (resp.status == 200 && resp.data.length > 0) {
         if(!this.facetOptions.length) {
           this.facetOptions = resp.data.map((obj: any) => ({ id: obj.id, label: obj.label }))
@@ -129,12 +124,11 @@ export default defineComponent({
       } else {
         this.isScrollable = false;
       }
-      this.offset += viewIndex;
     },
-    async loadMoreTags(event: any, queryString: string){
-      console.log("getTags executed");
+    async loadMoreTags(event: any){
       this.getTags(
-        queryString
+        undefined,
+        Math.ceil((this.facetOptions.length / process.env.VUE_APP_VIEW_SIZE) * process.env.VUE_APP_VIEW_SIZE).toString() 
       ).then(() => {
         event.target.complete();
       })
