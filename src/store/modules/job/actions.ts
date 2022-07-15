@@ -53,7 +53,7 @@ const actions: ActionTree<JobState, RootState> = {
         "statusId_op": "in",
         "systemJobEnumId_op": "not-empty"
       },
-      "fieldList": [ "systemJobEnumId", "runTime", "tempExprId", "parentJobId", "serviceName", "jobId", "jobName", "statusId", "cancelDateTime", "finishDateTime", "startDateTime" ],
+      "fieldList": [ "systemJobEnumId", "runTime", "tempExprId", "parentJobId", "serviceName", "jobId", "jobName", "statusId", "cancelDateTime", "finishDateTime", "startDateTime", "runtimeDataId" ],
       "entityName": "JobSandbox",
       "noConditionFind": "Y",
       "viewSize": payload.viewSize,
@@ -73,13 +73,16 @@ const actions: ActionTree<JobState, RootState> = {
           commit(types.JOB_HISTORY_UPDATED, { jobs, total });
           const tempExprList = [] as any;
           const enumIds = [] as any;
+          const searchPreferenceIds = [] as any;
           resp.data.docs.map((item: any) => {
             enumIds.push(item.systemJobEnumId);
             tempExprList.push(item.tempExprId);
+            if (item.runtimeData && item.runtimeData.searchPreferenceId) searchPreferenceIds.push(item.runtimeData.searchPreferenceId)
           })
           const tempExpr = [...new Set(tempExprList)];
           dispatch('fetchTemporalExpression', tempExpr);
           dispatch('fetchJobDescription', enumIds);
+          dispatch('fetchThresholdRules', [...new Set(searchPreferenceIds)])
         }
       } else {
         commit(types.JOB_HISTORY_UPDATED, { jobs: [], total: 0 });
@@ -110,7 +113,7 @@ const actions: ActionTree<JobState, RootState> = {
         "statusId_fld1_op": "equals",
         "statusId_fld1_grp": "2",
       },
-      "fieldList": [ "systemJobEnumId", "runTime", "tempExprId", "parentJobId", "serviceName", "jobId", "jobName", "statusId" ],
+      "fieldList": [ "systemJobEnumId", "runTime", "tempExprId", "parentJobId", "serviceName", "jobId", "jobName", "statusId", "runtimeDataId" ],
       "entityName": "JobSandbox",
       "noConditionFind": "Y",
       "viewSize": payload.viewSize,
@@ -130,13 +133,16 @@ const actions: ActionTree<JobState, RootState> = {
           commit(types.JOB_RUNNING_UPDATED, { jobs, total });
           const tempExprList = [] as any;
           const enumIds = [] as any;
+          const searchPreferenceIds = [] as any;
           resp.data.docs.map((item: any) => {
             enumIds.push(item.systemJobEnumId);
             tempExprList.push(item.tempExprId);
+            if (item.runtimeData && item.runtimeData.searchPreferenceId) searchPreferenceIds.push(item.runtimeData.searchPreferenceId)
           })
           const tempExpr = [...new Set(tempExprList)];
           dispatch('fetchTemporalExpression', tempExpr);
           dispatch('fetchJobDescription', enumIds);
+          dispatch('fetchThresholdRules', [...new Set(searchPreferenceIds)])
         }
       } else {
         commit(types.JOB_RUNNING_UPDATED, { jobs: [], total: 0 });
@@ -162,7 +168,7 @@ const actions: ActionTree<JobState, RootState> = {
         "statusId": "SERVICE_PENDING",
         "systemJobEnumId_op": "not-empty"
       },
-      "fieldList": [ "systemJobEnumId", "runTime", "tempExprId", "parentJobId", "serviceName", "jobId", "jobName", "currentRetryCount", "statusId" ],
+      "fieldList": [ "systemJobEnumId", "runTime", "tempExprId", "parentJobId", "serviceName", "jobId", "jobName", "currentRetryCount", "statusId", "runtimeDataId" ],
       "entityName": "JobSandbox",
       "noConditionFind": "Y",
       "viewSize": payload.viewSize,
@@ -180,13 +186,16 @@ const actions: ActionTree<JobState, RootState> = {
           commit(types.JOB_PENDING_UPDATED, { jobs, total });
           const tempExprList = [] as any;
           const enumIds = [] as any;
+          const searchPreferenceIds = [] as any;
           resp.data.docs.map((item: any) => {
             enumIds.push(item.systemJobEnumId);
             tempExprList.push(item.tempExprId);
+            if (item.runtimeData && item.runtimeData.searchPreferenceId) searchPreferenceIds.push(item.runtimeData.searchPreferenceId)
           })
           const tempExpr = [...new Set(tempExprList)];
           dispatch('fetchTemporalExpression', tempExpr);
           dispatch('fetchJobDescription', enumIds);
+          dispatch('fetchThresholdRules', [...new Set(searchPreferenceIds)])
         }
       } else {
         commit(types.JOB_PENDING_UPDATED, { jobs: [], total: 0 });
@@ -219,6 +228,30 @@ const actions: ActionTree<JobState, RootState> = {
     })
     if (resp.status === 200 && !hasError(resp)) {
       commit(types.JOB_TEMPORAL_EXPRESSION_UPDATED, resp.data.docs);
+    }
+    return resp;
+  },
+  async fetchThresholdRules({ state, commit }, thresholdRuleIds){
+    const tempIds = [] as any;
+    const cachedThresholdRuleIds = Object.keys(state.thresholdRules);
+    thresholdRuleIds.map((id: any) => {
+      if(!cachedThresholdRuleIds.includes(id) && id){
+        tempIds.push(id);
+      }
+    });
+    if(tempIds.length <= 0) return thresholdRuleIds.map((id: any) => state.temporalExp[id]);
+    const resp = await JobService.fetchThresholdRules({
+        "inputFields": {
+        "searchPrefId": tempIds,
+        "searchPrefId_op": "in"
+      },
+      "viewSize": tempIds.length,
+      "fieldList": [ "searchPrefId", "searchPrefValue"],
+      "entityName": "SearchPreference",
+      "noConditionFind": "Y",
+    })
+    if (resp.status === 200 && !hasError(resp)) {
+      commit(types.JOB_THRESHOLD_RULES_UPDATED, resp.data.docs);
     }
     return resp;
   },

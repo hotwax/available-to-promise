@@ -31,6 +31,19 @@ const mutations: MutationTree <JobState> = {
             })
         }
     },
+    [types.JOB_THRESHOLD_RULES_UPDATED] (state, thresholdRules) {
+        if(thresholdRules){
+            state.thresholdRules = thresholdRules.reduce((thresholdRules: any, thresholdRule: any) => {
+                // Try catch to handle when parsing fails
+                try {
+                    thresholdRules[thresholdRule.searchPrefId] = JSON.parse(thresholdRule.searchPrefValue);
+                } catch(err) {
+                    console.error(err);
+                }
+              return thresholdRules;
+            }, state.thresholdRules)
+        }
+    },
     [types.JOB_DESCRIPTION_UPDATED] (state, enums) {
         if (enums) {
             enums.forEach((enumInfo: any) => {

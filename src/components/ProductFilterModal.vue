@@ -111,7 +111,7 @@ export default defineComponent({
         limit: viewSize,
         q: this.queryString,
         term: this.queryString,
-        offset: viewIndex,
+        offset: viewIndex
       }
 
       const resp = await ProductService.fetchFacets(payload);
@@ -159,7 +159,7 @@ export default defineComponent({
     isAlreadyApplied(value: string) {
       const type = this.type === 'included' ? 'excluded' : 'included'
       return this.appliedFilters[type][this.searchfield].list.includes(value)
-    }
+    },
   },
   setup() {
     const store = useStore();
