@@ -119,6 +119,7 @@ export default defineComponent({
           this.facetOptions = resp.data.map((obj: any) => ({ id: obj.id, label: obj.label }))
         } else {
           this.facetOptions.push(...resp.data.map((obj: any) => ({ id: obj.id, label: obj.label })))
+          this.isScrollable = !(this.facetOptions.length < process.env.VUE_APP_VIEW_SIZE)
         }
       } else {
         this.isScrollable = false;
