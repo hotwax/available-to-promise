@@ -163,8 +163,8 @@ export default defineComponent({
       }
 
       if(!shopifyConfigId) {
-        const resp = await this.store.dispatch('util/getShopifyConfig', productStoreId)
-        shopifyConfigId = resp.shopifyConfigId
+        const shopifyConfigResp = await this.store.dispatch('util/getShopifyConfig', productStoreId)
+        shopifyConfigId = shopifyConfigResp.shopifyConfigId
       }
 
       if (!facilityId) {
