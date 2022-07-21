@@ -27,7 +27,9 @@
           <ion-item lines="none">
             <ion-label class="ion-text-wrap">
               <p class="overline">{{ instanceUrl }}</p>
-              {{ eComStore?.storeName }}
+              <ion-select interface="popover" :value="eComStore.productStoreId" @ionChange="setEComStore($event)">
+                <ion-select-option v-for="store in (userProfile.stores.length ? userProfile.stores : [])" :key="store.productStoreId" :value="store.productStoreId" >{{ store.storeName }}</ion-select-option>
+              </ion-select>
             </ion-label>
             <ion-note slot="end">{{ userProfile?.userTimeZone }}</ion-note>
           </ion-item>
@@ -39,19 +41,19 @@
 </template>
 
 <script lang="ts">
-import { IonApp, IonContent, IonFooter, IonHeader, IonItem, IonIcon, IonLabel, IonList, IonMenu, IonNote, IonTitle, IonToolbar, IonRouterOutlet, menuController } from '@ionic/vue';
+import { IonApp, IonContent, IonFooter, IonHeader, IonItem, IonIcon, IonLabel, IonList, IonMenu, IonNote, IonSelect, IonSelectOption, IonTitle, IonToolbar, IonRouterOutlet, menuController } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { loadingController } from '@ionic/vue';
 import { options, settings, pulseOutline } from 'ionicons/icons';
 import emitter from "@/event-bus"
 import { useRouter } from 'vue-router';
-import { mapGetters } from 'vuex';
+import { mapGetters, useStore } from 'vuex';
 import { Settings } from 'luxon'
 
 export default defineComponent({
   name: 'App',
   components: {
-    IonApp, IonContent, IonFooter, IonHeader, IonItem, IonIcon, IonLabel, IonList, IonMenu, IonNote, IonTitle, IonToolbar, IonRouterOutlet
+    IonApp, IonContent, IonFooter, IonHeader, IonItem, IonIcon, IonLabel, IonList, IonMenu, IonNote, IonSelect, IonSelectOption, IonTitle, IonToolbar, IonRouterOutlet
   },
   data() {
     return {
@@ -85,7 +87,15 @@ export default defineComponent({
     },
     async closeMenu() {
       await menuController.close();
-    }
+    },
+    setEComStore(event: CustomEvent) {
+      if(this.userProfile) {
+        this.store.dispatch('user/setEcomStore', {
+          'eComStore': this.userProfile.stores.find((store: any) => store.productStoreId === event['detail'].value)
+        })
+      }
+      emitter.emit("productStoreChanged")
+    },
   },
   async mounted() {
     this.loader = await loadingController
@@ -108,13 +118,21 @@ export default defineComponent({
   },
   setup() {
     const router = useRouter();
+    const store = useStore();
 
     return {
       options,
       pulseOutline,
       settings,
-      router
+      router,
+      store
     }
   }
 });
 </script>
+
+<style scoped>
+ion-select {
+  padding-inline-start: 0;
+}
+</style>
