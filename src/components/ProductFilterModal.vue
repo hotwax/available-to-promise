@@ -115,7 +115,7 @@ export default defineComponent({
       const resp = await ProductService.fetchFacets(payload);
       if (resp.status == 200 && resp.data.length > 0) {
         this.facetOptions = viewIndex === 0 ? resp.data : [...this.facetOptions , ...resp.data];
-        this.isScrollable = !(this.facetOptions.length < process.env.VUE_APP_VIEW_SIZE)
+        this.isScrollable = (resp.data.length % process.env.VUE_APP_VIEW_SIZE) === 0 ? true : false;
       } else {
         this.facetOptions = [];
         this.isScrollable = false;
