@@ -93,7 +93,6 @@ export default defineComponent({
     },
     async search(event: any) {
       this.queryString = event.target.value;
-      this.facetOptions = [];
       this.getTags();
     },
     async getTags(vSize?: any, vIndex?: any) {
@@ -115,13 +114,10 @@ export default defineComponent({
 
       const resp = await ProductService.fetchFacets(payload);
       if (resp.status == 200 && resp.data.length > 0) {
-        if(!this.facetOptions.length) {
-          this.facetOptions = resp.data.map((obj: any) => ({ id: obj.id, label: obj.label }))
-        } else {
-          this.facetOptions.push(...resp.data.map((obj: any) => ({ id: obj.id, label: obj.label })))
-          this.isScrollable = !(this.facetOptions.length < process.env.VUE_APP_VIEW_SIZE)
-        }
+        this.facetOptions = viewIndex === 0 ? resp.data : [...this.facetOptions , ...resp.data];
+        this.isScrollable = !(this.facetOptions.length < process.env.VUE_APP_VIEW_SIZE)
       } else {
+        this.facetOptions = [];
         this.isScrollable = false;
       }
     },
