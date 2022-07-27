@@ -187,6 +187,8 @@ import { useRouter } from 'vue-router';
 import { mapGetters, useStore } from 'vuex';
 import SaveThresholdModal from '@/components/SaveThresholdModal.vue';
 import ProductFilterModal from '@/components/ProductFilterModal.vue';
+import { showToast } from '@/utils';
+import { translate } from '@/i18n';
 
 export default defineComponent({
   name: 'SelectProduct',
@@ -239,21 +241,29 @@ export default defineComponent({
       const job = await this.pendingJobs.find((job: any) => {
         return job.jobId == this.$route.query.id;
       })
-      const includedTags = this.getIncludedTagsAndOperator(job.runtimeData.searchPreferenceId).tags
-      const excludedTags = this.getExcludedTagsAndOperator(job.runtimeData.searchPreferenceId).tags
-      this.threshold = job.runtimeData.threshold;
-      if(includedTags){
-        includedTags.map((tag: any) => {
-          this.updateFilter(tag, "included", "tags")
-        })
-        this.applyOperator("included", "tags", this.getIncludedTagsAndOperator(job.runtimeData.searchPreferenceId).operator)
-      }
-      if(excludedTags){
-        excludedTags.map((tag: any) => {
-          this.updateFilter(tag, "excluded", "tags")
-        })
-        this.applyOperator("excluded", "tags", this.getExcludedTagsAndOperator(job.runtimeData.searchPreferenceId).operator)
-      }
+      if (job) {
+        if (job.runtimeData?.searchPreferenceId) {
+          const includedTags = this.getIncludedTagsAndOperator(job.runtimeData.searchPreferenceId).tags
+          const excludedTags = this.getExcludedTagsAndOperator(job.runtimeData.searchPreferenceId).tags
+          this.threshold = job.runtimeData.threshold;
+          if (includedTags) {
+            includedTags.map((tag: any) => {
+              this.updateFilter(tag, "included", "tags")
+            })
+            this.applyOperator("included", "tags", this.getIncludedTagsAndOperator(job.runtimeData.searchPreferenceId).operator)
+          }
+          if (excludedTags) {
+            excludedTags.map((tag: any) => {
+              this.updateFilter(tag, "excluded", "tags")
+            })
+            this.applyOperator("excluded", "tags", this.getExcludedTagsAndOperator(job.runtimeData.searchPreferenceId).operator)
+          }  
+        } else {
+          showToast(translate("No threshold rule found. Invalid job"));
+        }
+      } else {
+        showToast(translate("No job found."));
+      } 
     }
   },
   methods: {

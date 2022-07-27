@@ -240,20 +240,25 @@ const actions: ActionTree<JobState, RootState> = {
       }
     });
     if(tempIds.length <= 0) return thresholdRuleIds.map((id: any) => state.temporalExp[id]);
-    const resp = await JobService.fetchThresholdRules({
+    try {
+      const resp = await JobService.fetchThresholdRules({
         "inputFields": {
-        "searchPrefId": tempIds,
-        "searchPrefId_op": "in"
-      },
-      "viewSize": tempIds.length,
-      "fieldList": [ "searchPrefId", "searchPrefValue"],
-      "entityName": "SearchPreference",
-      "noConditionFind": "Y",
-    })
-    if (resp.status === 200 && !hasError(resp)) {
-      commit(types.JOB_THRESHOLD_RULES_UPDATED, resp.data.docs);
+          "searchPrefId": tempIds,
+          "searchPrefId_op": "in"
+        },
+        "viewSize": tempIds.length,
+        "fieldList": [ "searchPrefId", "searchPrefValue"],
+        "entityName": "SearchPreference",
+        "noConditionFind": "Y",
+      })
+      if (resp.status === 200 && !hasError(resp)) {
+        commit(types.JOB_THRESHOLD_RULES_UPDATED, resp.data.docs);
+      }
+      return resp;
+    } catch(err){
+      console.error(err);
+      showToast(translate("No threshold rule found. Invalid job"));
     }
-    return resp;
   },
   
   async fetchJobs ({ state, commit, dispatch }, payload) {
