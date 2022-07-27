@@ -233,9 +233,6 @@ export default defineComponent({
     return {
       threshold: '' as any,
       queryString: '',
-      jobEnums: [
-        ...JSON.parse(process.env?.VUE_APP_JOB_ENUMS as string) as any
-      ],
     }
   },
   async ionViewWillEnter(){
