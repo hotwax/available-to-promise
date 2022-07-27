@@ -223,7 +223,6 @@ export default defineComponent({
       isScrollable: 'product/isScrollable',
       appliedFilters: 'product/getAppliedFilters',
       query: 'product/getQuery',
-      getCurrentEComStore:'user/getCurrentEComStore',
       pendingJobs: 'job/getPendingJobs',
       getIncludedTagsAndOperator: 'job/getIncludedTagsAndOperator',
       getExcludedTagsAndOperator: 'job/getExcludedTagsAndOperator',
