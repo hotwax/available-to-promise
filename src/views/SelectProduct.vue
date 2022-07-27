@@ -226,8 +226,7 @@ export default defineComponent({
       appliedFilters: 'product/getAppliedFilters',
       query: 'product/getQuery',
       pendingJobs: 'job/getPendingJobs',
-      getIncludedTagsAndOperator: 'job/getIncludedTagsAndOperator',
-      getExcludedTagsAndOperator: 'job/getExcludedTagsAndOperator',
+      getTagsAndOperator: 'job/getTagsAndOperator'
     })
   },
   data () {
@@ -238,23 +237,23 @@ export default defineComponent({
   },
   ionViewWillEnter(){
     if (this.$route.query.id) {
-      const job = this.pendingJobs.find((job: any) => job.jobId === this.$route.query.id)
+      const job = this.pendingJobs.find((job: any) => job.jobId == this.$route.query.id)
       if (job) {
         if (job.runtimeData?.searchPreferenceId) {
-          const includedTags = this.getIncludedTagsAndOperator(job.runtimeData.searchPreferenceId).tags
-          const excludedTags = this.getExcludedTagsAndOperator(job.runtimeData.searchPreferenceId).tags
+          const includedTags = this.getTagsAndOperator(job.runtimeData.searchPreferenceId, "included").tags
+          const excludedTags = this.getTagsAndOperator(job.runtimeData.searchPreferenceId, "excluded").tags
           this.threshold = job.runtimeData.threshold;
           if (includedTags) {
             includedTags.map((tag: any) => {
               this.updateFilter(tag, "included", "tags")
             })
-            this.applyOperator("included", "tags", this.getIncludedTagsAndOperator(job.runtimeData.searchPreferenceId).operator)
+            this.applyOperator("included", "tags", this.getTagsAndOperator(job.runtimeData.searchPreferenceId, "included").operator)
           }
           if (excludedTags) {
             excludedTags.map((tag: any) => {
               this.updateFilter(tag, "excluded", "tags")
             })
-            this.applyOperator("excluded", "tags", this.getExcludedTagsAndOperator(job.runtimeData.searchPreferenceId).operator)
+            this.applyOperator("excluded", "tags", this.getTagsAndOperator(job.runtimeData.searchPreferenceId, "excluded").operator)
           }  
         } else {
           showToast(translate("No threshold rule found. Invalid job"));

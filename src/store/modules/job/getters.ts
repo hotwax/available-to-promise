@@ -40,41 +40,29 @@ const getters: GetterTree <JobState, RootState> = {
     getJobs: (state) => {
       return state.cached;
     },
-    getIncludedTagsAndOperator: (state) => (id: string): any => {
+    getTagsAndOperator: (state, getters) => (id: string, type: string): any => {
+      const tagString = getters.getTags(id, type);
+      if(tagString){
+        let tags = parser.removeOuterBrackets(tagString.trim());
+        const operator = tagString.indexOf(' AND ') > 0 ? 'AND' : 'OR'
+        tags = tags.split(` ${operator} `).map((tag: any) => JSON.parse(tag))
+        return { tags, operator }
+      } else {
+        return ""
+      }
+    },
+    getTags: (state) => (id: string, type: string): any => {
       const thresholdRule = state.thresholdRules[id];
       if (!thresholdRule) return "";
-      const tagsIncluded = thresholdRule.json.filter.find((filter: any) => filter.startsWith("tags:"))
-      if (!tagsIncluded) return ""
-      const operator = tagsIncluded.indexOf(' AND ') > 0 ? 'AND' : 'OR'
-      let tags = parser.removeOuterBrackets(tagsIncluded.substring(tagsIncluded.indexOf(":") + 1).trim())
-      tags = tags.split(` ${operator} `).map((tag: any) => JSON.parse(tag))
-      return { tags, operator }
-    },
-    getExcludedTagsAndOperator: (state) => (id: string): any => {
-      const thresholdRule = state.thresholdRules[id];
-      if (!thresholdRule) return "";
-      const tagsExcluded = thresholdRule.json.filter.find((filter: any) => filter.startsWith("-tags:"))
-      if (!tagsExcluded) return ""
-      const operator = tagsExcluded.indexOf(' AND ') > 0 ? 'AND' : 'OR'
-      let tags = parser.removeOuterBrackets(tagsExcluded.substring(tagsExcluded.indexOf(":") + 1).trim())
-      tags = tags.split(` ${operator} `).map((tag: any) => JSON.parse(tag))
-      return { tags, operator }
-    },
-    getTagsIncluded: (state) => (id: string): any => {
-      const thresholdRule = state.thresholdRules[id];
-
-      if (!thresholdRule) return "";
-      const tagsIncluded = thresholdRule.json.filter.find((filter: any) => filter.startsWith("tags:"))
-      if (!tagsIncluded) return ""
-      return tagsIncluded.substring(tagsIncluded.indexOf(":") + 1)
-    },
-    getTagsExcluded: (state) => (id: string): any => {
-      const thresholdRule = state.thresholdRules[id];
-      if (!thresholdRule) return "";
-      const tagsExcluded = thresholdRule.json.filter.find((filter: any) => filter.startsWith("-tags:"))
-      if (!tagsExcluded) return ""
-      return tagsExcluded.substring(tagsExcluded.indexOf(":") + 1)
-    },
+      let tags;
+      if(type === 'included'){
+        tags = thresholdRule.json.filter.find((filter: any) => filter.startsWith("tags:")) 
+      } else {
+        tags = thresholdRule.json.filter.find((filter: any) => filter.startsWith("-tags:"))
+      }
+      if (!tags) return ""
+      return tags.substring(tags.indexOf(":") + 1);
+    }
   }
 
   export default getters;
