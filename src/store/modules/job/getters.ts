@@ -46,7 +46,7 @@ const getters: GetterTree <JobState, RootState> = {
       const tagsIncluded = thresholdRule.json.filter.find((filter: any) => filter.startsWith("tags:"))
       if (!tagsIncluded) return ""
       let tags = parser.parseBooleanQuery(tagsIncluded.substring(tagsIncluded.indexOf(":") + 1).trim());
-      const operator = tagsIncluded.indexOf('AND') ? 'AND' : 'OR'
+      const operator = tagsIncluded.indexOf(' AND ') ? 'AND' : 'OR'
       tags = tags.map((tag: any) => JSON.parse(tag[0]));
       return { tags, operator }
     },

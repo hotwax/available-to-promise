@@ -233,14 +233,12 @@ export default defineComponent({
   data () {
     return {
       threshold: '' as any,
-      queryString: '',
+      queryString: ''
     }
   },
-  async ionViewWillEnter(){
+  ionViewWillEnter(){
     if (this.$route.query.id) {
-      const job = await this.pendingJobs.find((job: any) => {
-        return job.jobId == this.$route.query.id;
-      })
+      const job = this.pendingJobs.find((job: any) => job.jobId === this.$route.query.id)
       if (job) {
         if (job.runtimeData?.searchPreferenceId) {
           const includedTags = this.getIncludedTagsAndOperator(job.runtimeData.searchPreferenceId).tags
