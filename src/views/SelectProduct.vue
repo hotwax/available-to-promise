@@ -222,19 +222,55 @@ export default defineComponent({
       products: 'product/getProducts',
       isScrollable: 'product/isScrollable',
       appliedFilters: 'product/getAppliedFilters',
-      query: 'product/getQuery'
+      query: 'product/getQuery',
+      getCurrentEComStore:'user/getCurrentEComStore',
+      pendingJobs: 'job/getPendingJobs',
+      getIncludedTagsAndOperator: 'job/getIncludedTagsAndOperator',
+      getExcludedTagsAndOperator: 'job/getIncludedTagsAndOperator',
     })
   },
   data () {
     return {
       threshold: '' as any,
-      queryString: ''
+      queryString: '',
+      jobEnums: [
+        ...JSON.parse(process.env?.VUE_APP_JOB_ENUMS as string) as any
+      ],
+    }
+  },
+  async ionViewWillEnter(){
+    if (this.$route.query.id) {
+      const job = await this.pendingJobs.find((job: any) => {
+        return job.jobId == this.$route.query.id;
+      })
+      const includedTags = this.getIncludedTagsAndOperator(job.runtimeData.searchPreferenceId).tags
+      const excludedTags = this.getExcludedTagsAndOperator(job.runtimeData.searchPreferenceId).tags
+      this.threshold = job.runtimeData.threshold;
+      if(includedTags){
+        includedTags.map((tag: any) => {
+          this.updateFilter(tag, "included", "tags")
+        })
+        this.applyOperator("included", "tags", this.getIncludedTagsAndOperator(job.runtimeData.searchPreferenceId).operator)
+      }
+      if(excludedTags){
+        excludedTags.map((tag: any) => {
+          this.updateFilter(tag, "excluded", "tags")
+        })
+        this.applyOperator("excluded", "tags", this.getExcludedTagsAndOperator(job.runtimeData.searchPreferenceId).operator)
+      }
     }
   },
   methods: {
     searchProducts(event: any) {
       this.queryString = event.target.value;
       this.getProducts();
+    },
+    async updateFilter(value: string, type: string, id: string) {
+      await this.store.dispatch('product/updateAppliedFilters', {
+        type,
+        id,
+        value
+      })
     },
     async getProducts(vSize?: any, vIndex?: any) {
       const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
