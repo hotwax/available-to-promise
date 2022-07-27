@@ -45,9 +45,9 @@ const getters: GetterTree <JobState, RootState> = {
       if (!thresholdRule) return "";
       const tagsIncluded = thresholdRule.json.filter.find((filter: any) => filter.startsWith("tags:"))
       if (!tagsIncluded) return ""
-      let tags = parser.parseBooleanQuery(tagsIncluded.substring(tagsIncluded.indexOf(":") + 1).trim());
-      const operator = tagsIncluded.indexOf(' AND ') ? 'AND' : 'OR'
-      tags = tags.map((tag: any) => JSON.parse(tag[0]));
+      const operator = tagsIncluded.indexOf(' AND ') > 0 ? 'AND' : 'OR'
+      let tags = parser.removeOuterBrackets(tagsIncluded.substring(tagsIncluded.indexOf(":") + 1).trim())
+      tags = tags.split(` ${operator} `).map((tag: any) => JSON.parse(tag))
       return { tags, operator }
     },
     getExcludedTagsAndOperator: (state) => (id: string): any => {
@@ -55,9 +55,9 @@ const getters: GetterTree <JobState, RootState> = {
       if (!thresholdRule) return "";
       const tagsExcluded = thresholdRule.json.filter.find((filter: any) => filter.startsWith("-tags:"))
       if (!tagsExcluded) return ""
-      let tags = parser.parseBooleanQuery(tagsExcluded.substring(tagsExcluded.indexOf(":") + 1).trim());
-      const operator = tagsExcluded.indexOf('AND') ? 'AND' : 'OR'
-      tags = tags.map((tag: any) => JSON.parse(tag[0]));
+      const operator = tagsExcluded.indexOf(' AND ') > 0 ? 'AND' : 'OR'
+      let tags = parser.removeOuterBrackets(tagsExcluded.substring(tagsExcluded.indexOf(":") + 1).trim())
+      tags = tags.split(` ${operator} `).map((tag: any) => JSON.parse(tag))
       return { tags, operator }
     },
     getTagsIncluded: (state) => (id: string): any => {
