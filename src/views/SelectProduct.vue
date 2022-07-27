@@ -226,7 +226,7 @@ export default defineComponent({
       getCurrentEComStore:'user/getCurrentEComStore',
       pendingJobs: 'job/getPendingJobs',
       getIncludedTagsAndOperator: 'job/getIncludedTagsAndOperator',
-      getExcludedTagsAndOperator: 'job/getIncludedTagsAndOperator',
+      getExcludedTagsAndOperator: 'job/getExcludedTagsAndOperator',
     })
   },
   data () {
