@@ -13,7 +13,7 @@
             <ion-icon :icon="filterOutline" />
           </ion-button>
           <ion-button v-if="isFilterChanged" fill="clear">
-            <ion-icon slot="end" color="warning" :icon="warningOutline"></ion-icon>
+            <ion-icon slot="end" color="warning" :icon="warningOutline" />
           </ion-button>
         </ion-buttons>
       </ion-toolbar>
