@@ -419,10 +419,10 @@ export default defineComponent({
             this.job.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = productStoreId)
             this.job.priority && (payload['SERVICE_PRIORITY'] = this.job.priority.toString())
   
-            JobService.scheduleJob(JSON.parse(JSON.stringify({ ...this.job.runtimeData, ...payload }))).catch((error: any) => { return error })
             if(this.job.runtimeData.threshold !== this.threshold){
               this.job.runtimeData.threshold = this.threshold
               await this.store.dispatch('job/cancelJob', this.job);
+              JobService.scheduleJob(JSON.parse(JSON.stringify({ ...this.job.runtimeData, ...payload }))).catch((error: any) => { return error })
               payload['SERVICE_TEMP_EXPR'] = 'EVERYDAY';
               payload['jobFields'].tempExprId = 'EVERYDAY'; // Need to remove this as we are passing frequency in SERVICE_TEMP_EXPR, currently kept it for backward compatibility
               payload['SERVICE_RUN_AS_SYSTEM'] = 'Y';
@@ -432,7 +432,10 @@ export default defineComponent({
               // Scheduling Job that will run everyday and as system
               JobService.scheduleJob({ ...this.job.runtimeData, ...payload }).catch(error => { return error })
 
+            } else {
+              JobService.scheduleJob(JSON.parse(JSON.stringify({ ...this.job.runtimeData, ...payload }))).catch((error: any) => { return error })
             }
+
             this.isFilterChanged = false;
           } else {
             showToast(translate('Something went wrong'))
