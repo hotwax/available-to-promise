@@ -226,7 +226,8 @@ export default defineComponent({
       appliedFilters: 'product/getAppliedFilters',
       query: 'product/getQuery',
       pendingJobs: 'job/getPendingJobs',
-      getTagsAndOperator: 'job/getTagsAndOperator'
+      getTagsAndOperator: 'job/getTagsAndOperator',
+      getCurrentEComStore:'user/getCurrentEComStore',
     })
   },
   data () {
@@ -235,9 +236,9 @@ export default defineComponent({
       queryString: ''
     }
   },
-  ionViewWillEnter(){
+  async ionViewWillEnter(){
     if (this.$route.query.id) {
-      const job = this.pendingJobs.find((job: any) => job.jobId == this.$route.query.id)
+      const job = this.pendingJobs.find((job: any) => job.jobId === this.$route.query.id) ? this.pendingJobs.find((job: any) => job.jobId === this.$route.query.id) : await this.store.dispatch('job/fetchJob', {eComStoreId: this.getCurrentEComStore.productStoreId, jobId: this.$route.query.id})
       if (job) {
         if (job.runtimeData?.searchPreferenceId) {
           const includedTags = this.getTagsAndOperator(job.runtimeData.searchPreferenceId, "included").tags
