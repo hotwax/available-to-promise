@@ -261,15 +261,11 @@ export default defineComponent({
           const excludedTags = this.getTagsAndOperator(job.runtimeData.searchPreferenceId, "excluded").tags
           this.threshold = job.runtimeData.threshold;
           if (includedTags) {
-            includedTags.map((tag: any) => {
-              this.updateFilter(tag, "included", "tags")
-            })
+            includedTags.map((tag: any) => this.updateFilter(tag, "included", "tags"))
             this.applyOperator("included", "tags", this.getTagsAndOperator(job.runtimeData.searchPreferenceId, "included").operator)
           }
           if (excludedTags) {
-            excludedTags.map((tag: any) => {
-              this.updateFilter(tag, "excluded", "tags")
-            })
+            excludedTags.map((tag: any) => this.updateFilter(tag, "excluded", "tags"))
             this.applyOperator("excluded", "tags", this.getTagsAndOperator(job.runtimeData.searchPreferenceId, "excluded").operator)
           }  
           this.isFilterChanged = false;
