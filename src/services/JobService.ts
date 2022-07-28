@@ -23,15 +23,6 @@ const updateJob = async (payload: any): Promise <any>  => {
   });
 }
 
-const updateRuntimeData = async (payload: any): Promise <any>  => {
-  return api({
-    url: "service/updateRuntimeData",
-    method: "post",
-    data: payload
-  });
-}
-
-
 const scheduleJob = async (payload: any): Promise <any>  => {
   return api({
     url: "scheduleService",
@@ -63,6 +54,5 @@ export const JobService = {
   fetchTemporalExpression,
   fetchThresholdRules,
   updateJob,
-  scheduleJob,
-  updateRuntimeData
+  scheduleJob
 }
