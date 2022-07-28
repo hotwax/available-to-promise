@@ -420,7 +420,13 @@ export default defineComponent({
             this.job.priority && (payload['SERVICE_PRIORITY'] = this.job.priority.toString())
   
             JobService.scheduleJob(JSON.parse(JSON.stringify({ ...this.job.runtimeData, ...payload }))).catch((error: any) => { return error })
-
+            if(this.job.runtimeData.threshold !== this.threshold){
+              this.job.runtimeData.threshold = this.threshold
+              JobService.updateRuntimeData({
+                "jobId": this.job.runtimeDataId,
+                "runtimeInfo": JSON.stringify(this.job.runtimeData)
+              })
+            }
             this.isFilterChanged = false;
           } else {
             showToast(translate('Something went wrong'))
