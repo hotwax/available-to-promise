@@ -422,10 +422,16 @@ export default defineComponent({
             JobService.scheduleJob(JSON.parse(JSON.stringify({ ...this.job.runtimeData, ...payload }))).catch((error: any) => { return error })
             if(this.job.runtimeData.threshold !== this.threshold){
               this.job.runtimeData.threshold = this.threshold
-              JobService.updateRuntimeData({
-                "jobId": this.job.runtimeDataId,
-                "runtimeInfo": JSON.stringify(this.job.runtimeData)
-              })
+              await this.store.dispatch('job/cancelJob', this.job);
+              payload['SERVICE_TEMP_EXPR'] = 'EVERYDAY';
+              payload['jobFields'].tempExprId = 'EVERYDAY'; // Need to remove this as we are passing frequency in SERVICE_TEMP_EXPR, currently kept it for backward compatibility
+              payload['SERVICE_RUN_AS_SYSTEM'] = 'Y';
+              payload['jobFields'].runAsUser = 'system';// default system, but empty in run now. TODO Need to remove this as we are using SERVICE_RUN_AS_SYSTEM, currently kept it for backward compatibility
+              payload['includeAll'] =  false;
+
+              // Scheduling Job that will run everyday and as system
+              JobService.scheduleJob({ ...this.job.runtimeData, ...payload }).catch(error => { return error })
+
             }
             this.isFilterChanged = false;
           } else {
