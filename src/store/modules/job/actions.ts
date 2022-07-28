@@ -288,7 +288,6 @@ const actions: ActionTree<JobState, RootState> = {
       return resp;
     } catch(err){
       console.error(err);
-      showToast(translate("No threshold rule found. Invalid job"));
     }
   },
   
