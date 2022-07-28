@@ -142,7 +142,7 @@
       <div class="action desktop-only">
         <ion-button :disabled="isServiceScheduling" @click="saveThreshold()">
           <ion-icon slot="start" :icon="saveOutline" />
-          {{ $t($route.query.id? "Update threshold rule" : "Save threshold rule") }}
+          {{ $t($route.query.id ? "Update threshold rule" : "Save threshold rule") }}
         </ion-button>
       </div>
 
