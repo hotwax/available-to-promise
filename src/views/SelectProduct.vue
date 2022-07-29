@@ -140,14 +140,14 @@
       </div>
 
       <div class="action desktop-only">
-        <ion-button :disabled="isJobPending(job) || isServiceScheduling" @click="saveThreshold()">
+        <ion-button :disabled="isJobEditable(job) || isServiceScheduling" @click="saveThreshold()">
           <ion-icon slot="start" :icon="saveOutline" />
           {{ $t($route.query.id ? "Update threshold rule" : "Save threshold rule") }}
         </ion-button>
       </div>
 
       <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="mobile-only">
-        <ion-fab-button :disabled="isServiceScheduling || isJobPending(job)" @click="saveThreshold()">
+        <ion-fab-button :disabled="isServiceScheduling || isJobEditable(job)" @click="saveThreshold()">
           <ion-icon :icon="arrowForwardOutline" />
         </ion-fab-button>
       </ion-fab>
@@ -278,9 +278,9 @@ export default defineComponent({
     }
   },
   methods: {
-    isJobPending(job: any){
+    isJobEditable(job: any){
       if(this.$route.query.id){
-        return !(job.statusId === 'SERVICE_PENDING' && job.startDateTime > DateTime.now().toMillis());
+        return !(job.statusId === 'SERVICE_PENDING' && job.runTime > DateTime.now().toMillis());
       }
       return false;
     },
