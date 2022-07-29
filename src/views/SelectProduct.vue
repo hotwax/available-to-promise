@@ -147,7 +147,7 @@
       </div>
 
       <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="mobile-only">
-        <ion-fab-button :disabled="isServiceScheduling" @click="saveThreshold()">
+        <ion-fab-button :disabled="isServiceScheduling || isJobPending(job)" @click="saveThreshold()">
           <ion-icon :icon="arrowForwardOutline" />
         </ion-fab-button>
       </ion-fab>
