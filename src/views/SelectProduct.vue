@@ -378,6 +378,27 @@ export default defineComponent({
             let shopifyConfigId = this.shopifyConfig[productStoreId]
             let facilityId = this.facilitiesByProductStore[productStoreId]
 
+            if(!shopifyConfigId) {
+              const shopifyConfig = await this.store.dispatch('util/getShopifyConfig', productStoreId)
+              shopifyConfigId = shopifyConfig.shopifyConfigId
+            }
+
+            if (!facilityId) {
+              const resp = await this.store.dispatch('util/fetchFacilitiesByProductStore', {
+                inputFields: {
+                  productStoreId,
+                  facilityTypeId: 'CONFIGURATION'
+                },
+                entityName: 'ProductStoreFacilityDetail',
+                fieldList: ['facilityId', 'productStoreId'],
+                distinct: 'Y',
+                noConditionFind: 'Y',
+                filterByDate: 'Y',
+                viewSize: 10
+              })
+              facilityId = resp[productStoreId]
+            }
+
             const payload = {
               'JOB_NAME': this.job.jobName,
               'SERVICE_NAME': this.job.serviceName,
