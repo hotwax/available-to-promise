@@ -289,7 +289,7 @@ export default defineComponent({
   },
   methods: {
     isJobEditable(job: any){
-      return !(job.statusId === 'SERVICE_PENDING' && job.runTime > DateTime.now().toMillis() && !this.isFilterChanged && this.threshold === job.runtimeData.threshold);
+      return !(job.statusId === 'SERVICE_PENDING' && job.runTime > DateTime.now().toMillis() && this.isFilterChanged && this.threshold !== job.runtimeData.threshold);
     },
     async navigateBack(){
       if(this.isFilterChanged){
