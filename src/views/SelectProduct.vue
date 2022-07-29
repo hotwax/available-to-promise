@@ -288,10 +288,7 @@ export default defineComponent({
   },
   methods: {
     isJobEditable(job: any){
-      if(this.jobId){
-        return !(job.statusId === 'SERVICE_PENDING' && job.runTime > DateTime.now().toMillis());
-      }
-      return false;
+      return !(job.statusId === 'SERVICE_PENDING' && job.runTime > DateTime.now().toMillis());
     },
     async navigateBack(){
       if(this.isFilterChanged){
@@ -357,32 +354,29 @@ export default defineComponent({
         });
         
         if (resp.status === 200 && !hasError(resp)) {
-          const productStoreId = this.job.productStoreId
-          let shopifyConfigId = this.shopifyConfig[productStoreId]
-          let facilityId = this.facilitiesByProductStore[productStoreId]
 
           const payload = {
             'JOB_NAME': this.job.jobName,
             'SERVICE_NAME': this.job.serviceName,
             'SERVICE_COUNT': '0',
             'jobFields': {
-              'productStoreId': productStoreId,
+              'productStoreId': this.job.productStoreId,
               'systemJobEnumId': this.job.systemJobEnumId,
               'maxRecurrenceCount': '-1',
               'parentJobId': this.job.parentJobId,
               'recurrenceTimeZone': this.job.recurrenceTimeZone
             },
-            'shopifyConfigId': shopifyConfigId,
+            'shopifyConfigId': this.job.runtimeData.shopifyConfigId,
             'statusId': "SERVICE_PENDING",
             'systemJobEnumId': this.job.systemJobEnumId,
             'includeAll': true, // true: includes all the product, false: includes only products updated in the last 24 hours
-            searchPreferenceId: this.job.runtimeData.searchPreferenceId,
-            threshold: this.threshold,
-            facilityId: facilityId
+            'searchPreferenceId': this.job.runtimeData.searchPreferenceId,
+            'threshold': this.threshold,
+            'facilityId': this.job.runtimeData.facilityId,
           } as any;
 
           // checking if the runtimeData has productStoreId, and if present then adding it on root level
-          this.job.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = productStoreId)
+          this.job.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = this.job.productStoreId)
           this.job.priority && (payload['SERVICE_PRIORITY'] = this.job.priority.toString())
 
           if(this.job.runtimeData.threshold !== this.threshold){
