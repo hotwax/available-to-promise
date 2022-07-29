@@ -279,7 +279,10 @@ export default defineComponent({
   },
   methods: {
     isJobPending(job: any){
-      return !(job.statusId === 'SERVICE_PENDING' && job.startDateTime > DateTime.now().toMillis());
+      if(this.$route.query.id){
+        return !(job.statusId === 'SERVICE_PENDING' && job.startDateTime > DateTime.now().toMillis());
+      }
+      return false;
     },
     async navigateBack(){
       if(this.isFilterChanged){
