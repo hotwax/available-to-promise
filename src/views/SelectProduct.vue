@@ -140,14 +140,21 @@
       </div>
 
       <div class="action desktop-only">
-        <ion-button :disabled="isJobEditable(job) || isServiceScheduling" @click="saveThreshold()">
+        <ion-button v-if="jobId" :disabled="isJobEditable(job) || isServiceScheduling" @click="updateThreshold()">
           <ion-icon slot="start" :icon="saveOutline" />
-          {{ $t($route.query.id ? "Update threshold rule" : "Save threshold rule") }}
+          {{ $t("Update threshold rule") }}
+        </ion-button>
+        <ion-button v-else @click="saveThreshold()">
+          <ion-icon slot="start" :icon="saveOutline" />
+          {{ $t("Save threshold rule") }}
         </ion-button>
       </div>
 
       <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="mobile-only">
-        <ion-fab-button :disabled="isServiceScheduling || isJobEditable(job)" @click="saveThreshold()">
+        <ion-fab-button v-if="jobId" :disabled="isServiceScheduling || isJobEditable(job)" @click="updateThreshold()">
+          <ion-icon :icon="arrowForwardOutline" />
+        </ion-fab-button>
+        <ion-fab-button v-else @click="saveThreshold()">
           <ion-icon :icon="arrowForwardOutline" />
         </ion-fab-button>
       </ion-fab>
@@ -250,11 +257,12 @@ export default defineComponent({
       isFilterChanged: false,
       isServiceScheduling: false,
       job: {} as any,
-      jobId: (this as any).router.query.id
+      jobId: "" as any
     }
   },
   async ionViewWillEnter(){
-    if (this.jobId) {
+    if (this.$route.query.id) {
+      this.jobId = this.$route.query.id;
       const job = this.pendingJobs.find((job: any) => job.jobId === this.jobId) ? this.pendingJobs.find((job: any) => job.jobId === this.jobId) : await this.store.dispatch('job/fetchJob', {eComStoreId: this.getCurrentEComStore.productStoreId, jobId: this.jobId})
       if (job) {
         this.job = job;
@@ -331,6 +339,81 @@ export default defineComponent({
         event.target.complete();
       })
     },
+    async updateThreshold() {
+      this.isServiceScheduling = true;
+      const solrQuery = this.query
+      // re-initialized params object from query as there is no need for grouping or pagination when storing the query
+      solrQuery.json.params = {
+        "q.op": "AND"
+      }
+      // made the query to default (*:*) before storing, as the threshold will be set for all the products those
+      // are fullfilling the filters condition
+      solrQuery.json['query'] = "*:*"
+
+      try {
+        const resp = await ProductService.updateSearchPreference({
+          searchPrefId: this.job.runtimeData.searchPreferenceId,
+          searchPrefValue: JSON.stringify(solrQuery)
+        });
+        
+        if (resp.status === 200 && !hasError(resp)) {
+          const productStoreId = this.job.productStoreId
+          let shopifyConfigId = this.shopifyConfig[productStoreId]
+          let facilityId = this.facilitiesByProductStore[productStoreId]
+
+          const payload = {
+            'JOB_NAME': this.job.jobName,
+            'SERVICE_NAME': this.job.serviceName,
+            'SERVICE_COUNT': '0',
+            'jobFields': {
+              'productStoreId': productStoreId,
+              'systemJobEnumId': this.job.systemJobEnumId,
+              'maxRecurrenceCount': '-1',
+              'parentJobId': this.job.parentJobId,
+              'recurrenceTimeZone': this.job.recurrenceTimeZone
+            },
+            'shopifyConfigId': shopifyConfigId,
+            'statusId': "SERVICE_PENDING",
+            'systemJobEnumId': this.job.systemJobEnumId,
+            'includeAll': true, // true: includes all the product, false: includes only products updated in the last 24 hours
+            searchPreferenceId: this.job.runtimeData.searchPreferenceId,
+            threshold: this.threshold,
+            facilityId: facilityId
+          } as any;
+
+          // checking if the runtimeData has productStoreId, and if present then adding it on root level
+          this.job.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = productStoreId)
+          this.job.priority && (payload['SERVICE_PRIORITY'] = this.job.priority.toString())
+
+          if(this.job.runtimeData.threshold !== this.threshold){
+            this.job.runtimeData.threshold = this.threshold
+            //Cancel existing job
+            await this.store.dispatch('job/cancelJob', this.job);
+
+            JobService.scheduleJob(JSON.parse(JSON.stringify({ ...this.job.runtimeData, ...payload }))).catch((error: any) => { return error })
+
+            payload['SERVICE_TEMP_EXPR'] = this.job.tempExprId;
+            payload['jobFields'].tempExprId = this.job.tempExprId; // Need to remove this as we are passing frequency in SERVICE_TEMP_EXPR, currently kept it for backward compatibility
+            payload['SERVICE_RUN_AS_SYSTEM'] = 'Y';
+            payload['jobFields'].runAsUser = 'system';// default system, but empty in run now. TODO Need to remove this as we are using SERVICE_RUN_AS_SYSTEM, currently kept it for backward compatibility
+            payload['includeAll'] =  false;
+
+            // Scheduling Job that will run everyday and as system
+            JobService.scheduleJob({ ...this.job.runtimeData, ...payload }).catch(error => { return error })
+          } else {
+            JobService.scheduleJob(JSON.parse(JSON.stringify({ ...this.job.runtimeData, ...payload }))).catch((error: any) => { return error })
+            showToast(translate('Service updated successfully'));
+          }
+        } else {
+          showToast(translate('Something went wrong'))
+        }
+      } catch (err) {
+        console.error(err)
+        showToast(translate('Something went wrong'))
+      }
+      this.isServiceScheduling = false;
+      this.isFilterChanged = false;
+    },
     async saveThreshold() {
       // an alert will be displayed, if the user does not enter a threshold value before proceeding to save page
       if (!this.threshold) {
@@ -345,92 +428,14 @@ export default defineComponent({
           });
         return alert.present();
       }
-
-      if(!this.jobId){
-        const saveThresholdModal = await modalController.create({
-          component: SaveThresholdModal,
-          componentProps: {
-            threshold: this.threshold,
-            totalSKUs: this.products.total.variant
-          }
-        })
-      
-        saveThresholdModal.present();
-      } else {
-        this.isServiceScheduling = true;
-        const solrQuery = this.query
-
-        // re-initialized params object from query as there is no need for grouping or pagination when storing the query
-        solrQuery.json.params = {
-          "q.op": "AND"
+      const saveThresholdModal = await modalController.create({
+        component: SaveThresholdModal,
+        componentProps: {
+          threshold: this.threshold,
+          totalSKUs: this.products.total.variant
         }
-        // made the query to default (*:*) before storing, as the threshold will be set for all the products those
-        // are fullfilling the filters condition
-        solrQuery.json['query'] = "*:*"
-
-        try {
-          const resp = await ProductService.updateSearchPreference({
-            searchPrefId: this.job.runtimeData.searchPreferenceId,
-            searchPrefValue: JSON.stringify(solrQuery)
-          });
-
-          if (resp.status === 200 && !hasError(resp)) {
-            const productStoreId = this.job.productStoreId
-            let shopifyConfigId = this.shopifyConfig[productStoreId]
-            let facilityId = this.facilitiesByProductStore[productStoreId]
-
-            const payload = {
-              'JOB_NAME': this.job.jobName,
-              'SERVICE_NAME': this.job.serviceName,
-              'SERVICE_COUNT': '0',
-              'jobFields': {
-                'productStoreId': productStoreId,
-                'systemJobEnumId': this.job.systemJobEnumId,
-                'maxRecurrenceCount': '-1',
-                'parentJobId': this.job.parentJobId,
-                'recurrenceTimeZone': this.job.recurrenceTimeZone
-              },
-              'shopifyConfigId': shopifyConfigId,
-              'statusId': "SERVICE_PENDING",
-              'systemJobEnumId': this.job.systemJobEnumId,
-              'includeAll': true, // true: includes all the product, false: includes only products updated in the last 24 hours
-              searchPreferenceId: this.job.runtimeData.searchPreferenceId,
-              threshold: this.threshold,
-              facilityId: facilityId
-            } as any;
-
-            // checking if the runtimeData has productStoreId, and if present then adding it on root level
-            this.job.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = productStoreId)
-            this.job.priority && (payload['SERVICE_PRIORITY'] = this.job.priority.toString())
-  
-            if(this.job.runtimeData.threshold !== this.threshold){
-              this.job.runtimeData.threshold = this.threshold
-              //Cancel existing job
-              await this.store.dispatch('job/cancelJob', this.job);
-              JobService.scheduleJob(JSON.parse(JSON.stringify({ ...this.job.runtimeData, ...payload }))).catch((error: any) => { return error })
-              payload['SERVICE_TEMP_EXPR'] = this.job.tempExprId;
-              payload['jobFields'].tempExprId = this.job.tempExprId; // Need to remove this as we are passing frequency in SERVICE_TEMP_EXPR, currently kept it for backward compatibility
-              payload['SERVICE_RUN_AS_SYSTEM'] = 'Y';
-              payload['jobFields'].runAsUser = 'system';// default system, but empty in run now. TODO Need to remove this as we are using SERVICE_RUN_AS_SYSTEM, currently kept it for backward compatibility
-              payload['includeAll'] =  false;
-
-              // Scheduling Job that will run everyday and as system
-              JobService.scheduleJob({ ...this.job.runtimeData, ...payload }).catch(error => { return error })
-
-            } else {
-              JobService.scheduleJob(JSON.parse(JSON.stringify({ ...this.job.runtimeData, ...payload }))).catch((error: any) => { return error })
-            }
-
-            this.isFilterChanged = false;
-          } else {
-            showToast(translate('Something went wrong'))
-          }
-        } catch (err) {
-          console.error(err)
-          showToast(translate('Something went wrong'))
-        }
-        this.isServiceScheduling = false
-      }
+      })
+      saveThresholdModal.present();
     },
     async searchFilter(label: string, facetToSelect: string, searchfield: string, type: string) {
       const modal = await modalController.create({
