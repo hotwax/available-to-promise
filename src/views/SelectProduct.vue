@@ -379,7 +379,7 @@ export default defineComponent({
             let facilityId = this.facilitiesByProductStore[productStoreId]
 
             const payload = {
-              'JOB_NAME': this.job.jobName ? this.job.jobName : this.userProfile.partyName,
+              'JOB_NAME': this.job.jobName,
               'SERVICE_NAME': this.job.serviceName,
               'SERVICE_COUNT': '0',
               'jobFields': {
@@ -387,7 +387,7 @@ export default defineComponent({
                 'systemJobEnumId': this.job.systemJobEnumId,
                 'maxRecurrenceCount': '-1',
                 'parentJobId': this.job.parentJobId,
-                'recurrenceTimeZone': this.userProfile?.userTimeZone
+                'recurrenceTimeZone': this.job.recurrenceTimeZone
               },
               'shopifyConfigId': shopifyConfigId,
               'statusId': "SERVICE_PENDING",
