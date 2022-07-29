@@ -249,12 +249,13 @@ export default defineComponent({
       queryString: '',
       isFilterChanged: false,
       isServiceScheduling: false,
-      job: {} as any
+      job: {} as any,
+      jobId: (this as any).router.query.id
     }
   },
   async ionViewWillEnter(){
-    if (this.$route.query.id) {
-      const job = this.pendingJobs.find((job: any) => job.jobId === this.$route.query.id) ? this.pendingJobs.find((job: any) => job.jobId === this.$route.query.id) : await this.store.dispatch('job/fetchJob', {eComStoreId: this.getCurrentEComStore.productStoreId, jobId: this.$route.query.id})
+    if (this.jobId) {
+      const job = this.pendingJobs.find((job: any) => job.jobId === this.jobId) ? this.pendingJobs.find((job: any) => job.jobId === this.jobId) : await this.store.dispatch('job/fetchJob', {eComStoreId: this.getCurrentEComStore.productStoreId, jobId: this.jobId})
       if (job) {
         this.job = job;
         if (job.runtimeData?.searchPreferenceId) {
@@ -279,7 +280,7 @@ export default defineComponent({
   },
   methods: {
     isJobEditable(job: any){
-      if(this.$route.query.id){
+      if(this.jobId){
         return !(job.statusId === 'SERVICE_PENDING' && job.runTime > DateTime.now().toMillis());
       }
       return false;
@@ -345,7 +346,7 @@ export default defineComponent({
         return alert.present();
       }
 
-      if(!this.$route.query.id){
+      if(!this.jobId){
         const saveThresholdModal = await modalController.create({
           component: SaveThresholdModal,
           componentProps: {
@@ -378,27 +379,6 @@ export default defineComponent({
             let shopifyConfigId = this.shopifyConfig[productStoreId]
             let facilityId = this.facilitiesByProductStore[productStoreId]
 
-            if(!shopifyConfigId) {
-              const shopifyConfig = await this.store.dispatch('util/getShopifyConfig', productStoreId)
-              shopifyConfigId = shopifyConfig.shopifyConfigId
-            }
-
-            if (!facilityId) {
-              const resp = await this.store.dispatch('util/fetchFacilitiesByProductStore', {
-                inputFields: {
-                  productStoreId,
-                  facilityTypeId: 'CONFIGURATION'
-                },
-                entityName: 'ProductStoreFacilityDetail',
-                fieldList: ['facilityId', 'productStoreId'],
-                distinct: 'Y',
-                noConditionFind: 'Y',
-                filterByDate: 'Y',
-                viewSize: 10
-              })
-              facilityId = resp[productStoreId]
-            }
-
             const payload = {
               'JOB_NAME': this.job.jobName,
               'SERVICE_NAME': this.job.serviceName,
@@ -425,6 +405,7 @@ export default defineComponent({
   
             if(this.job.runtimeData.threshold !== this.threshold){
               this.job.runtimeData.threshold = this.threshold
+              //Cancel existing job
               await this.store.dispatch('job/cancelJob', this.job);
               JobService.scheduleJob(JSON.parse(JSON.stringify({ ...this.job.runtimeData, ...payload }))).catch((error: any) => { return error })
               payload['SERVICE_TEMP_EXPR'] = this.job.tempExprId;
