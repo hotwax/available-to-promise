@@ -45,6 +45,7 @@ const getters: GetterTree <JobState, RootState> = {
       if(tagString){
         let tags = parser.removeOuterBrackets(tagString.trim());
         const operator = tagString.indexOf(' AND ') > 0 ? 'AND' : 'OR'
+        //Need to parse as it is returned in json format
         tags = tags.split(` ${operator} `).map((tag: any) => JSON.parse(tag))
         return { tags, operator }
       } 
