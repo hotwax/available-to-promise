@@ -18,7 +18,7 @@ const actions: ActionTree<JobState, RootState> = {
         "jobId": payload.jobId.toString(),
         "jobId_op": "equals"
       },
-      "fieldList": [ "systemJobEnumId", "runTime", "tempExprId", "parentJobId", "serviceName", "jobId", "jobName", "statusId", "cancelDateTime", "finishDateTime", "startDateTime", "runtimeDataId" ],
+      "fieldList": [ "systemJobEnumId", "runTime", "tempExprId", "parentJobId", "serviceName", "jobId", "jobName", "statusId", "cancelDateTime", "finishDateTime", "startDateTime", "runtimeDataId", "productStoreId" ],
       "noConditionFind": "Y",
     }
     try {
