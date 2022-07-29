@@ -140,7 +140,7 @@
       </div>
 
       <div class="action desktop-only">
-        <ion-button :disabled="isServiceScheduling" @click="saveThreshold()">
+        <ion-button :disabled="isJobPending(job) || isServiceScheduling" @click="saveThreshold()">
           <ion-icon slot="start" :icon="saveOutline" />
           {{ $t($route.query.id ? "Update threshold rule" : "Save threshold rule") }}
         </ion-button>
@@ -196,6 +196,7 @@ import { hasError, showToast } from '@/utils';
 import { translate } from '@/i18n';
 import { ProductService } from '@/services/ProductService';
 import { JobService } from '@/services/JobService';
+import { DateTime } from 'luxon';
 
 export default defineComponent({
   name: 'SelectProduct',
@@ -268,7 +269,6 @@ export default defineComponent({
             excludedTags.map((tag: any) => this.updateFilter(tag, "excluded", "tags"))
             this.applyOperator("excluded", "tags", this.getTagsAndOperator(job.runtimeData.searchPreferenceId, "excluded").operator)
           }  
-          this.isFilterChanged = false;
         } else {
           showToast(translate("No threshold rule found. Invalid job"));
         }
@@ -278,6 +278,9 @@ export default defineComponent({
     }
   },
   methods: {
+    isJobPending(job: any){
+      return !(job.statusId === 'SERVICE_PENDING' && job.startDateTime > DateTime.now().toMillis());
+    },
     async navigateBack(){
       if(this.isFilterChanged){
         const alert = await alertController.create({

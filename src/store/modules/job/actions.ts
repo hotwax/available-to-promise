@@ -28,7 +28,7 @@ const actions: ActionTree<JobState, RootState> = {
         job['statusDesc'] = this.state.util.statusDesc[job.statusId];
         await dispatch('fetchTemporalExpression', [job.tempExprId]);
         await dispatch('fetchJobDescription', [job.systemJobEnumId]);
-        await dispatch('fetchThresholdRules', [job.runtimeData?.searchPreferenceId])
+        if (job.runtimeData && job.runtimeData.searchPreferenceId) await dispatch('fetchThresholdRules', [job.runtimeData.searchPreferenceId])
         return job;   
       } else {
         console.error(resp);
@@ -288,6 +288,7 @@ const actions: ActionTree<JobState, RootState> = {
       return resp;
     } catch(err){
       console.error(err);
+      return Promise.reject(new Error(err))
     }
   },
   
