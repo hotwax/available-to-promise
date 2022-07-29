@@ -8,38 +8,6 @@ import { translate } from '@/i18n'
 import { DateTime } from 'luxon';
 
 const actions: ActionTree<JobState, RootState> = {
-
-  async fetchJob({commit, dispatch, state}, payload){
-    let resp;
-    const params = {
-      "inputFields": {
-        "productStoreId": payload.eComStoreId,
-        "productStoreId_op": "equals",
-        "jobId": payload.jobId.toString(),
-        "jobId_op": "equals"
-      },
-      "fieldList": [ "systemJobEnumId", "runTime", "tempExprId", "parentJobId", "serviceName", "jobId", "jobName", "statusId", "cancelDateTime", "finishDateTime", "startDateTime", "runtimeDataId", "productStoreId" ],
-      "noConditionFind": "Y",
-    }
-    try {
-      resp = await JobService.fetchJobInformation(params)
-      if (resp.status === 200 && resp.data.docs?.length > 0 && !hasError(resp)) {
-        const job = resp.data.docs[0];
-        job['statusDesc'] = this.state.util.statusDesc[job.statusId];
-        await dispatch('fetchTemporalExpression', [job.tempExprId]);
-        await dispatch('fetchJobDescription', [job.systemJobEnumId]);
-        if (job.runtimeData && job.runtimeData.searchPreferenceId) await dispatch('fetchThresholdRules', [job.runtimeData.searchPreferenceId])
-        return job;   
-      } else {
-        console.error(resp);
-        return {};
-      }
-    } catch (err) {
-      console.error(err);
-      return {}
-    }
-  },
-
   async fetchJobDescription({ commit, state }, payload){
     const enumIds = [] as any;
     const cachedEnumIds = Object.keys(state.enumIds);

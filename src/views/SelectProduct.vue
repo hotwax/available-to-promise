@@ -263,7 +263,7 @@ export default defineComponent({
   async ionViewWillEnter(){
     if (this.$route.query.id) {
       this.jobId = this.$route.query.id;
-      const job = this.pendingJobs.find((job: any) => job.jobId === this.jobId) ? this.pendingJobs.find((job: any) => job.jobId === this.jobId) : await this.store.dispatch('job/fetchJob', {eComStoreId: this.getCurrentEComStore.productStoreId, jobId: this.jobId})
+      const job = this.pendingJobs.find((job: any) => job.jobId === this.jobId) ? this.pendingJobs.find((job: any) => job.jobId === this.jobId) : await JobService.fetchJob({eComStoreId: this.getCurrentEComStore.productStoreId, jobId: this.jobId})
       if (job) {
         this.job = job;
         if (job.runtimeData?.searchPreferenceId) {
