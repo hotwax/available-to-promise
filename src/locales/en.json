@@ -117,6 +117,8 @@
   "Time zone updated successfully": "Time zone updated successfully",
   "Type": "Type",
   "UI Components": "UI Components",
+  "Unable to schedule service.": "Unable to schedule service.",
+  "Unable to update threshold rule.": "Unable to update threshold rule.",
   "Update time zone": "Update time zone",
   "Upload": "Upload",
   "Upload CSV": "Upload CSV",

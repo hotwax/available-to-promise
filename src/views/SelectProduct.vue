@@ -289,7 +289,7 @@ export default defineComponent({
   },
   methods: {
     isJobEditable(job: any){
-      return !(job.statusId === 'SERVICE_PENDING' && job.runTime > DateTime.now().toMillis());
+      return !(job.statusId === 'SERVICE_PENDING' && job.runTime > DateTime.now().toMillis() && !this.isFilterChanged && this.threshold === job.runtimeData.threshold);
     },
     async navigateBack(){
       if(this.isFilterChanged){
@@ -394,7 +394,8 @@ export default defineComponent({
                 payload['includeAll'] =  false;
 
                 // Scheduling Job that will run everyday and as system
-                JobService.scheduleJob({ ...this.job.runtimeData, ...payload }).catch(error => { return error })
+                JobService.scheduleJob({ ...this.job.runtimeData, ...payload }).catch(error => { return error });
+                this.isFilterChanged = false;
               } else {
                 console.error(resp);
               } 
@@ -406,14 +407,13 @@ export default defineComponent({
             showToast(translate('Service updated successfully'));
           }
         } else {
-          showToast(translate('Something went wrong'))
+          showToast(translate('Unable to schedule service.'))
         }
       } catch (err) {
         console.error(err)
-        showToast(translate('Something went wrong'))
+        showToast(translate('Unable to update threshold rule.'))
       }
       this.isServiceScheduling = false;
-      this.isFilterChanged = false;
     },
     async saveThreshold() {
       // an alert will be displayed, if the user does not enter a threshold value before proceeding to save page
