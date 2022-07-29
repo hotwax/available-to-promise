@@ -382,18 +382,24 @@ export default defineComponent({
           if(this.job.runtimeData.threshold !== this.threshold){
             this.job.runtimeData.threshold = this.threshold
             //Cancel existing job
-            await this.store.dispatch('job/cancelJob', this.job);
+            await this.store.dispatch('job/cancelJob', this.job).then((resp) => {
+              if(resp.status === 200 && !hasError(resp)){
+                JobService.scheduleJob(JSON.parse(JSON.stringify({ ...this.job.runtimeData, ...payload }))).catch((error: any) => { return error })
 
-            JobService.scheduleJob(JSON.parse(JSON.stringify({ ...this.job.runtimeData, ...payload }))).catch((error: any) => { return error })
+                payload['SERVICE_TEMP_EXPR'] = this.job.tempExprId;
+                payload['jobFields'].tempExprId = this.job.tempExprId; // Need to remove this as we are passing frequency in SERVICE_TEMP_EXPR, currently kept it for backward compatibility
+                payload['SERVICE_RUN_AS_SYSTEM'] = 'Y';
+                payload['jobFields'].runAsUser = 'system';// default system, but empty in run now. TODO Need to remove this as we are using SERVICE_RUN_AS_SYSTEM, currently kept it for backward compatibility
+                payload['includeAll'] =  false;
 
-            payload['SERVICE_TEMP_EXPR'] = this.job.tempExprId;
-            payload['jobFields'].tempExprId = this.job.tempExprId; // Need to remove this as we are passing frequency in SERVICE_TEMP_EXPR, currently kept it for backward compatibility
-            payload['SERVICE_RUN_AS_SYSTEM'] = 'Y';
-            payload['jobFields'].runAsUser = 'system';// default system, but empty in run now. TODO Need to remove this as we are using SERVICE_RUN_AS_SYSTEM, currently kept it for backward compatibility
-            payload['includeAll'] =  false;
-
-            // Scheduling Job that will run everyday and as system
-            JobService.scheduleJob({ ...this.job.runtimeData, ...payload }).catch(error => { return error })
+                // Scheduling Job that will run everyday and as system
+                JobService.scheduleJob({ ...this.job.runtimeData, ...payload }).catch(error => { return error })
+              } else {
+                console.error(resp);
+              } 
+            }).catch(err => {
+              console.error(err);
+            })
           } else {
             JobService.scheduleJob(JSON.parse(JSON.stringify({ ...this.job.runtimeData, ...payload }))).catch((error: any) => { return error })
             showToast(translate('Service updated successfully'));
