@@ -51,8 +51,17 @@
         <ion-label>{{ $t("Auto disable after") }}</ion-label>
         <ion-input :placeholder="$t('occurrences')" v-model="count"/>
       </ion-item> -->
-    </ion-list>
 
+      <ion-item lines="full" @click="updateThresholdRule">
+        <ion-icon slot="start" :icon="pencilOutline" />
+        <ion-label class="ion-text-wrap">{{ $t("Edit threshold rule") }}</ion-label>
+        <ion-note slot="end">
+          {{ productCount }} {{ $t("products selected")}}
+        </ion-note>
+        <ion-icon slot="end" :icon="chevronForwardOutline" />
+      </ion-item>
+
+    </ion-list>
     <div class="actions desktop-only">
       <div>
         <ion-button size="small" fill="outline" color="medium" :disabled="status === 'SERVICE_DRAFT'" @click="skipJob(job)">{{ $t("Skip once") }}</ion-button>
@@ -85,14 +94,17 @@ import {
   IonModal,
   IonSelect,
   IonSelectOption,
-  alertController
+  alertController,
+  IonNote
 } from "@ionic/vue";
 import {
   calendarClearOutline,
   timeOutline,
   timerOutline,
   syncOutline,
-  personCircleOutline
+  personCircleOutline,
+  pencilOutline,
+  chevronForwardOutline
 } from "ionicons/icons";
 import { mapGetters, useStore } from "vuex";
 import { handleDateTimeInput } from "@/utils";
@@ -112,7 +124,8 @@ export default defineComponent({
     IonList,
     IonModal,
     IonSelect,
-    IonSelectOption
+    IonSelectOption,
+    IonNote
   },
   data() {
     return {
@@ -120,7 +133,7 @@ export default defineComponent({
       minDateTime: DateTime.now().toISO()
     }
   },
-  props: ["job", "title", "status", "type"],
+  props: ["job", "title", "status", "type", "productCount"],
   computed: {
     ...mapGetters({
       getJobStatus: 'job/getJobStatus',
@@ -165,6 +178,9 @@ export default defineComponent({
     }
   },
   methods: {
+    updateThresholdRule(){
+      this.$router.push(`select-product?id=${this.job.jobId}`)
+    },
     getDateTime(time: any) {
       return DateTime.fromMillis(time).toISO()
     },
@@ -265,7 +281,9 @@ export default defineComponent({
       timerOutline,
       store,
       syncOutline,
-      personCircleOutline
+      personCircleOutline,
+      pencilOutline,
+      chevronForwardOutline
     };
   }
 });

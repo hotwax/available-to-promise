@@ -253,7 +253,7 @@
         </section>
 
         <aside class="desktop-only" v-show="segmentSelected === 'pending' && currentJob">
-          <JobConfiguration :title="title" :job="currentJob" :status="currentJobStatus" :type="freqType" :key="currentJob"/>
+          <JobConfiguration :title="title" :job="currentJob" :productCount="productCount" :status="currentJobStatus" :type="freqType" :key="currentJob"/>
         </aside>
       </main>
     </ion-content>
@@ -298,6 +298,7 @@ import { Plugins } from '@capacitor/core';
 import { showToast } from '@/utils'
 import JobHistoryModal from '@/components/JobHistoryModal.vue';
 import { DateTime } from 'luxon';
+import { ProductService } from '@/services/ProductService';
 
 export default defineComponent({
   name: "ThresholdUpdates",
@@ -339,7 +340,8 @@ export default defineComponent({
       freqType: '' as any,
       isJobDetailAnimationCompleted: false,
       isDesktop: isPlatform('desktop'),
-      isRetrying: false
+      isRetrying: false,
+      productCount: 0
     }
   },
   computed: {
@@ -354,7 +356,9 @@ export default defineComponent({
       getCurrentEComStore:'user/getCurrentEComStore',
       isPendingJobsScrollable: 'job/isPendingJobsScrollable',
       isRunningJobsScrollable: 'job/isRunningJobsScrollable',
-      isHistoryJobsScrollable: 'job/isHistoryJobsScrollable'
+      isHistoryJobsScrollable: 'job/isHistoryJobsScrollable',
+      products: 'product/getProducts',
+      query: 'job/getThresholdRules'
     })
   },
   mounted(){
@@ -511,6 +515,8 @@ export default defineComponent({
         return;
       }
 
+      this.getProductCount(this.query(job.runtimeData.searchPreferenceId));
+      
       this.currentJob = {id: job.jobId, ...job}
       this.title = this.getEnumName(job.systemJobEnumId)
       this.currentJobStatus = job.tempExprId
@@ -520,6 +526,10 @@ export default defineComponent({
         this.playAnimation();
         this.isJobDetailAnimationCompleted = true;
       }
+    },
+    async getProductCount(query: any){
+      const resp = await ProductService.getProducts(query);
+      this.productCount = resp.data.response.numFound
     },
     playAnimation() {
       const aside = this.$el.querySelector('aside') as Element
