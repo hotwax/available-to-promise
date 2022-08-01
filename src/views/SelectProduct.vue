@@ -273,7 +273,7 @@ export default defineComponent({
       if (job) {
         this.job = job;
         if (job.runtimeData?.searchPreferenceId) {
-          this.prepareSearchPreference(job);
+          this.store.dispatch('product/setAppliedfiltersAndOperator', this.prepareSearchPreference(job)); 
           this.threshold = job.runtimeData.threshold;
         } else {
           showToast(translate("No threshold rule found. Invalid job"));
@@ -285,10 +285,10 @@ export default defineComponent({
     isJobEditable(job: any){
       return !(((job.statusId === 'SERVICE_PENDING' && job.runTime > DateTime.now().toMillis()) && (this.isFilterChanged || this.threshold !== job.runtimeData.threshold)));
     },
-    async prepareSearchPreference(job: any){
-      const includedTagsAndOperator = await this.getTagsAndOperator(job.runtimeData.searchPreferenceId, "included");
-      const excludedTagsAndOperator = await this.getTagsAndOperator(job.runtimeData.searchPreferenceId, "excluded");
-      const payload = {
+    prepareSearchPreference(job: any){
+      const includedTagsAndOperator = this.getTagsAndOperator(job.runtimeData.searchPreferenceId, "included");
+      const excludedTagsAndOperator = this.getTagsAndOperator(job.runtimeData.searchPreferenceId, "excluded");
+      return {
         included: {
           tags: {
             list: includedTagsAndOperator.tags,
@@ -302,7 +302,6 @@ export default defineComponent({
           } 
         }
       }
-      this.store.dispatch('product/setAppliedfiltersAndOperator', payload); 
     },
     async navigateBack(){
       if(this.isFilterChanged){
