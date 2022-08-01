@@ -273,17 +273,8 @@ export default defineComponent({
       if (job) {
         this.job = job;
         if (job.runtimeData?.searchPreferenceId) {
-          const includedTagsAndOperator = this.getTagsAndOperator(job.runtimeData.searchPreferenceId, "included");
-          const excludedTagsAndOperator = this.getTagsAndOperator(job.runtimeData.searchPreferenceId, "excluded")
-          const includedTags = includedTagsAndOperator.tags
-          const excludedTags = excludedTagsAndOperator.tags
+          this.store.dispatch('product/setAppliedfiltersAndOperator', this.prepareAppliedFilters(job)); 
           this.threshold = job.runtimeData.threshold;
-          if (includedTags) {
-            this.store.dispatch('product/setAppliedfiltersAndOperator', {id: 'tags', type: 'included', value: { list: includedTags, operator: includedTagsAndOperator.operator }})
-          }
-          if (excludedTags) {
-            this.store.dispatch('product/setAppliedfiltersAndOperator', {id: 'tags', type: 'excluded', value: { list: excludedTags, operator: excludedTagsAndOperator.operator }})
-          }  
         } else {
           showToast(translate("No threshold rule found. Invalid job"));
         }
@@ -293,6 +284,24 @@ export default defineComponent({
     },
     isJobEditable(job: any){
       return !(((job.statusId === 'SERVICE_PENDING' && job.runTime > DateTime.now().toMillis()) && (this.isFilterChanged || this.threshold !== job.runtimeData.threshold)));
+    },
+    prepareAppliedFilters(job: any){
+      const includedTagsAndOperator = this.getTagsAndOperator(job.runtimeData.searchPreferenceId, "included");
+      const excludedTagsAndOperator = this.getTagsAndOperator(job.runtimeData.searchPreferenceId, "excluded");
+      return {
+        included: {
+          tags: {
+            list: includedTagsAndOperator.tags,
+            operator: includedTagsAndOperator.operator
+          }
+        },
+        excluded: {
+          tags: {
+            list: excludedTagsAndOperator.tags,
+            operator: excludedTagsAndOperator.operator
+          } 
+        }
+      }
     },
     async navigateBack(){
       if(this.isFilterChanged){
@@ -319,13 +328,6 @@ export default defineComponent({
     searchProducts(event: any) {
       this.queryString = event.target.value;
       this.getProducts();
-    },
-    async updateFilter(value: string, type: string, id: string) {
-      await this.store.dispatch('product/updateAppliedFilters', {
-        type,
-        id,
-        value
-      })
     },
     async getProducts(vSize?: any, vIndex?: any) {
       const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
