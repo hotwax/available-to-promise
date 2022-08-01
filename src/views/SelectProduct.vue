@@ -330,13 +330,6 @@ export default defineComponent({
       this.queryString = event.target.value;
       this.getProducts();
     },
-    async updateFilter(value: string, type: string, id: string) {
-      await this.store.dispatch('product/updateAppliedFilters', {
-        type,
-        id,
-        value
-      })
-    },
     async getProducts(vSize?: any, vIndex?: any) {
       const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
       const viewIndex = vIndex ? vIndex : 0;
