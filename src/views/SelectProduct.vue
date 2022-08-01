@@ -279,12 +279,10 @@ export default defineComponent({
           const excludedTags = excludedTagsAndOperator.tags
           this.threshold = job.runtimeData.threshold;
           if (includedTags) {
-            includedTags.map((tag: any) => this.updateFilter(tag, "included", "tags"))
-            this.applyOperator("included", "tags", includedTagsAndOperator.operator)
+            this.store.dispatch('product/setAppliedfiltersAndOperator', {id: 'tags', type: 'included', value: { list: includedTags, operator: includedTagsAndOperator.operator }})
           }
           if (excludedTags) {
-            excludedTags.map((tag: any) => this.updateFilter(tag, "excluded", "tags"))
-            this.applyOperator("excluded", "tags", excludedTagsAndOperator.operator)
+            this.store.dispatch('product/setAppliedfiltersAndOperator', {id: 'tags', type: 'excluded', value: { list: excludedTags, operator: excludedTagsAndOperator.operator }})
           }  
         } else {
           showToast(translate("No threshold rule found. Invalid job"));
