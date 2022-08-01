@@ -8,7 +8,6 @@ import { translate } from '@/i18n'
 import { DateTime } from 'luxon';
 
 const actions: ActionTree<JobState, RootState> = {
-
   async fetchJobDescription({ commit, state }, payload){
     const enumIds = [] as any;
     const cachedEnumIds = Object.keys(state.enumIds);
@@ -240,20 +239,25 @@ const actions: ActionTree<JobState, RootState> = {
       }
     });
     if(tempIds.length <= 0) return thresholdRuleIds.map((id: any) => state.temporalExp[id]);
-    const resp = await JobService.fetchThresholdRules({
+    try {
+      const resp = await JobService.fetchThresholdRules({
         "inputFields": {
-        "searchPrefId": tempIds,
-        "searchPrefId_op": "in"
-      },
-      "viewSize": tempIds.length,
-      "fieldList": [ "searchPrefId", "searchPrefValue"],
-      "entityName": "SearchPreference",
-      "noConditionFind": "Y",
-    })
-    if (resp.status === 200 && !hasError(resp)) {
-      commit(types.JOB_THRESHOLD_RULES_UPDATED, resp.data.docs);
+          "searchPrefId": tempIds,
+          "searchPrefId_op": "in"
+        },
+        "viewSize": tempIds.length,
+        "fieldList": [ "searchPrefId", "searchPrefValue"],
+        "entityName": "SearchPreference",
+        "noConditionFind": "Y",
+      })
+      if (resp.status === 200 && !hasError(resp)) {
+        commit(types.JOB_THRESHOLD_RULES_UPDATED, resp.data.docs);
+      }
+      return resp;
+    } catch(err){
+      console.error(err);
+      return Promise.reject(new Error(err))
     }
-    return resp;
   },
   
   async fetchJobs ({ state, commit, dispatch }, payload) {

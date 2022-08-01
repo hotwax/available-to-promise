@@ -56,12 +56,12 @@
 
               <ion-item v-if="job.runtimeData && job.runtimeData.searchPreferenceId">
                 <ion-icon slot="start" :icon="checkmarkCircleOutline" />
-                <ion-label class="ion-text-wrap">{{ getTagsIncluded(job.runtimeData.searchPreferenceId) ? getTagsIncluded(job.runtimeData.searchPreferenceId) : "-" }}</ion-label>
+                <ion-label class="ion-text-wrap">{{ getTags(job.runtimeData.searchPreferenceId, "included") ? getTags(job.runtimeData.searchPreferenceId, "included") : "-" }}</ion-label>
               </ion-item>
 
               <ion-item v-if="job.runtimeData && job.runtimeData.searchPreferenceId">
                 <ion-icon slot="start" :icon="closeCircleOutline" />
-                <ion-label class="ion-text-wrap">{{ getTagsExcluded(job.runtimeData.searchPreferenceId) ? getTagsExcluded(job.runtimeData.searchPreferenceId) : "-" }}</ion-label>
+                <ion-label class="ion-text-wrap">{{ getTags(job.runtimeData.searchPreferenceId, "excluded") ? getTags(job.runtimeData.searchPreferenceId, "excluded") : "-" }}</ion-label>
               </ion-item>
 
               <ion-item>
@@ -133,12 +133,12 @@
 
               <ion-item v-if="job.runtimeData && job.runtimeData.searchPreferenceId">
                 <ion-icon slot="start" :icon="checkmarkCircleOutline" />
-                <ion-label class="ion-text-wrap">{{ getTagsIncluded(job.runtimeData.searchPreferenceId) ? getTagsIncluded(job.runtimeData.searchPreferenceId) : "-" }}</ion-label>
+                <ion-label class="ion-text-wrap">{{ getTags(job.runtimeData.searchPreferenceId, "included") ? getTags(job.runtimeData.searchPreferenceId, "included") : "-" }}</ion-label>
               </ion-item>
 
               <ion-item v-if="job.runtimeData && job.runtimeData.searchPreferenceId">
                 <ion-icon slot="start" :icon="closeCircleOutline" />
-                <ion-label class="ion-text-wrap">{{ getTagsExcluded(job.runtimeData.searchPreferenceId) ? getTagsExcluded(job.runtimeData.searchPreferenceId) : "-" }}</ion-label>
+                <ion-label class="ion-text-wrap">{{ getTags(job.runtimeData.searchPreferenceId, "excluded") ? getTags(job.runtimeData.searchPreferenceId, "excluded") : "-" }}</ion-label>
               </ion-item>
 
               <ion-item>
@@ -211,12 +211,12 @@
 
             <ion-item v-if="job.runtimeData && job.runtimeData.searchPreferenceId">
               <ion-icon slot="start" :icon="checkmarkCircleOutline" />
-              <ion-label class="ion-text-wrap">{{ getTagsIncluded(job.runtimeData.searchPreferenceId) ? getTagsIncluded(job.runtimeData.searchPreferenceId) : "-" }}</ion-label>
+              <ion-label class="ion-text-wrap">{{ getTags(job.runtimeData.searchPreferenceId, "included") ? getTags(job.runtimeData.searchPreferenceId, "included") : "-" }}</ion-label>
             </ion-item>
 
             <ion-item v-if="job.runtimeData && job.runtimeData.searchPreferenceId">
               <ion-icon slot="start" :icon="closeCircleOutline" />
-              <ion-label class="ion-text-wrap">{{ getTagsExcluded(job.runtimeData.searchPreferenceId) ? getTagsExcluded(job.runtimeData.searchPreferenceId) : "-" }}</ion-label>
+              <ion-label class="ion-text-wrap">{{ getTags(job.runtimeData.searchPreferenceId, "excluded") ? getTags(job.runtimeData.searchPreferenceId, "excluded") : "-" }}</ion-label>
             </ion-item>
 
             <ion-item>
@@ -348,8 +348,7 @@ export default defineComponent({
       pendingJobs: 'job/getPendingJobs',
       runningJobs: 'job/getRunningJobs',
       temporalExpr: 'job/getTemporalExpr',
-      getTagsIncluded: 'job/getTagsIncluded',
-      getTagsExcluded: 'job/getTagsExcluded',
+      getTags: 'job/getTags',
       getEnumDescription: 'job/getEnumDescription',
       getEnumName: 'job/getEnumName',
       getCurrentEComStore:'user/getCurrentEComStore',

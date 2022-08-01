@@ -51,6 +51,11 @@ const actions: ActionTree<ProductState, RootState> = {
     return resp;
   },
 
+  setAppliedfiltersAndOperator({ commit, dispatch }, payload){
+    commit(types.PRODUCT_ALL_FILTERS_UPDATED, payload)
+    dispatch('updateQuery');
+  },
+
   async updateAppliedFilters({ commit, state, dispatch }, payload) {
     const value = payload.value
     const appliedFilters = JSON.parse(JSON.stringify((state.appliedFilters as any)[payload.type][payload.id]))
@@ -93,7 +98,6 @@ const actions: ActionTree<ProductState, RootState> = {
       state.query.json.params.rows = payload.viewSize
       state.query.json.params.start = payload.viewSize * payload.viewIndex
     }
-
     state.query.json['filter'] = Object.keys(state.appliedFilters.included).reduce((filter, value) => {
       const filterValues = (state.appliedFilters.included as any)[value]
       if (filterValues.list.length > 0) {

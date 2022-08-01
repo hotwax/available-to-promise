@@ -1,6 +1,7 @@
 import { GetterTree } from 'vuex'
 import JobState from './JobState'
 import RootState from '../../RootState'
+import parser from 'boolean-parser'
 
 const getters: GetterTree <JobState, RootState> = {
     getJobStatus: (state) => (id: string): any  => {
@@ -39,21 +40,23 @@ const getters: GetterTree <JobState, RootState> = {
     getJobs: (state) => {
       return state.cached;
     },
-    getTagsIncluded: (state) => (id: string): any => {
-      const thresholdRule = state.thresholdRules[id];
-
-      if (!thresholdRule) return "";
-      const tagsIncluded = thresholdRule.json.filter.find((filter: any) => filter.startsWith("tags:"))
-      if (!tagsIncluded) return ""
-      return tagsIncluded.substring(tagsIncluded.indexOf(":") + 1)
+    getTagsAndOperator: (state, getters) => (id: string, type: string): any => {
+      const tagString = getters.getTags(id, type);
+      if(tagString){
+        let tags = parser.removeOuterBrackets(tagString.trim());
+        const operator = tagString.indexOf(' AND ') > 0 ? 'AND' : 'OR'
+        //Need to parse as it is returned in json format
+        tags = tags.split(` ${operator} `).map((tag: any) => JSON.parse(tag))
+        return { tags, operator }
+      } 
+      return {};
     },
-    getTagsExcluded: (state) => (id: string): any => {
+    getTags: (state) => (id: string, type: string): any => {
       const thresholdRule = state.thresholdRules[id];
       if (!thresholdRule) return "";
-      const tagsExcluded = thresholdRule.json.filter.find((filter: any) => filter.startsWith("-tags:"))
-      if (!tagsExcluded) return ""
-      return tagsExcluded.substring(tagsExcluded.indexOf(":") + 1)
-    },
+      const tags = thresholdRule.json.filter.find((filter: any) => filter.startsWith(type === 'included' ? 'tags:' : '-tags:')) 
+      return tags ? tags.substring(tags.indexOf(":") + 1) : "";
+    }
   }
 
   export default getters;
