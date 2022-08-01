@@ -382,20 +382,25 @@ export default defineComponent({
 
           if(this.job.runtimeData.threshold !== this.threshold){
             this.job.runtimeData.threshold = this.threshold
-            //Cancel existing job
             await this.store.dispatch('job/cancelJob', this.job).then((resp) => {
               if(resp.status === 200 && !hasError(resp)){
-                JobService.scheduleJob(JSON.parse(JSON.stringify({ ...this.job.runtimeData, ...payload }))).catch((error: any) => { return error })
-
-                payload['SERVICE_TEMP_EXPR'] = this.job.tempExprId;
-                payload['jobFields'].tempExprId = this.job.tempExprId; // Need to remove this as we are passing frequency in SERVICE_TEMP_EXPR, currently kept it for backward compatibility
-                payload['SERVICE_RUN_AS_SYSTEM'] = 'Y';
-                payload['jobFields'].runAsUser = 'system';// default system, but empty in run now. TODO Need to remove this as we are using SERVICE_RUN_AS_SYSTEM, currently kept it for backward compatibility
-                payload['includeAll'] =  false;
-
-                // Scheduling Job that will run everyday and as system
-                JobService.scheduleJob({ ...this.job.runtimeData, ...payload }).catch(error => { return error });
-                this.isFilterChanged = false;
+                // Scheduling Job that will run only once for all the products
+                JobService.scheduleJob(JSON.parse(JSON.stringify({ ...this.job.runtimeData, ...payload }))).then((resp: any) => {
+                  if(resp.status === 200 && !hasError(resp) && resp.data){
+                    payload['SERVICE_TEMP_EXPR'] = this.job.tempExprId;
+                    payload['jobFields'].tempExprId = this.job.tempExprId; // Need to remove this as we are passing frequency in SERVICE_TEMP_EXPR, currently kept it for backward compatibility
+                    payload['SERVICE_RUN_AS_SYSTEM'] = 'Y';
+                    payload['jobFields'].runAsUser = 'system';// default system, but empty in run now. TODO Need to remove this as we are using SERVICE_RUN_AS_SYSTEM, currently kept it for backward compatibility
+                    payload['includeAll'] =  false;
+    
+                    // Scheduling Job that will run everyday and as system
+                    JobService.scheduleJob({ ...this.job.runtimeData, ...payload }).catch(error => { return error });
+                    this.isFilterChanged = false;
+                  } else {
+                    console.error(resp);
+                    showToast(translate('Unable to schedule service.'))
+                  }
+                }).catch((error: any) => { return error })
               } else {
                 console.error(resp);
               } 
@@ -403,8 +408,14 @@ export default defineComponent({
               console.error(err);
             })
           } else {
-            JobService.scheduleJob(JSON.parse(JSON.stringify({ ...this.job.runtimeData, ...payload }))).catch((error: any) => { return error })
-            showToast(translate('Service updated successfully'));
+            JobService.scheduleJob(JSON.parse(JSON.stringify({ ...this.job.runtimeData, ...payload }))).then((resp: any) => {
+              if(resp.status === 200 && !hasError(resp) && resp.data){
+                showToast(translate('Service updated successfully'));
+              } else {
+                console.error(resp);
+                showToast(translate('Unable to schedule service.'))
+              }
+            }).catch((error: any) => { return error })  
           }
         } else {
           showToast(translate('Unable to schedule service.'))
