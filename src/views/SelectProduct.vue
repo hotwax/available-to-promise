@@ -273,17 +273,8 @@ export default defineComponent({
       if (job) {
         this.job = job;
         if (job.runtimeData?.searchPreferenceId) {
-          const includedTagsAndOperator = this.getTagsAndOperator(job.runtimeData.searchPreferenceId, "included");
-          const excludedTagsAndOperator = this.getTagsAndOperator(job.runtimeData.searchPreferenceId, "excluded")
-          const includedTags = includedTagsAndOperator.tags
-          const excludedTags = excludedTagsAndOperator.tags
+          this.prepareSearchPreference(job);
           this.threshold = job.runtimeData.threshold;
-          if (includedTags) {
-            this.store.dispatch('product/setAppliedfiltersAndOperator', {id: 'tags', type: 'included', value: { list: includedTags, operator: includedTagsAndOperator.operator }})
-          }
-          if (excludedTags) {
-            this.store.dispatch('product/setAppliedfiltersAndOperator', {id: 'tags', type: 'excluded', value: { list: excludedTags, operator: excludedTagsAndOperator.operator }})
-          }  
         } else {
           showToast(translate("No threshold rule found. Invalid job"));
         }
@@ -293,6 +284,25 @@ export default defineComponent({
     },
     isJobEditable(job: any){
       return !(((job.statusId === 'SERVICE_PENDING' && job.runTime > DateTime.now().toMillis()) && (this.isFilterChanged || this.threshold !== job.runtimeData.threshold)));
+    },
+    async prepareSearchPreference(job: any){
+      const includedTagsAndOperator = await this.getTagsAndOperator(job.runtimeData.searchPreferenceId, "included");
+      const excludedTagsAndOperator = await this.getTagsAndOperator(job.runtimeData.searchPreferenceId, "excluded");
+      const payload = {
+        included: {
+          tags: {
+            list: includedTagsAndOperator.tags,
+            operator: includedTagsAndOperator.operator
+          }
+        },
+        excluded: {
+          tags: {
+            list: excludedTagsAndOperator.tags,
+            operator: excludedTagsAndOperator.operator
+          } 
+        }
+      }
+      this.store.dispatch('product/setAppliedfiltersAndOperator', payload); 
     },
     async navigateBack(){
       if(this.isFilterChanged){

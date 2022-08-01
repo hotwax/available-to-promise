@@ -52,7 +52,7 @@ const actions: ActionTree<ProductState, RootState> = {
   },
 
   setAppliedfiltersAndOperator({ commit, dispatch }, payload){
-    commit(types.PRODUCT_FILTER_UPDATED, {id: payload.id, type: payload.type, value: payload.value})
+    commit(types.PRODUCT_ALL_FILTERS_UPDATED, payload)
     dispatch('updateQuery');
   },
 
