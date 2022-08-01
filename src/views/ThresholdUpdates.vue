@@ -295,7 +295,7 @@ import JobConfiguration from '@/components/JobConfiguration.vue'
 import { copyOutline, closeCircleOutline, checkmarkCircleOutline, optionsOutline, timeOutline, timerOutline } from "ionicons/icons";
 
 import { Plugins } from '@capacitor/core';
-import { showToast } from '@/utils'
+import { hasError, showToast } from '@/utils'
 import JobHistoryModal from '@/components/JobHistoryModal.vue';
 import { DateTime } from 'luxon';
 import { ProductService } from '@/services/ProductService';
@@ -529,7 +529,11 @@ export default defineComponent({
     },
     async getProductCount(query: any){
       const resp = await ProductService.getProducts(query);
-      this.productCount = resp.data.response.numFound
+      if(resp.status === 200 && !hasError(resp) && resp.data.response){
+        this.productCount = resp.data.response.numFound
+      } else {
+        console.error(resp);
+      } 
     },
     playAnimation() {
       const aside = this.$el.querySelector('aside') as Element
