@@ -262,32 +262,35 @@ export default defineComponent({
   },
   async ionViewWillEnter(){
     if (this.$route.query.id) {
-      this.jobId = this.$route.query.id;
+      this.applyThresholdRule(this.$route.query.id)
+    }
+  },
+  methods: {
+    async applyThresholdRule(id: any){
+      this.jobId = id;
       let job = this.pendingJobs.find((job: any) => job.jobId === this.jobId)
       job = job ? job : await JobService.fetchJob({eComStoreId: this.getCurrentEComStore.productStoreId, jobId: this.jobId})
       if (job) {
         this.job = job;
         if (job.runtimeData?.searchPreferenceId) {
-          const includedTags = this.getTagsAndOperator(job.runtimeData.searchPreferenceId, "included").tags
-          const excludedTags = this.getTagsAndOperator(job.runtimeData.searchPreferenceId, "excluded").tags
+          const includedTagsAndOperator = this.getTagsAndOperator(job.runtimeData.searchPreferenceId, "included");
+          const excludedTagsAndOperator = this.getTagsAndOperator(job.runtimeData.searchPreferenceId, "excluded")
+          const includedTags = includedTagsAndOperator.tags
+          const excludedTags = excludedTagsAndOperator.tags
           this.threshold = job.runtimeData.threshold;
           if (includedTags) {
-            includedTags.map((tag: any) => this.updateFilter(tag, "included", "tags"))
-            this.applyOperator("included", "tags", this.getTagsAndOperator(job.runtimeData.searchPreferenceId, "included").operator)
+            this.store.dispatch('product/setAppliedfiltersAndOperator', {id: 'tags', type: 'included', value: { list: includedTags, operator: includedTagsAndOperator.operator }})
           }
           if (excludedTags) {
-            excludedTags.map((tag: any) => this.updateFilter(tag, "excluded", "tags"))
-            this.applyOperator("excluded", "tags", this.getTagsAndOperator(job.runtimeData.searchPreferenceId, "excluded").operator)
+            this.store.dispatch('product/setAppliedfiltersAndOperator', {id: 'tags', type: 'excluded', value: { list: excludedTags, operator: excludedTagsAndOperator.operator }})
           }  
         } else {
           showToast(translate("No threshold rule found. Invalid job"));
         }
       } else {
         showToast(translate("No job found."));
-      } 
-    }
-  },
-  methods: {
+      }
+    },
     isJobEditable(job: any){
       return !(((job.statusId === 'SERVICE_PENDING' && job.runTime > DateTime.now().toMillis()) && (this.isFilterChanged || this.threshold !== job.runtimeData.threshold)));
     },
