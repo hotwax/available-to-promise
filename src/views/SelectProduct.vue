@@ -411,6 +411,7 @@ export default defineComponent({
             JobService.scheduleJob(JSON.parse(JSON.stringify({ ...this.job.runtimeData, ...payload }))).then((resp: any) => {
               if(resp.status === 200 && !hasError(resp) && resp.data){
                 showToast(translate('Service updated successfully'));
+                this.isFilterChanged = false;
               } else {
                 console.error(resp);
                 showToast(translate('Unable to schedule service.'))
