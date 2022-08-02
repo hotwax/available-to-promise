@@ -3,7 +3,7 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-menu-button slot="start" />
-        <ion-back-button slot="start" @click="navigateBack" default-href="/" />
+        <ion-back-button v-if="jobId" slot="start" @click="navigateBack" default-href="/" />
         <ion-title>{{ $t("Threshold management") }}</ion-title>
         <ion-buttons slot="end">
           <ion-button fill="clear" class="mobile-only">
@@ -261,13 +261,13 @@ export default defineComponent({
     }
   },
   async ionViewWillEnter(){
-    if (this.$route.query.id) {
-      this.applyThresholdRule(this.$route.query.id)
+    this.jobId = this.$route.query.id
+    if (this.jobId) {
+      this.applyThresholdRule()
     }
   },
   methods: {
-    async applyThresholdRule(id: any){
-      this.jobId = id;
+    async applyThresholdRule(){
       let job = this.pendingJobs.find((job: any) => job.jobId === this.jobId)
       job = job ? job : await JobService.fetchJob({eComStoreId: this.getCurrentEComStore.productStoreId, jobId: this.jobId})
       if (job) {
