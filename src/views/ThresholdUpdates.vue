@@ -358,7 +358,7 @@ export default defineComponent({
       isRunningJobsScrollable: 'job/isRunningJobsScrollable',
       isHistoryJobsScrollable: 'job/isHistoryJobsScrollable',
       products: 'product/getProducts',
-      query: 'job/getThresholdRules'
+      query: 'job/getProductQuery'
     })
   },
   mounted(){

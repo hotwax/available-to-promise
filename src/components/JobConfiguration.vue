@@ -99,12 +99,12 @@ import {
 } from "@ionic/vue";
 import {
   calendarClearOutline,
+  chevronForwardOutline,
   timeOutline,
   timerOutline,
   syncOutline,
-  personCircleOutline,
   pencilOutline,
-  chevronForwardOutline
+  personCircleOutline
 } from "ionicons/icons";
 import { mapGetters, useStore } from "vuex";
 import { handleDateTimeInput } from "@/utils";
@@ -276,14 +276,14 @@ export default defineComponent({
     const store = useStore();
     return {
       calendarClearOutline,
+      chevronForwardOutline,
       customPopoverOptions,
       timeOutline,
       timerOutline,
       store,
       syncOutline,
-      personCircleOutline,
       pencilOutline,
-      chevronForwardOutline
+      personCircleOutline
     };
   }
 });
