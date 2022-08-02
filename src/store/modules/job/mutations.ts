@@ -50,6 +50,11 @@ const mutations: MutationTree <JobState> = {
               state.enumIds[enumInfo.enumId] = enumInfo
             });
         }
+    },
+    [types.JOB_THRESHOLD_RULE_REMOVED] (state, id) {
+        if(id) {
+            delete state.thresholdRules[id]
+        }
     }
 }
 export default mutations;
