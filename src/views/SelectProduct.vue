@@ -401,8 +401,16 @@ export default defineComponent({
                     payload['includeAll'] =  false;
     
                     // Scheduling Job that will run everyday and as system
-                    JobService.scheduleJob({ ...this.job.runtimeData, ...payload }).catch(error => { return error });
-                    this.isFilterChanged = false;
+                    JobService.scheduleJob({ ...this.job.runtimeData, ...payload }).then((resp) => {
+                      if(resp.status === 200 && !hasError(resp) && resp.data){
+                        this.isFilterChanged = false;
+                        this.store.dispatch('job/removeThresholdRule', this.job.runtimeData.searchPreferenceId);
+                        this.$router.push('/threshold-updates')
+                      } else {
+                        console.error(resp);
+                        showToast(translate('Unable to schedule service.'))
+                      }
+                    }).catch(error => { return error });
                   } else {
                     console.error(resp);
                     showToast(translate('Unable to schedule service.'))
@@ -419,6 +427,8 @@ export default defineComponent({
               if(resp.status === 200 && !hasError(resp) && resp.data){
                 showToast(translate('Service updated successfully'));
                 this.isFilterChanged = false;
+                this.store.dispatch('job/removeThresholdRule', this.job.runtimeData.searchPreferenceId);
+                this.$router.push('/threshold-updates')
               } else {
                 console.error(resp);
                 showToast(translate('Unable to schedule service.'))
@@ -491,6 +501,7 @@ export default defineComponent({
         value
       })
       this.queryString = ''
+      this.isFilterChanged = true;
     },
     async resetFilters(type: string) {
       // checking that if any of the current type does not have any attribute selected than not making solr query

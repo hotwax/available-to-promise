@@ -259,6 +259,10 @@ const actions: ActionTree<JobState, RootState> = {
       return Promise.reject(new Error(err))
     }
   },
+
+  removeThresholdRule({ state }, id){
+    delete state.thresholdRules[id];
+  },
   
   async fetchJobs ({ state, commit, dispatch }, payload) {
     const resp = await JobService.fetchJobInformation({
