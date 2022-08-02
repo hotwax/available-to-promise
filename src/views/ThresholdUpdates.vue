@@ -529,12 +529,16 @@ export default defineComponent({
       }
     },
     async getProductCount(query: any){
-      const resp = await ProductService.getProducts(query);
-      if(resp.status === 200 && !hasError(resp) && resp.data.response){
-        this.productCount = resp.data.response.numFound
-      } else {
-        console.error(resp);
-      } 
+      try {
+        const resp = await ProductService.getProducts(query);
+        if(resp.status === 200 && !hasError(resp) && resp.data.response){
+          this.productCount = resp.data.response.numFound
+        } else {
+          console.error(resp);
+        } 
+      } catch (err) {
+        console.error(err);
+      }
     },
     playAnimation() {
       const aside = this.$el.querySelector('aside') as Element
