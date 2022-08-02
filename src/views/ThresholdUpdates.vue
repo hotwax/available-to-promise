@@ -514,7 +514,7 @@ export default defineComponent({
       if(!this.isDesktop) {
         return;
       }
-
+      this.query(job.runtimeData.searchPreferenceId).json.params.rows = 0;
       this.getProductCount(this.query(job.runtimeData.searchPreferenceId));
       
       this.currentJob = {id: job.jobId, ...job}
