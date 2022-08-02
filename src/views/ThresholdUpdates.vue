@@ -514,8 +514,9 @@ export default defineComponent({
       if(!this.isDesktop) {
         return;
       }
-      this.query(job.runtimeData.searchPreferenceId).json.params.rows = 0;
-      this.getProductCount(this.query(job.runtimeData.searchPreferenceId));
+      const query = JSON.parse(JSON.stringify(this.query(job.runtimeData.searchPreferenceId)))
+      query.json.params.rows = 0;
+      this.getProductCount(query);
       
       this.currentJob = {id: job.jobId, ...job}
       this.title = this.getEnumName(job.systemJobEnumId)

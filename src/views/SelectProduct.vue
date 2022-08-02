@@ -291,14 +291,14 @@ export default defineComponent({
       return {
         included: {
           tags: {
-            list: includedTagsAndOperator.tags,
-            operator: includedTagsAndOperator.operator
+            list: includedTagsAndOperator.tags ? includedTagsAndOperator.tags : [],
+            operator: includedTagsAndOperator.operator ? includedTagsAndOperator.operator : ''
           }
         },
         excluded: {
           tags: {
-            list: excludedTagsAndOperator.tags,
-            operator: excludedTagsAndOperator.operator
+            list: excludedTagsAndOperator.tags  ? excludedTagsAndOperator.tags : [],
+            operator: excludedTagsAndOperator.operator ? excludedTagsAndOperator.operator : ''
           } 
         }
       }
