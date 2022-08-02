@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header :translucent="true">
       <ion-toolbar>
-        <ion-menu-button slot="start" />
+        <ion-menu-button v-if="!jobId" slot="start" />
         <ion-back-button v-if="jobId" slot="start" @click="navigateBack" default-href="/" />
         <ion-title>{{ $t("Threshold management") }}</ion-title>
         <ion-buttons slot="end">
