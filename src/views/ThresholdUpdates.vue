@@ -253,7 +253,7 @@
         </section>
 
         <aside class="desktop-only" v-show="segmentSelected === 'pending' && currentJob">
-          <JobConfiguration :title="title" :job="currentJob" :status="currentJobStatus" :type="freqType" :key="currentJob"/>
+          <JobConfiguration :title="title" :job="currentJob" :productCount="productCount" :status="currentJobStatus" :type="freqType" :key="currentJob"/>
         </aside>
       </main>
     </ion-content>
@@ -295,9 +295,10 @@ import JobConfiguration from '@/components/JobConfiguration.vue'
 import { copyOutline, closeCircleOutline, checkmarkCircleOutline, optionsOutline, timeOutline, timerOutline } from "ionicons/icons";
 
 import { Plugins } from '@capacitor/core';
-import { showToast } from '@/utils'
+import { hasError, showToast } from '@/utils'
 import JobHistoryModal from '@/components/JobHistoryModal.vue';
 import { DateTime } from 'luxon';
+import { ProductService } from '@/services/ProductService';
 
 export default defineComponent({
   name: "ThresholdUpdates",
@@ -339,7 +340,8 @@ export default defineComponent({
       freqType: '' as any,
       isJobDetailAnimationCompleted: false,
       isDesktop: isPlatform('desktop'),
-      isRetrying: false
+      isRetrying: false,
+      productCount: 0
     }
   },
   computed: {
@@ -354,7 +356,9 @@ export default defineComponent({
       getCurrentEComStore:'user/getCurrentEComStore',
       isPendingJobsScrollable: 'job/isPendingJobsScrollable',
       isRunningJobsScrollable: 'job/isRunningJobsScrollable',
-      isHistoryJobsScrollable: 'job/isHistoryJobsScrollable'
+      isHistoryJobsScrollable: 'job/isHistoryJobsScrollable',
+      products: 'product/getProducts',
+      query: 'job/getThresholdRule'
     })
   },
   mounted(){
@@ -510,7 +514,10 @@ export default defineComponent({
       if(!this.isDesktop) {
         return;
       }
-
+      const query = JSON.parse(JSON.stringify(this.query(job.runtimeData.searchPreferenceId)))
+      
+      this.getProductCount(query);
+      
       this.currentJob = {id: job.jobId, ...job}
       this.title = this.getEnumName(job.systemJobEnumId)
       this.currentJobStatus = job.tempExprId
@@ -519,6 +526,22 @@ export default defineComponent({
       if (this.currentJob && !this.isJobDetailAnimationCompleted) {
         this.playAnimation();
         this.isJobDetailAnimationCompleted = true;
+      }
+    },
+    async getProductCount(query: any){
+      //Passed rows = 0 as we only need product count and not the data
+      query.json.params.rows = 0;
+      try {
+        const resp = await ProductService.getProducts(query);
+        if(resp.status === 200 && !hasError(resp) && resp.data.response){
+          this.productCount = resp.data.response.numFound
+        } else {
+          console.error(resp);
+          this.productCount = 0;
+        } 
+      } catch (err) {
+        console.error(err);
+        this.productCount = 0;
       }
     },
     playAnimation() {

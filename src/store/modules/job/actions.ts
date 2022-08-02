@@ -167,7 +167,7 @@ const actions: ActionTree<JobState, RootState> = {
         "statusId": "SERVICE_PENDING",
         "systemJobEnumId_op": "not-empty"
       },
-      "fieldList": [ "systemJobEnumId", "runTime", "tempExprId", "parentJobId", "serviceName", "jobId", "jobName", "currentRetryCount", "statusId", "runtimeDataId" ],
+      "fieldList": [ "systemJobEnumId", "runTime", "tempExprId", "parentJobId", "serviceName", "jobId", "jobName", "currentRetryCount", "statusId", "runtimeDataId", "productStoreId" ],
       "entityName": "JobSandbox",
       "noConditionFind": "Y",
       "viewSize": payload.viewSize,
@@ -450,6 +450,10 @@ const actions: ActionTree<JobState, RootState> = {
     } catch (err) {
       showToast(translate('Something went wrong'))
       console.error(err)
+      // TODO: explore around handling error, so that we can directly access the response status code
+      // This is returned so that response is handled in catch instead of then
+      // err is string and when trying to access status it gives error
+      return Promise.reject(err)
     }
     return resp;
   },

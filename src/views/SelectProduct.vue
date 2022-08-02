@@ -2,8 +2,8 @@
   <ion-page>
     <ion-header :translucent="true">
       <ion-toolbar>
-        <ion-menu-button slot="start" />
-        <ion-back-button slot="start" @click="navigateBack" default-href="/" />
+        <ion-menu-button v-if="!jobId" slot="start" />
+        <ion-back-button v-if="jobId" slot="start" @click="navigateBack" default-href="/" />
         <ion-title>{{ $t("Threshold management") }}</ion-title>
         <ion-buttons slot="end">
           <ion-button fill="clear" class="mobile-only">
@@ -12,7 +12,7 @@
           <ion-button fill="clear" class="mobile-only">
             <ion-icon :icon="filterOutline" />
           </ion-button>
-          <ion-button v-if="isFilterChanged" fill="clear">
+          <ion-button v-if="isFilterChanged || threshold != job?.runtimeData?.threshold" fill="clear">
             <ion-icon slot="end" color="warning" :icon="warningOutline" />
           </ion-button>
         </ion-buttons>
@@ -140,7 +140,7 @@
       </div>
 
       <div class="action desktop-only">
-        <ion-button v-if="jobId" :disabled="isJobEditable(job) || isServiceScheduling" @click="updateThreshold()">
+        <ion-button v-if="jobId" :disabled="isJobEditable() || isServiceScheduling" @click="updateThreshold()">
           <ion-icon slot="start" :icon="saveOutline" />
           {{ $t("Update threshold rule") }}
         </ion-button>
@@ -151,7 +151,7 @@
       </div>
 
       <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="mobile-only">
-        <ion-fab-button v-if="jobId" :disabled="isServiceScheduling || isJobEditable(job)" @click="updateThreshold()">
+        <ion-fab-button v-if="jobId" :disabled="isServiceScheduling || isJobEditable()" @click="updateThreshold()">
           <ion-icon :icon="arrowForwardOutline" />
         </ion-fab-button>
         <ion-fab-button v-else @click="saveThreshold()">
@@ -261,13 +261,13 @@ export default defineComponent({
     }
   },
   async ionViewWillEnter(){
-    if (this.$route.query.id) {
-      this.applyThresholdRule(this.$route.query.id)
+    this.jobId = this.$route.query.id
+    if (this.jobId) {
+      this.applyThresholdRule()
     }
   },
   methods: {
-    async applyThresholdRule(id: any){
-      this.jobId = id;
+    async applyThresholdRule(){
       let job = this.pendingJobs.find((job: any) => job.jobId === this.jobId)
       job = job ? job : await JobService.fetchJob({eComStoreId: this.getCurrentEComStore.productStoreId, jobId: this.jobId})
       if (job) {
@@ -282,8 +282,8 @@ export default defineComponent({
         showToast(translate("No job found."));
       }
     },
-    isJobEditable(job: any){
-      return !(((job.statusId === 'SERVICE_PENDING' && job.runTime > DateTime.now().toMillis()) && (this.isFilterChanged || this.threshold !== job.runtimeData.threshold)));
+    isJobEditable(){
+      return !(((this.job.statusId === 'SERVICE_PENDING' && this.job.runTime > DateTime.now().toMillis()) && (this.isFilterChanged || this.threshold != this.job.runtimeData.threshold)));
     },
     prepareAppliedFilters(job: any){
       const includedTagsAndOperator = this.getTagsAndOperator(job.runtimeData.searchPreferenceId, "included");
@@ -304,7 +304,7 @@ export default defineComponent({
       }
     },
     async navigateBack(){
-      if(this.isFilterChanged){
+      if(this.isFilterChanged || this.threshold != this.job?.runtimeData?.threshold){
         const alert = await alertController.create({
           header: this.$t("Save changes"),
           message: this.$t("Make sure you have saved your changes. All unsaved changes to this rule will be lost."),
@@ -317,6 +317,8 @@ export default defineComponent({
               text: this.$t("Discard"),
               handler: () => {
                 this.router.push("/threshold-updates");
+                this.isFilterChanged = false;
+                this.store.dispatch('product/clearAllFilters');
               },
             },
           ],
@@ -324,6 +326,7 @@ export default defineComponent({
         return alert.present();
       }
       this.router.push("/threshold-updates");
+      this.store.dispatch('product/clearAllFilters');
     },
     searchProducts(event: any) {
       this.queryString = event.target.value;
@@ -360,32 +363,31 @@ export default defineComponent({
         });
         
         if (resp.status === 200 && !hasError(resp)) {
-
           const payload = {
             'JOB_NAME': this.job.jobName,
             'SERVICE_NAME': this.job.serviceName,
             'SERVICE_COUNT': '0',
             'jobFields': {
-              'productStoreId': this.job.productStoreId,
+              'productStoreId': this.job.productStoreId ? this.job.productStoreId : '',
               'systemJobEnumId': this.job.systemJobEnumId,
               'maxRecurrenceCount': '-1',
               'parentJobId': this.job.parentJobId,
               'recurrenceTimeZone': this.job.recurrenceTimeZone
             },
-            'shopifyConfigId': this.job.runtimeData.shopifyConfigId,
+            'shopifyConfigId': this.job.runtimeData.shopifyConfigId ? this.job.runtimeData.shopifyConfigId : "",
             'statusId': "SERVICE_PENDING",
             'systemJobEnumId': this.job.systemJobEnumId,
             'includeAll': true, // true: includes all the product, false: includes only products updated in the last 24 hours
             'searchPreferenceId': this.job.runtimeData.searchPreferenceId,
             'threshold': this.threshold,
-            'facilityId': this.job.runtimeData.facilityId,
+            'facilityId': this.job.runtimeData.facilityId ? this.job.runtimeData.facilityId : [],
           } as any;
 
           // checking if the runtimeData has productStoreId, and if present then adding it on root level
           this.job.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = this.job.productStoreId)
           this.job.priority && (payload['SERVICE_PRIORITY'] = this.job.priority.toString())
 
-          if(this.job.runtimeData.threshold !== this.threshold){
+          if(this.job.runtimeData.threshold != this.threshold){
             this.job.runtimeData.threshold = this.threshold
             await this.store.dispatch('job/cancelJob', this.job).then((resp) => {
               if(resp.status === 200 && !hasError(resp)){
@@ -466,7 +468,7 @@ export default defineComponent({
         }
       })
       modal.onDidDismiss().then((payload) => {
-        if(payload.data.isFilterChanged){
+        if(payload.data?.isFilterChanged){
           this.queryString = '';
           this.isFilterChanged = true;
         }
