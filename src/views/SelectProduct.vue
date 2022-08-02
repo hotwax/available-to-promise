@@ -363,8 +363,6 @@ export default defineComponent({
         });
         
         if (resp.status === 200 && !hasError(resp)) {
-          this.store.dispatch('job/removeThresholdRule', this.job.runtimeData.searchPreferenceId);
-          this.store.dispatch('job/fetchThresholdRules', [this.job.runtimeData.searchPreferenceId]);
           const payload = {
             'JOB_NAME': this.job.jobName,
             'SERVICE_NAME': this.job.serviceName,
@@ -406,6 +404,7 @@ export default defineComponent({
                     JobService.scheduleJob({ ...this.job.runtimeData, ...payload }).then((resp) => {
                       if(resp.status === 200 && !hasError(resp) && resp.data){
                         this.isFilterChanged = false;
+                        this.store.dispatch('job/removeThresholdRule', this.job.runtimeData.searchPreferenceId);
                         this.$router.push('/threshold-updates')
                       } else {
                         console.error(resp);
@@ -428,6 +427,7 @@ export default defineComponent({
               if(resp.status === 200 && !hasError(resp) && resp.data){
                 showToast(translate('Service updated successfully'));
                 this.isFilterChanged = false;
+                this.store.dispatch('job/removeThresholdRule', this.job.runtimeData.searchPreferenceId);
                 this.$router.push('/threshold-updates')
               } else {
                 console.error(resp);
