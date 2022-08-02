@@ -12,7 +12,7 @@
           <ion-button fill="clear" class="mobile-only">
             <ion-icon :icon="filterOutline" />
           </ion-button>
-          <ion-button v-if="isFilterChanged" fill="clear">
+          <ion-button v-if="isFilterChanged || threshold != job?.runtimeData?.threshold" fill="clear">
             <ion-icon slot="end" color="warning" :icon="warningOutline" />
           </ion-button>
         </ion-buttons>
@@ -304,7 +304,7 @@ export default defineComponent({
       }
     },
     async navigateBack(){
-      if(this.isFilterChanged){
+      if(this.isFilterChanged || this.threshold != this.job?.runtimeData?.threshold){
         const alert = await alertController.create({
           header: this.$t("Save changes"),
           message: this.$t("Make sure you have saved your changes. All unsaved changes to this rule will be lost."),
@@ -317,6 +317,7 @@ export default defineComponent({
               text: this.$t("Discard"),
               handler: () => {
                 this.router.push("/threshold-updates");
+                this.isFilterChanged = false;
               },
             },
           ],
@@ -384,7 +385,7 @@ export default defineComponent({
           this.job.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = this.job.productStoreId)
           this.job.priority && (payload['SERVICE_PRIORITY'] = this.job.priority.toString())
 
-          if(this.job.runtimeData.threshold !== this.threshold){
+          if(this.job.runtimeData.threshold != this.threshold){
             this.job.runtimeData.threshold = this.threshold
             await this.store.dispatch('job/cancelJob', this.job).then((resp) => {
               if(resp.status === 200 && !hasError(resp)){
