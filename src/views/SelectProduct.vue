@@ -363,7 +363,7 @@ export default defineComponent({
         });
         
         if (resp.status === 200 && !hasError(resp)) {
-          delete this.store.state.job.thresholdRules[this.job.runtimeData.searchPreferenceId]
+          this.store.dispatch('job/removeThresholdRule', this.job.runtimeData.searchPreferenceId);
           this.store.dispatch('job/fetchThresholdRules', [this.job.runtimeData.searchPreferenceId]);
           const payload = {
             'JOB_NAME': this.job.jobName,
@@ -403,9 +403,15 @@ export default defineComponent({
                     payload['includeAll'] =  false;
     
                     // Scheduling Job that will run everyday and as system
-                    JobService.scheduleJob({ ...this.job.runtimeData, ...payload }).catch(error => { return error });
-                    this.isFilterChanged = false;
-                    this.$router.push('/threshold-updates')
+                    JobService.scheduleJob({ ...this.job.runtimeData, ...payload }).then((resp) => {
+                      if(resp.status === 200 && !hasError(resp) && resp.data){
+                        this.isFilterChanged = false;
+                        this.$router.push('/threshold-updates')
+                      } else {
+                        console.error(resp);
+                        showToast(translate('Unable to schedule service.'))
+                      }
+                    }).catch(error => { return error });
                   } else {
                     console.error(resp);
                     showToast(translate('Unable to schedule service.'))
@@ -422,6 +428,7 @@ export default defineComponent({
               if(resp.status === 200 && !hasError(resp) && resp.data){
                 showToast(translate('Service updated successfully'));
                 this.isFilterChanged = false;
+                this.$router.push('/threshold-updates')
               } else {
                 console.error(resp);
                 showToast(translate('Unable to schedule service.'))
