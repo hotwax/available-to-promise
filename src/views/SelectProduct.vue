@@ -140,7 +140,7 @@
       </div>
 
       <div class="action desktop-only">
-        <ion-button v-if="jobId" :disabled="isJobEditable(job) || isServiceScheduling" @click="updateThreshold()">
+        <ion-button v-if="jobId" :disabled="isJobEditable || isServiceScheduling" @click="updateThreshold()">
           <ion-icon slot="start" :icon="saveOutline" />
           {{ $t("Update threshold rule") }}
         </ion-button>
@@ -151,7 +151,7 @@
       </div>
 
       <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="mobile-only">
-        <ion-fab-button v-if="jobId" :disabled="isServiceScheduling || isJobEditable(job)" @click="updateThreshold()">
+        <ion-fab-button v-if="jobId" :disabled="isServiceScheduling || isJobEditable" @click="updateThreshold()">
           <ion-icon :icon="arrowForwardOutline" />
         </ion-fab-button>
         <ion-fab-button v-else @click="saveThreshold()">
@@ -248,7 +248,10 @@ export default defineComponent({
       currentEComStore: 'user/getCurrentEComStore',
       shopifyConfig: 'util/getShopifyConfig',
       facilitiesByProductStore: 'util/getFacilityByProductStore',
-    })
+    }),
+    isJobEditable: () => {
+      return !((((this as any).job.statusId === 'SERVICE_PENDING' && (this as any).job.runTime > DateTime.now().toMillis()) && ((this as any).isFilterChanged || (this as any).threshold != (this as any).job.runtimeData.threshold)));
+    },
   },
   data () {
     return {
@@ -281,9 +284,6 @@ export default defineComponent({
       } else {
         showToast(translate("No job found."));
       }
-    },
-    isJobEditable(job: any){
-      return !(((job.statusId === 'SERVICE_PENDING' && job.runTime > DateTime.now().toMillis()) && (this.isFilterChanged || this.threshold !== job.runtimeData.threshold)));
     },
     prepareAppliedFilters(job: any){
       const includedTagsAndOperator = this.getTagsAndOperator(job.runtimeData.searchPreferenceId, "included");
