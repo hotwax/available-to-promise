@@ -466,7 +466,7 @@ export default defineComponent({
         }
       })
       modal.onDidDismiss().then((payload) => {
-        if(payload.data.isFilterChanged){
+        if(payload.data?.isFilterChanged){
           this.queryString = '';
           this.isFilterChanged = true;
         }
