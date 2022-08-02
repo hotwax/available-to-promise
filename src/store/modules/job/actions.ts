@@ -450,6 +450,10 @@ const actions: ActionTree<JobState, RootState> = {
     } catch (err) {
       showToast(translate('Something went wrong'))
       console.error(err)
+      // TODO: explore around handling error, so that we can directly access the response status code
+      // This is returned so that response is handled in catch instead of then
+      // err is string and when trying to access status it gives error
+      return Promise.reject(err)
     }
     return resp;
   },
