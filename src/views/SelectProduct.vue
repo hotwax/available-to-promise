@@ -12,7 +12,7 @@
           <ion-button fill="clear" class="mobile-only">
             <ion-icon :icon="filterOutline" />
           </ion-button>
-          <ion-button v-if="isFilterChanged || threshold != job?.runtimeData?.threshold" fill="clear">
+          <ion-button v-if="jobId && (isFilterChanged || threshold != job?.runtimeData?.threshold)" fill="clear">
             <ion-icon slot="end" color="warning" :icon="warningOutline" />
           </ion-button>
         </ion-buttons>
