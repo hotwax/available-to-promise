@@ -92,10 +92,10 @@ import {
   IonLabel,
   IonList,
   IonModal,
+  IonNote,
   IonSelect,
   IonSelectOption,
-  alertController,
-  IonNote
+  alertController
 } from "@ionic/vue";
 import {
   calendarClearOutline,
@@ -123,9 +123,9 @@ export default defineComponent({
     IonLabel,
     IonList,
     IonModal,
+    IonNote,
     IonSelect,
-    IonSelectOption,
-    IonNote
+    IonSelectOption
   },
   data() {
     return {
