@@ -363,6 +363,8 @@ export default defineComponent({
         });
         
         if (resp.status === 200 && !hasError(resp)) {
+          delete this.store.state.job.thresholdRules[this.job.runtimeData.searchPreferenceId]
+          this.store.dispatch('job/fetchThresholdRules', [this.job.runtimeData.searchPreferenceId]);
           const payload = {
             'JOB_NAME': this.job.jobName,
             'SERVICE_NAME': this.job.serviceName,
@@ -403,6 +405,7 @@ export default defineComponent({
                     // Scheduling Job that will run everyday and as system
                     JobService.scheduleJob({ ...this.job.runtimeData, ...payload }).catch(error => { return error });
                     this.isFilterChanged = false;
+                    this.$router.push('/threshold-updates')
                   } else {
                     console.error(resp);
                     showToast(translate('Unable to schedule service.'))
@@ -491,6 +494,7 @@ export default defineComponent({
         value
       })
       this.queryString = ''
+      this.isFilterChanged = true;
     },
     async resetFilters(type: string) {
       // checking that if any of the current type does not have any attribute selected than not making solr query
