@@ -360,25 +360,24 @@ export default defineComponent({
         });
         
         if (resp.status === 200 && !hasError(resp)) {
-
           const payload = {
             'JOB_NAME': this.job.jobName,
             'SERVICE_NAME': this.job.serviceName,
             'SERVICE_COUNT': '0',
             'jobFields': {
-              'productStoreId': this.job.productStoreId,
+              'productStoreId': this.job.productStoreId ? this.job.productStoreId : '',
               'systemJobEnumId': this.job.systemJobEnumId,
               'maxRecurrenceCount': '-1',
               'parentJobId': this.job.parentJobId,
               'recurrenceTimeZone': this.job.recurrenceTimeZone
             },
-            'shopifyConfigId': this.job.runtimeData.shopifyConfigId,
+            'shopifyConfigId': this.job.runtimeData.shopifyConfigId ? this.job.runtimeData.shopifyConfigId : "",
             'statusId': "SERVICE_PENDING",
             'systemJobEnumId': this.job.systemJobEnumId,
             'includeAll': true, // true: includes all the product, false: includes only products updated in the last 24 hours
             'searchPreferenceId': this.job.runtimeData.searchPreferenceId,
             'threshold': this.threshold,
-            'facilityId': this.job.runtimeData.facilityId,
+            'facilityId': this.job.runtimeData.facilityId ? this.job.runtimeData.facilityId : [],
           } as any;
 
           // checking if the runtimeData has productStoreId, and if present then adding it on root level
