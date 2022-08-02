@@ -57,7 +57,7 @@ const getters: GetterTree <JobState, RootState> = {
       const tags = thresholdRule.json.filter.find((filter: any) => filter.startsWith(type === 'included' ? 'tags:' : '-tags:')) 
       return tags ? tags.substring(tags.indexOf(":") + 1) : "";
     },
-    getProductQuery: (state) => (id: string): any => {
+    getThresholdRule: (state) => (id: string): any => {
       return state.thresholdRules[id];
     }
   }

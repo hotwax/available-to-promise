@@ -52,7 +52,7 @@
         <ion-input :placeholder="$t('occurrences')" v-model="count"/>
       </ion-item> -->
 
-      <ion-item v-if="job?.runtimeData" @click="updateThresholdRule">
+      <ion-item v-if="job?.runtimeData?.searchPreferenceId" @click="updateThresholdRule">
         <ion-icon slot="start" :icon="pencilOutline" />
         <ion-label class="ion-text-wrap">{{ $t("Edit threshold rule") }}</ion-label>
         <ion-note slot="end">

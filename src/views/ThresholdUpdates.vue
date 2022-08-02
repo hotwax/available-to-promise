@@ -358,7 +358,7 @@ export default defineComponent({
       isRunningJobsScrollable: 'job/isRunningJobsScrollable',
       isHistoryJobsScrollable: 'job/isHistoryJobsScrollable',
       products: 'product/getProducts',
-      query: 'job/getProductQuery'
+      query: 'job/getThresholdRule'
     })
   },
   mounted(){
@@ -515,7 +515,7 @@ export default defineComponent({
         return;
       }
       const query = JSON.parse(JSON.stringify(this.query(job.runtimeData.searchPreferenceId)))
-      query.json.params.rows = 0;
+      
       this.getProductCount(query);
       
       this.currentJob = {id: job.jobId, ...job}
@@ -529,15 +529,19 @@ export default defineComponent({
       }
     },
     async getProductCount(query: any){
+      //Passed rows = 0 as we only need product count and not the data
+      query.json.params.rows = 0;
       try {
         const resp = await ProductService.getProducts(query);
         if(resp.status === 200 && !hasError(resp) && resp.data.response){
           this.productCount = resp.data.response.numFound
         } else {
           console.error(resp);
+          this.productCount = 0;
         } 
       } catch (err) {
         console.error(err);
+        this.productCount = 0;
       }
     },
     playAnimation() {
