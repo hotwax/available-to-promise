@@ -49,7 +49,7 @@ const getters: GetterTree <JobState, RootState> = {
         tags = tags.split(` ${operator} `).map((tag: any) => JSON.parse(tag))
         return { tags, operator }
       } 
-      return {};
+      return { tags: [], operator: '' };
     },
     getTags: (state) => (id: string, type: string): any => {
       const thresholdRule = state.thresholdRules[id];
