@@ -42,14 +42,14 @@ const getters: GetterTree <JobState, RootState> = {
     },
     getTagsAndOperator: (state, getters) => (id: string, type: string): any => {
       const tagString = getters.getTags(id, type);
+      const operator = tagString.indexOf(' AND ') > 0 ? 'AND' : 'OR'
       if(tagString){
         let tags = parser.removeOuterBrackets(tagString.trim());
-        const operator = tagString.indexOf(' AND ') > 0 ? 'AND' : 'OR'
         //Need to parse as it is returned in json format
         tags = tags.split(` ${operator} `).map((tag: any) => JSON.parse(tag))
         return { tags, operator }
       } 
-      return { tags: [], operator: '' };
+      return { tags: [], operator };
     },
     getTags: (state) => (id: string, type: string): any => {
       const thresholdRule = state.thresholdRules[id];

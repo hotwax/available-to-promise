@@ -318,6 +318,7 @@ export default defineComponent({
               handler: () => {
                 this.router.push("/threshold-updates");
                 this.isFilterChanged = false;
+                this.store.dispatch('product/clearAllFilters');
               },
             },
           ],
@@ -325,6 +326,7 @@ export default defineComponent({
         return alert.present();
       }
       this.router.push("/threshold-updates");
+      this.store.dispatch('product/clearAllFilters');
     },
     searchProducts(event: any) {
       this.queryString = event.target.value;
