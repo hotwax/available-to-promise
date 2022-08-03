@@ -514,10 +514,11 @@ export default defineComponent({
       if(!this.isDesktop) {
         return;
       }
-      const query = JSON.parse(JSON.stringify(this.query(job.runtimeData.searchPreferenceId)))
-      
-      this.getProductCount(query);
-      
+      // For Jobs like Import jobs, we will not have any rule setup
+      if (job.runtimeData?.searchPreferenceId) {
+        const query = JSON.parse(JSON.stringify(this.query(job.runtimeData.searchPreferenceId)))
+        this.getProductCount(query);
+      }
       this.currentJob = {id: job.jobId, ...job}
       this.title = this.getEnumName(job.systemJobEnumId)
       this.currentJobStatus = job.tempExprId

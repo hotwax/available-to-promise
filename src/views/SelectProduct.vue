@@ -370,9 +370,7 @@ export default defineComponent({
             'jobFields': {
               'productStoreId': this.job.productStoreId ? this.job.productStoreId : '',
               'systemJobEnumId': this.job.systemJobEnumId,
-              'maxRecurrenceCount': '-1',
-              'parentJobId': this.job.parentJobId,
-              'recurrenceTimeZone': this.job.recurrenceTimeZone
+              'parentJobId': this.job.parentJobId
             },
             'shopifyConfigId': this.job.runtimeData.shopifyConfigId ? this.job.runtimeData.shopifyConfigId : "",
             'statusId': "SERVICE_PENDING",
@@ -396,10 +394,12 @@ export default defineComponent({
                   if(resp.status === 200 && !hasError(resp) && resp.data){
                     payload['SERVICE_TEMP_EXPR'] = this.job.tempExprId;
                     payload['jobFields'].tempExprId = this.job.tempExprId; // Need to remove this as we are passing frequency in SERVICE_TEMP_EXPR, currently kept it for backward compatibility
+                    payload['jobFields'].maxRecurrenceCount = '-1';
+                    payload['jobFields'].recurrenceTimeZone = this.job.recurrenceTimeZone;
                     payload['SERVICE_RUN_AS_SYSTEM'] = 'Y';
                     payload['jobFields'].runAsUser = 'system';// default system, but empty in run now. TODO Need to remove this as we are using SERVICE_RUN_AS_SYSTEM, currently kept it for backward compatibility
                     payload['includeAll'] =  false;
-    
+                    payload['SERVICE_TIME'] = this.job.runTime.toString()
                     // Scheduling Job that will run everyday and as system
                     JobService.scheduleJob({ ...this.job.runtimeData, ...payload }).then((resp) => {
                       if(resp.status === 200 && !hasError(resp) && resp.data){
@@ -475,7 +475,8 @@ export default defineComponent({
           facetToSelect,
           searchfield,
           type
-        }
+        },
+        backdropDismiss: false
       })
       modal.onDidDismiss().then((payload) => {
         if(payload.data?.isFilterChanged){
