@@ -260,12 +260,6 @@ export default defineComponent({
       jobId: "" as any
     }
   },
-  async ionViewWillEnter(){
-    this.jobId = this.$route.query.id
-    if (this.jobId) {
-      this.applyThresholdRule()
-    }
-  },
   methods: {
     async applyThresholdRule(){
       let job = this.pendingJobs.find((job: any) => job.jobId === this.jobId)
@@ -273,7 +267,7 @@ export default defineComponent({
       if (job) {
         this.job = job;
         if (job.runtimeData?.searchPreferenceId) {
-          this.store.dispatch('product/setAppliedfiltersAndOperator', this.prepareAppliedFilters(job)); 
+          await this.store.dispatch('product/setAppliedfiltersAndOperator', this.prepareAppliedFilters(job)); 
           this.threshold = job.runtimeData.threshold;
         } else {
           showToast(translate("No threshold rule found. Invalid job"));
@@ -316,9 +310,9 @@ export default defineComponent({
             {
               text: this.$t("Discard"),
               handler: () => {
-                this.router.push("/threshold-updates");
                 this.isFilterChanged = false;
                 this.store.dispatch('product/clearAllFilters');
+                this.router.push("/threshold-updates");
               },
             },
           ],
@@ -496,6 +490,10 @@ export default defineComponent({
       this.isFilterChanged = true;
     },
     async applyOperator(type: string, id: string, value: string) {
+      // TODO Find a better way
+      // This is done as when applying the exisiting rule as the value of the select box changes
+      // query is sent multiple times
+      if (this.appliedFilters[type]['tags'].operator === value) return;
       await this.store.dispatch('product/updateAppliedFilterOperator', {
         type,
         id,
@@ -519,8 +517,14 @@ export default defineComponent({
     this.queryString = '';
     this.threshold = '';
   },
-  ionViewDidEnter () {
-    this.getProducts();
+  async ionViewWillEnter(){
+    this.jobId = this.$route.query.id
+    this.isFilterChanged = false;
+    if (this.jobId) {
+      this.applyThresholdRule()
+    } else {
+      this.getProducts();
+    }
   },
   setup() {
     const router = useRouter();
