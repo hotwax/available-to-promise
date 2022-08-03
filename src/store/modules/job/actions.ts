@@ -260,8 +260,8 @@ const actions: ActionTree<JobState, RootState> = {
     }
   },
 
-  removeThresholdRule({ state }, id){
-    delete state.thresholdRules[id];
+  removeThresholdRule({ commit }, id){
+    commit(types.JOB_THRESHOLD_RULE_REMOVED, id);
   },
   
   async fetchJobs ({ state, commit, dispatch }, payload) {
