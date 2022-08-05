@@ -51,10 +51,10 @@
         <ion-label>{{ $t("Auto disable after") }}</ion-label>
         <ion-input :placeholder="$t('occurrences')" v-model="count"/>
       </ion-item> -->
-      <ion-item v-if="job?.systemJobEnumId" lines="inset">
+      <ion-item v-if="job?.systemJobEnumId === 'JOB_EXP_PROD_THRSHLD'" lines="inset">
         <ion-icon slot="start" :icon="cogOutline" />
         <ion-label>{{ $t("Rule name") }}</ion-label>
-        <ion-input class="ion-text-end" :placeholder="job?.jobName" v-model="updatedJobName"></ion-input>
+        <ion-input class="ion-text-end" name="ruleName" v-model="ruleName" id="ruleName" />
       </ion-item>
 
       <ion-item v-if="job?.runtimeData?.searchPreferenceId" button detail="true" @click="updateThresholdRule" lines="full">
@@ -137,7 +137,7 @@ export default defineComponent({
   data() {
     return {
       jobStatus: this.status,
-      updatedJobName: "" as string,
+      ruleName: this.job.jobName,
       minDateTime: DateTime.now().toISO()
     }
   },
@@ -256,7 +256,7 @@ export default defineComponent({
     },
     async updateJob() {
       const job = this.job;
-      job.jobName = this.updatedJobName;
+      job.jobName = this.ruleName;
       job['jobStatus'] = this.jobStatus !== 'SERVICE_DRAFT' ? this.jobStatus : 'HOURLY';
       if (job?.statusId === 'SERVICE_DRAFT') {
         this.store.dispatch('job/scheduleService', job)
