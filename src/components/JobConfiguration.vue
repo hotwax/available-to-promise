@@ -137,7 +137,7 @@ export default defineComponent({
   data() {
     return {
       jobStatus: this.status,
-      ruleName: this.job.jobName,
+      ruleName: this.job?.jobName,
       minDateTime: DateTime.now().toISO()
     }
   },
