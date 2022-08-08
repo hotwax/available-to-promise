@@ -32,7 +32,7 @@
         </ion-modal>
       </ion-item>
 
-      <ion-item>
+      <ion-item lines="inset">
         <ion-icon slot="start" :icon="timerOutline" />
         <ion-label>{{ $t("Schedule") }}</ion-label>
         <ion-select :interface-options="customPopoverOptions" interface="popover" :value="jobStatus" :placeholder="$t('Disabled')" @ionChange="($event) => jobStatus = $event['detail'].value">
@@ -51,8 +51,13 @@
         <ion-label>{{ $t("Auto disable after") }}</ion-label>
         <ion-input :placeholder="$t('occurrences')" v-model="count"/>
       </ion-item> -->
+      <ion-item v-if="job?.systemJobEnumId === 'JOB_EXP_PROD_THRSHLD'" lines="inset">
+        <ion-icon slot="start" :icon="cogOutline" />
+        <ion-label>{{ $t("Rule name") }}</ion-label>
+        <ion-input class="ion-text-end" name="ruleName" v-model="ruleName" id="ruleName" />
+      </ion-item>
 
-      <ion-item v-if="job?.runtimeData?.searchPreferenceId" button detail="true" @click="updateThresholdRule">
+      <ion-item v-if="job?.runtimeData?.searchPreferenceId" button detail="true" @click="updateThresholdRule" lines="full">
         <ion-icon slot="start" :icon="pencilOutline" />
         <ion-label class="ion-text-wrap">{{ $t("Edit threshold rule") }}</ion-label>
         <ion-note slot="end">
@@ -87,6 +92,7 @@ import {
   IonContent,
   IonDatetime,
   IonIcon,
+  IonInput,
   IonItem,
   IonLabel,
   IonList,
@@ -99,6 +105,7 @@ import {
 import {
   calendarClearOutline,
   chevronForwardOutline,
+  cogOutline,
   timeOutline,
   timerOutline,
   syncOutline,
@@ -118,6 +125,7 @@ export default defineComponent({
     IonContent,
     IonDatetime,
     IonIcon,
+    IonInput,
     IonItem,
     IonLabel,
     IonList,
@@ -129,6 +137,7 @@ export default defineComponent({
   data() {
     return {
       jobStatus: this.status,
+      ruleName: this.job.jobName,
       minDateTime: DateTime.now().toISO()
     }
   },
@@ -247,6 +256,7 @@ export default defineComponent({
     },
     async updateJob() {
       const job = this.job;
+      job.jobName = this.ruleName;
       job['jobStatus'] = this.jobStatus !== 'SERVICE_DRAFT' ? this.jobStatus : 'HOURLY';
       if (job?.statusId === 'SERVICE_DRAFT') {
         this.store.dispatch('job/scheduleService', job)
@@ -276,6 +286,7 @@ export default defineComponent({
     return {
       calendarClearOutline,
       chevronForwardOutline,
+      cogOutline,
       customPopoverOptions,
       timeOutline,
       timerOutline,
