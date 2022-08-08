@@ -309,7 +309,7 @@ const actions: ActionTree<JobState, RootState> = {
   },
   async updateJob ({ dispatch }, job) {
     let resp;
-    const jobEnums = JSON.parse(process.env?.VUE_APP_JOB_ENUMS);
+    const jobEnums = process.env?.VUE_APP_JOB_ENUMS ? JSON.parse(process.env?.VUE_APP_JOB_ENUMS) : [];
 
     const payload = {
       'jobId': job.jobId,
