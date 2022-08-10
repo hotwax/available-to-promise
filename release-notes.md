@@ -1,3 +1,10 @@
+# Release 1.0.5
+
+## What's Changed
+* Fixed: AutoCompleteSolrFacet API fails due to invalid characters when using GET method (#2gagqqt) by @adityasharma7 in https://github.com/hotwax/threshold-management/pull/127
+
+
+**Full Changelog**: https://github.com/hotwax/threshold-management/compare/v1.0.4...v1.0.5
 
 # Release 1.0.4
 
