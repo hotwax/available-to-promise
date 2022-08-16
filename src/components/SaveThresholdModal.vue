@@ -125,7 +125,7 @@ export default defineComponent({
           searchPrefValue: JSON.stringify(solrQuery)
         });
 
-        if (resp.status == 200 && resp?.data?.searchPrefId) {
+        if (resp.status == 200 && !hasError(resp) && resp?.data?.searchPrefId) {
           const searchPreferenceId = resp.data.searchPrefId;
           const params = {
             "searchPrefId": searchPreferenceId,
