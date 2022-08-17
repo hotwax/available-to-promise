@@ -8,14 +8,39 @@ const hasError = (response: any) => {
     return !!response.data._ERROR_MESSAGE_ || !!response.data._ERROR_MESSAGE_LIST_;
 }
 
-const showToast = async (message: string) => {
+const showToast = async (message: string, err?: any) => {
+  if(message === "Something went wrong" && err) {
     const toast = await toastController
-        .create({
-          message,
-          duration: 3000,
-          position: 'bottom',
-        })
-      return toast.present();
+    .create({
+      message,
+      duration: 3000,
+      position: 'bottom',
+      buttons: [
+        {
+          text: 'view',
+          side: 'end',
+          handler: async () => {
+            const errorMessageToast = await toastController
+              .create({
+                message: err,
+                duration: 3000,
+                position: 'bottom',
+              })
+            return errorMessageToast.present();
+          }
+        }
+      ]
+    })
+    return toast.present();
+  } else {
+    const toast = await toastController
+      .create({
+        message,
+        duration: 3000,
+        position: 'bottom',
+      })
+    return toast.present();
+  }
 }
 
 const getFeature = (featureHierarchy: any, featureKey: string) => {
