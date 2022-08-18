@@ -183,6 +183,11 @@ export default defineComponent({
         facilityId = resp[productStoreId]
       }
 
+      if (!facilityId.length) {
+        showToast(translate('Configuration missing'))
+        return;
+      }
+
       const payload = {
         'JOB_NAME': this.jobName ? this.jobName : this.userProfile.partyName,
         'SERVICE_NAME': job.serviceName,
