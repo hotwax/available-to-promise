@@ -94,6 +94,7 @@ export default defineComponent({
           'eComStore': this.userProfile.stores.find((store: any) => store.productStoreId === event['detail'].value)
         })
       }
+      emitter.emit("productStoreChanged")
     },
   },
   async mounted() {
