@@ -42,7 +42,16 @@ const fetchFacets = async (payload: any): Promise<any> => {
   });
 }
 
+const associateSearchPrefToUser = async (payload: any): Promise<any> => {
+  return api({
+    url: "service/createUserSearchPreference",
+    method: "post",
+    data: payload
+  });
+}
+
 export const ProductService = {
+  associateSearchPrefToUser,
   fetchFacets,
   createSearchPreference,
   fetchProducts,
