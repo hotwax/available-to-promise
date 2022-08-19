@@ -1,3 +1,14 @@
+# Release 1.0.6
+
+## What's Changed
+* Fixed: DateTime component has different hour cycle on different devices(#2dmq8ja) by @shashwatbangar in https://github.com/hotwax/threshold-management/pull/101
+* Fixed: Service fails when scheduled without facilityId(#2pjpbek) by @disha1202 in https://github.com/hotwax/threshold-management/pull/129
+* Implemented: Create a user search preference entry after creating search preference(#2e5ww56) by @shashwatbangar in https://github.com/hotwax/threshold-management/pull/128
+* Improved: code to create a user search preference entry after creating search preference (#2e5ww56). by @meet-aniket in https://github.com/hotwax/threshold-management/pull/104
+
+
+**Full Changelog**: https://github.com/hotwax/threshold-management/compare/v1.0.5...v1.0.6
+
 # Release 1.0.5
 
 ## What's Changed
