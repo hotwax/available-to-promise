@@ -1,5 +1,6 @@
-import { toastController } from '@ionic/vue';
+import { modalController, toastController } from '@ionic/vue';
 import { DateTime } from "luxon";
+import ErrorMessageModal from "@/components/ErrorMessageModal.vue";
 
 // TODO Use separate files for specific utilities
 
@@ -20,13 +21,15 @@ const showToast = async (message: string, err?: any) => {
           text: 'view',
           side: 'end',
           handler: async () => {
-            const errorMessageToast = await toastController
-              .create({
-                message: err,
-                duration: 3000,
-                position: 'bottom',
-              })
-            return errorMessageToast.present();
+            const errorMessageModal = await modalController.create({
+              component: ErrorMessageModal,
+              componentProps: {
+                errorMessage: err,
+              },
+              initialBreakpoint: 0.08,
+              breakpoints: [0, 0.10, 0.5, 0.75]
+            });
+            return errorMessageModal.present();
           }
         }
       ]
