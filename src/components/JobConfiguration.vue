@@ -129,7 +129,6 @@ export default defineComponent({
       getJob: 'job/getJob',
       shopifyConfigId: 'user/getShopifyConfigId',
       currentEComStore: 'user/getCurrentEComStore',
-      getCurrentEComStore:'user/getCurrentEComStore'
     }),
     generateFrequencyOptions(): any {
       const optionDefault = [{
@@ -185,7 +184,7 @@ export default defineComponent({
               if (job) {
                 this.store.dispatch('job/skipJob', job).then( async (resp) => {
                   if(resp) {
-                    await this.store.dispatch('job/fetchPendingJobs', { eComStoreId: this.getCurrentEComStore.productStoreId, viewSize: process.env.VUE_APP_VIEW_SIZE, viewIndex: 0, jobEnums: this.jobEnums });
+                    await this.store.dispatch('job/fetchPendingJobs', { eComStoreId: this.currentEComStore.productStoreId, viewSize: process.env.VUE_APP_VIEW_SIZE, viewIndex: 0, jobEnums: this.jobEnums });
                   }
                 })
               }
@@ -207,7 +206,7 @@ export default defineComponent({
             handler: () => {
               this.store.dispatch('job/cancelJob', job).then( async (resp) => {
                 if(resp) {
-                  await this.store.dispatch('job/fetchPendingJobs', { eComStoreId: this.getCurrentEComStore.productStoreId, viewSize: process.env.VUE_APP_VIEW_SIZE, viewIndex: 0, jobEnums: this.jobEnums });
+                  await this.store.dispatch('job/fetchPendingJobs', { eComStoreId: this.currentEComStore.productStoreId, viewSize: process.env.VUE_APP_VIEW_SIZE, viewIndex: 0, jobEnums: this.jobEnums });
                 }
               });
             }
@@ -249,7 +248,7 @@ export default defineComponent({
       } else if (job?.statusId === 'SERVICE_PENDING') {
         this.store.dispatch('job/updateJob', job).then( async (resp) => {
           if(resp) {
-            await this.store.dispatch('job/fetchPendingJobs', { eComStoreId: this.getCurrentEComStore.productStoreId, viewSize: process.env.VUE_APP_VIEW_SIZE, viewIndex: 0, jobEnums: this.jobEnums });
+            await this.store.dispatch('job/fetchPendingJobs', { eComStoreId: this.currentEComStore.productStoreId, viewSize: process.env.VUE_APP_VIEW_SIZE, viewIndex: 0, jobEnums: this.jobEnums });
           }
         })
       }
