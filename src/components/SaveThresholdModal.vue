@@ -125,8 +125,14 @@ export default defineComponent({
           searchPrefValue: JSON.stringify(solrQuery)
         });
 
-        if (resp.status == 200 && resp?.data?.searchPrefId) {
+        if (resp.status == 200 && !hasError(resp) && resp?.data?.searchPrefId) {
           const searchPreferenceId = resp.data.searchPrefId;
+          const params = {
+            "searchPrefId": searchPreferenceId,
+            "userSearchPrefTypeId": "THRESHOLD_INV_QUERY"
+          }
+          // Handle the case whether we will schedule service if searchPrefId is not associated with user. 
+          await ProductService.associateSearchPrefToUser(params);
           await this.scheduleService(searchPreferenceId, this.threshold)
         } else {
           showToast(translate('Something went wrong'))
@@ -156,9 +162,15 @@ export default defineComponent({
         job = this.jobs[this.jobEnumId]
       }
 
+      // Used Guard Clause
+      if (!job) {
+        showToast(translate('Configuration missing'))
+        return;
+      }
+
       if(!shopifyConfigId) {
-        const resp = await this.store.dispatch('util/getShopifyConfig', productStoreId)
-        shopifyConfigId = resp[productStoreId]
+        const shopifyConfig = await this.store.dispatch('util/getShopifyConfig', productStoreId)
+        shopifyConfigId = shopifyConfig.shopifyConfigId
       }
 
       if (!facilityId) {
@@ -177,34 +189,57 @@ export default defineComponent({
         facilityId = resp[productStoreId]
       }
 
-      const payload = job ? {
+      if (!facilityId.length) {
+        showToast(translate('Configuration missing'))
+        return;
+      }
+
+      const payload = {
         'JOB_NAME': this.jobName ? this.jobName : this.userProfile.partyName,
         'SERVICE_NAME': job.serviceName,
         'SERVICE_COUNT': '0',
         'jobFields': {
           'productStoreId': productStoreId,
           'systemJobEnumId': job.systemJobEnumId,
-          'tempExprId': 'EVERYDAY',
           'maxRecurrenceCount': '-1',
           'parentJobId': job.parentJobId,
-          'runAsUser': 'system', // default system, but empty in run now
-          'recurrenceTimeZone': DateTime.now().zoneName
+          'recurrenceTimeZone': this.userProfile?.userTimeZone
         },
         'shopifyConfigId': shopifyConfigId,
         'statusId': "SERVICE_PENDING",
         'systemJobEnumId': job.systemJobEnumId,
+        'includeAll': true, // true: includes all the product, false: includes only products updated in the last 24 hours
         searchPreferenceId,
         threshold,
         facilityId
-      } as any : {}
+      } as any;
 
       // checking if the runtimeData has productStoreId, and if present then adding it on root level
-      job?.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = productStoreId)
-      job?.priority && (payload['SERVICE_PRIORITY'] = job.priority.toString())
+      job.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = productStoreId)
+      job.priority && (payload['SERVICE_PRIORITY'] = job.priority.toString())
 
       try {
-        resp = await JobService.scheduleJob({ ...job.runtimeData, ...payload });
-        if (resp.status == 200 && !hasError(resp)) {
+        const scheduleJobRequests = [];
+        // Job will be scheduled for single run where include all will be true
+        // This will apply threshold on exisiting products
+        // Deep cloning payload so that both the schedules do not share same reference
+        scheduleJobRequests.push(JobService.scheduleJob(JSON.parse(JSON.stringify({ ...job.runtimeData, ...payload }))).catch(error => { return error }))
+
+        payload['SERVICE_TEMP_EXPR'] = 'EVERYDAY';
+        payload['jobFields'].tempExprId = 'EVERYDAY'; // Need to remove this as we are passing frequency in SERVICE_TEMP_EXPR, currently kept it for backward compatibility
+        payload['SERVICE_RUN_AS_SYSTEM'] = 'Y';
+        payload['jobFields'].runAsUser = 'system';// default system, but empty in run now. TODO Need to remove this as we are using SERVICE_RUN_AS_SYSTEM, currently kept it for backward compatibility
+        payload['includeAll'] =  false;
+
+        // Scheduling Job that will run everyday and as system
+        scheduleJobRequests.push(JobService.scheduleJob({ ...job.runtimeData, ...payload }).catch(error => { return error }))
+
+        let scheduleJobResponse = await Promise.all(scheduleJobRequests);
+        let ifScheduleJobSuccess = scheduleJobResponse.every((response: any) => {
+          return response.status == 200 && !hasError(response);
+        })
+
+        if (ifScheduleJobSuccess) {
           showToast(translate('Service has been scheduled'))
           this.closeModal();
         } else {

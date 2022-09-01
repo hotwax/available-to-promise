@@ -24,6 +24,7 @@
         <ion-modal trigger="open-run-time-modal">
           <ion-content force-overscroll="false">
             <ion-datetime
+              hour-cycle="h12"
               :min="minDateTime"
               :value="job?.runTime ? getDateTime(job.runTime) : ''"
               @ionChange="updateRunTime($event, job)"
@@ -32,7 +33,7 @@
         </ion-modal>
       </ion-item>
 
-      <ion-item>
+      <ion-item lines="inset">
         <ion-icon slot="start" :icon="timerOutline" />
         <ion-label>{{ $t("Schedule") }}</ion-label>
         <ion-select :interface-options="customPopoverOptions" interface="popover" :value="jobStatus" :placeholder="$t('Disabled')" @ionChange="($event) => jobStatus = $event['detail'].value">
@@ -51,8 +52,21 @@
         <ion-label>{{ $t("Auto disable after") }}</ion-label>
         <ion-input :placeholder="$t('occurrences')" v-model="count"/>
       </ion-item> -->
-    </ion-list>
+      <ion-item v-if="job?.systemJobEnumId === 'JOB_EXP_PROD_THRSHLD'" lines="inset">
+        <ion-icon slot="start" :icon="cogOutline" />
+        <ion-label>{{ $t("Rule name") }}</ion-label>
+        <ion-input class="ion-text-end" name="ruleName" v-model="ruleName" id="ruleName" />
+      </ion-item>
 
+      <ion-item v-if="job?.runtimeData?.searchPreferenceId" button detail="true" @click="updateThresholdRule" lines="full">
+        <ion-icon slot="start" :icon="pencilOutline" />
+        <ion-label class="ion-text-wrap">{{ $t("Edit threshold rule") }}</ion-label>
+        <ion-note slot="end">
+          {{ productCount }} {{ $t("products selected")}}
+        </ion-note>
+      </ion-item>
+
+    </ion-list>
     <div class="actions desktop-only">
       <div>
         <ion-button size="small" fill="outline" color="medium" :disabled="status === 'SERVICE_DRAFT'" @click="skipJob(job)">{{ $t("Skip once") }}</ion-button>
@@ -79,23 +93,29 @@ import {
   IonContent,
   IonDatetime,
   IonIcon,
+  IonInput,
   IonItem,
   IonLabel,
   IonList,
   IonModal,
+  IonNote,
   IonSelect,
   IonSelectOption,
   alertController
 } from "@ionic/vue";
 import {
   calendarClearOutline,
+  chevronForwardOutline,
+  cogOutline,
   timeOutline,
   timerOutline,
   syncOutline,
+  pencilOutline,
   personCircleOutline
 } from "ionicons/icons";
 import { mapGetters, useStore } from "vuex";
-import { translate } from "@/i18n";
+import { handleDateTimeInput } from "@/utils";
+
 import { DateTime } from 'luxon';
 
 export default defineComponent({
@@ -106,23 +126,23 @@ export default defineComponent({
     IonContent,
     IonDatetime,
     IonIcon,
+    IonInput,
     IonItem,
     IonLabel,
     IonList,
     IonModal,
+    IonNote,
     IonSelect,
     IonSelectOption
   },
   data() {
     return {
       jobStatus: this.status,
-      minDateTime: DateTime.now().toISO(),
-      jobEnums: [
-        ...JSON.parse(process.env?.VUE_APP_JOB_ENUMS as string) as any
-      ]
+      ruleName: this.job?.jobName,
+      minDateTime: DateTime.now().toISO()
     }
   },
-  props: ["job", "title", "status", "type"],
+  props: ["job", "title", "status", "type", "productCount"],
   computed: {
     ...mapGetters({
       getJobStatus: 'job/getJobStatus',
@@ -167,8 +187,11 @@ export default defineComponent({
     }
   },
   methods: {
+    updateThresholdRule(){
+      this.$router.push(`select-product?id=${this.job.jobId}`)
+    },
     getDateTime(time: any) {
-      return DateTime.fromMillis(time)
+      return DateTime.fromMillis(time).toISO()
     },
     async skipJob(job: any) {
       const alert = await alertController
@@ -242,6 +265,7 @@ export default defineComponent({
     },
     async updateJob() {
       const job = this.job;
+      job.jobName = this.ruleName;
       job['jobStatus'] = this.jobStatus !== 'SERVICE_DRAFT' ? this.jobStatus : 'HOURLY';
       if (job?.statusId === 'SERVICE_DRAFT') {
         this.store.dispatch('job/scheduleService', job)
@@ -262,7 +286,7 @@ export default defineComponent({
     },
     updateRunTime(ev: CustomEvent, job: any) {
       if (job) {
-        job.runTime = DateTime.fromISO(ev['detail'].value).toMillis()
+        job.runTime = handleDateTimeInput(ev['detail'].value)
       }
     }
   },
@@ -274,11 +298,14 @@ export default defineComponent({
     const store = useStore();
     return {
       calendarClearOutline,
+      chevronForwardOutline,
+      cogOutline,
       customPopoverOptions,
       timeOutline,
       timerOutline,
       store,
       syncOutline,
+      pencilOutline,
       personCircleOutline
     };
   }

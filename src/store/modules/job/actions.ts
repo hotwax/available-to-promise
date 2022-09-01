@@ -8,7 +8,6 @@ import { translate } from '@/i18n'
 import { DateTime } from 'luxon';
 
 const actions: ActionTree<JobState, RootState> = {
-
   async fetchJobDescription({ commit, state }, payload){
     const enumIds = [] as any;
     const cachedEnumIds = Object.keys(state.enumIds);
@@ -18,7 +17,7 @@ const actions: ActionTree<JobState, RootState> = {
       }
     });
     if(enumIds.length <= 0) return enumIds.map((id: any) => state.enumIds[id]);
-    const cachedEnum = payload.map((id: any) => state.enumIds[id]);
+
     const resp = await JobService.fetchJobDescription({
       "inputFields": {
         "enumId": enumIds,
@@ -48,11 +47,12 @@ const actions: ActionTree<JobState, RootState> = {
         "systemJobEnumId_fld1_grp": "2",
         "systemJobEnumId_fld1_op": "equals",
         "productStoreId": payload.eComStoreId,
+        "productStoreId_grp": "2",
         "statusId": ["SERVICE_CANCELLED", "SERVICE_CRASHED", "SERVICE_FAILED", "SERVICE_FINISHED"],
         "statusId_op": "in",
         "systemJobEnumId_op": "not-empty"
       },
-      "fieldList": [ "systemJobEnumId", "runTime", "tempExprId", "parentJobId", "serviceName", "jobId", "jobName", "statusId", "cancelDateTime", "finishDateTime", "startDateTime" ],
+      "fieldList": [ "systemJobEnumId", "runTime", "tempExprId", "parentJobId", "serviceName", "jobId", "jobName", "statusId", "cancelDateTime", "finishDateTime", "startDateTime", "runtimeDataId" ],
       "entityName": "JobSandbox",
       "noConditionFind": "Y",
       "viewSize": payload.viewSize,
@@ -72,13 +72,16 @@ const actions: ActionTree<JobState, RootState> = {
           commit(types.JOB_HISTORY_UPDATED, { jobs, total });
           const tempExprList = [] as any;
           const enumIds = [] as any;
+          const searchPreferenceIds = [] as any;
           resp.data.docs.map((item: any) => {
             enumIds.push(item.systemJobEnumId);
             tempExprList.push(item.tempExprId);
+            if (item.runtimeData && item.runtimeData.searchPreferenceId) searchPreferenceIds.push(item.runtimeData.searchPreferenceId)
           })
           const tempExpr = [...new Set(tempExprList)];
           dispatch('fetchTemporalExpression', tempExpr);
           dispatch('fetchJobDescription', enumIds);
+          dispatch('fetchThresholdRules', [...new Set(searchPreferenceIds)])
         }
       } else {
         commit(types.JOB_HISTORY_UPDATED, { jobs: [], total: 0 });
@@ -100,15 +103,12 @@ const actions: ActionTree<JobState, RootState> = {
         "systemJobEnumId_fld1_grp": "2",
         "systemJobEnumId_fld1_op": "equals",
         "productStoreId": payload.eComStoreId,
+        "productStoreId_grp": "2",
+        "statusId": ["SERVICE_RUNNING", "SERVICE_QUEUED"],
+        "statusId_op": "in",
         "systemJobEnumId_op": "not-empty",
-        "statusId_fld0_value": "SERVICE_RUNNING",
-        "statusId_fld0_op": "equals",
-        "statusId_fld0_grp": "1",
-        "statusId_fld1_value": "SERVICE_QUEUED",
-        "statusId_fld1_op": "equals",
-        "statusId_fld1_grp": "2",
       },
-      "fieldList": [ "systemJobEnumId", "runTime", "tempExprId", "parentJobId", "serviceName", "jobId", "jobName", "statusId" ],
+      "fieldList": [ "systemJobEnumId", "runTime", "tempExprId", "parentJobId", "serviceName", "jobId", "jobName", "statusId", "runtimeDataId" ],
       "entityName": "JobSandbox",
       "noConditionFind": "Y",
       "viewSize": payload.viewSize,
@@ -128,13 +128,16 @@ const actions: ActionTree<JobState, RootState> = {
           commit(types.JOB_RUNNING_UPDATED, { jobs, total });
           const tempExprList = [] as any;
           const enumIds = [] as any;
+          const searchPreferenceIds = [] as any;
           resp.data.docs.map((item: any) => {
             enumIds.push(item.systemJobEnumId);
             tempExprList.push(item.tempExprId);
+            if (item.runtimeData && item.runtimeData.searchPreferenceId) searchPreferenceIds.push(item.runtimeData.searchPreferenceId)
           })
           const tempExpr = [...new Set(tempExprList)];
           dispatch('fetchTemporalExpression', tempExpr);
           dispatch('fetchJobDescription', enumIds);
+          dispatch('fetchThresholdRules', [...new Set(searchPreferenceIds)])
         }
       } else {
         commit(types.JOB_RUNNING_UPDATED, { jobs: [], total: 0 });
@@ -156,10 +159,11 @@ const actions: ActionTree<JobState, RootState> = {
         "systemJobEnumId_fld1_grp": "2",
         "systemJobEnumId_fld1_op": "equals",
         "productStoreId": payload.eComStoreId,
+        "productStoreId_grp": "2",
         "statusId": "SERVICE_PENDING",
         "systemJobEnumId_op": "not-empty"
       },
-      "fieldList": [ "systemJobEnumId", "runTime", "tempExprId", "parentJobId", "serviceName", "jobId", "jobName", "currentRetryCount", "statusId" ],
+      "fieldList": [ "systemJobEnumId", "runTime", "tempExprId", "parentJobId", "serviceName", "jobId", "jobName", "currentRetryCount", "statusId", "runtimeDataId", "productStoreId" ],
       "entityName": "JobSandbox",
       "noConditionFind": "Y",
       "viewSize": payload.viewSize,
@@ -177,13 +181,16 @@ const actions: ActionTree<JobState, RootState> = {
           commit(types.JOB_PENDING_UPDATED, { jobs, total });
           const tempExprList = [] as any;
           const enumIds = [] as any;
+          const searchPreferenceIds = [] as any;
           resp.data.docs.map((item: any) => {
             enumIds.push(item.systemJobEnumId);
             tempExprList.push(item.tempExprId);
+            if (item.runtimeData && item.runtimeData.searchPreferenceId) searchPreferenceIds.push(item.runtimeData.searchPreferenceId)
           })
           const tempExpr = [...new Set(tempExprList)];
           dispatch('fetchTemporalExpression', tempExpr);
           dispatch('fetchJobDescription', enumIds);
+          dispatch('fetchThresholdRules', [...new Set(searchPreferenceIds)])
         }
       } else {
         commit(types.JOB_PENDING_UPDATED, { jobs: [], total: 0 });
@@ -203,7 +210,7 @@ const actions: ActionTree<JobState, RootState> = {
       }
     });
     if(tempIds.length <= 0) return tempExprIds.map((id: any) => state.temporalExp[id]);
-    const cachedTempExpr = tempExprIds.map((id: any) => state.temporalExp[id]);
+    
     const resp = await JobService.fetchTemporalExpression({
         "inputFields": {
         "tempExprId": tempIds,
@@ -218,6 +225,39 @@ const actions: ActionTree<JobState, RootState> = {
       commit(types.JOB_TEMPORAL_EXPRESSION_UPDATED, resp.data.docs);
     }
     return resp;
+  },
+  async fetchThresholdRules({ state, commit }, thresholdRuleIds){
+    const tempIds = [] as any;
+    const cachedThresholdRuleIds = Object.keys(state.thresholdRules);
+    thresholdRuleIds.map((id: any) => {
+      if(!cachedThresholdRuleIds.includes(id) && id){
+        tempIds.push(id);
+      }
+    });
+    if(tempIds.length <= 0) return thresholdRuleIds.map((id: any) => state.temporalExp[id]);
+    try {
+      const resp = await JobService.fetchThresholdRules({
+        "inputFields": {
+          "searchPrefId": tempIds,
+          "searchPrefId_op": "in"
+        },
+        "viewSize": tempIds.length,
+        "fieldList": [ "searchPrefId", "searchPrefValue"],
+        "entityName": "SearchPreference",
+        "noConditionFind": "Y",
+      })
+      if (resp.status === 200 && !hasError(resp)) {
+        commit(types.JOB_THRESHOLD_RULES_UPDATED, resp.data.docs);
+      }
+      return resp;
+    } catch(err){
+      console.error(err);
+      return Promise.reject(new Error(err))
+    }
+  },
+
+  removeThresholdRule({ commit }, id){
+    commit(types.JOB_THRESHOLD_RULE_REMOVED, id);
   },
   
   async fetchJobs ({ state, commit, dispatch }, payload) {
@@ -265,11 +305,12 @@ const actions: ActionTree<JobState, RootState> = {
   },
   async updateJob ({ dispatch }, job) {
     let resp;
+    const jobEnums = process.env?.VUE_APP_JOB_ENUMS ? JSON.parse(process.env?.VUE_APP_JOB_ENUMS) : [];
 
     const payload = {
       'jobId': job.jobId,
       'systemJobEnumId': job.systemJobEnumId,
-      'recurrenceTimeZone': DateTime.now().zoneName,
+      'recurrenceTimeZone': this.state.user.current.userTimeZone,
       'tempExprId': job.jobStatus,
       'statusId': "SERVICE_PENDING"
     } as any
@@ -288,6 +329,7 @@ const actions: ActionTree<JobState, RootState> = {
             'systemJobEnumId_op': 'equals'
           }
         })
+        await dispatch('fetchPendingJobs', {eComStoreId: this.state.user.currentEComStore.productStoreId, viewSize: this.state.job.pending.total, viewIndex: 0, jobEnums: jobEnums});
       } else {
         showToast(translate('Something went wrong'))
       }
@@ -305,14 +347,15 @@ const actions: ActionTree<JobState, RootState> = {
       'JOB_NAME': job.jobName,
       'SERVICE_NAME': job.serviceName,
       'SERVICE_COUNT': '0',
+      'SERVICE_TEMP_EXPR': job.jobStatus,
       'jobFields': {
         'productStoreId': this.state.user.currentEComStore.productStoreId,
         'systemJobEnumId': job.systemJobEnumId,
-        'tempExprId': job.jobStatus,
+        'tempExprId': job.jobStatus, // Need to remove this as we are passing frequency in SERVICE_TEMP_EXPR, currently kept it for backward compatibility
         'maxRecurrenceCount': '-1',
         'parentJobId': job.parentJobId,
         'runAsUser': 'system', // default system, but empty in run now
-        'recurrenceTimeZone': DateTime.now().zoneName
+        'recurrenceTimeZone': this.state.user.current.userTimeZone,
       },
       'shopifyConfigId': this.state.user.shopifyConfig,
       'statusId': "SERVICE_PENDING",
@@ -371,7 +414,7 @@ const actions: ActionTree<JobState, RootState> = {
       'jobId': job.jobId,
       'runTime': updatedRunTime,
       'systemJobEnumId': job.systemJobEnumId,
-      'recurrenceTimeZone': DateTime.now().zoneName,
+      'recurrenceTimeZone': this.state.user.current.userTimeZone,
       'statusId': "SERVICE_PENDING"
     } as any
 
@@ -390,15 +433,13 @@ const actions: ActionTree<JobState, RootState> = {
         jobId: job.jobId,
         systemJobEnumId: job.systemJobEnumId,
         statusId: "SERVICE_CANCELLED",
-        recurrenceTimeZone: DateTime.now().zoneName,
+        recurrenceTimeZone: this.state.user.current.userTimeZone,
         cancelDateTime: DateTime.now().toMillis()
       });
       if (resp.status == 200 && !hasError(resp)) {
         showToast(translate('Service updated successfully'))
-        if(state.cached[job.systemJobEnumId]) {
-          state.cached[job.systemJobEnumId].statusId = 'SERVICE_DRAFT'
-          state.cached[job.systemJobEnumId].status = 'SERVICE_DRAFT'
-        }
+        // deleting the enum from cached job as we will not store the job with cancelled status
+        delete state.cached[job?.systemJobEnumId]
         dispatch('fetchJobs', {
           inputFields: {
             'systemJobEnumId': job.systemJobEnumId,
@@ -411,6 +452,10 @@ const actions: ActionTree<JobState, RootState> = {
     } catch (err) {
       showToast(translate('Something went wrong'))
       console.error(err)
+      // TODO: explore around handling error, so that we can directly access the response status code
+      // This is returned so that response is handled in catch instead of then
+      // err is string and when trying to access status it gives error
+      return Promise.reject(err)
     }
     return resp;
   },

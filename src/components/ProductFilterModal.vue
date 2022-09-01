@@ -20,10 +20,13 @@
       <ion-item v-for="option in facetOptions" :key="option.id">
         <ion-label>{{ option.label }}</ion-label>
         <!-- Added key on checkbox as when clicking on the checkbox the checked value is changed but not reflected on UI -->
-        <ion-checkbox v-if="!isAlreadyApplied(option.id)" :checked="appliedFilters[type][searchfield].includes(option.id)" :key="appliedFilters[type][searchfield].includes(option.id)" @click="updateFilter(option.id)"/>
+        <ion-checkbox v-if="!isAlreadyApplied(option.id)" :checked="appliedFilters[type][searchfield].list.includes(option.id)" :key="appliedFilters[type][searchfield].list.includes(option.id)" @click="updateFilter(option.id)"/>
         <ion-note v-else slot="end" color="danger">{{ type === 'included' ? $t("excluded") : $t("included") }}</ion-note>
       </ion-item>
     </ion-list>
+    <ion-infinite-scroll @ionInfinite="loadMoreTags($event)" threshold="100px" :disabled="!isScrollable">
+      <ion-infinite-scroll-content loading-spinner="crescent" :loading-text="$t('Loading')"/>
+    </ion-infinite-scroll>
   </ion-content>
 </template>
 
@@ -36,6 +39,8 @@ import {
   IonContent,
   IonHeader,
   IonIcon,
+  IonInfiniteScroll,
+  IonInfiniteScrollContent,
   IonItem,
   IonLabel,
   IonList,
@@ -58,6 +63,8 @@ export default defineComponent({
     IonContent,
     IonHeader,
     IonIcon,
+    IonInfiniteScroll,
+    IonInfiniteScrollContent,
     IonItem,
     IonLabel,
     IonList,
@@ -70,7 +77,8 @@ export default defineComponent({
     return {
       queryString: '',
       facetOptions: [] as any,
-      isFilterChanged: false
+      isFilterChanged: false,
+      isScrollable: true,
     }
   },
   computed: {
@@ -84,7 +92,13 @@ export default defineComponent({
       modalController.dismiss({ dismissed: true, isFilterChanged: this.isFilterChanged });
     },
     async search(event: any) {
-      // TODO: need to implement infinite scroll on the modal search
+      this.queryString = event.target.value;
+      this.getTags();
+    },
+    async getTags(vSize?: any, vIndex?: any) {
+      const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
+      const viewIndex = vIndex ? vIndex : 0;
+
       const payload = {
         facetToSelect: this.facetToSelect,
         docType: 'PRODUCT',
@@ -92,17 +106,28 @@ export default defineComponent({
         searchfield: this.searchfield,
         jsonQuery: '{"query":"*:*","filter":["docType:PRODUCT"]}',
         noConditionFind: 'N',
-        limit: 10,
-        q: event.target.value,
-        term: event.target.value
+        limit: viewSize,
+        q: this.queryString,
+        term: this.queryString,
+        offset: viewIndex * viewSize,
       }
 
       const resp = await ProductService.fetchFacets(payload);
       if (resp.status == 200 && resp.data.length > 0) {
-        this.facetOptions = resp.data.map((obj: any) => ({ id: obj.id, label: obj.label }))
+        this.facetOptions = viewIndex === 0 ? resp.data : [...this.facetOptions , ...resp.data];
+        this.isScrollable = (this.facetOptions.length % process.env.VUE_APP_VIEW_SIZE) === 0;
       } else {
-        this.facetOptions = []
+        this.facetOptions = [];
+        this.isScrollable = false;
       }
+    },
+    async loadMoreTags(event: any){
+      this.getTags(
+        undefined,
+        Math.ceil(this.facetOptions.length / process.env.VUE_APP_VIEW_SIZE).toString() 
+      ).then(() => {
+        event.target.complete();
+      })
     },
     async updateFilter(value: string) {
       await this.store.dispatch('product/updateAppliedFilters', {
@@ -120,13 +145,16 @@ export default defineComponent({
       await this.store.dispatch('product/clearFilters', {
         type: this.type,
         id: this.searchfield,
-        value: []
+        value: {
+          list: [],
+          operator: 'OR'
+        }
       })
       this.isFilterChanged = true;
     },
     isAlreadyApplied(value: string) {
       const type = this.type === 'included' ? 'excluded' : 'included'
-      return this.appliedFilters[type][this.searchfield].includes(value)
+      return this.appliedFilters[type][this.searchfield].list.includes(value)
     }
   },
   setup() {

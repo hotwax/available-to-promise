@@ -18,6 +18,14 @@ const getProducts = async (payload: any): Promise<any> => {
   })
 }
 
+const updateSearchPreference = async (payload: any): Promise<any> => {
+  return api({
+    url: "service/updateSearchPreference",
+    method: "post",
+    data: payload
+  });
+}
+
 const createSearchPreference = async (payload: any): Promise<any> => {
   return api({
     url: "service/createSearchPreference",
@@ -34,9 +42,19 @@ const fetchFacets = async (payload: any): Promise<any> => {
   });
 }
 
+const associateSearchPrefToUser = async (payload: any): Promise<any> => {
+  return api({
+    url: "service/createUserSearchPreference",
+    method: "post",
+    data: payload
+  });
+}
+
 export const ProductService = {
+  associateSearchPrefToUser,
   fetchFacets,
   createSearchPreference,
   fetchProducts,
-  getProducts
+  getProducts,
+  updateSearchPreference
 }

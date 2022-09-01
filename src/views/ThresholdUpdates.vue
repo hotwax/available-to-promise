@@ -48,19 +48,30 @@
                   <p>{{ getEnumDescription(job.systemJobEnumId) }}</p>
                 </ion-label>
               </ion-item>
+
+              <ion-item v-if="job.runtimeData && job.runtimeData.threshold !== null && job.runtimeData.threshold !== undefined">
+                <ion-icon slot="start" :icon="optionsOutline"/>
+                <ion-label class="ion-text-wrap">{{ job.runtimeData.threshold }} {{ $t('threshold') }}</ion-label>
+              </ion-item>
+
+              <ion-item v-if="job.runtimeData && job.runtimeData.searchPreferenceId">
+                <ion-icon slot="start" :icon="checkmarkCircleOutline" />
+                <ion-label class="ion-text-wrap">{{ getTags(job.runtimeData.searchPreferenceId, "included") ? getTags(job.runtimeData.searchPreferenceId, "included") : "-" }}</ion-label>
+              </ion-item>
+
+              <ion-item v-if="job.runtimeData && job.runtimeData.searchPreferenceId">
+                <ion-icon slot="start" :icon="closeCircleOutline" />
+                <ion-label class="ion-text-wrap">{{ getTags(job.runtimeData.searchPreferenceId, "excluded") ? getTags(job.runtimeData.searchPreferenceId, "excluded") : "-" }}</ion-label>
+              </ion-item>
+
               <ion-item>
                 <ion-icon slot="start" :icon="timeOutline" />
                 <ion-label class="ion-text-wrap">{{ job.runTime ? getTime(job.runTime) : "-"  }}</ion-label>
               </ion-item>
 
-              <ion-item>
+              <ion-item lines="full">
                 <ion-icon slot="start" :icon="timerOutline" />
                 <ion-label class="ion-text-wrap">{{ job.tempExprId ? temporalExpr(job.tempExprId)?.description : "🙃"  }}</ion-label>
-              </ion-item>
-
-              <ion-item lines="full">
-                <ion-icon slot="start" :icon="refreshOutline" />
-                <ion-label class="ion-text-wrap">{{ job.currentRetryCount }}</ion-label>
               </ion-item>
 
               <div class="actions">
@@ -115,19 +126,29 @@
                   <p>{{ getEnumDescription(job.systemJobEnumId) }}</p>
                 </ion-label>
               </ion-item>
+              <ion-item v-if="job.runtimeData && job.runtimeData.threshold !== null && job.runtimeData.threshold !== undefined">
+                <ion-icon slot="start" :icon="optionsOutline"/>
+                <ion-label class="ion-text-wrap">{{ job.runtimeData.threshold }} {{ $t('threshold') }}</ion-label>
+              </ion-item>
+
+              <ion-item v-if="job.runtimeData && job.runtimeData.searchPreferenceId">
+                <ion-icon slot="start" :icon="checkmarkCircleOutline" />
+                <ion-label class="ion-text-wrap">{{ getTags(job.runtimeData.searchPreferenceId, "included") ? getTags(job.runtimeData.searchPreferenceId, "included") : "-" }}</ion-label>
+              </ion-item>
+
+              <ion-item v-if="job.runtimeData && job.runtimeData.searchPreferenceId">
+                <ion-icon slot="start" :icon="closeCircleOutline" />
+                <ion-label class="ion-text-wrap">{{ getTags(job.runtimeData.searchPreferenceId, "excluded") ? getTags(job.runtimeData.searchPreferenceId, "excluded") : "-" }}</ion-label>
+              </ion-item>
+
               <ion-item>
                 <ion-icon slot="start" :icon="timeOutline" />
                 <ion-label class="ion-text-wrap">{{ job.runTime ? getTime(job.runTime) : "-"  }}</ion-label>
               </ion-item>
 
-              <ion-item>
+              <ion-item lines="full">
                 <ion-icon slot="start" :icon="timerOutline" />
                 <ion-label class="ion-text-wrap">{{ job.tempExprId ? temporalExpr(job.tempExprId)?.description : "🙃"  }}</ion-label>
-              </ion-item>
-
-              <ion-item lines="full">
-                <ion-icon slot="start" :icon="codeWorkingOutline" />
-                <ion-label class="ion-text-wrap">{{ job.serviceName }}</ion-label>
               </ion-item>
 
               <div class="actions">
@@ -183,20 +204,30 @@
                 <p>{{ getEnumDescription(job.systemJobEnumId) }}</p>
               </ion-label>
             </ion-item>
+            <ion-item v-if="job.runtimeData && job.runtimeData.threshold !== null && job.runtimeData.threshold !== undefined">
+              <ion-icon slot="start" :icon="optionsOutline"/>
+              <ion-label class="ion-text-wrap">{{ job.runtimeData.threshold }} {{ $t('threshold') }}</ion-label>
+            </ion-item>
+
+            <ion-item v-if="job.runtimeData && job.runtimeData.searchPreferenceId">
+              <ion-icon slot="start" :icon="checkmarkCircleOutline" />
+              <ion-label class="ion-text-wrap">{{ getTags(job.runtimeData.searchPreferenceId, "included") ? getTags(job.runtimeData.searchPreferenceId, "included") : "-" }}</ion-label>
+            </ion-item>
+
+            <ion-item v-if="job.runtimeData && job.runtimeData.searchPreferenceId">
+              <ion-icon slot="start" :icon="closeCircleOutline" />
+              <ion-label class="ion-text-wrap">{{ getTags(job.runtimeData.searchPreferenceId, "excluded") ? getTags(job.runtimeData.searchPreferenceId, "excluded") : "-" }}</ion-label>
+            </ion-item>
+
             <ion-item>
               <ion-icon slot="start" :icon="timeOutline" />
               <ion-label class="ion-text-wrap">{{ job.runTime ? getTime(job.runTime) : "-"  }}</ion-label>
               <ion-note slot="end">{{ job.statusId == "SERVICE_CANCELLED" || job.statusId == "SERVICE_CRASHED" ? getJobExecutionTime(job.startDateTime, job.cancelDateTime) : getJobExecutionTime(job.startDateTime, job.finishDateTime) }}</ion-note>
             </ion-item>
 
-            <ion-item>
+            <ion-item lines="full">
               <ion-icon slot="start" :icon="timerOutline" />
               <ion-label class="ion-text-wrap">{{ job.tempExprId ? temporalExpr(job.tempExprId)?.description : "🙃"  }}</ion-label>
-            </ion-item>
-
-            <ion-item lines="full">
-              <ion-icon slot="start" :icon="codeWorkingOutline" />
-              <ion-label class="ion-text-wrap">{{ job.serviceName }}</ion-label>
             </ion-item>
 
             <div class="actions">
@@ -222,7 +253,7 @@
         </section>
 
         <aside class="desktop-only" v-show="segmentSelected === 'pending' && currentJob">
-          <JobConfiguration :title="title" :job="currentJob" :status="currentJobStatus" :type="freqType" :key="currentJob"/>
+          <JobConfiguration :title="title" :job="currentJob" :productCount="productCount" :status="currentJobStatus" :type="freqType" :key="currentJob"/>
         </aside>
       </main>
     </ion-content>
@@ -261,12 +292,13 @@ import {
   createAnimation
 } from "@ionic/vue";
 import JobConfiguration from '@/components/JobConfiguration.vue'
-import { codeWorkingOutline, copyOutline, refreshOutline, timeOutline, timerOutline } from "ionicons/icons";
-import emitter from '@/event-bus';
+import { copyOutline, closeCircleOutline, checkmarkCircleOutline, optionsOutline, timeOutline, timerOutline } from "ionicons/icons";
+
 import { Plugins } from '@capacitor/core';
-import { showToast } from '@/utils'
+import { hasError, showToast } from '@/utils'
 import JobHistoryModal from '@/components/JobHistoryModal.vue';
 import { DateTime } from 'luxon';
+import { ProductService } from '@/services/ProductService';
 
 export default defineComponent({
   name: "ThresholdUpdates",
@@ -308,7 +340,8 @@ export default defineComponent({
       freqType: '' as any,
       isJobDetailAnimationCompleted: false,
       isDesktop: isPlatform('desktop'),
-      isRetrying: false
+      isRetrying: false,
+      productCount: 0
     }
   },
   computed: {
@@ -317,12 +350,15 @@ export default defineComponent({
       pendingJobs: 'job/getPendingJobs',
       runningJobs: 'job/getRunningJobs',
       temporalExpr: 'job/getTemporalExpr',
+      getTags: 'job/getTags',
       getEnumDescription: 'job/getEnumDescription',
       getEnumName: 'job/getEnumName',
       getCurrentEComStore:'user/getCurrentEComStore',
       isPendingJobsScrollable: 'job/isPendingJobsScrollable',
       isRunningJobsScrollable: 'job/isRunningJobsScrollable',
-      isHistoryJobsScrollable: 'job/isHistoryJobsScrollable'
+      isHistoryJobsScrollable: 'job/isHistoryJobsScrollable',
+      products: 'product/getProducts',
+      query: 'job/getThresholdRule'
     })
   },
   mounted(){
@@ -478,7 +514,11 @@ export default defineComponent({
       if(!this.isDesktop) {
         return;
       }
-
+      // For Jobs like Import jobs, we will not have any rule setup
+      if (job.runtimeData?.searchPreferenceId) {
+        const query = JSON.parse(JSON.stringify(this.query(job.runtimeData.searchPreferenceId)))
+        this.getProductCount(query);
+      }
       this.currentJob = {id: job.jobId, ...job}
       this.title = this.getEnumName(job.systemJobEnumId)
       this.currentJobStatus = job.tempExprId
@@ -487,6 +527,22 @@ export default defineComponent({
       if (this.currentJob && !this.isJobDetailAnimationCompleted) {
         this.playAnimation();
         this.isJobDetailAnimationCompleted = true;
+      }
+    },
+    async getProductCount(query: any){
+      //Passed rows = 0 as we only need product count and not the data
+      query.json.params.rows = 0;
+      try {
+        const resp = await ProductService.getProducts(query);
+        if(resp.status === 200 && !hasError(resp) && resp.data.response){
+          this.productCount = resp.data.response.numFound
+        } else {
+          console.error(resp);
+          this.productCount = 0;
+        } 
+      } catch (err) {
+        console.error(err);
+        this.productCount = 0;
       }
     },
     playAnimation() {
@@ -516,7 +572,13 @@ export default defineComponent({
   ionViewWillEnter() {
     // reassigning current job when entering in the view to not display the job config component if previously opened
     this.currentJob = undefined
-    this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums});
+    if (this.segmentSelected === 'pending') {
+      this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums})
+    } else if (this.segmentSelected === 'running') {
+      this.store.dispatch('job/fetchRunningJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums})
+    } else {
+      this.store.dispatch('job/fetchJobHistory', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums});
+    }
   },
   setup() {
     const store = useStore();
@@ -525,8 +587,9 @@ export default defineComponent({
     return {
       copyOutline,
       store,
-      codeWorkingOutline,
-      refreshOutline,
+      closeCircleOutline,
+      checkmarkCircleOutline,
+      optionsOutline,
       timeOutline,
       timerOutline,
       segmentSelected

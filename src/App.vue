@@ -22,28 +22,48 @@
           </ion-item>
         </ion-list>
       </ion-content>
+      <ion-footer>
+        <ion-toolbar>
+          <ion-item lines="none">
+            <ion-label class="ion-text-wrap">
+              <p class="overline">{{ instanceUrl }}</p>
+              {{ eComStore?.storeName }}
+            </ion-label>
+            <ion-note slot="end">{{ userProfile?.userTimeZone }}</ion-note>
+          </ion-item>
+        </ion-toolbar>
+      </ion-footer>
     </ion-menu>
     <ion-router-outlet id="main" />
   </ion-app>
 </template>
 
 <script lang="ts">
-import { IonApp, IonContent, IonHeader, IonItem, IonIcon, IonLabel, IonList, IonMenu, IonTitle, IonToolbar, IonRouterOutlet, menuController } from '@ionic/vue';
+import { IonApp, IonContent, IonFooter, IonHeader, IonItem, IonIcon, IonLabel, IonList, IonMenu, IonNote, IonTitle, IonToolbar, IonRouterOutlet, menuController } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { loadingController } from '@ionic/vue';
 import { options, settings, pulseOutline } from 'ionicons/icons';
 import emitter from "@/event-bus"
 import { useRouter } from 'vue-router';
+import { mapGetters } from 'vuex';
+import { Settings } from 'luxon'
 
 export default defineComponent({
   name: 'App',
   components: {
-    IonApp, IonContent, IonHeader, IonItem, IonIcon, IonLabel, IonList, IonMenu, IonTitle, IonToolbar, IonRouterOutlet
+    IonApp, IonContent, IonFooter, IonHeader, IonItem, IonIcon, IonLabel, IonList, IonMenu, IonNote, IonTitle, IonToolbar, IonRouterOutlet
   },
   data() {
     return {
       loader: null as any
     };
+  },
+  computed: {
+    ...mapGetters({
+      instanceUrl: 'user/getInstanceUrl',
+      userProfile: 'user/getUserProfile',
+      eComStore: 'user/getCurrentEComStore'
+    })
   },
   methods: {
     async presentLoader() {
@@ -76,6 +96,11 @@ export default defineComponent({
     });
     emitter.on('presentLoader', this.presentLoader);
     emitter.on('dismissLoader', this.dismissLoader);
+    // Handles case when user resumes or reloads the app
+    // Luxon timezzone should be set with the user's selected timezone
+    if (this.userProfile && this.userProfile.userTimeZone) {
+      Settings.defaultZone = this.userProfile.userTimeZone;
+    }
   },
   unmounted() {
     emitter.off('presentLoader', this.presentLoader);

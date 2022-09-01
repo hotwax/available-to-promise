@@ -11,7 +11,7 @@
        <!-- Select eCom store -->
       <ion-item>
         <ion-icon :icon="globeOutline" slot="start" />
-        <ion-label>{{$t("Shop")}}</ion-label>
+        <ion-label>{{$t("eCom Store")}}</ion-label>
         <ion-select interface="popover" :value="currentEComStore.productStoreId" @ionChange="setEComStore($event)">
           <ion-select-option v-for="store in (userProfile ? userProfile.stores : [])" :key="store.productStoreId" :value="store.productStoreId" >{{ store.storeName }}</ion-select-option>
         </ion-select>
@@ -22,6 +22,13 @@
         <ion-icon :icon="codeWorkingOutline" slot="start"/>
         <ion-label>{{ $t("OMS") }}</ion-label>
         <p slot="end">{{ baseURL ? baseURL : instanceUrl }}</p>
+      </ion-item>
+
+      <!-- User timezone -->
+      <ion-item>
+        <ion-icon :icon="timeOutline" slot="start"/>
+        <ion-label> {{ userProfile && userProfile.userTimeZone ? userProfile.userTimeZone : '-' }} </ion-label>
+        <ion-button @click="changeTimeZone()" slot="end" fill="outline" color="dark">{{ $t("Change") }}</ion-button>
       </ion-item>
 
       <!-- Profile of user logged in -->
@@ -36,11 +43,12 @@
 </template>
 
 <script lang="ts">
-import { IonBackButton, IonButton, IonContent, IonHeader,IonIcon, IonItem, IonLabel, IonMenuButton, IonPage, IonSelect, IonSelectOption, IonTitle, IonToolbar, popoverController } from '@ionic/vue';
+import {  IonButton, IonContent, IonHeader, IonIcon, IonItem, IonLabel, IonMenuButton, IonPage, IonSelect, IonSelectOption, IonTitle, IonToolbar, modalController } from '@ionic/vue';
 import { defineComponent } from 'vue';
-import { codeWorkingOutline, ellipsisVertical, globeOutline, personCircleOutline, storefrontOutline} from 'ionicons/icons'
+import { codeWorkingOutline, ellipsisVertical, globeOutline, personCircleOutline, storefrontOutline, timeOutline } from 'ionicons/icons'
 import { mapGetters, useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import TimeZoneModal from '@/views/TimezoneModal.vue';
 
 export default defineComponent({
   name: 'Settings',
@@ -78,6 +86,12 @@ export default defineComponent({
         })
       }
     },
+    async changeTimeZone() {
+      const timeZoneModal = await modalController.create({
+        component: TimeZoneModal,
+      });
+      return timeZoneModal.present();
+    },
     logout () {
       this.store.dispatch('user/logout').then(() => {
         this.router.push('/login');
@@ -95,7 +109,8 @@ export default defineComponent({
       personCircleOutline,
       storefrontOutline,
       store,
-      router
+      router,
+      timeOutline
     }
   }
 });

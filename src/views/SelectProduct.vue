@@ -2,7 +2,8 @@
   <ion-page>
     <ion-header :translucent="true">
       <ion-toolbar>
-        <ion-menu-button slot="start" />
+        <ion-menu-button v-if="!jobId" slot="start" />
+        <ion-back-button v-if="jobId" slot="start" @click="navigateBack" default-href="/" />
         <ion-title>{{ $t("Threshold management") }}</ion-title>
         <ion-buttons slot="end">
           <ion-button fill="clear" class="mobile-only">
@@ -10,6 +11,9 @@
           </ion-button>
           <ion-button fill="clear" class="mobile-only">
             <ion-icon :icon="filterOutline" />
+          </ion-button>
+          <ion-button v-if="jobId && (isFilterChanged || threshold != job?.runtimeData?.threshold)" fill="clear">
+            <ion-icon slot="end" color="warning" :icon="warningOutline" />
           </ion-button>
         </ion-buttons>
       </ion-toolbar>
@@ -31,17 +35,22 @@
               </div>
             </ion-list-header>
             <ion-card>
-              <ion-toolbar>
-                <ion-item lines="none">
-                  <ion-label>{{ $t("Tags") }}</ion-label>
-                  <ion-button fill="clear" slot="end" size="small" @click="searchFilter('tags', 'tagsFacet', 'tags', 'included')">
-                    <ion-label>{{ $t('add') }}</ion-label>
-                    <ion-icon :icon="addCircleOutline" />
-                  </ion-button>
-                </ion-item>
-              </ion-toolbar>
+              <ion-item lines="none">
+                <ion-label>{{ $t("Tags") }}</ion-label>
+                <ion-button fill="clear" slot="end" size="small" @click="searchFilter('tags', 'tagsFacet', 'tags', 'included')">
+                  <ion-label>{{ $t('add') }}</ion-label>
+                  <ion-icon :icon="addCircleOutline" />
+                </ion-button>
+              </ion-item>
+              <ion-item lines="none">
+                <ion-label>{{ $t("Operator") }}</ion-label>
+                <ion-select interface="popover" @ionChange="applyOperator('included', 'tags', $event.detail.value)" :value="appliedFilters['included']['tags'].operator">
+                  <ion-select-option value="AND">AND</ion-select-option>
+                  <ion-select-option value="OR">OR</ion-select-option>
+                </ion-select>
+              </ion-item>
               <ion-card-content>
-                <ion-chip v-for="(tag, index) in appliedFilters['included']['tags']" :key="index">
+                <ion-chip v-for="(tag, index) in appliedFilters['included']['tags'].list" :key="index">
                   <ion-icon :icon="pricetagOutline" />
                   <ion-label>{{ tag }}</ion-label>
                   <ion-icon :icon="closeCircle" @click="removeFilters('included', 'tags', tag)"/>
@@ -57,17 +66,22 @@
               </div>
             </ion-list-header>
             <ion-card>
-              <ion-toolbar>
-                <ion-item lines="none">
-                  <ion-label>{{ $t("Tags") }}</ion-label>
-                  <ion-button fill="clear" slot="end" size="small" @click="searchFilter('tags', 'tagsFacet', 'tags', 'excluded')">
-                    <ion-label>{{ $t('add') }}</ion-label>
-                    <ion-icon :icon="addCircleOutline" />
-                  </ion-button>
-                </ion-item>
-              </ion-toolbar>
+              <ion-item lines="none">
+                <ion-label>{{ $t("Tags") }}</ion-label>
+                <ion-button fill="clear" slot="end" size="small" @click="searchFilter('tags', 'tagsFacet', 'tags', 'excluded')">
+                  <ion-label>{{ $t('add') }}</ion-label>
+                  <ion-icon :icon="addCircleOutline" />
+                </ion-button>
+              </ion-item>
+              <ion-item lines="none">
+                <ion-label>{{ $t("Operator") }}</ion-label>
+                <ion-select @ionChange="applyOperator('excluded', 'tags', $event.detail.value)" interface="popover" :value="appliedFilters['excluded']['tags'].operator">
+                  <ion-select-option value="AND">AND</ion-select-option>
+                  <ion-select-option value="OR">OR</ion-select-option>
+                </ion-select>
+              </ion-item>
               <ion-card-content>
-                <ion-chip v-for="(tag, index) in appliedFilters['excluded']['tags']" :key="index">
+                <ion-chip v-for="(tag, index) in appliedFilters['excluded']['tags'].list" :key="index">
                   <ion-icon :icon="pricetagOutline" />
                   <ion-label>{{ tag }}</ion-label>
                   <ion-icon :icon="closeCircle" @click="removeFilters('excluded', 'tags', tag)"/>
@@ -126,14 +140,21 @@
       </div>
 
       <div class="action desktop-only">
-        <ion-button @click="saveThreshold()">
+        <ion-button v-if="jobId" :disabled="isJobEditable() || isServiceScheduling" @click="updateThreshold()">
+          <ion-icon slot="start" :icon="saveOutline" />
+          {{ $t("Update threshold rule") }}
+        </ion-button>
+        <ion-button v-else @click="saveThreshold()">
           <ion-icon slot="start" :icon="saveOutline" />
           {{ $t("Save threshold rule") }}
         </ion-button>
       </div>
 
       <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="mobile-only">
-        <ion-fab-button>
+        <ion-fab-button v-if="jobId" :disabled="isServiceScheduling || isJobEditable()" @click="updateThreshold()">
+          <ion-icon :icon="arrowForwardOutline" />
+        </ion-fab-button>
+        <ion-fab-button v-else @click="saveThreshold()">
           <ion-icon :icon="arrowForwardOutline" />
         </ion-fab-button>
       </ion-fab>
@@ -145,6 +166,7 @@
 import Image from '@/components/Image.vue';
 import {
   alertController,
+  IonBackButton,
   IonButton,
   IonButtons,
   IonCard,
@@ -163,6 +185,8 @@ import {
   IonMenuButton,
   IonPage,
   IonSearchbar,
+  IonSelect,
+  IonSelectOption,
   IonTitle,
   IonToolbar,
   modalController,
@@ -170,15 +194,21 @@ import {
   IonInfiniteScrollContent
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
-import { arrowForwardOutline, downloadOutline, filterOutline, saveOutline, pricetagOutline, closeCircle, addCircleOutline, albumsOutline } from 'ionicons/icons';
+import { arrowForwardOutline, downloadOutline, filterOutline, saveOutline, pricetagOutline, closeCircle, addCircleOutline, albumsOutline, warningOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
 import { mapGetters, useStore } from 'vuex';
 import SaveThresholdModal from '@/components/SaveThresholdModal.vue';
 import ProductFilterModal from '@/components/ProductFilterModal.vue';
+import { hasError, showToast } from '@/utils';
+import { translate } from '@/i18n';
+import { ProductService } from '@/services/ProductService';
+import { JobService } from '@/services/JobService';
+import { DateTime } from 'luxon';
 
 export default defineComponent({
   name: 'SelectProduct',
   components: {
+    IonBackButton,
     IonButton,
     IonButtons,
     IonCard,
@@ -199,6 +229,8 @@ export default defineComponent({
     IonMenuButton,
     IonPage,
     IonSearchbar,
+    IonSelect,
+    IonSelectOption,
     IonTitle,
     IonToolbar,
     Image
@@ -208,16 +240,88 @@ export default defineComponent({
       products: 'product/getProducts',
       isScrollable: 'product/isScrollable',
       appliedFilters: 'product/getAppliedFilters',
-      query: 'product/getQuery'
+      query: 'product/getQuery',
+      pendingJobs: 'job/getPendingJobs',
+      getTagsAndOperator: 'job/getTagsAndOperator',
+      getCurrentEComStore:'user/getCurrentEComStore',
+      userProfile: 'user/getUserProfile',
+      currentEComStore: 'user/getCurrentEComStore',
+      shopifyConfig: 'util/getShopifyConfig',
+      facilitiesByProductStore: 'util/getFacilityByProductStore',
     })
   },
   data () {
     return {
       threshold: '' as any,
-      queryString: ''
+      queryString: '',
+      isFilterChanged: false,
+      isServiceScheduling: false,
+      job: {} as any,
+      jobId: "" as any
     }
   },
   methods: {
+    async applyThresholdRule(){
+      let job = this.pendingJobs.find((job: any) => job.jobId === this.jobId)
+      job = job ? job : await JobService.fetchJob({eComStoreId: this.getCurrentEComStore.productStoreId, jobId: this.jobId})
+      if (job) {
+        this.job = job;
+        if (job.runtimeData?.searchPreferenceId) {
+          await this.store.dispatch('product/setAppliedfiltersAndOperator', this.prepareAppliedFilters(job)); 
+          this.threshold = job.runtimeData.threshold;
+        } else {
+          showToast(translate("No threshold rule found. Invalid job"));
+        }
+      } else {
+        showToast(translate("No job found."));
+      }
+    },
+    isJobEditable(){
+      return !(((this.job.statusId === 'SERVICE_PENDING' && this.job.runTime > DateTime.now().toMillis()) && (this.isFilterChanged || this.threshold != this.job.runtimeData.threshold)));
+    },
+    prepareAppliedFilters(job: any){
+      const includedTagsAndOperator = this.getTagsAndOperator(job.runtimeData.searchPreferenceId, "included");
+      const excludedTagsAndOperator = this.getTagsAndOperator(job.runtimeData.searchPreferenceId, "excluded");
+      return {
+        included: {
+          tags: {
+            list: includedTagsAndOperator.tags,
+            operator: includedTagsAndOperator.operator
+          }
+        },
+        excluded: {
+          tags: {
+            list: excludedTagsAndOperator.tags,
+            operator: excludedTagsAndOperator.operator
+          } 
+        }
+      }
+    },
+    async navigateBack(){
+      if(this.isFilterChanged || this.threshold != this.job?.runtimeData?.threshold){
+        const alert = await alertController.create({
+          header: this.$t("Save changes"),
+          message: this.$t("Make sure you have saved your changes. All unsaved changes to this rule will be lost."),
+          buttons: [
+            {
+              text: this.$t("Keep editing"),
+              role: 'cancel',
+            },
+            {
+              text: this.$t("Discard"),
+              handler: () => {
+                this.isFilterChanged = false;
+                this.store.dispatch('product/clearAllFilters');
+                this.router.push("/threshold-updates");
+              },
+            },
+          ],
+        });
+        return alert.present();
+      }
+      this.router.push("/threshold-updates");
+      this.store.dispatch('product/clearAllFilters');
+    },
     searchProducts(event: any) {
       this.queryString = event.target.value;
       this.getProducts();
@@ -235,6 +339,105 @@ export default defineComponent({
         event.target.complete();
       })
     },
+    async updateThreshold() {
+      this.isServiceScheduling = true;
+      const solrQuery = this.query
+      // re-initialized params object from query as there is no need for grouping or pagination when storing the query
+      solrQuery.json.params = {
+        "q.op": "AND"
+      }
+      // made the query to default (*:*) before storing, as the threshold will be set for all the products those
+      // are fullfilling the filters condition
+      solrQuery.json['query'] = "*:*"
+
+      try {
+        const resp = await ProductService.updateSearchPreference({
+          searchPrefId: this.job.runtimeData.searchPreferenceId,
+          searchPrefValue: JSON.stringify(solrQuery)
+        });
+        
+        if (resp.status === 200 && !hasError(resp)) {
+          const payload = {
+            'JOB_NAME': this.job.jobName,
+            'SERVICE_NAME': this.job.serviceName,
+            'SERVICE_COUNT': '0',
+            'jobFields': {
+              'productStoreId': this.job.productStoreId ? this.job.productStoreId : '',
+              'systemJobEnumId': this.job.systemJobEnumId,
+              'parentJobId': this.job.parentJobId
+            },
+            'shopifyConfigId': this.job.runtimeData.shopifyConfigId ? this.job.runtimeData.shopifyConfigId : "",
+            'statusId': "SERVICE_PENDING",
+            'systemJobEnumId': this.job.systemJobEnumId,
+            'includeAll': true, // true: includes all the product, false: includes only products updated in the last 24 hours
+            'searchPreferenceId': this.job.runtimeData.searchPreferenceId,
+            'threshold': this.threshold,
+            'facilityId': this.job.runtimeData.facilityId ? this.job.runtimeData.facilityId : [],
+          } as any;
+
+          // checking if the runtimeData has productStoreId, and if present then adding it on root level
+          this.job.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = this.job.productStoreId)
+          this.job.priority && (payload['SERVICE_PRIORITY'] = this.job.priority.toString())
+
+          if(this.job.runtimeData.threshold != this.threshold){
+            this.job.runtimeData.threshold = this.threshold
+            await this.store.dispatch('job/cancelJob', this.job).then((resp) => {
+              if(resp.status === 200 && !hasError(resp)){
+                // Scheduling Job that will run only once for all the products
+                JobService.scheduleJob(JSON.parse(JSON.stringify({ ...this.job.runtimeData, ...payload }))).then((resp: any) => {
+                  if(resp.status === 200 && !hasError(resp) && resp.data){
+                    payload['SERVICE_TEMP_EXPR'] = this.job.tempExprId;
+                    payload['jobFields'].tempExprId = this.job.tempExprId; // Need to remove this as we are passing frequency in SERVICE_TEMP_EXPR, currently kept it for backward compatibility
+                    payload['jobFields'].maxRecurrenceCount = '-1';
+                    payload['jobFields'].recurrenceTimeZone = this.job.recurrenceTimeZone;
+                    payload['SERVICE_RUN_AS_SYSTEM'] = 'Y';
+                    payload['jobFields'].runAsUser = 'system';// default system, but empty in run now. TODO Need to remove this as we are using SERVICE_RUN_AS_SYSTEM, currently kept it for backward compatibility
+                    payload['includeAll'] =  false;
+                    payload['SERVICE_TIME'] = this.job.runTime.toString()
+                    // Scheduling Job that will run everyday and as system
+                    JobService.scheduleJob({ ...this.job.runtimeData, ...payload }).then((resp) => {
+                      if(resp.status === 200 && !hasError(resp) && resp.data){
+                        this.isFilterChanged = false;
+                        this.store.dispatch('job/removeThresholdRule', this.job.runtimeData.searchPreferenceId);
+                        this.$router.push('/threshold-updates')
+                      } else {
+                        console.error(resp);
+                        showToast(translate('Unable to schedule service.'))
+                      }
+                    }).catch(error => { return error });
+                  } else {
+                    console.error(resp);
+                    showToast(translate('Unable to schedule service.'))
+                  }
+                }).catch((error: any) => { return error })
+              } else {
+                console.error(resp);
+              } 
+            }).catch(err => {
+              console.error(err);
+            })
+          } else {
+            JobService.scheduleJob(JSON.parse(JSON.stringify({ ...this.job.runtimeData, ...payload }))).then((resp: any) => {
+              if(resp.status === 200 && !hasError(resp) && resp.data){
+                showToast(translate('Service updated successfully'));
+                this.isFilterChanged = false;
+                this.store.dispatch('job/removeThresholdRule', this.job.runtimeData.searchPreferenceId);
+                this.$router.push('/threshold-updates')
+              } else {
+                console.error(resp);
+                showToast(translate('Unable to schedule service.'))
+              }
+            }).catch((error: any) => { return error })  
+          }
+        } else {
+          showToast(translate('Unable to schedule service.'))
+        }
+      } catch (err) {
+        console.error(err)
+        showToast(translate('Unable to update threshold rule.'))
+      }
+      this.isServiceScheduling = false;
+    },
     async saveThreshold() {
       // an alert will be displayed, if the user does not enter a threshold value before proceeding to save page
       if (!this.threshold) {
@@ -249,7 +452,6 @@ export default defineComponent({
           });
         return alert.present();
       }
-
       const saveThresholdModal = await modalController.create({
         component: SaveThresholdModal,
         componentProps: {
@@ -257,7 +459,6 @@ export default defineComponent({
           totalSKUs: this.products.total.variant
         }
       })
-
       saveThresholdModal.present();
     },
     async searchFilter(label: string, facetToSelect: string, searchfield: string, type: string) {
@@ -268,11 +469,13 @@ export default defineComponent({
           facetToSelect,
           searchfield,
           type
-        }
+        },
+        backdropDismiss: false
       })
       modal.onDidDismiss().then((payload) => {
-        if(payload.data.isFilterChanged){
+        if(payload.data?.isFilterChanged){
           this.queryString = '';
+          this.isFilterChanged = true;
         }
       })
       modal.present();
@@ -284,6 +487,20 @@ export default defineComponent({
         value
       })
       this.queryString = ''
+      this.isFilterChanged = true;
+    },
+    async applyOperator(type: string, id: string, value: string) {
+      // TODO Find a better way
+      // This is done as when applying the exisiting rule as the value of the select box changes
+      // query is sent multiple times
+      if (this.appliedFilters[type]['tags'].operator === value) return;
+      await this.store.dispatch('product/updateAppliedFilterOperator', {
+        type,
+        id,
+        value
+      })
+      this.queryString = ''
+      this.isFilterChanged = true;
     },
     async resetFilters(type: string) {
       // checking that if any of the current type does not have any attribute selected than not making solr query
@@ -292,6 +509,7 @@ export default defineComponent({
       }
       await this.store.dispatch('product/resetFilters', { type })
       this.queryString = ''
+      this.isFilterChanged = true;
     }
   },
   ionViewDidLeave() {
@@ -299,8 +517,14 @@ export default defineComponent({
     this.queryString = '';
     this.threshold = '';
   },
-  ionViewDidEnter () {
-    this.getProducts();
+  async ionViewWillEnter(){
+    this.jobId = this.$route.query.id
+    this.isFilterChanged = false;
+    if (this.jobId) {
+      this.applyThresholdRule()
+    } else {
+      this.getProducts();
+    }
   },
   setup() {
     const router = useRouter();
@@ -316,7 +540,8 @@ export default defineComponent({
       pricetagOutline,
       closeCircle,
       addCircleOutline,
-      albumsOutline
+      albumsOutline,
+      warningOutline
     };
   },
 });
@@ -329,8 +554,7 @@ export default defineComponent({
 }
 
 .find {
-  padding: var( --spacer-lg);
-  gap: var(--spacer-lg);
+  padding: 0 var( --spacer-base);
 }
 
 ion-list-header > div {
@@ -340,6 +564,10 @@ ion-list-header > div {
 }
 
 @media (min-width: 991px) {
+  .find {
+    padding: var( --spacer-lg);
+    gap: var(--spacer-lg);
+   }
   .action {
     position: fixed;
     z-index: 3;

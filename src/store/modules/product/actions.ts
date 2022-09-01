@@ -42,7 +42,7 @@ const actions: ActionTree<ProductState, RootState> = {
         commit(types.PRODUCT_LIST_UPDATED, { products, totalVirtual, totalVariant });
       } else {
         showToast(translate("Products not found"));
-        commit(types.PRODUCT_LIST_UPDATED, { products: [], totalVirtual: state.products.total.virtual, totalVariant: state.products.total.variant });
+        commit(types.PRODUCT_LIST_UPDATED, { products: [], totalVirtual: query.json.query === "*:*" ? 0 : state.products.total.virtual, totalVariant: query.json.query === "*:*" ? 0 : state.products.total.variant });
       }
     } catch (error) {
       console.error(error);
@@ -51,12 +51,25 @@ const actions: ActionTree<ProductState, RootState> = {
     return resp;
   },
 
+  setAppliedfiltersAndOperator({ commit, dispatch }, payload){
+    commit(types.PRODUCT_ALL_FILTERS_UPDATED, payload)
+    dispatch('updateQuery');
+  },
+
   async updateAppliedFilters({ commit, state, dispatch }, payload) {
     const value = payload.value
     const appliedFilters = JSON.parse(JSON.stringify((state.appliedFilters as any)[payload.type][payload.id]))
-    appliedFilters.includes(value) ? appliedFilters.splice(appliedFilters.indexOf(value), 1) : appliedFilters.push(value)
+    appliedFilters.list.includes(value) ? appliedFilters.list.splice(appliedFilters.list.indexOf(value), 1) : appliedFilters.list.push(value)
     commit(types.PRODUCT_FILTER_UPDATED, {id: payload.id, type: payload.type, value: appliedFilters})
     dispatch('updateQuery')
+  },
+
+  async updateAppliedFilterOperator({ commit, state, dispatch }, payload) {
+    const appliedFilters = JSON.parse(JSON.stringify((state.appliedFilters as any)[payload.type][payload.id]))
+    appliedFilters.operator = payload.value;
+    commit(types.PRODUCT_FILTER_UPDATED, {id: payload.id, type: payload.type, value: appliedFilters})
+    // If we have list items then only apply filters again
+    if(appliedFilters.list.length) dispatch('updateQuery')
   },
 
   async updateQuery({ commit, dispatch, state }, payload) {
@@ -75,7 +88,7 @@ const actions: ActionTree<ProductState, RootState> = {
 
     if(payload && payload.queryString) {
       state.query.json.params.defType = 'edismax'
-      state.query.json.params.qf = 'productId productName sku internalName brandName parentProductName'
+      state.query.json.params.qf = 'productId productName upc sku internalName brandName parentProductName'
       // passed this operator to do not split search string and consider the search string as a single value
       state.query.json.params['q.op'] = 'AND'
       state.query.json.query = `*${payload.queryString}*`
@@ -85,19 +98,18 @@ const actions: ActionTree<ProductState, RootState> = {
       state.query.json.params.rows = payload.viewSize
       state.query.json.params.start = payload.viewSize * payload.viewIndex
     }
-
     state.query.json['filter'] = Object.keys(state.appliedFilters.included).reduce((filter, value) => {
       const filterValues = (state.appliedFilters.included as any)[value]
-      if (filterValues.length > 0) {
-        filter.push(`${value}: ("${filterValues.join('" OR "')}")`)
+      if (filterValues.list.length > 0) {
+        filter.push(`${value}: ("${filterValues.list.join('" ' + filterValues.operator + ' "')}")`)
       }
       return filter
     }, state.query.json['filter'])
 
     state.query.json['filter'] = Object.keys(state.appliedFilters.excluded).reduce((filter, value) => {
       const filterValues = (state.appliedFilters.excluded as any)[value]
-      if (filterValues.length > 0) {
-        filter.push(`-${value}: ("${filterValues.join('" OR "')}")`)
+      if (filterValues.list.length > 0) {
+        filter.push(`-${value}: ("${filterValues.list.join('" ' + filterValues.operator + ' "')}")`)
       }
       return filter
     }, state.query.json['filter'])
@@ -109,7 +121,10 @@ const actions: ActionTree<ProductState, RootState> = {
   async resetFilters({ commit, state, dispatch }, payload) {
     const appliedFilters = JSON.parse(JSON.stringify((state.appliedFilters as any)[payload.type]))
     const value = Object.keys(appliedFilters).reduce((value: any, filter: any) => {
-      value[filter] = []
+      value[filter] = {
+        list: [],
+        operator: "OR"
+      }
       return value
     }, {})
     commit(types.PRODUCT_FILTERS_UPDATED, {type: payload.type, value})
@@ -120,7 +135,10 @@ const actions: ActionTree<ProductState, RootState> = {
     const appliedFilters = JSON.parse(JSON.stringify(state.appliedFilters))
     const value = Object.keys(appliedFilters).reduce((value: any, type: any) => {
       const val = Object.keys(appliedFilters[type]).reduce((val: any, filter: any) => {
-        val[filter] = []
+        val[filter] = {
+          list: [],
+          operator: 'OR'
+        }
         return val
       }, {})
       value[type] = val
