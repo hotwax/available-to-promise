@@ -183,7 +183,11 @@ export default defineComponent({
             text: this.$t('Skip'),
             handler: () => {
               if (job) {
-                this.store.dispatch('job/skipJob', job)
+                this.store.dispatch('job/skipJob', job).then( async (resp) => {
+                  if(resp) {
+                    await this.store.dispatch('job/fetchPendingJobs', { eComStoreId: this.getCurrentEComStore.productStoreId, viewSize: process.env.VUE_APP_VIEW_SIZE, viewIndex: 0, jobEnums: this.jobEnums });
+                  }
+                })
               }
             }
           }],
@@ -201,7 +205,11 @@ export default defineComponent({
           }, {
             text: this.$t('Cancel'),
             handler: () => {
-              this.store.dispatch('job/cancelJob', job);
+              this.store.dispatch('job/cancelJob', job).then( async (resp) => {
+                if(resp) {
+                  await this.store.dispatch('job/fetchPendingJobs', { eComStoreId: this.getCurrentEComStore.productStoreId, viewSize: process.env.VUE_APP_VIEW_SIZE, viewIndex: 0, jobEnums: this.jobEnums });
+                }
+              });
             }
           }],
         });
