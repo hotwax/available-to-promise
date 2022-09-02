@@ -3,7 +3,7 @@ import { ActionTree } from 'vuex'
 import RootState from '@/store/RootState'
 import UserState from './UserState'
 import * as types from './mutation-types'
-import { hasError, showToast } from '@/utils'
+import { checkServerError, hasError, showToast } from '@/utils'
 import { translate } from '@/i18n'
 import emitter from '@/event-bus'
 import { DateTime, Settings } from 'luxon';
@@ -29,12 +29,12 @@ const actions: ActionTree<UserState, RootState> = {
           return Promise.reject(new Error(resp.data._ERROR_MESSAGE_));
         }
       } else {
-        showToast(translate('Something went wrong'));
+        showToast(translate('Something went wrong'), checkServerError(resp));
         console.error("error", resp.data._ERROR_MESSAGE_);
         return Promise.reject(new Error(resp.data._ERROR_MESSAGE_));
       }
     } catch (err) {
-      showToast(translate('Something went wrong'));
+      showToast(translate('Something went wrong'), err);
       console.error("error", err);
       return Promise.reject(new Error(err))
     }

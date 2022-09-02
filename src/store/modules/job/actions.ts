@@ -2,7 +2,7 @@ import { ActionTree } from 'vuex'
 import RootState from '@/store/RootState'
 import JobState from './JobState'
 import * as types from './mutation-types'
-import { hasError, showToast } from '@/utils'
+import { checkServerError, hasError, showToast } from '@/utils'
 import { JobService } from '@/services/JobService'
 import { translate } from '@/i18n'
 import { DateTime } from 'luxon';
@@ -89,7 +89,7 @@ const actions: ActionTree<JobState, RootState> = {
     }).catch((err) => {
       commit(types.JOB_HISTORY_UPDATED, { jobs: [], total: 0 });
       console.error(err);
-      showToast(translate("Something went wrong"));
+      showToast(translate("Something went wrong"), err);
     }) 
   },
 
@@ -145,7 +145,7 @@ const actions: ActionTree<JobState, RootState> = {
     }).catch((err) => {
       commit(types.JOB_RUNNING_UPDATED, { jobs: [], total: 0 });
       console.error(err);
-      showToast(translate("Something went wrong"));
+      showToast(translate("Something went wrong"), err);
     }) 
   },
 
@@ -198,7 +198,7 @@ const actions: ActionTree<JobState, RootState> = {
     }).catch((err) => {
       commit(types.JOB_PENDING_UPDATED, { jobs: [], total: 0 });
       console.error(err);
-      showToast(translate("Something went wrong"));
+      showToast(translate("Something went wrong"), err);
     })
   },
   async fetchTemporalExpression({ state, commit }, tempExprIds){
@@ -331,10 +331,10 @@ const actions: ActionTree<JobState, RootState> = {
         })
         await dispatch('fetchPendingJobs', {eComStoreId: this.state.user.currentEComStore.productStoreId, viewSize: this.state.job.pending.total, viewIndex: 0, jobEnums: jobEnums});
       } else {
-        showToast(translate('Something went wrong'))
+        showToast(translate('Something went wrong'), checkServerError(resp))
       }
     } catch (err) {
-      showToast(translate('Something went wrong'))
+      showToast(translate('Something went wrong'), err)
       console.error(err)
     }
     return resp;
@@ -378,10 +378,10 @@ const actions: ActionTree<JobState, RootState> = {
           }
         })
       } else {
-        showToast(translate('Something went wrong'))
+        showToast(translate('Something went wrong'), checkServerError(resp))
       }
     } catch (err) {
-      showToast(translate('Something went wrong'))
+      showToast(translate('Something went wrong'), err)
       console.error(err)
     }
     return resp;
@@ -447,10 +447,10 @@ const actions: ActionTree<JobState, RootState> = {
           }
         })
       } else {
-        showToast(translate('Something went wrong'))
+        showToast(translate('Something went wrong'), checkServerError(resp))
       }
     } catch (err) {
-      showToast(translate('Something went wrong'))
+      showToast(translate('Something went wrong'), err)
       console.error(err)
       // TODO: explore around handling error, so that we can directly access the response status code
       // This is returned so that response is handled in catch instead of then

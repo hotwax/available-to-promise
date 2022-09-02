@@ -10,40 +10,32 @@ const hasError = (response: any) => {
 }
 
 const showToast = async (message: string, err?: any) => {
-  if(message === "Something went wrong" && err) {
-    const toast = await toastController
-    .create({
-      message,
-      duration: 3000,
-      position: 'bottom',
-      buttons: [
-        {
-          text: 'view',
-          side: 'end',
-          handler: async () => {
-            const errorMessageModal = await modalController.create({
-              component: ErrorMessageModal,
-              componentProps: {
-                errorMessage: err,
-              },
-              initialBreakpoint: 0.08,
-              breakpoints: [0, 0.10, 0.5, 0.75]
-            });
-            return errorMessageModal.present();
-          }
+  const config = {
+    message,
+    duration: 3000,
+    position: 'bottom'
+  } as any
+  if (err) {
+    config.buttons = [
+      {
+        text: 'view',
+        side: 'end',
+        handler: async () => {
+          const errorMessageModal = await modalController.create({
+            component: ErrorMessageModal,
+            componentProps: {
+              errorMessage: err,
+            },
+            initialBreakpoint: 0.08,
+            breakpoints: [0, 0.10, 0.5, 0.75]
+          });
+          return errorMessageModal.present();
         }
-      ]
-    })
-    return toast.present();
-  } else {
-    const toast = await toastController
-      .create({
-        message,
-        duration: 3000,
-        position: 'bottom',
-      })
-    return toast.present();
+      }
+    ]
   }
+  const toast = await toastController.create(config)
+  return toast.present();
 }
 
 const getFeature = (featureHierarchy: any, featureKey: string) => {
@@ -63,4 +55,9 @@ const handleDateTimeInput = (dateTimeValue: any) => {
   const dateTime = DateTime.fromISO(dateTimeValue, { setZone: true}).toFormat("yyyy-MM-dd'T'HH:mm:ss")
   return DateTime.fromISO(dateTime).toMillis()
 }
-export { handleDateTimeInput, showToast, hasError, getFeature }
+
+const checkServerError = (resp: any) => {
+  const error = resp.data._ERROR_MESSAGE_ || resp.error;
+  return error;
+}
+export { handleDateTimeInput, showToast, hasError, getFeature, checkServerError }
