@@ -2,7 +2,7 @@ import { ActionTree } from 'vuex'
 import RootState from '@/store/RootState'
 import JobState from './JobState'
 import * as types from './mutation-types'
-import { checkServerError, hasError, showToast } from '@/utils'
+import { getResponseError, hasError, showToast } from '@/utils'
 import { JobService } from '@/services/JobService'
 import { translate } from '@/i18n'
 import { DateTime } from 'luxon';
@@ -331,7 +331,7 @@ const actions: ActionTree<JobState, RootState> = {
         })
         await dispatch('fetchPendingJobs', {eComStoreId: this.state.user.currentEComStore.productStoreId, viewSize: this.state.job.pending.total, viewIndex: 0, jobEnums: jobEnums});
       } else {
-        showToast(translate('Something went wrong'), checkServerError(resp))
+        showToast(translate('Something went wrong'), getResponseError(resp))
       }
     } catch (err) {
       showToast(translate('Something went wrong'), err)
@@ -378,7 +378,7 @@ const actions: ActionTree<JobState, RootState> = {
           }
         })
       } else {
-        showToast(translate('Something went wrong'), checkServerError(resp))
+        showToast(translate('Something went wrong'), getResponseError(resp))
       }
     } catch (err) {
       showToast(translate('Something went wrong'), err)
@@ -447,7 +447,7 @@ const actions: ActionTree<JobState, RootState> = {
           }
         })
       } else {
-        showToast(translate('Something went wrong'), checkServerError(resp))
+        showToast(translate('Something went wrong'), getResponseError(resp))
       }
     } catch (err) {
       showToast(translate('Something went wrong'), err)

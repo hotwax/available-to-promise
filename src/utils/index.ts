@@ -56,8 +56,8 @@ const handleDateTimeInput = (dateTimeValue: any) => {
   return DateTime.fromISO(dateTime).toMillis()
 }
 
-const checkServerError = (resp: any) => {
-  const error = resp.data._ERROR_MESSAGE_ || resp.error;
+const getResponseError = (resp: any) => {
+  const error = resp.error || resp.data._ERROR_MESSAGE_ || resp.data._ERROR_MESSAGE_LIST_;
   return error;
 }
-export { handleDateTimeInput, showToast, hasError, getFeature, checkServerError }
+export { handleDateTimeInput, showToast, hasError, getFeature, getResponseError }
