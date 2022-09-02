@@ -232,7 +232,7 @@ export default defineComponent({
           showToast(translate('Service has been scheduled'))
           this.closeModal();
         } else {
-          showToast(translate('Something went wrong'))
+          showToast(translate('Something went wrong'), getResponseError(scheduleJobRequests))
         }
       } catch (err) {
         showToast(translate('Something went wrong'), err)
