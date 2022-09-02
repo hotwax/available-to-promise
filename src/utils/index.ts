@@ -57,7 +57,6 @@ const handleDateTimeInput = (dateTimeValue: any) => {
 }
 
 const getResponseError = (resp: any) => {
-  const error = resp.error || resp.data._ERROR_MESSAGE_ || resp.data._ERROR_MESSAGE_LIST_;
-  return error;
+  return resp.error || resp.data._ERROR_MESSAGE_ || resp.data._ERROR_MESSAGE_LIST_;
 }
 export { handleDateTimeInput, showToast, hasError, getFeature, getResponseError }
