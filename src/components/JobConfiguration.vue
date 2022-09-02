@@ -142,7 +142,7 @@ export default defineComponent({
       minDateTime: DateTime.now().toISO()
     }
   },
-  props: ["job", "title", "status", "type", "productCount"],
+  props: ["job", "title", "status", "type", "productCount", "jobEnums"],
   computed: {
     ...mapGetters({
       getJobStatus: 'job/getJobStatus',
