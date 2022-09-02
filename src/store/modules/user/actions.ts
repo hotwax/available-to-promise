@@ -29,12 +29,12 @@ const actions: ActionTree<UserState, RootState> = {
           return Promise.reject(new Error(resp.data._ERROR_MESSAGE_));
         }
       } else {
-        showToast(translate('Something went wrong'), getResponseError(resp));
+        showToast(translate('Something went wrong'));
         console.error("error", resp.data._ERROR_MESSAGE_);
         return Promise.reject(new Error(resp.data._ERROR_MESSAGE_));
       }
     } catch (err) {
-      showToast(translate('Something went wrong'), err);
+      showToast(translate('Something went wrong'));
       console.error("error", err);
       return Promise.reject(new Error(err))
     }
