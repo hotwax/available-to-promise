@@ -114,7 +114,7 @@ import {
   personCircleOutline
 } from "ionicons/icons";
 import { mapGetters, useStore } from "vuex";
-import { handleDateTimeInput } from "@/utils";
+import { handleDateTimeInput, hasError } from "@/utils";
 
 import { DateTime } from 'luxon';
 
@@ -205,12 +205,7 @@ export default defineComponent({
             text: this.$t('Skip'),
             handler: () => {
               if (job) {
-                this.store.dispatch('job/skipJob', job).then( async (resp) => {
-                  // Fetching pending jobs as only pending jobs can be skipped.
-                  if(resp) {
-                    await this.store.dispatch('job/fetchPendingJobs', { eComStoreId: this.currentEComStore.productStoreId, viewSize: process.env.VUE_APP_VIEW_SIZE, viewIndex: 0, jobEnums: this.jobEnums });
-                  }
-                })
+                this.store.dispatch('job/skipJob', job)
               }
             }
           }],
@@ -228,12 +223,7 @@ export default defineComponent({
           }, {
             text: this.$t('Cancel'),
             handler: () => {
-              this.store.dispatch('job/cancelJob', job).then( async (resp) => {
-                // Fetching pending jobs as only pending jobs can be canceled.
-                if(resp) {
-                  await this.store.dispatch('job/fetchPendingJobs', { eComStoreId: this.currentEComStore.productStoreId, viewSize: process.env.VUE_APP_VIEW_SIZE, viewIndex: 0, jobEnums: this.jobEnums });
-                }
-              });
+              this.store.dispatch('job/cancelJob', job)
             }
           }],
         });
@@ -272,12 +262,7 @@ export default defineComponent({
       if (job?.statusId === 'SERVICE_DRAFT') {
         this.store.dispatch('job/scheduleService', job)
       } else if (job?.statusId === 'SERVICE_PENDING') {
-        this.store.dispatch('job/updateJob', job).then( async (resp) => {
-          // Fetching pending jobs as only pending jobs can be updated.
-          if(resp) {
-            await this.store.dispatch('job/fetchPendingJobs', { eComStoreId: this.currentEComStore.productStoreId, viewSize: process.env.VUE_APP_VIEW_SIZE, viewIndex: 0, jobEnums: this.jobEnums });
-          }
-        })
+        this.store.dispatch('job/updateJob', job)
       }
     },
     getTime (time: any) {
