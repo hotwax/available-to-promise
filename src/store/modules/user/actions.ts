@@ -3,7 +3,7 @@ import { ActionTree } from 'vuex'
 import RootState from '@/store/RootState'
 import UserState from './UserState'
 import * as types from './mutation-types'
-import { getResponseError, hasError, showToast } from '@/utils'
+import { hasError, showToast } from '@/utils'
 import { translate } from '@/i18n'
 import emitter from '@/event-bus'
 import { DateTime, Settings } from 'luxon';

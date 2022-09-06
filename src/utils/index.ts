@@ -57,12 +57,6 @@ const handleDateTimeInput = (dateTimeValue: any) => {
 }
 
 const getResponseError = (resp: any) => {
-  if(Array.isArray(resp)) {
-    return resp.reduce((error: string, response: any) => {
-      error += response.data.error || response.data._ERROR_MESSAGE_ || response.data._ERROR_MESSAGE_LIST_ || response.data.errorMessage || response.data.errorMessageList + " ";
-      return error;
-    }, "")
-  }
-  return resp.data.error || resp.data._ERROR_MESSAGE_ || resp.data._ERROR_MESSAGE_LIST_ || resp.data.errorMessage || resp.data.errorMessageList;
+  return resp.data.error || resp.data._ERROR_MESSAGE_ || resp.data._ERROR_MESSAGE_LIST_ || resp.data.errorMessage || resp.data.errorMessageList || "";
 }
 export { handleDateTimeInput, showToast, hasError, getFeature, getResponseError }
