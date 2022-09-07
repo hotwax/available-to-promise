@@ -305,7 +305,7 @@ const actions: ActionTree<JobState, RootState> = {
   },
   async updateJob ({ dispatch }, job) {
     let resp;
-    const jobEnums = process.env?.VUE_APP_JOB_ENUMS ? JSON.parse(process.env?.VUE_APP_JOB_ENUMS) : [];
+    const jobEnums = process.env?.VUE_APP_JOB_ENUMS ? JSON.parse(process.env.VUE_APP_JOB_ENUMS) : [];
 
     const payload = {
       'jobId': job.jobId,
@@ -421,7 +421,7 @@ const actions: ActionTree<JobState, RootState> = {
     const resp = await JobService.updateJob(payload)
     if (resp.status === 200 && !hasError(resp) && resp.data.docs) {
       commit(types.JOB_UPDATED, { job });
-      const jobEnums = process.env?.VUE_APP_JOB_ENUMS ? JSON.parse(process.env?.VUE_APP_JOB_ENUMS) : [];
+      const jobEnums = process.env?.VUE_APP_JOB_ENUMS ? JSON.parse(process.env.VUE_APP_JOB_ENUMS) : [];
       await dispatch('fetchPendingJobs', {eComStoreId: this.state.user.currentEComStore.productStoreId, viewSize: this.state.job.pending.total, viewIndex: 0, jobEnums: jobEnums});
     }
     return resp;
@@ -448,7 +448,7 @@ const actions: ActionTree<JobState, RootState> = {
             'systemJobEnumId_op': 'equals'
           }
         })
-        const jobEnums = process.env?.VUE_APP_JOB_ENUMS ? JSON.parse(process.env?.VUE_APP_JOB_ENUMS) : [];
+        const jobEnums = process.env?.VUE_APP_JOB_ENUMS ? JSON.parse(process.env.VUE_APP_JOB_ENUMS) : [];
         await dispatch('fetchPendingJobs', {eComStoreId: this.state.user.currentEComStore.productStoreId, viewSize: this.state.job.pending.total, viewIndex: 0, jobEnums: jobEnums});
       } else {
         showToast(translate('Something went wrong'))
