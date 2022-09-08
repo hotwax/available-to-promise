@@ -46,7 +46,7 @@ const actions: ActionTree<ProductState, RootState> = {
       }
     } catch (error) {
       console.error(error);
-      showToast(translate("Something went wrong"));
+      showToast(translate("Something went wrong"), error);
     }
     return resp;
   },

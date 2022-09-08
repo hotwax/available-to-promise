@@ -62,7 +62,7 @@ import {
   cloudUploadOutline
 } from 'ionicons/icons';
 import { ProductService } from '@/services/ProductService';
-import { hasError, showToast } from '@/utils';
+import { getResponseError, hasError, showToast } from '@/utils';
 import { translate } from '@/i18n';
 import { mapGetters, useStore } from 'vuex';
 import { DateTime } from 'luxon';
@@ -135,11 +135,11 @@ export default defineComponent({
           await ProductService.associateSearchPrefToUser(params);
           await this.scheduleService(searchPreferenceId, this.threshold)
         } else {
-          showToast(translate('Something went wrong'))
+          showToast(translate('Something went wrong'), getResponseError(resp))
         }
       } catch (err) {
         console.error(err)
-        showToast(translate('Something went wrong'))
+        showToast(translate('Something went wrong'), err)
       }
       this.isServiceScheduling = false
     },
@@ -243,10 +243,13 @@ export default defineComponent({
           showToast(translate('Service has been scheduled'))
           this.closeModal();
         } else {
-          showToast(translate('Something went wrong'))
+          let errorMessage = scheduleJobResponse.reduce((errorMessage: string, response: any) => {
+            return errorMessage += getResponseError(response);
+          }, "")
+          showToast(translate('Something went wrong'), errorMessage)
         }
       } catch (err) {
-        showToast(translate('Something went wrong'))
+        showToast(translate('Something went wrong'), err)
         console.error(err)
       }
       return resp;

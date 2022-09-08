@@ -1,5 +1,6 @@
-import { toastController } from '@ionic/vue';
+import { modalController, toastController } from '@ionic/vue';
 import { DateTime } from "luxon";
+import ErrorMessageModal from "@/components/ErrorMessageModal.vue";
 
 // TODO Use separate files for specific utilities
 
@@ -8,14 +9,33 @@ const hasError = (response: any) => {
     return !!response.data._ERROR_MESSAGE_ || !!response.data._ERROR_MESSAGE_LIST_;
 }
 
-const showToast = async (message: string) => {
-    const toast = await toastController
-        .create({
-          message,
-          duration: 3000,
-          position: 'bottom',
-        })
-      return toast.present();
+const showToast = async (message: string, err?: any) => {
+  const config = {
+    message,
+    duration: 3000,
+    position: 'bottom'
+  } as any
+  if (err) {
+    config.buttons = [
+      {
+        text: 'view',
+        side: 'end',
+        handler: async () => {
+          const errorMessageModal = await modalController.create({
+            component: ErrorMessageModal,
+            componentProps: {
+              errorMessage: err,
+            },
+            initialBreakpoint: 0.08,
+            breakpoints: [0, 0.10, 0.5, 0.75]
+          });
+          return errorMessageModal.present();
+        }
+      }
+    ]
+  }
+  const toast = await toastController.create(config)
+  return toast.present();
 }
 
 const getFeature = (featureHierarchy: any, featureKey: string) => {
@@ -35,4 +55,8 @@ const handleDateTimeInput = (dateTimeValue: any) => {
   const dateTime = DateTime.fromISO(dateTimeValue, { setZone: true}).toFormat("yyyy-MM-dd'T'HH:mm:ss")
   return DateTime.fromISO(dateTime).toMillis()
 }
-export { handleDateTimeInput, showToast, hasError, getFeature }
+
+const getResponseError = (resp: any) => {
+  return resp.data.error || resp.data._ERROR_MESSAGE_ || resp.data._ERROR_MESSAGE_LIST_ || resp.data.errorMessage || resp.data.errorMessageList || "";
+}
+export { handleDateTimeInput, showToast, hasError, getFeature, getResponseError }
