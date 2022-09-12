@@ -253,7 +253,7 @@
         </section>
 
         <aside class="desktop-only" v-show="segmentSelected === 'pending' && currentJob">
-          <JobConfiguration :title="title" :job="currentJob" :productCount="productCount" :status="currentJobStatus" :type="freqType" :key="currentJob" :jobEnums="jobEnums" />
+          <JobConfiguration :title="title" :job="currentJob" :productCount="productCount" :status="currentJobStatus" :type="freqType" :key="currentJob" />
         </aside>
       </main>
     </ion-content>

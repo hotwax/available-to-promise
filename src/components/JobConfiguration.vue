@@ -114,7 +114,7 @@ import {
   personCircleOutline
 } from "ionicons/icons";
 import { mapGetters, useStore } from "vuex";
-import { handleDateTimeInput, hasError } from "@/utils";
+import { handleDateTimeInput } from "@/utils";
 
 import { DateTime } from 'luxon';
 
@@ -142,13 +142,13 @@ export default defineComponent({
       minDateTime: DateTime.now().toISO()
     }
   },
-  props: ["job", "title", "status", "type", "productCount", "jobEnums"],
+  props: ["job", "title", "status", "type", "productCount"],
   computed: {
     ...mapGetters({
       getJobStatus: 'job/getJobStatus',
       getJob: 'job/getJob',
       shopifyConfigId: 'user/getShopifyConfigId',
-      currentEComStore: 'user/getCurrentEComStore',
+      currentEComStore: 'user/getCurrentEComStore'
     }),
     generateFrequencyOptions(): any {
       const optionDefault = [{
@@ -223,7 +223,7 @@ export default defineComponent({
           }, {
             text: this.$t('Cancel'),
             handler: () => {
-              this.store.dispatch('job/cancelJob', job)
+              this.store.dispatch('job/cancelJob', job);
             }
           }],
         });
