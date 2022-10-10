@@ -394,33 +394,18 @@ const actions: ActionTree<JobState, RootState> = {
     commit(types.JOB_UPDATED_BULK, {})
   },
 
-  async skipJob({ commit, getters, dispatch }, job) {
-    let skipTime = {};
-    const integer1 = getters['getTemporalExpr'](job.tempExprId).integer1;
-    const integer2 = getters['getTemporalExpr'](job.tempExprId).integer2
-    if(integer1 === 12) {
-      skipTime = { minutes: integer2 }
-    } else if (integer1 === 10) {
-      skipTime = { hours: integer2 }
-    } else if (integer1 === 5) {
-      skipTime = { days: integer2 }
-    } else {
-      showToast(translate("This job schedule cannot be skipped"));
-      return;
-    }
-    const time = DateTime.fromMillis(job.runTime).diff(DateTime.local()).plus(skipTime);
-    const updatedRunTime = time.toMillis() + DateTime.local().toMillis()
-    const payload = {
-      'jobId': job.jobId,
-      'runTime': updatedRunTime,
-      'systemJobEnumId': job.systemJobEnumId,
+  async skipJob({ commit, getters, dispatch }, payload) {
+    const params = {
+      'jobId': payload.job.jobId,
+      'runTime': payload.updatedRunTime,
+      'systemJobEnumId': payload.job.systemJobEnumId,
       'recurrenceTimeZone': this.state.user.current.userTimeZone,
       'statusId': "SERVICE_PENDING"
     } as any
 
-    const resp = await JobService.updateJob(payload)
-    if (resp.status === 200 && !hasError(resp) && resp.data.docs) {
-      commit(types.JOB_UPDATED, { job });
+    const resp = await JobService.updateJob(params)
+    if (resp.status === 200 && !hasError(resp)) {
+      commit(types.JOB_UPDATED, { job: payload.job });
       const jobEnums = process.env?.VUE_APP_JOB_ENUMS ? JSON.parse(process.env.VUE_APP_JOB_ENUMS) : [];
       await dispatch('fetchPendingJobs', {eComStoreId: this.state.user.currentEComStore.productStoreId, viewSize: this.state.job.pending.total, viewIndex: 0, jobEnums: jobEnums});
     }

@@ -114,9 +114,10 @@ import {
   personCircleOutline
 } from "ionicons/icons";
 import { mapGetters, useStore } from "vuex";
-import { handleDateTimeInput } from "@/utils";
+import { handleDateTimeInput, showToast } from "@/utils";
 
 import { DateTime } from 'luxon';
+import { translate } from "@/i18n";
 
 export default defineComponent({
   name: "JobConfiguration",
@@ -148,7 +149,8 @@ export default defineComponent({
       getJobStatus: 'job/getJobStatus',
       getJob: 'job/getJob',
       shopifyConfigId: 'user/getShopifyConfigId',
-      currentEComStore: 'user/getCurrentEComStore'
+      currentEComStore: 'user/getCurrentEComStore',
+      getTemporalExpr: 'job/getTemporalExpr'
     }),
     generateFrequencyOptions(): any {
       const optionDefault = [{
@@ -204,9 +206,25 @@ export default defineComponent({
           }, {
             text: this.$t('Skip'),
             handler: () => {
-              if (job) {
-                this.store.dispatch('job/skipJob', job)
+              let skipTime = {};
+              const integer1 = this.getTemporalExpr(job.tempExprId).integer1;
+              const integer2 = this.getTemporalExpr(job.tempExprId).integer2
+              if(integer1 === 12) {
+                skipTime = { minutes: integer2 }
+              } else if (integer1 === 10) {
+                skipTime = { hours: integer2 }
+              } else if (integer1 === 5) {
+                skipTime = { days: integer2 }
+              } else {
+                showToast(translate("This job schedule cannot be skipped"));
+                return;
               }
+              const time = DateTime.fromMillis(job.runTime).diff(DateTime.local()).plus(skipTime);
+              const updatedRunTime = time.toMillis() + DateTime.local().toMillis()
+
+              this.store.dispatch('job/skipJob', {job, updatedRunTime}).then(() => {
+                job.runTime = updatedRunTime;
+              })
             }
           }],
         });
