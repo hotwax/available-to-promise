@@ -1,7 +1,8 @@
+---
 name: Bug report
- about: Create a report to help us improve
- labels: bug
- ---
+about: Create a report to help us improve
+labels: bug
+---
 
  ## Current behavior
  <!--  Describe the current behavior pointing exactly why it's not working as intended. -->
