@@ -10,7 +10,7 @@
           "dev-threshold-management"
         ],
         "uat": [
-          "bopis-uat"
+          "threshold-management-uat"
         ]
       }
     },
