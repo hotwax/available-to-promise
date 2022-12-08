@@ -53,7 +53,7 @@
             </ion-card-title>
           </ion-card-header>
           <ion-card-content>
-            {{ $t('eCommerce stores are directly connected to one Shop Configs. If your OMS is connected to multiple eCommerce stores selling the same catalog operating as one Company, you may have multiple Shop Configs for the selected Product Store.') }}
+            {{ $t('eCommerce stores are directly connected to one Shop Config. If your OMS is connected to multiple eCommerce stores selling the same catalog operating as one Company, you may have multiple Shop Configs for the selected Product Store.') }}
           </ion-card-content>
           <ion-item lines="none">
             <ion-label>{{ $t("Select eCommerce") }}</ion-label>
@@ -86,17 +86,24 @@
 </template>
 
 <script lang="ts">
-import {  IonButton, IonContent, IonHeader, IonIcon, IonItem, IonLabel, IonMenuButton, IonPage, IonSelect, IonSelectOption, IonTitle, IonToolbar, modalController } from '@ionic/vue';
+import {  IonAvatar, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonHeader, IonIcon, IonItem, IonLabel, IonMenuButton, IonPage, IonSelect, IonSelectOption, IonTitle, IonToolbar, modalController } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { codeWorkingOutline, ellipsisVertical, globeOutline, openOutline, personCircleOutline, storefrontOutline, timeOutline } from 'ionicons/icons'
 import { mapGetters, useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import TimeZoneModal from '@/views/TimezoneModal.vue';
+import Image from '@/components/Image.vue'
 
 export default defineComponent({
   name: 'Settings',
   components: {
+    IonAvatar,
     IonButton, 
+    IonCard,
+    IonCardContent,
+    IonCardHeader,
+    IonCardSubtitle,
+    IonCardTitle,
     IonContent, 
     IonHeader, 
     IonIcon,
@@ -107,7 +114,8 @@ export default defineComponent({
     IonSelect, 
     IonSelectOption,
     IonTitle, 
-    IonToolbar
+    IonToolbar,
+    Image
   },
   data() {
     return {
