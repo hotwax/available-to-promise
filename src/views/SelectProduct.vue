@@ -204,6 +204,7 @@ import { translate } from '@/i18n';
 import { ProductService } from '@/services/ProductService';
 import { JobService } from '@/services/JobService';
 import { DateTime } from 'luxon';
+import emitter from '@/event-bus';
 
 export default defineComponent({
   name: 'SelectProduct',
@@ -525,6 +526,12 @@ export default defineComponent({
     } else {
       this.getProducts();
     }
+  },
+  mounted(){
+    emitter.on("productStoreChanged", this.getProducts);
+  },
+  unmounted(){
+    emitter.off("productStoreChanged", this.getProducts);
   },
   setup() {
     const router = useRouter();

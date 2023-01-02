@@ -27,7 +27,12 @@
           <ion-item lines="none">
             <ion-label class="ion-text-wrap">
               <p class="overline">{{ instanceUrl }}</p>
-              {{ eComStore?.storeName }}
+              <ion-select v-if="userProfile?.stores?.length > 1" interface="popover" :value="eComStore.productStoreId" @ionChange="setEComStore($event)">
+                <ion-select-option v-for="store in (userProfile?.stores ? userProfile.stores : [])" :key="store.productStoreId" :value="store.productStoreId" >{{ store.storeName }}</ion-select-option>
+              </ion-select>
+              <ion-label v-else>
+                {{ eComStore.productStoreId }}
+              </ion-label>
             </ion-label>
             <ion-note slot="end">{{ userProfile?.userTimeZone }}</ion-note>
           </ion-item>
@@ -47,6 +52,7 @@ import emitter from "@/event-bus"
 import { useRouter } from 'vue-router';
 import { mapGetters } from 'vuex';
 import { Settings } from 'luxon'
+import { useStore } from "@/store";
 
 export default defineComponent({
   name: 'App',
@@ -66,6 +72,10 @@ export default defineComponent({
     })
   },
   methods: {
+    async setEComStore(event: CustomEvent) {
+      await this.store.dispatch('user/setEcomStore', { 'productStoreId': event.detail.value })
+      emitter.emit("productStoreChanged");
+    },
     async presentLoader() {
       if (!this.loader) {
         this.loader = await loadingController
@@ -108,11 +118,13 @@ export default defineComponent({
   },
   setup() {
     const router = useRouter();
+    const store = useStore();
 
     return {
       options,
       pulseOutline,
       settings,
+      store,
       router
     }
   }

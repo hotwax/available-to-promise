@@ -293,7 +293,7 @@ import {
 } from "@ionic/vue";
 import JobConfiguration from '@/components/JobConfiguration.vue'
 import { copyOutline, closeCircleOutline, checkmarkCircleOutline, optionsOutline, timeOutline, timerOutline } from "ionicons/icons";
-
+import emitter from '@/event-bus';
 import { Plugins } from '@capacitor/core';
 import { hasError, showToast } from '@/utils'
 import JobHistoryModal from '@/components/JobHistoryModal.vue';
@@ -363,6 +363,10 @@ export default defineComponent({
   },
   mounted(){
     this.store.dispatch('util/getServiceStatusDesc')
+    emitter.on("productStoreChanged", this.refreshJobs);
+  },
+  unmounted(){
+    emitter.off("productStoreChanged", this.refreshJobs);
   },
   methods: {
     getJobExecutionTime(startTime: any, endTime: any){
