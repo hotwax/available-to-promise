@@ -250,7 +250,7 @@ const actions: ActionTree<JobState, RootState> = {
         commit(types.JOB_THRESHOLD_RULES_UPDATED, resp.data.docs);
       }
       return resp;
-    } catch(err){
+    } catch(err: any){
       console.error(err);
       return Promise.reject(new Error(err))
     }
