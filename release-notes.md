@@ -7,7 +7,9 @@
 * @k2maan made their first contribution in https://github.com/hotwax/threshold-management/pull/153
 
 **Full Changelog**: https://github.com/hotwax/threshold-management/compare/v1.1.0...v1.2.0
+
 # Release 1.1.0
+
 ## What's Changed
 * Update contribution guideline in Readme file(#2r0kmb3) by @azkyakhan in https://github.com/hotwax/threshold-management/pull/132
 * Implemented: Code to check if user has permission to access the app(#2hr41aq) by @shashwatbangar in https://github.com/hotwax/threshold-management/pull/131
