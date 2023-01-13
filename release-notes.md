@@ -20,8 +20,6 @@
 * Updated bug report and feature request issue template by @ymaheshwari1 in https://github.com/hotwax/threshold-management/pull/144
 * Implemented: Autodeploy flow for uat(#31ngcmh) by @shashwatbangar in https://github.com/hotwax/threshold-management/pull/145
 
-## New Contributors
-* @k2maan made their first contribution in https://github.com/hotwax/threshold-management/pull/153
 
 **Full Changelog**: https://github.com/hotwax/threshold-management/compare/v1.0.6...v1.1.0
 
