@@ -1,3 +1,28 @@
+# Release 1.2.0
+
+## What's Changed
+* Fixed build issue due to eslint version mismatch in dependencies (#85zrhpak3) by @k2maan in https://github.com/hotwax/threshold-management/pull/153
+
+## New Contributors
+* @k2maan made their first contribution in https://github.com/hotwax/threshold-management/pull/153
+
+**Full Changelog**: https://github.com/hotwax/threshold-management/compare/v1.1.0...v1.2.0
+# Release 1.1.0
+## What's Changed
+* Update contribution guideline in Readme file(#2r0kmb3) by @azkyakhan in https://github.com/hotwax/threshold-management/pull/132
+* Implemented: Code to check if user has permission to access the app(#2hr41aq) by @shashwatbangar in https://github.com/hotwax/threshold-management/pull/131
+* Implemented: Modal to display server errors(#2gg32yc) by @shashwatbangar in https://github.com/hotwax/threshold-management/pull/130
+* Upgraded ionic to 6.1.15(#2uaz29u) by @disha1202 in https://github.com/hotwax/threshold-management/pull/134
+* Added support to alias specific instance URL with environment configuration(#30dkjp1) by @disha1202 in https://github.com/hotwax/threshold-management/pull/142
+* Upgraded to ionic 6.2(#2w9wz26) by @disha1202 in https://github.com/hotwax/threshold-management/pull/140
+* Updated bug report and feature request issue template by @ymaheshwari1 in https://github.com/hotwax/threshold-management/pull/144
+* Implemented: Autodeploy flow for uat(#31ngcmh) by @shashwatbangar in https://github.com/hotwax/threshold-management/pull/145
+
+## New Contributors
+* @k2maan made their first contribution in https://github.com/hotwax/threshold-management/pull/153
+
+**Full Changelog**: https://github.com/hotwax/threshold-management/compare/v1.0.6...v1.1.0
+
 # Release 1.0.6
 
 ## What's Changed
@@ -159,29 +184,3 @@
 * @rathoreprashant made their first contribution in https://github.com/hotwax/threshold-management/pull/71
 
 **Full Changelog**: https://github.com/hotwax/threshold-management/commits/v1.0.0
-
-# Release 1.1.0
-## What's Changed
-* Update contribution guideline in Readme file(#2r0kmb3) by @azkyakhan in https://github.com/hotwax/threshold-management/pull/132
-* Implemented: Code to check if user has permission to access the app(#2hr41aq) by @shashwatbangar in https://github.com/hotwax/threshold-management/pull/131
-* Implemented: Modal to display server errors(#2gg32yc) by @shashwatbangar in https://github.com/hotwax/threshold-management/pull/130
-* Upgraded ionic to 6.1.15(#2uaz29u) by @disha1202 in https://github.com/hotwax/threshold-management/pull/134
-* Added support to alias specific instance URL with environment configuration(#30dkjp1) by @disha1202 in https://github.com/hotwax/threshold-management/pull/142
-* Upgraded to ionic 6.2(#2w9wz26) by @disha1202 in https://github.com/hotwax/threshold-management/pull/140
-* Updated bug report and feature request issue template by @ymaheshwari1 in https://github.com/hotwax/threshold-management/pull/144
-* Implemented: Autodeploy flow for uat(#31ngcmh) by @shashwatbangar in https://github.com/hotwax/threshold-management/pull/145
-
-## New Contributors
-* @k2maan made their first contribution in https://github.com/hotwax/threshold-management/pull/153
-
-**Full Changelog**: https://github.com/hotwax/threshold-management/compare/v1.0.6...v1.1.0
-
-# Release 1.2.0
-
-## What's Changed
-* Fixed build issue due to eslint version mismatch in dependencies (#85zrhpak3) by @k2maan in https://github.com/hotwax/threshold-management/pull/153
-
-## New Contributors
-* @k2maan made their first contribution in https://github.com/hotwax/threshold-management/pull/153
-
-**Full Changelog**: https://github.com/hotwax/threshold-management/compare/v1.1.0...v1.2.0
