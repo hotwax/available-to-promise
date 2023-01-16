@@ -188,6 +188,6 @@ export default defineComponent({
     grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
   }
   hr {
-    border-top: 1px solid var(--ion-color-medium);
+    border-top: 1px solid var(--border-medium);
   }
 </style>
