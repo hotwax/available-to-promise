@@ -236,15 +236,6 @@ http://ionicframework.com/docs/theming/ */
 }
 
 body {
-  --spacer-2xs: 0.25rem; /* 4px */
-  --spacer-xs: 0.5rem;   /* 8px */
-  --spacer-sm: 1rem;     /* 16px */
-  --spacer-base: 1.5rem; /* 24px */
-  --spacer-lg: 2rem;     /* 32px */
-  --spacer-xl: 2.5rem;   /* 40px */
-  --spacer-2xl: 5rem;    /* 80px */
-  --spacer-3xl: 10rem;   /* 160px */
-
   /** Border variable **/
   --border-medium: 1px solid var(--ion-color-medium);
 }
@@ -294,10 +285,6 @@ body {
 .section-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(343px, 1fr));
-}
-
-ion-thumbnail > img {
-  object-fit: contain;
 }
 
 ion-select {
@@ -372,19 +359,5 @@ hr {
 
   .sort > div > :first-child{
     border-bottom: unset;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  ion-chip > ion-icon {
-    color: var(--ion-color-dark);
-  }
-
-  .chip-outline {
-    border-color: var(--ion-color-dark);
-  }
-
-  ion-item {
-    --border-color: var(--ion-color-medium)
   }
 }
