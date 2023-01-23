@@ -5,6 +5,7 @@ import ProductState from './ProductState'
 import * as types from './mutation-types'
 import { hasError, showToast, getFeature } from '@/utils'
 import { translate } from '@/i18n'
+import logger from "@/logger";
 
 const actions: ActionTree<ProductState, RootState> = {
 
@@ -45,7 +46,7 @@ const actions: ActionTree<ProductState, RootState> = {
         commit(types.PRODUCT_LIST_UPDATED, { products: [], totalVirtual: query.json.query === "*:*" ? 0 : state.products.total.virtual, totalVariant: query.json.query === "*:*" ? 0 : state.products.total.variant });
       }
     } catch (error) {
-      console.error(error);
+      logger.error(error);
       showToast(translate("Something went wrong"), error);
     }
     return resp;

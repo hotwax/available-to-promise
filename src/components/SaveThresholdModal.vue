@@ -138,7 +138,7 @@ export default defineComponent({
           showToast(translate('Something went wrong'), getResponseError(resp))
         }
       } catch (err) {
-        console.error(err)
+        this.$log.error(err);
         showToast(translate('Something went wrong'), err)
       }
       this.isServiceScheduling = false
@@ -250,7 +250,7 @@ export default defineComponent({
         }
       } catch (err) {
         showToast(translate('Something went wrong'), err)
-        console.error(err)
+        this.$log.error(err);
       }
       return resp;
     }
