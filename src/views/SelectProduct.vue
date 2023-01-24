@@ -401,20 +401,20 @@ export default defineComponent({
                         this.store.dispatch('job/removeThresholdRule', this.job.runtimeData.searchPreferenceId);
                         this.$router.push('/threshold-updates')
                       } else {
-                        console.error(resp);
+                        this.$log.error(resp);
                         showToast(translate('Unable to schedule service.'))
                       }
                     }).catch(error => { return error });
                   } else {
-                    console.error(resp);
+                    this.$log.error(resp);
                     showToast(translate('Unable to schedule service.'))
                   }
                 }).catch((error: any) => { return error })
               } else {
-                console.error(resp);
+                this.$log.error(resp);
               } 
             }).catch(err => {
-              console.error(err);
+              this.$log.error(err);
             })
           } else {
             JobService.scheduleJob(JSON.parse(JSON.stringify({ ...this.job.runtimeData, ...payload }))).then((resp: any) => {
@@ -424,7 +424,7 @@ export default defineComponent({
                 this.store.dispatch('job/removeThresholdRule', this.job.runtimeData.searchPreferenceId);
                 this.$router.push('/threshold-updates')
               } else {
-                console.error(resp);
+                this.$log.error(resp);
                 showToast(translate('Unable to schedule service.'))
               }
             }).catch((error: any) => { return error })  
@@ -433,7 +433,7 @@ export default defineComponent({
           showToast(translate('Unable to schedule service.'))
         }
       } catch (err) {
-        console.error(err)
+        this.$log.error(err);
         showToast(translate('Unable to update threshold rule.'))
       }
       this.isServiceScheduling = false;

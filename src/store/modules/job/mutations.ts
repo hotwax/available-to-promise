@@ -1,6 +1,7 @@
 import { MutationTree } from 'vuex'
 import JobState from './JobState'
 import * as types from './mutation-types'
+import logger from "@/logger";
 
 const mutations: MutationTree <JobState> = {
     [types.JOB_UPDATED_BULK] (state, payload) {
@@ -38,7 +39,7 @@ const mutations: MutationTree <JobState> = {
                 try {
                     thresholdRules[thresholdRule.searchPrefId] = JSON.parse(thresholdRule.searchPrefValue);
                 } catch(err) {
-                    console.error(err);
+                    logger.error(err);
                 }
               return thresholdRules;
             }, state.thresholdRules)

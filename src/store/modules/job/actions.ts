@@ -6,6 +6,7 @@ import { getResponseError, hasError, showToast } from '@/utils'
 import { JobService } from '@/services/JobService'
 import { translate } from '@/i18n'
 import { DateTime } from 'luxon';
+import logger from "@/logger";
 
 const actions: ActionTree<JobState, RootState> = {
   async fetchJobDescription({ commit, state }, payload){
@@ -88,7 +89,7 @@ const actions: ActionTree<JobState, RootState> = {
       }
     }).catch((err) => {
       commit(types.JOB_HISTORY_UPDATED, { jobs: [], total: 0 });
-      console.error(err);
+      logger.error(err);
       showToast(translate("Something went wrong"), err);
     }) 
   },
@@ -144,7 +145,7 @@ const actions: ActionTree<JobState, RootState> = {
       }
     }).catch((err) => {
       commit(types.JOB_RUNNING_UPDATED, { jobs: [], total: 0 });
-      console.error(err);
+      logger.error(err);
       showToast(translate("Something went wrong"), err);
     }) 
   },
@@ -197,7 +198,7 @@ const actions: ActionTree<JobState, RootState> = {
       }
     }).catch((err) => {
       commit(types.JOB_PENDING_UPDATED, { jobs: [], total: 0 });
-      console.error(err);
+      logger.error(err);
       showToast(translate("Something went wrong"), err);
     })
   },
@@ -251,7 +252,7 @@ const actions: ActionTree<JobState, RootState> = {
       }
       return resp;
     } catch(err: any){
-      console.error(err);
+      logger.error(err);
       return Promise.reject(new Error(err))
     }
   },
@@ -335,7 +336,7 @@ const actions: ActionTree<JobState, RootState> = {
       }
     } catch (err) {
       showToast(translate('Something went wrong'), err)
-      console.error(err)
+      logger.error(err)
     }
     return resp;
   },
@@ -382,7 +383,7 @@ const actions: ActionTree<JobState, RootState> = {
       }
     } catch (err) {
       showToast(translate('Something went wrong'), err)
-      console.error(err)
+      logger.error(err)
     }
     return resp;
   },
@@ -451,7 +452,7 @@ const actions: ActionTree<JobState, RootState> = {
       }
     } catch (err) {
       showToast(translate('Something went wrong'), err)
-      console.error(err)
+      logger.error(err)
       // TODO: explore around handling error, so that we can directly access the response status code
       // This is returned so that response is handled in catch instead of then
       // err is string and when trying to access status it gives error

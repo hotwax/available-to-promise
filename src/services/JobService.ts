@@ -1,6 +1,7 @@
 import api from '@/api'
 import store from "@/store";
 import { hasError } from "@/utils";
+import logger from "@/logger";
 
 const fetchJob = async (payload: any): Promise<any> => {
   let resp;
@@ -24,11 +25,11 @@ const fetchJob = async (payload: any): Promise<any> => {
       if (job.runtimeData && job.runtimeData.searchPreferenceId) await store.dispatch('job/fetchThresholdRules', [job.runtimeData.searchPreferenceId])
       return job;   
     } else {
-      console.error(resp);
+      logger.error(resp);
       return {};
     }
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     return {}
   }
 }
