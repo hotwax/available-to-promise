@@ -35,3 +35,6 @@ npm-debug.log*
 .env
 .env.*
 !.env.example
+
+.gradle/
+.firebase/
