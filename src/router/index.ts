@@ -49,7 +49,7 @@ const routes: Array<RouteRecordRaw> = [
     component: SelectProduct,
     beforeEnter: authGuard,
     meta: {
-      permissionId: "SELECT_PRODUCT_VIEW"
+      permissionId: "APP_SELECT_PRODUCT_VIEW"
     }
   },    
   {
@@ -83,7 +83,7 @@ const routes: Array<RouteRecordRaw> = [
     component: ThresholdUpdates,
     beforeEnter: authGuard,
     meta: {
-      permissionId: "THRESHOLD_UPDATES_VIEW"
+      permissionId: "APP_THRESHOLD_UPDATES_VIEW"
     }
   },
   {

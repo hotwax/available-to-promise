@@ -132,11 +132,12 @@ const getPreferredStore = async (token: any): Promise<any> => {
 }
 
 const getUserPermissions = async (payload: any, token: any): Promise<any> => {
-  let appPermissions = [] as any;
+  const baseURL = store.getters['user/getBaseUrl'];
+  let serverPermissions = [] as any;
 
   // If the server specific permission list doesn't exist, getting server permissions will be of no use
   // It means there are no rules yet depending upon the server permissions.
-  if (payload.permissionIds && payload.permissionIds.length == 0) return appPermissions;
+  if (payload.permissionIds && payload.permissionIds.length == 0) return serverPermissions;
   // TODO pass specific permissionIds
   let resp;
     // TODO Make it configurable from the environment variables.
@@ -150,32 +151,39 @@ const getUserPermissions = async (payload: any, token: any): Promise<any> => {
         viewSize,
         permissionIds: payload.permissionIds
       }
-      resp = await getPermissions({
+      resp = await client({
+        url: "getPermissions",
+        method: "post",
+        baseURL,
         data: params,
         headers: {
           Authorization:  'Bearer ' + token,
           'Content-Type': 'application/json'
         }
-      });
+      })
       if(resp.status === 200 && resp.data.docs?.length && !hasError(resp)) {
-        let serverPermissions = resp.data.docs.map((permission: any) => permission.permissionId);
+        serverPermissions = resp.data.docs.map((permission: any) => permission.permissionId);
         const total = resp.data.count;
         const remainingPermissions = total - serverPermissions.length;
         if (remainingPermissions > 0) {
           // We need to get all the remaining permissions
           const apiCallsNeeded = Math.floor(remainingPermissions / viewSize) + ( remainingPermissions % viewSize != 0 ? 1 : 0);
           const responses = await Promise.all([...Array(apiCallsNeeded).keys()].map(async (index: any) => {
-            const response = await getPermissions({
+            const response = await client({
+              url: "getPermissions",
+              method: "post",
+              baseURL,
               data: {
-              "viewIndex": index + 1,
-              viewSize,
-              permissionIds: payload.permissionIds
-            },
-            headers: {
-              Authorization:  'Bearer ' + token,
-              'Content-Type': 'application/json'
-            }});
-            if(response.status === 200 && !hasError(response)){
+                "viewIndex": index + 1,
+                viewSize,
+                permissionIds: payload.permissionIds
+              },
+              headers: {
+                Authorization:  'Bearer ' + token,
+                'Content-Type': 'application/json'
+              }
+            })
+            if(!hasError(response)){
               return Promise.resolve(response);
               } else {
               return Promise.reject(response);
@@ -203,23 +211,13 @@ const getUserPermissions = async (payload: any, token: any): Promise<any> => {
           // Show toast to user intimiting about the failure
           // Allow user to login
           // TODO Implement Retry or improve experience with show in progress icon and allowing login only if all the data related to user profile is fetched.
-          // if (permissionResponses.failed.length > 0) showToast(translate("Something went wrong while getting complete user profile. Try login again for smoother experience."));
+          if (permissionResponses.failed.length > 0) Promise.reject("Something went wrong while getting complete user permissions.");
         }
-        appPermissions = prepareAppPermissions(serverPermissions);
       }
-      return appPermissions;
+      return serverPermissions;
     } catch(error: any) {
-      console.error(error);
+      return Promise.reject(error);
     }
-}
-const getPermissions = async (payload: any): Promise<any> => {
-  const baseURL = store.getters['user/getBaseUrl'];
-  return client({
-    url: "getPermissions",
-    method: "post",
-    baseURL,
-    ...payload
-  });
 }
 
 

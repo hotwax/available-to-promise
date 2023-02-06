@@ -7,11 +7,11 @@
     </ion-header>
     <ion-content>
       <ion-list>
-        <ion-item button @click="closeMenu(); router.push('/select-product')">
+        <ion-item v-if="hasPermission('APP_SELECT_PRODUCT_VIEW')" button @click="closeMenu(); router.push('/select-product')">
           <ion-icon :icon="options" slot="start" />
           <ion-label>{{ $t("Threshold Management") }}</ion-label>
         </ion-item>
-        <ion-item button @click="closeMenu(); router.push('/threshold-updates')">
+        <ion-item v-if="hasPermission('APP_THRESHOLD_UPDATES_VIEW')" button @click="closeMenu(); router.push('/threshold-updates')">
           <ion-icon :icon="pulseOutline" slot="start" />
           <ion-label>{{ $t("Threshold Updates") }}</ion-label>
         </ion-item>

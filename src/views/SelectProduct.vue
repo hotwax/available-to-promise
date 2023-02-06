@@ -140,21 +140,21 @@
       </div>
 
       <div class="action desktop-only">
-        <ion-button v-if="jobId" :disabled="isJobEditable() || isServiceScheduling" @click="updateThreshold()">
+        <ion-button v-if="jobId" :disabled="!hasPermission(Actions.APP_THRESHOLD_RULE_UPDATE) || isJobEditable() || isServiceScheduling" @click="updateThreshold()">
           <ion-icon slot="start" :icon="saveOutline" />
           {{ $t("Update threshold rule") }}
         </ion-button>
-        <ion-button v-else @click="saveThreshold()">
+        <ion-button :disabled="!hasPermission(Actions.APP_THRESHOLD_RULE_UPDATE)" v-else @click="saveThreshold()">
           <ion-icon slot="start" :icon="saveOutline" />
           {{ $t("Save threshold rule") }}
         </ion-button>
       </div>
 
       <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="mobile-only">
-        <ion-fab-button v-if="jobId" :disabled="isServiceScheduling || isJobEditable()" @click="updateThreshold()">
+        <ion-fab-button v-if="jobId" :disabled="!hasPermission(Actions.APP_THRESHOLD_RULE_UPDATE) || isServiceScheduling || isJobEditable()" @click="updateThreshold()">
           <ion-icon :icon="arrowForwardOutline" />
         </ion-fab-button>
-        <ion-fab-button v-else @click="saveThreshold()">
+        <ion-fab-button :disabled="!hasPermission(Actions.APP_THRESHOLD_RULE_UPDATE)" v-else @click="saveThreshold()">
           <ion-icon :icon="arrowForwardOutline" />
         </ion-fab-button>
       </ion-fab>
@@ -204,6 +204,7 @@ import { translate } from '@/i18n';
 import { ProductService } from '@/services/ProductService';
 import { JobService } from '@/services/JobService';
 import { DateTime } from 'luxon';
+import { Actions, hasPermission } from '@/authorization'
 
 export default defineComponent({
   name: 'SelectProduct',
@@ -531,9 +532,11 @@ export default defineComponent({
     const store = useStore();
 
     return {
+      Actions,
       arrowForwardOutline,
       downloadOutline,
       filterOutline,
+      hasPermission,
       router,
       saveOutline,
       store,
