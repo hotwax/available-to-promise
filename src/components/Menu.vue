@@ -50,10 +50,9 @@
     IonToolbar,
     menuController
   } from "@ionic/vue";
-  import { defineComponent, ref } from "vue";
+  import { defineComponent } from "vue";
   import { mapGetters } from "vuex";
   import { useStore } from "@/store";
-  import emitter from "@/event-bus"
   import { hasPermission } from "@/authorization";
   import { useRouter } from "vue-router";
 import { options, settings, pulseOutline } from 'ionicons/icons';
