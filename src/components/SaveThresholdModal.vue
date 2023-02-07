@@ -65,7 +65,6 @@ import { ProductService } from '@/services/ProductService';
 import { getResponseError, hasError, showToast } from '@/utils';
 import { translate } from '@/i18n';
 import { mapGetters, useStore } from 'vuex';
-import { DateTime } from 'luxon';
 import { JobService } from '@/services/JobService';
 
 export default defineComponent({
