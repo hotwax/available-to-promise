@@ -5,11 +5,14 @@ import UserState from './UserState'
 import * as types from './mutation-types'
 import { hasError, showToast } from '@/utils'
 import { translate } from '@/i18n'
-import emitter from '@/event-bus'
-import { DateTime, Settings } from 'luxon';
+import { Settings } from 'luxon';
 import logger from "@/logger";
-
-import { getServerPermissionsFromRules, prepareAppPermissions, resetPermissions, setPermissions } from '@/authorization'
+import {
+  getServerPermissionsFromRules,
+  prepareAppPermissions,
+  resetPermissions,
+  setPermissions
+} from '@/authorization'
 
 
 
