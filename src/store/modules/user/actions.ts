@@ -39,7 +39,7 @@ const actions: ActionTree<UserState, RootState> = {
       // If we have any error most possible reason is incorrect credentials.
       if (hasError(resp)) {
         showToast(translate('Sorry, your username or password is incorrect. Please try again.'));
-        console.error("error", resp.data._ERROR_MESSAGE_);
+        logger.error("error", resp.data._ERROR_MESSAGE_);
         return Promise.reject(new Error(resp.data._ERROR_MESSAGE_));
       }
 
@@ -94,10 +94,6 @@ const actions: ActionTree<UserState, RootState> = {
       commit(types.USER_CURRENT_ECOM_STORE_UPDATED, preferredStore);
       commit(types.USER_PERMISSIONS_UPDATED, appPermissions);
       commit(types.USER_TOKEN_CHANGED, { newToken: token })
-
-      // Getting service status description
-      // TODO check if we could move it to logic for fetching jobs
-      this.dispatch('util/getServiceStatusDesc')
       
       // Handling case for warnings like password may expire in few days
       if (resp.data._EVENT_MESSAGE_ && resp.data._EVENT_MESSAGE_.startsWith("Alert:")) {

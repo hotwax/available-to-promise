@@ -40,7 +40,6 @@ const store = createStore<RootState>({
     },
 })
 
-// const permissions = store.getters['user/getUserPermissions'];
 setPermissions(store.getters['user/getUserPermissions']);
 
 export default store
