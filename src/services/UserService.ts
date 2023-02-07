@@ -1,6 +1,5 @@
 import api, {client} from '@/api'
 import store from '@/store';
-import { prepareAppPermissions } from '@/authorization'
 import { hasError } from '@/utils'
 
 const login = async (username: string, password: string): Promise <any> => {
@@ -14,40 +13,23 @@ const login = async (username: string, password: string): Promise <any> => {
   });
 }
 
-const checkPermission = async (payload: any): Promise <any>  => {
-  let baseURL = store.getters['user/getInstanceUrl'];
-  baseURL = baseURL && baseURL.startsWith('http') ? baseURL : `https://${baseURL}.hotwax.io/api/`;
-  return client({
-    url: "checkPermission",
-    method: "post",
-    baseURL: baseURL,
-    ...payload
-  });
-}
-
 const getUserProfile = async (token: any): Promise<any> => {
+  const baseURL = store.getters['user/getBaseUrl'];
   try {
-    const resp = await getProfile({
+    const resp = await client({
+      url: "user-profile",
+      method: "get",
+      baseURL,
       headers: {
         Authorization:  'Bearer ' + token,
         'Content-Type': 'application/json'
       }
     });
-    if(hasError(resp)) return Promise.reject("Error getting user profile");
+    if(hasError(resp)) return Promise.reject("Error getting user profile: " + JSON.stringify(resp.data));
     return Promise.resolve(resp.data)
   } catch(error: any) {
-    console.error(error);
     return Promise.reject(error)
   }
-}
-const getProfile = async (payload: any): Promise <any>  => {
-  const baseURL = store.getters['user/getBaseUrl'];
-  return client({
-    url: "user-profile",
-    method: "get",
-    baseURL,
-    ...payload
-  });
 }
 
 const getAvailableTimeZones = async (): Promise <any>  => {
@@ -64,32 +46,35 @@ const setUserTimeZone = async (payload: any): Promise <any>  => {
     data: payload
   });
 }
-
 const getEComStores = async (token: any): Promise<any> => {
-  const params = {
-    "inputFields": {
-      "storeName_op": "not-empty"
-    },
-    "fieldList": ["productStoreId", "storeName"],
-    "entityName": "ProductStore",
-    "distinct": "Y",
-    "noConditionFind": "Y"
-  }
-  const baseURL = store.getters['user/getBaseUrl'];
-  const resp = await client({
-    url: "performFind",
-    method: "get",
-    baseURL,
-    params,
-    headers: {
-      Authorization:  'Bearer ' + token,
-      'Content-Type': 'application/json'
+  try {
+    const params = {
+      "inputFields": {
+        "storeName_op": "not-empty"
+      },
+      "fieldList": ["productStoreId", "storeName"],
+      "entityName": "ProductStore",
+      "distinct": "Y",
+      "noConditionFind": "Y"
     }
-  });
-  if (hasError(resp)) {
-    return Promise.reject(resp);
-  } else {
-    return Promise.resolve(resp.data.docs);
+    const baseURL = store.getters['user/getBaseUrl'];
+    const resp = await client({
+      url: "performFind",
+      method: "get",
+      baseURL,
+      params,
+      headers: {
+        Authorization:  'Bearer ' + token,
+        'Content-Type': 'application/json'
+      }
+    });
+    if (hasError(resp)) {
+      return Promise.reject(resp.data);
+    } else {
+      return Promise.resolve(resp.data.docs);
+    }
+  } catch(error: any) {
+    return Promise.reject(error)
   }
 }
 
@@ -109,26 +94,32 @@ const getUserPreference = async (payload: any): Promise<any> => {
     data: payload,
   });
 }
+
 const getPreferredStore = async (token: any): Promise<any> => {
   const baseURL = store.getters['user/getBaseUrl'];
-  const resp = await client({
-    url: "service/getUserPreference",
-    //TODO Due to security reasons service model of OMS 1.0 does not support sending parameters in get request that's why we use post here
-    method: "post",
-    baseURL,
-    headers: {
-      Authorization:  'Bearer ' + token,
-      'Content-Type': 'application/json'
-    },
-    data: {
-      'userPrefTypeId': 'SELECTED_BRAND'
-    },
-  });
-  if (hasError(resp)) {
-    return Promise.reject(resp);
-  } else {
-    return Promise.resolve(resp.data.userPrefValue);
+  try {
+    const resp = await client({
+      url: "service/getUserPreference",
+      //TODO Due to security reasons service model of OMS 1.0 does not support sending parameters in get request that's why we use post here
+      method: "post",
+      baseURL,
+      headers: {
+        Authorization:  'Bearer ' + token,
+        'Content-Type': 'application/json'
+      },
+      data: {
+        'userPrefTypeId': 'SELECTED_BRAND'
+      },
+    });
+    if (hasError(resp)) {
+      return Promise.reject(resp.data);
+    } else {
+      return Promise.resolve(resp.data.userPrefValue);
+    }
+  } catch(error: any) {
+    return Promise.reject(error)
   }
+  
 }
 
 const getUserPermissions = async (payload: any, token: any): Promise<any> => {
@@ -227,10 +218,8 @@ export const UserService = {
     getUserProfile,
     login,
     getAvailableTimeZones,
-    getProfile,
     setUserTimeZone,
     setUserPreference,
     getUserPreference,
-    getEComStores,
-    checkPermission
+    getEComStores
 }
