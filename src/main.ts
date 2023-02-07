@@ -3,6 +3,8 @@ import App from './App.vue'
 import router from './router';
 import './registerServiceWorker'
 import { DateTime } from 'luxon';
+import logger from './logger';
+
 
 import { IonicVue } from '@ionic/vue';
 
@@ -36,6 +38,9 @@ import permissionActions from '@/authorization/Actions';
 const app = createApp(App)
   .use(IonicVue, {
     mode: 'md'
+  })
+  .use(logger, {
+    level: process.env.VUE_APP_DEFAULT_LOG_LEVEL
   })
   .use(router)
   .use(i18n)

@@ -7,6 +7,7 @@ import { hasError, showToast } from '@/utils'
 import { translate } from '@/i18n'
 import emitter from '@/event-bus'
 import { DateTime, Settings } from 'luxon';
+import logger from "@/logger";
 
 import { getServerPermissionsFromRules, prepareAppPermissions, resetPermissions, setPermissions } from '@/authorization'
 
@@ -63,7 +64,7 @@ const actions: ActionTree<UserState, RootState> = {
         if (hasPermission) {
           const permissionError = 'You do not have permission to access the app.';
           showToast(translate(permissionError));
-          console.error("error", permissionError);
+          logger.error("error", permissionError);
           return Promise.reject(new Error(permissionError));
         }
       }
@@ -105,7 +106,7 @@ const actions: ActionTree<UserState, RootState> = {
       // If any of the API call in try block has status code other than 2xx it will be handled in common catch block.
       // TODO Check if handling of specific status codes is required.
       showToast(translate('Something went wrong while login. Contact administrator'));
-      console.error("error", err);
+      logger.error("error", err);
       return Promise.reject(new Error(err))
     }
   },

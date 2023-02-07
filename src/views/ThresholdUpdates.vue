@@ -538,11 +538,11 @@ export default defineComponent({
         if(resp.status === 200 && !hasError(resp) && resp.data.response){
           this.productCount = resp.data.response.numFound
         } else {
-          console.error(resp);
+          this.$log.error(resp);
           this.productCount = 0;
         } 
       } catch (err) {
-        console.error(err);
+        this.$log.error(err);
         this.productCount = 0;
       }
     },
