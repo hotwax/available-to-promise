@@ -197,7 +197,6 @@ import { defineComponent } from 'vue';
 import { arrowForwardOutline, downloadOutline, filterOutline, saveOutline, pricetagOutline, closeCircle, addCircleOutline, albumsOutline, warningOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
 import { mapGetters, useStore } from 'vuex';
-import SaveThresholdModal from '@/components/SaveThresholdModal.vue';
 import ProductFilterModal from '@/components/ProductFilterModal.vue';
 import { hasError, showToast } from '@/utils';
 import { translate } from '@/i18n';
