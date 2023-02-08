@@ -116,11 +116,13 @@
   "store name": "store name",
   "Stores": "Stores",
   "stores selected": "stores selected",
+  "Sorry, your username or password is incorrect. Please try again.": "Sorry, your username or password is incorrect. Please try again.",
   "The timezone you select is used to ensure automations you schedule are always accurate to the time you select.": "The timezone you select is used to ensure automations you schedule are always accurate to the time you select.",
   "There are no jobs pending right now": "There are no jobs pending right now",
   "There are no jobs running right now": "There are no jobs running right now",
   "Tags": "Tags",
   "This is the name of the OMS you are connected to right now. Make sure that you are connected to the right instance before proceeding.": "This is the name of the OMS you are connected to right now. Make sure that you are connected to the right instance before proceeding.",
+  "This job schedule cannot be skipped": "This job schedule cannot be skipped",
   "threshold": "threshold",
   "Threshold": "Threshold",
   "Threshold management": "Threshold management",
@@ -140,5 +142,6 @@
   "Username": "Username",
   "virtual, ": "virtual, ",
   "variants": "variants",
-  "You can also download the products, locations and safety stock you selected in a CSV to upload in other systems": "You can also download the products, locations and safety stock you selected in a CSV to upload in other systems"
+  "You can also download the products, locations and safety stock you selected in a CSV to upload in other systems": "You can also download the products, locations and safety stock you selected in a CSV to upload in other systems",
+  "You do not have permission to access the app.": "You do not have permission to access the app."
 }
