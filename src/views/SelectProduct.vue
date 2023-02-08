@@ -452,14 +452,8 @@ export default defineComponent({
           });
         return alert.present();
       }
-      const saveThresholdModal = await modalController.create({
-        component: SaveThresholdModal,
-        componentProps: {
-          threshold: this.threshold,
-          totalSKUs: this.products.total.variant
-        }
-      })
-      saveThresholdModal.present();
+      await this.store.dispatch('product/updateThreshold', this.threshold)
+      this.router.push('/schedule-threshold')
     },
     async searchFilter(label: string, facetToSelect: string, searchfield: string, type: string) {
       const modal = await modalController.create({
