@@ -1,7 +1,7 @@
 <template>
   <section>
     <ion-item lines="none">
-      <h1>{{ $t(title) }}</h1>
+      <h1>{{ title }}</h1>
       <ion-badge slot="end" color="dark" v-if="job?.runTime">{{ $t("running") }} {{ timeTillJob(job.runTime) }}</ion-badge>
     </ion-item>
 
