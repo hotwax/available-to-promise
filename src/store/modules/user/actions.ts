@@ -13,6 +13,7 @@ import {
   resetPermissions,
   setPermissions
 } from '@/authorization'
+import { updateInstanceUrl, updateToken, resetConfig } from '@/adapter'
 
 
 
@@ -88,6 +89,7 @@ const actions: ActionTree<UserState, RootState> = {
       if (userProfile.userTimeZone) {
         Settings.defaultZone = userProfile.userTimeZone;
       }
+      updateToken(resp.data.token)
 
       // TODO user single mutation
       commit(types.USER_INFO_UPDATED, userProfile);
@@ -119,6 +121,7 @@ const actions: ActionTree<UserState, RootState> = {
     this.dispatch('product/clearAllFilters')
     this.dispatch('product/clearProductList');
     resetPermissions();
+    resetConfig();
   },
 
   /**
@@ -155,6 +158,7 @@ const actions: ActionTree<UserState, RootState> = {
   // Set User Instance Url
   setUserInstanceUrl ({ commit }, payload){
     commit(types.USER_INSTANCE_URL_UPDATED, payload)
+    updateInstanceUrl(payload)
   },
 }
 
