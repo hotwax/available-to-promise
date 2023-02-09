@@ -123,6 +123,7 @@ import { DateTime } from 'luxon';
 import { mapGetters, useStore } from 'vuex';
 import { ProductService } from '@/services/ProductService';
 import { useRouter } from 'vue-router';
+import logger from '@/logger';
 
 export default defineComponent({
   name: 'SelectProduct',
@@ -308,7 +309,7 @@ export default defineComponent({
           showToast(translate('Something went wrong'))
         }
       } catch (err) {
-        console.error(err)
+        logger.error(err)
         showToast(translate('Something went wrong'))
       }
       this.isServiceScheduling = false
@@ -318,7 +319,7 @@ export default defineComponent({
         this.store.dispatch('product/clearAllFilters')
         this.router.push('/select-product')
       } else {
-        console.error('Some jobs have failed while updating')
+        logger.error('Some jobs have failed while updating')
       }
     },
     async scheduleService(searchPreferenceId: string, threshold: string, runTime?: string) {

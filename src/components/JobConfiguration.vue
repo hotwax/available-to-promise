@@ -118,6 +118,7 @@ import { handleDateTimeInput, hasError, showToast } from "@/utils";
 import { JobService } from "@/services/JobService";
 import { DateTime } from 'luxon';
 import { translate } from "@/i18n";
+import logger from "@/logger";
 
 export default defineComponent({
   name: "JobConfiguration",
@@ -274,7 +275,7 @@ export default defineComponent({
           }
         } catch(err) {
           showToast(translate('Something went wrong'))
-          console.error(err)
+          logger.error(err)
         }
       }
     },
