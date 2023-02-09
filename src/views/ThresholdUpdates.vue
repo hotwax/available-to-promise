@@ -76,8 +76,8 @@
 
               <div class="actions">
                 <div>
-                  <ion-button fill="clear" @click.stop="skipJob(job)">{{ $t("Skip") }}</ion-button>
-                  <ion-button color="danger" fill="clear" @click.stop="cancelJob(job)">{{ $t("Cancel") }}</ion-button>
+                  <ion-button :disabled="!hasPermission(Actions.APP_JOB_UPDATE)" fill="clear" @click.stop="skipJob(job)">{{ $t("Skip") }}</ion-button>
+                  <ion-button :disabled="!hasPermission(Actions.APP_JOB_UPDATE)" color="danger" fill="clear" @click.stop="cancelJob(job)">{{ $t("Cancel") }}</ion-button>
                 </div>
                 <div>
                   <ion-button fill="clear" color="medium" slot="end" @click.stop="copyJobInformation(job)">
@@ -299,6 +299,7 @@ import { hasError, showToast } from '@/utils'
 import JobHistoryModal from '@/components/JobHistoryModal.vue';
 import { DateTime } from 'luxon';
 import { ProductService } from '@/services/ProductService';
+import { Actions, hasPermission } from '@/authorization'
 
 export default defineComponent({
   name: "ThresholdUpdates",
@@ -585,7 +586,9 @@ export default defineComponent({
     const segmentSelected = ref('pending');
 
     return {
+      Actions,
       copyOutline,
+      hasPermission,
       store,
       closeCircleOutline,
       checkmarkCircleOutline,

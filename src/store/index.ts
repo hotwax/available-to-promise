@@ -8,6 +8,7 @@ import userModule from './modules/user';
 import productModule from "./modules/product"
 import jobModule from './modules/job'
 import utilModule from "./modules/util"
+import { setPermissions } from '@/authorization'
 
 
 // TODO check how to register it from the components only
@@ -38,6 +39,8 @@ const store = createStore<RootState>({
         'util': utilModule
     },
 })
+
+setPermissions(store.getters['user/getUserPermissions']);
 
 export default store
 export function useStore(): typeof store {
