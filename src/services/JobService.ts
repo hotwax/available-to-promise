@@ -2,16 +2,13 @@ import api from '@/api'
 import store from "@/store";
 import logger from "@/logger";
 import { hasError } from '@/utils';
-import { DateTime } from 'luxon';
 
 const updateJob = async (job: any) => {
-  let resp;
-
   const payload = {
     'jobId': job.jobId,
     'systemJobEnumId': job.systemJobEnumId,
-    'recurrenceTimeZone': DateTime.now().zoneName,
-    'tempExprId': job.jobStatus,
+    'recurrenceTimeZone': store.state.user.current.userTimeZone,
+    'tempExprId': job.frequency ? job.frequency : job.jobStatus,
     'statusId': "SERVICE_PENDING"
   } as any
 
@@ -19,16 +16,7 @@ const updateJob = async (job: any) => {
   job?.sinceId && (payload['sinceId'] = job.sinceId)
   job?.jobName && (payload['jobName'] = job.jobName)
 
-  try {
-    resp = await updateJobSandbox(payload)
-    if (resp.status === 200 && !hasError(resp) && resp.data.successMessage) {
-      return Promise.resolve('success')
-    } else {
-      return Promise.reject('failed')
-    }
-  } catch (err) {
-    return Promise.reject('failed')
-  }
+  return await updateJobSandbox(payload)
 }
 
 const fetchJob = async (payload: any): Promise<any> => {

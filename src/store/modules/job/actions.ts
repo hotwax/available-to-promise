@@ -443,8 +443,6 @@ const actions: ActionTree<JobState, RootState> = {
       if (resp.status == 200 && !hasError(resp)) {
         showToast(translate('Service updated successfully'))
         // deleting the enum from cached job as we will not store the job with cancelled status
-        console.log('state.cached[job?.systemJobEnumId]', state.cached[job?.systemJobEnumId])
-        console.log('cachedJob', cachedJob)
         dispatch('fetchJobs', {
           inputFields: {
             'systemJobEnumId': job.systemJobEnumId,

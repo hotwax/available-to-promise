@@ -264,23 +264,20 @@ export default defineComponent({
       // filtered jobs by removing the new job as we need to update already existing job
       const jobsToUpdate = this.updatedJobsOrder.filter((job: any) => !job.isNew)
 
-      await Promise.all(jobsToUpdate.map(async (job: any) => {
-        const payload = {
-          'jobId': job.jobId,
-          'systemJobEnumId': job.systemJobEnumId,
-          'recurrenceTimeZone': this.userProfile.userTimeZone,
-          'statusId': "SERVICE_PENDING",
-          'runTime': job.runTime
-        }
-        // using resp and checking it in promise only, as we need jobId that will not be available in case
+      await Promise.allSettled(jobsToUpdate.map(async (job: any) => {
+        // using resp and checking it, as we need jobId that will not be available in case
         // of promise is rejected
-        const resp = await JobService.updateJob(payload)
-        if (resp !== 'success') {
-          // if the job failed when updating then adding the jobId to the failedJobs array
+        try {
+          const resp = await JobService.updateJob(job)
+          if(resp.status == 200 && !hasError(resp) && resp.data.successMessage) {
+            // if the job succeded when updating then adding the jobId to the successJobs array
+            this.successJobs.push(job.jobId)
+          } else {
+            // if the job failed when updating then adding the jobId to the failedJobs array
+            this.failedJobs.push(job.jobId)
+          }
+        } catch(err) {
           this.failedJobs.push(job.jobId)
-        } else {
-          // if the job succeded when updating then adding the jobId to the successJobs array
-          this.successJobs.push(job.jobId)
         }
       }))
 
