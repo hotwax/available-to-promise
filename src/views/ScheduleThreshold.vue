@@ -47,7 +47,7 @@
             <div v-for="job in jobsForReorder" :key="job.jobId">
               <ion-card>
                 <ion-item>
-                  <ion-label>{{ job.jobName }}</ion-label>
+                  <ion-label>{{ job.isNew ? jobName : job.jobName }}</ion-label>
                   <ion-reorder slot="end"></ion-reorder>
                 </ion-item>
                 <ion-card-header>
