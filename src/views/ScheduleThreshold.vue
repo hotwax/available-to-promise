@@ -272,11 +272,13 @@ export default defineComponent({
           'statusId': "SERVICE_PENDING",
           'runTime': job.runTime
         }
+        // using resp and checking it in promise only, as we need jobId that will not be available in case
+        // of promise is rejected
         const resp = await JobService.updateJob(payload)
-        if (!resp) {
+        if (resp !== 'success') {
           // if the job failed when updating then adding the jobId to the failedJobs array
           this.failedJobs.push(job.jobId)
-        } else if (resp?.status === 200) {
+        } else {
           // if the job succeded when updating then adding the jobId to the successJobs array
           this.successJobs.push(job.jobId)
         }
@@ -318,6 +320,8 @@ export default defineComponent({
       if (!this.failedJobs.length) {
         this.store.dispatch('product/clearAllFilters')
         this.router.push('/select-product')
+      } else {
+        console.error('Some jobs have failed while updating')
       }
     },
     async scheduleService(searchPreferenceId: string, threshold: string, runTime?: string) {
@@ -368,13 +372,15 @@ export default defineComponent({
         'JOB_NAME': this.jobName ? this.jobName : this.userProfile.partyName,
         'SERVICE_NAME': job.serviceName,
         'SERVICE_COUNT': '0',
+        'SERVICE_TEMP_EXPR': 'EVERYDAY',
+        'SERVICE_RUN_AS_SYSTEM':'Y',
         'jobFields': {
           'productStoreId': productStoreId,
           'systemJobEnumId': job.systemJobEnumId,
-          'tempExprId': 'EVERYDAY',
+          'tempExprId': 'EVERYDAY', // Need to remove this as we are passing frequency in SERVICE_TEMP_EXPR, currently kept it for backward compatibility
           'maxRecurrenceCount': '-1',
           'parentJobId': job.parentJobId,
-          'runAsUser': 'system', // default system, but empty in run now
+          'runAsUser': 'system', // default system, but empty in run now. TODO Need to remove this as we are using SERVICE_RUN_AS_SYSTEM, currently kept it for backward compatibility
           'recurrenceTimeZone': DateTime.now().zoneName
         },
         'shopifyConfigId': shopifyConfigId,

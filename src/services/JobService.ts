@@ -1,8 +1,7 @@
 import api from '@/api'
 import store from "@/store";
 import logger from "@/logger";
-import { translate } from '@/i18n';
-import { hasError, showToast } from '@/utils';
+import { hasError } from '@/utils';
 import { DateTime } from 'luxon';
 
 const updateJob = async (job: any) => {
@@ -23,15 +22,13 @@ const updateJob = async (job: any) => {
   try {
     resp = await updateJobSandbox(payload)
     if (resp.status === 200 && !hasError(resp) && resp.data.successMessage) {
-      showToast(translate('Service updated successfully'))
+      return Promise.resolve('success')
     } else {
-      showToast(translate('Something went wrong'))
+      return Promise.reject('failed')
     }
   } catch (err) {
-    showToast(translate('Something went wrong'))
-    console.error(err)
+    return Promise.reject('failed')
   }
-  return resp;
 }
 
 const fetchJob = async (payload: any): Promise<any> => {

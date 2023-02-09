@@ -114,9 +114,10 @@ import {
   personCircleOutline
 } from "ionicons/icons";
 import { mapGetters, useStore } from "vuex";
-import { handleDateTimeInput } from "@/utils";
+import { handleDateTimeInput, hasError, showToast } from "@/utils";
 import { JobService } from "@/services/JobService";
 import { DateTime } from 'luxon';
+import { translate } from "@/i18n";
 
 export default defineComponent({
   name: "JobConfiguration",
@@ -263,11 +264,16 @@ export default defineComponent({
       if (job?.statusId === 'SERVICE_DRAFT') {
         this.store.dispatch('job/scheduleService', job)
       } else if (job?.statusId === 'SERVICE_PENDING') {
-        await JobService.updateJob(job).then((resp: any) => {
-          if (resp && this.$route.path.includes('threshold-updates')) {
+        try {
+          await JobService.updateJob(job)
+          if(this.$route.path.includes('threshold-updates')) {
             this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.currentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums})
           }
-        })
+          showToast(translate('Service updated successfully'))
+        } catch(err) {
+          showToast(translate('Something went wrong'))
+          console.error(err)
+        }
       }
     },
     getTime (time: any) {
