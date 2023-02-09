@@ -116,7 +116,7 @@ import {
   IonToolbar
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
-import { hasError, showToast } from '@/utils';
+import { getResponseError, hasError, showToast } from '@/utils';
 import { translate } from '@/i18n';
 import { JobService } from '@/services/JobService';
 import { DateTime } from 'luxon';
@@ -345,9 +345,15 @@ export default defineComponent({
         job = this.jobs[this.jobEnumId]
       }
 
+      // Used Guard Clause
+      if (!job) {
+        showToast(translate('Configuration missing'))
+        return;
+      }
+
       if(!shopifyConfigId) {
-        const resp = await this.store.dispatch('util/getShopifyConfig', productStoreId)
-        shopifyConfigId = resp[productStoreId]
+        const shopifyConfig = await this.store.dispatch('util/getShopifyConfig', productStoreId)
+        shopifyConfigId = shopifyConfig.shopifyConfigId
       }
 
       if (!facilityId) {
@@ -366,24 +372,26 @@ export default defineComponent({
         facilityId = resp[productStoreId]
       }
 
+      if (!facilityId.length) {
+        showToast(translate('Configuration missing'))
+        return;
+      }
+
       const payload = job ? {
         'JOB_NAME': this.jobName ? this.jobName : this.userProfile.partyName,
         'SERVICE_NAME': job.serviceName,
         'SERVICE_COUNT': '0',
-        'SERVICE_TEMP_EXPR': 'EVERYDAY',
-        'SERVICE_RUN_AS_SYSTEM':'Y',
         'jobFields': {
           'productStoreId': productStoreId,
           'systemJobEnumId': job.systemJobEnumId,
-          'tempExprId': 'EVERYDAY', // Need to remove this as we are passing frequency in SERVICE_TEMP_EXPR, currently kept it for backward compatibility
           'maxRecurrenceCount': '-1',
           'parentJobId': job.parentJobId,
-          'runAsUser': 'system', // default system, but empty in run now. TODO Need to remove this as we are using SERVICE_RUN_AS_SYSTEM, currently kept it for backward compatibility
-          'recurrenceTimeZone': DateTime.now().zoneName
+          'recurrenceTimeZone': this.userProfile?.userTimeZone
         },
         'shopifyConfigId': shopifyConfigId,
         'statusId': "SERVICE_PENDING",
         'systemJobEnumId': job.systemJobEnumId,
+        'includeAll': true, // true: includes all the product, false: includes only products updated in the last 24 hours
         searchPreferenceId,
         threshold,
         facilityId
@@ -392,21 +400,40 @@ export default defineComponent({
       // checking if the runtimeData has productStoreId, and if present then adding it on root level
       job?.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = productStoreId)
       job?.priority && (payload['SERVICE_PRIORITY'] = job.priority.toString())
-      runTime && (payload['SERVICE_TIME'] = runTime.toString())
 
       try {
-        resp = await JobService.scheduleJob({ ...job.runtimeData, ...payload });
-        if (resp.status == 200 && !hasError(resp)) {
+        const scheduleJobRequests = [];
+        // Job will be scheduled for single run where include all will be true
+        // This will apply threshold on exisiting products
+        // Deep cloning payload so that both the schedules do not share same reference
+        scheduleJobRequests.push(JobService.scheduleJob(JSON.parse(JSON.stringify({ ...job.runtimeData, ...payload }))).catch(error => { return error }))
+        payload['SERVICE_TEMP_EXPR'] = 'EVERYDAY';
+        payload['jobFields'].tempExprId = 'EVERYDAY'; // Need to remove this as we are passing frequency in SERVICE_TEMP_EXPR, currently kept it for backward compatibility
+        payload['SERVICE_RUN_AS_SYSTEM'] = 'Y';
+        payload['jobFields'].runAsUser = 'system';// default system, but empty in run now. TODO Need to remove this as we are using SERVICE_RUN_AS_SYSTEM, currently kept it for backward compatibility
+        payload['includeAll'] =  false;
+        job.runTime && (payload['SERVICE_TIME'] = job.runTime.toString())
+
+        // Scheduling Job that will run everyday and as system
+        scheduleJobRequests.push(JobService.scheduleJob({ ...job.runtimeData, ...payload }).catch(error => { return error }))
+        let scheduleJobResponse = await Promise.all(scheduleJobRequests);
+        let ifScheduleJobSuccess = scheduleJobResponse.every((response: any) => {
+          return response.status == 200 && !hasError(response);
+        })
+        if (ifScheduleJobSuccess) {
           showToast(translate('Service has been scheduled'))
           this.successJobs.push(job.jobId)
         } else {
-          showToast(translate('Something went wrong'))
+          let errorMessage = scheduleJobResponse.reduce((errorMessage: string, response: any) => {
+            return errorMessage += getResponseError(response);
+          }, "")
+          showToast(translate('Something went wrong'), errorMessage)
           this.failedJobs.push(job.jobId)
         }
       } catch (err) {
-        showToast(translate('Something went wrong'))
+        showToast(translate('Something went wrong'), err)
         this.failedJobs.push(job.jobId)
-        console.error(err)
+        this.$log.error(err);
       }
       return resp;
     }
