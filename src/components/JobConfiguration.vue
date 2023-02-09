@@ -267,7 +267,7 @@ export default defineComponent({
       } else if (job?.statusId === 'SERVICE_PENDING') {
         try {
           const resp = await JobService.updateJob(job)
-          if(resp.status == 200 && !hasError(resp) && resp.data.successMessage && this.$route.path.includes('threshold-updates')) {
+          if(resp.status == 200 && !hasError(resp) && resp.data.successMessage) {
             this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.currentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums})
             showToast(translate('Service updated successfully'))
           } else {
