@@ -328,7 +328,7 @@ export default defineComponent({
         logger.error('Some jobs have failed while updating')
       }
     },
-    async scheduleService(searchPreferenceId: string, threshold: string, runTime?: string) {
+    async scheduleService(searchPreferenceId: string, threshold: string, runTime: string) {
       let job = this.jobs[this.jobEnumId]
       // finding the job with draft status as in this case we may have an array of jobs with pending and
       // draft status
@@ -418,7 +418,7 @@ export default defineComponent({
         payload['SERVICE_RUN_AS_SYSTEM'] = 'Y';
         payload['jobFields'].runAsUser = 'system';// default system, but empty in run now. TODO Need to remove this as we are using SERVICE_RUN_AS_SYSTEM, currently kept it for backward compatibility
         payload['includeAll'] =  false;
-        job.runTime && (payload['SERVICE_TIME'] = job.runTime.toString())
+        job.runTime && (payload['SERVICE_TIME'] = runTime.toString())
 
         // Scheduling Job that will run everyday and as system
         scheduleJobRequests.push(JobService.scheduleJob({ ...job.runtimeData, ...payload }).catch(error => { return error }))
@@ -480,7 +480,7 @@ export default defineComponent({
       'statusId': 'SERVICE_PENDING',
       'isNew': true,
       'runTime': lastRunTime + 900000,
-      'jobId': 'newJob'
+      'jobId': 'newJob' // adding jobId as to identify the new job to be scheduled
     }
 
     this.jobsForReorder?.push(newJob)
