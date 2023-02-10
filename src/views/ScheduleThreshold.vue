@@ -314,10 +314,12 @@ export default defineComponent({
           await this.scheduleService(searchPreferenceId, this.threshold, jobRunTime)
         } else {
           showToast(translate('Something went wrong'))
+          this.failedJobs.push('newJob')
         }
       } catch (err) {
         logger.error(err)
         showToast(translate('Something went wrong'))
+        this.failedJobs.push('newJob')
       }
       this.isServiceScheduling = false
 
