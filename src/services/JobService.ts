@@ -1,4 +1,4 @@
-import api from '@/api'
+import { api } from '@/adapter';
 import store from "@/store";
 import logger from "@/logger";
 import { hasError } from '@/utils';

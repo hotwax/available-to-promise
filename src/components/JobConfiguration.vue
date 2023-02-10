@@ -1,7 +1,7 @@
 <template>
   <section>
     <ion-item lines="none">
-      <h1>{{ $t(title) }}</h1>
+      <h1>{{ title }}</h1>
       <ion-badge slot="end" color="dark" v-if="job?.runTime">{{ $t("running") }} {{ timeTillJob(job.runTime) }}</ion-badge>
     </ion-item>
 
@@ -69,18 +69,18 @@
     </ion-list>
     <div class="actions desktop-only">
       <div>
-        <ion-button size="small" fill="outline" color="medium" :disabled="status === 'SERVICE_DRAFT'" @click="skipJob(job)">{{ $t("Skip once") }}</ion-button>
-        <ion-button size="small" fill="outline" color="danger" :disabled="status === 'SERVICE_DRAFT'" @click="cancelJob(job)">{{ $t("Disable") }}</ion-button>
+        <ion-button size="small" fill="outline" color="medium" :disabled="!hasPermission(Actions.APP_JOB_UPDATE) || status === 'SERVICE_DRAFT'" @click="skipJob(job)">{{ $t("Skip once") }}</ion-button>
+        <ion-button size="small" fill="outline" color="danger" :disabled="!hasPermission(Actions.APP_JOB_UPDATE) || status === 'SERVICE_DRAFT'" @click="cancelJob(job)">{{ $t("Disable") }}</ion-button>
       </div>
       <div>
-        <ion-button size="small" fill="outline" @click="saveChanges()">{{ $t("Save changes") }}</ion-button>
+        <ion-button size="small" fill="outline" :disabled="!hasPermission(Actions.APP_JOB_UPDATE)" @click="saveChanges()">{{ $t("Save changes") }}</ion-button>
       </div>
     </div>
 
     <div class=" actions mobile-only">
-      <ion-button size="small" fill="outline" color="medium" :disabled="status === 'SERVICE_DRAFT'" @click="skipJob(job)">{{ $t("Skip once") }}</ion-button>
-      <ion-button size="small" fill="outline" color="danger" :disabled="status === 'SERVICE_DRAFT'" @click="cancelJob(job)">{{ $t("Disable") }}</ion-button>
-      <ion-button expand="block" fill="outline" @click="saveChanges()">{{ $t("Save changes") }}</ion-button>
+      <ion-button size="small" fill="outline" color="medium" :disabled="hasPermission(Actions.APP_JOB_UPDATE) || status === 'SERVICE_DRAFT'" @click="skipJob(job)">{{ $t("Skip once") }}</ion-button>
+      <ion-button size="small" fill="outline" color="danger" :disabled="hasPermission(Actions.APP_JOB_UPDATE) || status === 'SERVICE_DRAFT'" @click="cancelJob(job)">{{ $t("Disable") }}</ion-button>
+      <ion-button expand="block" fill="outline" :disabled="!hasPermission(Actions.APP_JOB_UPDATE)" @click="saveChanges()">{{ $t("Save changes") }}</ion-button>
     </div>
   </section>
 </template>
@@ -119,6 +119,7 @@ import { JobService } from "@/services/JobService";
 import { DateTime } from 'luxon';
 import { translate } from "@/i18n";
 import logger from "@/logger";
+import { Actions, hasPermission } from '@/authorization'
 
 export default defineComponent({
   name: "JobConfiguration",
@@ -299,10 +300,12 @@ export default defineComponent({
     }
     const store = useStore();
     return {
+      Actions,
       calendarClearOutline,
       chevronForwardOutline,
       cogOutline,
       customPopoverOptions,
+      hasPermission,
       timeOutline,
       timerOutline,
       store,

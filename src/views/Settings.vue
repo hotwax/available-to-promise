@@ -144,10 +144,15 @@ export default defineComponent({
     this.appVersion = this.appInfo.branch ? (this.appInfo.branch + "-" + this.appInfo.revision) : this.appInfo.tag;
   },
   methods: {
-    setEComStore(store: any) {
-      if(this.userProfile) {
+    setEComStore(event: any) {
+      // If the value is same, no need to update
+      // Handled case for programmatical changes
+      // https://github.com/ionic-team/ionic-framework/discussions/25532
+      // https://github.com/ionic-team/ionic-framework/issues/20106
+      // https://github.com/ionic-team/ionic-framework/pull/25858
+      if(this.userProfile?.stores && this.currentEComStore?.productStoreId !== event.detail.value) {
         this.store.dispatch('user/setEcomStore', {
-          'eComStore': this.userProfile.stores.find((str: any) => str.productStoreId == store['detail'].value)
+          'productStoreId': event.detail.value
         })
       }
     },
