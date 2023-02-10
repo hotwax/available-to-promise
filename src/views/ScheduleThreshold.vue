@@ -73,14 +73,15 @@
       </div>
 
       <div class="action desktop-only">
-        <ion-button @click="saveThresholdRule()">
+        <!-- disabling button as once user have clicked schedule job and some jobs have failed then clicking the button again will re-run the whole process -->
+        <ion-button @click="saveThresholdRule()" :disabled="failedJobs.length">
           <ion-icon slot="start" :icon="saveOutline" />
           {{ $t("Schedule Job") }}
         </ion-button>
       </div>
 
       <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="mobile-only">
-        <ion-fab-button>
+        <ion-fab-button @click="saveThresholdRule()" :disabled="failedJobs.length">
           <ion-icon :icon="arrowForwardOutline" />
         </ion-fab-button>
       </ion-fab>

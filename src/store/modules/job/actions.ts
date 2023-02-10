@@ -427,10 +427,8 @@ const actions: ActionTree<JobState, RootState> = {
     return resp;
   },
 
-  async cancelJob({ dispatch, state }, job) {
+  async cancelJob({ dispatch }, job) {
     let resp;
-
-    const cachedJob = state.cached[job.systemJobEnumId]
 
     try {
       resp = await JobService.updateJobSandbox({
