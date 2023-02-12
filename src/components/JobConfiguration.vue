@@ -15,7 +15,7 @@
       <ion-item>
         <ion-icon slot="start" :icon="timeOutline" />
         <ion-label>{{ $t("Run time") }}</ion-label>
-        <ion-label id="open-run-time-modal" slot="end">{{ job?.runTime ? getTime(job.runTime) : $t('Select run time') }}</ion-label>
+        <ion-label id="open-run-time-modal" slot="end">{{ job?.runTime ? getTime(runTime ? runTime : job.runTime) : $t('Select run time') }}</ion-label>
         <!-- TODO: display a button when we are not having a runtime and open the datetime component
         on click of that button
         Currently, when mapping the same datetime component for label and button so it's not working so for
@@ -143,7 +143,8 @@ export default defineComponent({
       jobStatus: this.status,
       ruleName: this.job?.jobName,
       minDateTime: DateTime.now().toISO(),
-      jobEnums: JSON.parse(process.env?.VUE_APP_JOB_ENUMS as string) as any
+      jobEnums: JSON.parse(process.env?.VUE_APP_JOB_ENUMS as string) as any,
+      runTime: ''
     }
   },
   props: ["job", "title", "status", "type", "productCount"],
@@ -207,9 +208,13 @@ export default defineComponent({
             role: 'cancel'
           }, {
             text: this.$t('Skip'),
-            handler: () => {
+            handler: async () => {
               if (job) {
-                this.store.dispatch('job/skipJob', job)
+                const { updatedRunTime } = await this.store.dispatch('job/skipJob', job)
+                if(updatedRunTime) {
+                  this.runTime = updatedRunTime;
+                  this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.currentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums})
+                }
               }
             }
           }],
@@ -226,8 +231,11 @@ export default defineComponent({
             role: 'cancel'
           }, {
             text: this.$t('Cancel'),
-            handler: () => {
-              this.store.dispatch('job/cancelJob', job);
+            handler: async () => {
+              const resp = await this.store.dispatch('job/cancelJob', job);
+              if(resp.status == 200 && !hasError(resp) && resp.data.successMessage) {
+                this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.currentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums})
+              }
             }
           }],
         });

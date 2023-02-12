@@ -421,8 +421,12 @@ const actions: ActionTree<JobState, RootState> = {
     } as any
 
     const resp = await JobService.updateJobSandbox(payload)
-    if (resp.status === 200 && !hasError(resp) && resp.data.docs) {
+    if (resp.status === 200 && !hasError(resp) && resp.data.successMessage) {
       commit(types.JOB_UPDATED, { job });
+      // TODO: improve the condition to store the current job in state.
+      // returning the updated runTime on success as, the job configuration component does not get updated when
+      // skipping a job from there.
+      return { updatedRunTime: payload.runTime }
     }
     return resp;
   },
