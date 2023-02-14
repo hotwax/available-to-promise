@@ -2,7 +2,7 @@
   <section>
     <ion-item lines="none">
       <h1>{{ title }}</h1>
-      <ion-badge slot="end" color="dark" v-if="job?.runTime">{{ $t("running") }} {{ timeTillJob(job.runTime) }}</ion-badge>
+      <ion-badge slot="end" color="dark" v-if="job?.runTime">{{ $t("running") }} {{ timeTillJob(runTime ? runTime : job.runTime) }}</ion-badge>
     </ion-item>
 
     <ion-list>
@@ -151,7 +151,6 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       shopifyConfigId: 'user/getShopifyConfigId',
-      currentEComStore: 'user/getCurrentEComStore',
       userProfile: 'user/getUserProfile'
     }),
     generateFrequencyOptions(): any {
@@ -212,7 +211,7 @@ export default defineComponent({
                 const { updatedRunTime } = await this.store.dispatch('job/skipJob', job)
                 if(updatedRunTime) {
                   this.runTime = updatedRunTime;
-                  this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.currentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums})
+                  this.store.dispatch('job/fetchPendingJobs', {viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums})
                 }
               }
             }
@@ -233,7 +232,7 @@ export default defineComponent({
             handler: async () => {
               const resp = await this.store.dispatch('job/cancelJob', job);
               if(resp.status == 200 && !hasError(resp) && resp.data.successMessage) {
-                this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.currentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums})
+                this.store.dispatch('job/fetchPendingJobs', {viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums})
               }
             }
           }],
@@ -286,7 +285,7 @@ export default defineComponent({
 
           const resp = await JobService.updateJob(job)
           if(resp.status == 200 && !hasError(resp) && resp.data.successMessage) {
-            this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.currentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums})
+            this.store.dispatch('job/fetchPendingJobs', {viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums})
             showToast(translate('Service updated successfully'))
           } else {
             showToast(translate('Something went wrong'))

@@ -18,7 +18,6 @@ const getters: GetterTree <UserState, RootState> = {
         return state.token
     },
     getUserProfile (state) {
-        console.log('state.current', state.current)
         return state.current
     },
     getInstanceUrl (state) {

@@ -47,7 +47,7 @@ const actions: ActionTree<JobState, RootState> = {
         "systemJobEnumId_fld1_value": payload.jobEnums[1],
         "systemJobEnumId_fld1_grp": "2",
         "systemJobEnumId_fld1_op": "equals",
-        "productStoreId": payload.eComStoreId,
+        "productStoreId": this.state.user.currentEComStore.productStoreId,
         "productStoreId_grp": "2",
         "statusId": ["SERVICE_CANCELLED", "SERVICE_CRASHED", "SERVICE_FAILED", "SERVICE_FINISHED"],
         "statusId_op": "in",
@@ -103,7 +103,7 @@ const actions: ActionTree<JobState, RootState> = {
         "systemJobEnumId_fld1_value": payload.jobEnums[1],
         "systemJobEnumId_fld1_grp": "2",
         "systemJobEnumId_fld1_op": "equals",
-        "productStoreId": payload.eComStoreId,
+        "productStoreId": this.state.user.currentEComStore.productStoreId,
         "productStoreId_grp": "2",
         "statusId": ["SERVICE_RUNNING", "SERVICE_QUEUED"],
         "statusId_op": "in",
@@ -159,7 +159,7 @@ const actions: ActionTree<JobState, RootState> = {
         "systemJobEnumId_fld1_value": payload.jobEnums[1],
         "systemJobEnumId_fld1_grp": "2",
         "systemJobEnumId_fld1_op": "equals",
-        "productStoreId": payload.eComStoreId,
+        "productStoreId": this.state.user.currentEComStore.productStoreId,
         "productStoreId_grp": "2",
         "statusId": "SERVICE_PENDING",
         "systemJobEnumId_op": "not-empty"
@@ -267,7 +267,7 @@ const actions: ActionTree<JobState, RootState> = {
     commit(types.JOB_RUNNING_UPDATED, {jobs: [], total: 0});
   },
 
-  async skipJob({ commit, getters }, job) {
+  async skipJob({ getters }, job) {
     let skipTime = {};
     const integer1 = getters['getTemporalExpr'](job.tempExprId).integer1;
     const integer2 = getters['getTemporalExpr'](job.tempExprId).integer2
