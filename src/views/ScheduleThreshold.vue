@@ -74,14 +74,14 @@
 
       <div class="action desktop-only">
         <!-- disabling button as once user have clicked schedule job and some jobs have failed then clicking the button again will re-run the whole process -->
-        <ion-button @click="saveThresholdRule()" :disabled="failedJobs.length">
+        <ion-button @click="saveThresholdRule()" :disabled="failedJobs.length || isServiceScheduling">
           <ion-icon slot="start" :icon="saveOutline" />
           {{ $t("Schedule Job") }}
         </ion-button>
       </div>
 
       <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="mobile-only">
-        <ion-fab-button @click="saveThresholdRule()" :disabled="failedJobs.length">
+        <ion-fab-button @click="saveThresholdRule()" :disabled="failedJobs.length || isServiceScheduling">
           <ion-icon :icon="arrowForwardOutline" />
         </ion-fab-button>
       </ion-fab>
@@ -125,6 +125,7 @@ import { mapGetters, useStore } from 'vuex';
 import { ProductService } from '@/services/ProductService';
 import { useRouter } from 'vue-router';
 import logger from '@/logger';
+import emitter from '@/event-bus';
 
 export default defineComponent({
   name: 'SelectProduct',
@@ -165,7 +166,7 @@ export default defineComponent({
       failedJobs: [] as any,
       successJobs: [] as any,
       pendingExportProductThresholdJobs: [] as any,
-      draftExportProductThresholdJob: {}
+      draftExportProductThresholdJob: {} as any
     }
   },
   computed: {
@@ -447,68 +448,81 @@ export default defineComponent({
       return resp;
     },
     async fetchExportThresholdJobs() {
-      const resp = await JobService.fetchJobInformation({
+      // added loader as fetching jobs information may take some time
+      emitter.emit('presentLoader');
+
+      const payload = {
         "inputFields": {
-          "statusId_fld0_value": "SERVICE_DRAFT",
-          "statusId_fld0_op": "equals",
-          "statusId_fld0_grp": "1",
-          "statusId_fld1_value": "SERVICE_PENDING",
-          "statusId_fld1_op": "equals",
-          "statusId_fld1_grp": "2",
-          "productStoreId_fld0_value": this.currentEComStore.productStoreId,
-          "productStoreId_fld0_op": "equals",
-          "productStoreId_fld0_grp": "2",
+          "statusId": "SERVICE_DRAFT",
+          "statusId_op": "equals",
           "systemJobEnumId": "JOB_EXP_PROD_THRSHLD",
           "systemJobEnumId_op": "equals"
         },
-        "entityName": "JobSandbox",
         "noConditionFind": "Y",
-        "viewSize": 50,
+        "viewSize": 1,
         "orderBy": "runTime ASC"
-      })
-      if (resp.status === 200 && !hasError(resp) && resp.data.docs) {
-        const exportProductThresholdJobs = resp.data.docs.map((job: any) => ({
-          ...job,
-          id: job.jobId,
-          frequency: job.tempExprId,
-          enumId: job.systemJobEnumId,
-          status: job.statusId
-        }))
-
-        this.pendingExportProductThresholdJobs = exportProductThresholdJobs.filter((job: any) => job.statusId !== 'SERVICE_DRAFT')
-        this.draftExportProductThresholdJob = exportProductThresholdJobs.find((job: any) => job.statusId === 'SERVICE_DRAFT')
-
-        // fetching temp expressions
-        const tempExpr = exportProductThresholdJobs.map((job: any) => job.tempExprId)
-
-        console.log('tempExpr', tempExpr)
-
-        await this.store.dispatch('job/fetchJobDescription', [this.jobEnumId]);
-        await this.store.dispatch('job/fetchTemporalExpression', tempExpr)
       }
-      return resp;
+
+      // making separate api calls for draft and pending jobs information and not using promise.all
+      // as the api calls are not dependent on each other and also we don't need to take any decision based on success
+      // of these api calls together
+      try {
+        const resp = await JobService.fetchJobInformation(payload, true)
+        if (resp.status === 200 && !hasError(resp) && resp.data.docs) {
+          let job = resp.data.docs[0] // using 0th index as we will only have a single draft data for a job
+
+          this.draftExportProductThresholdJob = {
+            ...job,
+            id: job.jobId,
+            frequency: job.tempExprId,
+            enumId: job.systemJobEnumId,
+            status: job.statusId
+          }
+        } else {
+          logger.error('Failed to fetch export product threshold draft job information')
+        }
+      } catch(err) {
+        logger.error('Failed to fetch export product threshold draft job information')
+      }
+
+      try {
+        const resp = await JobService.fetchJobInformation({
+          ...payload,
+          "inputFields": {
+            "statusId": "SERVICE_PENDING",
+            "statusId_op": "equals",
+            "productStoreId": this.currentEComStore.productStoreId,
+            "productStoreId_op": "equals",
+            "systemJobEnumId": "JOB_EXP_PROD_THRSHLD",
+            "systemJobEnumId_op": "equals"
+          },
+          viewSize: 50
+        })
+        if (resp.status === 200 && !hasError(resp) && resp.data.docs) {
+          this.pendingExportProductThresholdJobs = resp.data.docs.map((job: any) => ({
+            ...job,
+            id: job.jobId,
+            frequency: job.tempExprId,
+            enumId: job.systemJobEnumId,
+            status: job.statusId
+          }))
+        } else {
+          logger.error('Failed to fetch export product threshold pending jobs information')
+        }
+      } catch(err) {
+        logger.error('Failed to fetch export product threshold pending jobs information')
+      }
+
+      const exportProductThresholdJobs = [...this.pendingExportProductThresholdJobs, ...[this.draftExportProductThresholdJob]]
+      const tempExpr = exportProductThresholdJobs.map((job: any) => job.tempExprId)
+
+      await this.store.dispatch('job/fetchJobDescription', [this.jobEnumId]);
+      await this.store.dispatch('job/fetchTemporalExpression', tempExpr)
+
+      emitter.emit('dismissLoader');
     }
   },
-  mounted() {
-    console.log('mounted hook schedule threshold')
-  },
-  unmounted() {
-    console.log('unmounted hook schedule threshold')
-  },
-  ionViewDidLeave() {
-    // TODO: remove this initialization from the hook and update the code accordingly
-    // Done this as currently the component is not being unmounted when changing the route as there exist
-    // a connection between parent and child and ionViewWillEnter hook does not reinitialize the
-    // local data property
-    this.jobName = ''
-    this.jobsForReorder = []
-    this.initialJobsOrder = []
-    this.initialRunTime = ''
-    this.updatedJobsOrder = []
-    this.failedJobs = []
-    this.successJobs = []
-  },
-  async ionViewWillEnter() {
+  async mounted() {
     await this.fetchExportThresholdJobs();
 
     // Storing the pending jobs in the reorder logic
