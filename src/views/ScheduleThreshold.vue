@@ -270,6 +270,19 @@ export default defineComponent({
         // using resp and checking it, as we need jobId that will not be available in case
         // of promise is rejected
         try {
+
+          const payload = {
+            'jobId': job.jobId,
+            'systemJobEnumId': job.systemJobEnumId,
+            'recurrenceTimeZone': this.userProfile.userTimeZone,
+            'tempExprId': job.frequency ? job.frequency : job.jobStatus,
+            'statusId': "SERVICE_PENDING"
+          } as any
+
+          job?.runTime && (payload['runTime'] = job.runTime)
+          job?.sinceId && (payload['sinceId'] = job.sinceId)
+          job?.jobName && (payload['jobName'] = job.jobName)
+
           const resp = await JobService.updateJob(job)
           if(resp.status == 200 && !hasError(resp) && resp.data.successMessage) {
             // if the job succeded when updating then adding the jobId to the successJobs array

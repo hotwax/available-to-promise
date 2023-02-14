@@ -153,7 +153,8 @@ export default defineComponent({
       getJobStatus: 'job/getJobStatus',
       getJob: 'job/getJob',
       shopifyConfigId: 'user/getShopifyConfigId',
-      currentEComStore: 'user/getCurrentEComStore'
+      currentEComStore: 'user/getCurrentEComStore',
+      userProfile: 'user/getUserProfile'
     }),
     generateFrequencyOptions(): any {
       const optionDefault = [{
@@ -275,6 +276,19 @@ export default defineComponent({
         this.store.dispatch('job/scheduleService', job)
       } else if (job?.statusId === 'SERVICE_PENDING') {
         try {
+
+          const payload = {
+            'jobId': job.jobId,
+            'systemJobEnumId': job.systemJobEnumId,
+            'recurrenceTimeZone': this.userProfile.userTimeZone,
+            'tempExprId': job.frequency ? job.frequency : job.jobStatus, // TODO: change jobStatus is to frequency
+            'statusId': "SERVICE_PENDING"
+          } as any
+
+          job?.runTime && (payload['runTime'] = job.runTime)
+          job?.sinceId && (payload['sinceId'] = job.sinceId)
+          job?.jobName && (payload['jobName'] = job.jobName)
+
           const resp = await JobService.updateJob(job)
           if(resp.status == 200 && !hasError(resp) && resp.data.successMessage) {
             this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.currentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums})

@@ -420,7 +420,7 @@ const actions: ActionTree<JobState, RootState> = {
       'statusId': "SERVICE_PENDING"
     } as any
 
-    const resp = await JobService.updateJobSandbox(payload)
+    const resp = await JobService.updateJob(payload)
     if (resp.status === 200 && !hasError(resp) && resp.data.successMessage) {
       commit(types.JOB_UPDATED, { job });
       // TODO: improve the condition to store the current job in state.
@@ -435,7 +435,7 @@ const actions: ActionTree<JobState, RootState> = {
     let resp;
 
     try {
-      resp = await JobService.updateJobSandbox({
+      resp = await JobService.updateJob({
         jobId: job.jobId,
         systemJobEnumId: job.systemJobEnumId,
         statusId: "SERVICE_CANCELLED",

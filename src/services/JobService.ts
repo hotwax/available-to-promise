@@ -3,22 +3,6 @@ import store from "@/store";
 import logger from "@/logger";
 import { hasError } from '@/utils';
 
-const updateJob = async (job: any) => {
-  const payload = {
-    'jobId': job.jobId,
-    'systemJobEnumId': job.systemJobEnumId,
-    'recurrenceTimeZone': store.state.user.current.userTimeZone,
-    'tempExprId': job.frequency ? job.frequency : job.jobStatus,
-    'statusId': "SERVICE_PENDING"
-  } as any
-
-  job?.runTime && (payload['runTime'] = job.runTime)
-  job?.sinceId && (payload['sinceId'] = job.sinceId)
-  job?.jobName && (payload['jobName'] = job.jobName)
-
-  return await updateJobSandbox(payload)
-}
-
 const fetchJob = async (payload: any): Promise<any> => {
   let resp;
   const params = {
@@ -65,7 +49,7 @@ const fetchJobDescription = async (payload: any): Promise <any>  => {
   });
 }
 
-const updateJobSandbox = async (payload: any): Promise <any>  => {
+const updateJob = async (payload: any): Promise <any>  => {
   return api({
     url: "service/updateJobSandbox",
     method: "post",
@@ -104,7 +88,6 @@ export const JobService = {
   fetchTemporalExpression,
   fetchThresholdRules,
   updateJob,
-  updateJobSandbox,
   scheduleJob,
   fetchJob
 }
