@@ -163,15 +163,15 @@ export default defineComponent({
       initialRunTime: '',
       updatedJobsOrder: [] as any,
       failedJobs: [] as any,
-      successJobs: [] as any
+      successJobs: [] as any,
+      pendingExportProductThresholdJobs: [] as any,
+      draftExportProductThresholdJob: {}
     }
   },
   computed: {
     ...mapGetters({
       currentEComStore: 'user/getCurrentEComStore',
       shopifyConfig: 'util/getShopifyConfig',
-      jobs: 'job/getJobs',
-      getJob: 'job/getJob',
       facilitiesByProductStore: 'util/getFacilityByProductStore',
       query: 'product/getQuery',
       temporalExpr: 'job/getTemporalExpr',
@@ -296,13 +296,6 @@ export default defineComponent({
         }
       }))
 
-      this.store.dispatch('job/fetchJobs', {
-        inputFields: {
-          'systemJobEnumId': this.jobEnumId,
-          'systemJobEnumId_op': 'equals'
-        }
-      })
-
       // re-initialized params object from query as there is no need for grouping or pagination when storing the query
       solrQuery.json.params = {
         "q.op": "AND"
@@ -345,10 +338,7 @@ export default defineComponent({
       }
     },
     async scheduleService(searchPreferenceId: string, threshold: string, runTime: string) {
-      let job = this.jobs[this.jobEnumId]
-      // finding the job with draft status as in this case we may have an array of jobs with pending and
-      // draft status
-      job = job?.find((job: any) => job.statusId === 'SERVICE_DRAFT')
+      let job = this.draftExportProductThresholdJob as any;
       const productStoreId = this.currentEComStore.productStoreId
       let shopifyConfigId = this.shopifyConfig[productStoreId]
       let facilityId = this.facilitiesByProductStore[productStoreId]
@@ -356,19 +346,14 @@ export default defineComponent({
       job.jobId = 'newJob'
 
       if (!job) {
-        await this.store.dispatch('job/fetchJobs', {
-          inputFields: {
-            statusId: "SERVICE_DRAFT",
-            statusId_op: "equals",
-            systemJobEnumId: this.jobEnumId,
-          },
-          viewSize: 1
-        })
-        job = this.jobs[this.jobEnumId]
+        await this.fetchExportThresholdJobs();
+        job = this.draftExportProductThresholdJob as any
       }
 
       // Used Guard Clause
       if (!job) {
+        // adding new job in failed status if the draft job data is not available
+        this.failedJobs.push('newJob')
         showToast(translate('Configuration missing'))
         return;
       }
@@ -395,6 +380,8 @@ export default defineComponent({
       }
 
       if (!facilityId.length) {
+        // adding new job in failed status if the facilityId is not available
+        this.failedJobs.push('newJob')
         showToast(translate('Configuration missing'))
         return;
       }
@@ -458,7 +445,55 @@ export default defineComponent({
         this.$log.error(err);
       }
       return resp;
+    },
+    async fetchExportThresholdJobs() {
+      const resp = await JobService.fetchJobInformation({
+        "inputFields": {
+          "statusId_fld0_value": "SERVICE_DRAFT",
+          "statusId_fld0_op": "equals",
+          "statusId_fld0_grp": "1",
+          "statusId_fld1_value": "SERVICE_PENDING",
+          "statusId_fld1_op": "equals",
+          "statusId_fld1_grp": "2",
+          "productStoreId_fld0_value": this.currentEComStore.productStoreId,
+          "productStoreId_fld0_op": "equals",
+          "productStoreId_fld0_grp": "2",
+          "systemJobEnumId": "JOB_EXP_PROD_THRSHLD",
+          "systemJobEnumId_op": "equals"
+        },
+        "entityName": "JobSandbox",
+        "noConditionFind": "Y",
+        "viewSize": 50,
+        "orderBy": "runTime ASC"
+      })
+      if (resp.status === 200 && !hasError(resp) && resp.data.docs) {
+        const exportProductThresholdJobs = resp.data.docs.map((job: any) => ({
+          ...job,
+          id: job.jobId,
+          frequency: job.tempExprId,
+          enumId: job.systemJobEnumId,
+          status: job.statusId
+        }))
+
+        this.pendingExportProductThresholdJobs = exportProductThresholdJobs.filter((job: any) => job.statusId !== 'SERVICE_DRAFT')
+        this.draftExportProductThresholdJob = exportProductThresholdJobs.find((job: any) => job.statusId === 'SERVICE_DRAFT')
+
+        // fetching temp expressions
+        const tempExpr = exportProductThresholdJobs.map((job: any) => job.tempExprId)
+
+        console.log('tempExpr', tempExpr)
+
+        await this.store.dispatch('job/fetchJobDescription', [this.jobEnumId]);
+        await this.store.dispatch('job/fetchTemporalExpression', tempExpr)
+      }
+      return resp;
     }
+  },
+  mounted() {
+    console.log('mounted hook schedule threshold')
+  },
+  unmounted() {
+    console.log('unmounted hook schedule threshold')
   },
   ionViewDidLeave() {
     // TODO: remove this initialization from the hook and update the code accordingly
@@ -474,16 +509,10 @@ export default defineComponent({
     this.successJobs = []
   },
   async ionViewWillEnter() {
-    await this.store.dispatch('job/fetchJobs', {
-      inputFields: {
-        systemJobEnumId: this.jobEnumId,
-        systemJobEnumId_op: "equals"
-      },
-      viewSize: 20
-    })
+    await this.fetchExportThresholdJobs();
 
-    // Filtered all the jobs that are in pending state as we will only use those jobs for reordering
-    this.jobsForReorder = this.getJob(this.jobEnumId).filter((job: any) => job.statusId === 'SERVICE_PENDING')
+    // Storing the pending jobs in the reorder logic
+    this.jobsForReorder = this.pendingExportProductThresholdJobs;
 
     // Finding the runTime of the first job or if there are no pending jobs then assigning current time
     // to initialRunTime and similarly finding last run time to assign a time to the new job
@@ -495,7 +524,7 @@ export default defineComponent({
       'tempExprId': 'EVERYDAY',
       'statusId': 'SERVICE_PENDING',
       'isNew': true,
-      'runTime': lastRunTime + 900000,
+      'runTime': this.jobsForReorder[0]?.runTime ? lastRunTime + 900000 : this.initialRunTime,
       'jobId': 'newJob' // adding jobId as to identify the new job to be scheduled
     }
 

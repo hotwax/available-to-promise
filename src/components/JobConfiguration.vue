@@ -150,8 +150,6 @@ export default defineComponent({
   props: ["job", "title", "status", "type", "productCount"],
   computed: {
     ...mapGetters({
-      getJobStatus: 'job/getJobStatus',
-      getJob: 'job/getJob',
       shopifyConfigId: 'user/getShopifyConfigId',
       currentEComStore: 'user/getCurrentEComStore',
       userProfile: 'user/getUserProfile'
@@ -272,16 +270,13 @@ export default defineComponent({
       const job = this.job;
       job.jobName = this.ruleName;
       job['jobStatus'] = this.jobStatus !== 'SERVICE_DRAFT' ? this.jobStatus : 'HOURLY';
-      if (job?.statusId === 'SERVICE_DRAFT') {
-        this.store.dispatch('job/scheduleService', job)
-      } else if (job?.statusId === 'SERVICE_PENDING') {
+      if (job?.statusId === 'SERVICE_PENDING') {
         try {
-
           const payload = {
             'jobId': job.jobId,
             'systemJobEnumId': job.systemJobEnumId,
             'recurrenceTimeZone': this.userProfile.userTimeZone,
-            'tempExprId': job.frequency ? job.frequency : job.jobStatus, // TODO: change jobStatus is to frequency
+            'tempExprId': job.frequency ? job.frequency : job.jobStatus, // TODO: change jobStatus to frequency
             'statusId': "SERVICE_PENDING"
           } as any
 

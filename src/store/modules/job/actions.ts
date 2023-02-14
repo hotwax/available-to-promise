@@ -260,140 +260,11 @@ const actions: ActionTree<JobState, RootState> = {
   removeThresholdRule({ commit }, id){
     commit(types.JOB_THRESHOLD_RULE_REMOVED, id);
   },
-  
-  async fetchJobs ({ state, commit, dispatch }, payload) {
-    const resp = await JobService.fetchJobInformation({
-      "inputFields": {
-        "statusId_fld0_value": "SERVICE_DRAFT",
-        "statusId_fld0_op": "equals",
-        "statusId_fld0_grp": "1",
-        "statusId_fld1_value": "SERVICE_PENDING",
-        "statusId_fld1_op": "equals",
-        "statusId_fld1_grp": "2",
-        "productStoreId_fld0_value": this.state.user.currentEComStore.productStoreId,
-        "productStoreId_fld0_op": "equals",
-        "productStoreId_fld0_grp": "2",
-        ...payload.inputFields
-      },
-      "entityName": "JobSandbox",
-      "noConditionFind": "Y",
-      "viewSize": payload.viewSize ? payload.viewSize : (payload.inputFields?.systemJobEnumId?.length * 2),
-      "orderBy": "runTime ASC"
-    })
-    if (resp.status === 200 && !hasError(resp) && resp.data.docs) {
-      const cached = JSON.parse(JSON.stringify(state.cached));
-
-      // added condition to store multiple pending jobs in the state for export products,
-      // getting job with status Service draft as well, as this information will be needed when scheduling
-      // a new batch
-      // TODO: this needs to be updated when we will be storing the draft and pending jobs separately
-      const exportProductThresholdJobs = [] as any
-      const exportProductThresholdEnum = 'JOB_EXP_PROD_THRSHLD'
-      resp.data.docs.filter((job: any) => job.systemJobEnumId === exportProductThresholdEnum).map((job: any) => {
-        exportProductThresholdJobs.push({
-          ...job,
-          id: job.jobId,
-          frequency: job.tempExprId,
-          enumId: job.systemJobEnumId,
-          status: job.statusId
-        })
-      })
-
-      resp.data.docs.filter((job: any) => job.statusId === 'SERVICE_PENDING').map((job: any) => {
-
-        // added condition to store multiple pending jobs in the state for order batch jobs
-        if (job.systemJobEnumId === exportProductThresholdEnum) {
-          return cached[job.systemJobEnumId] = exportProductThresholdJobs
-        }
-        
-        return cached[job.systemJobEnumId] = {
-          ...job,
-          id: job.jobId,
-          frequency: job.tempExprId,
-          enumId: job.systemJobEnumId,
-          status: job.statusId
-        }
-      })  
-
-      // always storing the jobs as an array as it will be helful when reordering the jobs or creating a new batch job
-      resp.data.docs.filter((job: any) => job.statusId === 'SERVICE_DRAFT').map((job: any) => {
-        return cached[job.systemJobEnumId] = cached[job.systemJobEnumId] ? cached[job.systemJobEnumId] : [{
-          ...job,
-          id: job.jobId,
-          frequency: job.tempExprId,
-          enumId: job.systemJobEnumId,
-          status: job.statusId
-        }]
-      });
-
-      // fetching temp expressions
-      const tempExpr = Object.values(cached).map((job: any) => {
-        // checked that if there is an array of jobs like in case of batch jobs then finding
-        // the tempExprId for all the nested jobs
-        if (job.length) return [...(job.map((jobInfo: any) => jobInfo.tempExprId))]
-        return job.tempExprId
-      }).flat()
-
-      await dispatch('fetchJobDescription', Object.keys(cached).map((job: any) => job));
-      await dispatch('fetchTemporalExpression', tempExpr)
-
-      commit(types.JOB_UPDATED_BULK, cached);
-    }
-    return resp;
-  },
-
-  async scheduleService({ dispatch }, job) {
-    let resp;
-
-    const payload = {
-      'JOB_NAME': job.jobName,
-      'SERVICE_NAME': job.serviceName,
-      'SERVICE_COUNT': '0',
-      'SERVICE_TEMP_EXPR': job.jobStatus,
-      'jobFields': {
-        'productStoreId': this.state.user.currentEComStore.productStoreId,
-        'systemJobEnumId': job.systemJobEnumId,
-        'tempExprId': job.jobStatus, // Need to remove this as we are passing frequency in SERVICE_TEMP_EXPR, currently kept it for backward compatibility
-        'maxRecurrenceCount': '-1',
-        'parentJobId': job.parentJobId,
-        'runAsUser': 'system', // default system, but empty in run now
-        'recurrenceTimeZone': this.state.user.current.userTimeZone,
-      },
-      'shopifyConfigId': this.state.user.shopifyConfig,
-      'statusId': "SERVICE_PENDING",
-      'systemJobEnumId': job.systemJobEnumId
-    } as any
-
-    // checking if the runtimeData has productStoreId, and if present then adding it on root level
-    job?.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = this.state.user.currentEComStore.productStoreId)
-    job?.priority && (payload['SERVICE_PRIORITY'] = job.priority.toString())
-    job?.runTime && (payload['SERVICE_TIME'] = job.runTime.toString())
-
-    try {
-      resp = await JobService.scheduleJob({ ...job.runtimeData, ...payload });
-      if (resp.status == 200 && !hasError(resp)) {
-        showToast(translate('Service has been scheduled'))
-        dispatch('fetchJobs', {
-          inputFields: {
-            'systemJobEnumId': payload.systemJobEnumId,
-            'systemJobEnumId_op': 'equals'
-          }
-        })
-      } else {
-        showToast(translate('Something went wrong'), getResponseError(resp))
-      }
-    } catch (err) {
-      showToast(translate('Something went wrong'), err)
-      logger.error(err)
-    }
-    return resp;
-  },
 
   clearJobState({commit}) {
     commit(types.JOB_PENDING_UPDATED, {jobs: [], total: 0});
     commit(types.JOB_HISTORY_UPDATED, {jobs: [], total: 0});
     commit(types.JOB_RUNNING_UPDATED, {jobs: [], total: 0});
-    commit(types.JOB_UPDATED_BULK, {})
   },
 
   async skipJob({ commit, getters }, job) {
@@ -422,7 +293,6 @@ const actions: ActionTree<JobState, RootState> = {
 
     const resp = await JobService.updateJob(payload)
     if (resp.status === 200 && !hasError(resp) && resp.data.successMessage) {
-      commit(types.JOB_UPDATED, { job });
       // TODO: improve the condition to store the current job in state.
       // returning the updated runTime on success as, the job configuration component does not get updated when
       // skipping a job from there.
@@ -444,13 +314,6 @@ const actions: ActionTree<JobState, RootState> = {
       });
       if (resp.status == 200 && !hasError(resp)) {
         showToast(translate('Service updated successfully'))
-        // deleting the enum from cached job as we will not store the job with cancelled status
-        dispatch('fetchJobs', {
-          inputFields: {
-            'systemJobEnumId': job.systemJobEnumId,
-            'systemJobEnumId_op': 'equals'
-          }
-        })
       } else {
         showToast(translate('Something went wrong'), getResponseError(resp))
       }
