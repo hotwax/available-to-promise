@@ -265,38 +265,6 @@ export default defineComponent({
       const solrQuery = this.query
 
       const jobRunTime = this.updatedJobsOrder.find((job: any) => job.isNew)?.runTime
-      // filtered jobs by removing the new job as we need to update already existing job
-      const jobsToUpdate = this.updatedJobsOrder.filter((job: any) => !job.isNew)
-
-      await Promise.allSettled(jobsToUpdate.map(async (job: any) => {
-        // using resp and checking it, as we need jobId that will not be available in case
-        // of promise is rejected
-        try {
-
-          const payload = {
-            'jobId': job.jobId,
-            'systemJobEnumId': job.systemJobEnumId,
-            'recurrenceTimeZone': this.userProfile.userTimeZone,
-            'tempExprId': job.frequency ? job.frequency : job.jobStatus,
-            'statusId': "SERVICE_PENDING"
-          } as any
-
-          job?.runTime && (payload['runTime'] = job.runTime)
-          job?.sinceId && (payload['sinceId'] = job.sinceId)
-          job?.jobName && (payload['jobName'] = job.jobName)
-
-          const resp = await JobService.updateJob(payload)
-          if(resp.status == 200 && !hasError(resp) && resp.data.successMessage) {
-            // if the job succeded when updating then adding the jobId to the successJobs array
-            this.successJobs.push(job.jobId)
-          } else {
-            // if the job failed when updating then adding the jobId to the failedJobs array
-            this.failedJobs.push(job.jobId)
-          }
-        } catch(err) {
-          this.failedJobs.push(job.jobId)
-        }
-      }))
 
       // re-initialized params object from query as there is no need for grouping or pagination when storing the query
       solrQuery.json.params = {
@@ -317,18 +285,56 @@ export default defineComponent({
             "searchPrefId": searchPreferenceId,
             "userSearchPrefTypeId": "THRESHOLD_INV_QUERY"
           }
-          // Handle the case whether we will schedule service if searchPrefId is not associated with user.
+          // TODO: Handle the case whether we will schedule service if searchPrefId is not associated with user.
           await ProductService.associateSearchPrefToUser(params);
           await this.scheduleService(searchPreferenceId, this.threshold, jobRunTime)
+
+          // checking whether the service has been scheduled successfully, if yes then only updating other jobs otherwise not
+          if (this.successJobs.includes('')) {
+            // filtered jobs by removing the new job as we need to update already existing job
+            const jobsToUpdate = this.updatedJobsOrder.filter((job: any) => !job.isNew)
+
+            await Promise.allSettled(jobsToUpdate.map(async (job: any) => {
+              // using resp and checking it, as we need jobId that will not be available in case
+              // of promise is rejected
+              try {
+
+                const payload = {
+                  'jobId': job.jobId,
+                  'systemJobEnumId': job.systemJobEnumId,
+                  'recurrenceTimeZone': this.userProfile.userTimeZone,
+                  'tempExprId': job.frequency ? job.frequency : job.jobStatus,
+                  'statusId': "SERVICE_PENDING"
+                } as any
+
+                job?.runTime && (payload['runTime'] = job.runTime)
+                job?.sinceId && (payload['sinceId'] = job.sinceId)
+                job?.jobName && (payload['jobName'] = job.jobName)
+
+                const resp = await JobService.updateJob(payload)
+                if(resp.status == 200 && !hasError(resp) && resp.data.successMessage) {
+                  // if the job succeded when updating then adding the jobId to the successJobs array
+                  this.successJobs.push(job.jobId)
+                } else {
+                  // if the job failed when updating then adding the jobId to the failedJobs array
+                  this.failedJobs.push(job.jobId)
+                }
+              } catch(err) {
+                this.failedJobs.push(job.jobId)
+              }
+            }))
+          } else {
+            logger.error('Failed to update jobs as the service has not been scheduled successfully')
+            this.failedJobs = this.jobsForReorder.map((job: any) => job.jobId)
+          }
         } else {
           showToast(translate('Something went wrong'))
-          // adding newJob in failed array as to identify the new job
-          this.failedJobs.push('')
+          this.failedJobs = this.jobsForReorder.map((job: any) => job.jobId)
         }
       } catch (err) {
         logger.error(err)
         showToast(translate('Something went wrong'))
-        this.failedJobs.push('')
+        this.failedJobs = this.jobsForReorder.map((job: any) => job.jobId)
       }
       this.isServiceScheduling = false
       emitter.emit('dismissLoader');
@@ -338,14 +344,13 @@ export default defineComponent({
         this.store.dispatch('product/clearAllFilters')
         this.router.push('/select-product')
       } else {
-        logger.error('Some jobs have failed while updating')
+        logger.error('Some jobs have failed while updating/scheduling')
       }
     },
     async scheduleService(searchPreferenceId: string, threshold: string, runTime: string) {
       const productStoreId = this.currentEComStore.productStoreId
       let shopifyConfigId = this.shopifyConfig[productStoreId]
       let facilityId = this.facilitiesByProductStore[productStoreId]
-      let resp = '' as any;
 
       // Used Guard Clause
       if (!Object.keys(this.job).length) {
@@ -441,7 +446,6 @@ export default defineComponent({
         this.failedJobs.push('')
         this.$log.error(err);
       }
-      return resp;
     },
     async fetchExportThresholdJobs() {
       // added loader as fetching jobs information may take some time
