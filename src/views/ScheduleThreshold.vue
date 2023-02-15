@@ -165,8 +165,7 @@ export default defineComponent({
       updatedJobsOrder: [] as any,
       failedJobs: [] as any,
       successJobs: [] as any,
-      pendingExportProductThresholdJobs: [] as any,
-      draftExportProductThresholdJob: {} as any
+      job: {} as any
     }
   },
   computed: {
@@ -324,12 +323,12 @@ export default defineComponent({
         } else {
           showToast(translate('Something went wrong'))
           // adding newJob in failed array as to identify the new job
-          this.failedJobs.push('newJob')
+          this.failedJobs.push('')
         }
       } catch (err) {
         logger.error(err)
         showToast(translate('Something went wrong'))
-        this.failedJobs.push('newJob')
+        this.failedJobs.push('')
       }
       this.isServiceScheduling = false
       emitter.emit('dismissLoader');
@@ -343,21 +342,15 @@ export default defineComponent({
       }
     },
     async scheduleService(searchPreferenceId: string, threshold: string, runTime: string) {
-      let job = this.draftExportProductThresholdJob as any;
       const productStoreId = this.currentEComStore.productStoreId
       let shopifyConfigId = this.shopifyConfig[productStoreId]
       let facilityId = this.facilitiesByProductStore[productStoreId]
       let resp = '' as any;
 
-      if (!Object.keys(job).length) {
-        await this.fetchExportThresholdJobs();
-        job = this.draftExportProductThresholdJob as any
-      }
-
       // Used Guard Clause
-      if (!Object.keys(job).length) {
+      if (!Object.keys(this.job).length) {
         // adding new job in failed status if the draft job data is not available
-        this.failedJobs.push('newJob')
+        this.failedJobs.push('')
         showToast(translate('Configuration missing'))
         return;
       }
@@ -385,25 +378,25 @@ export default defineComponent({
 
       if (!facilityId.length) {
         // adding new job in failed status if the facilityId is not available
-        this.failedJobs.push('newJob')
+        this.failedJobs.push('')
         showToast(translate('Configuration missing'))
         return;
       }
 
-      const payload = job ? {
+      const payload = this.job ? {
         'JOB_NAME': this.jobName ? this.jobName : this.userProfile.partyName,
-        'SERVICE_NAME': job.serviceName,
+        'SERVICE_NAME': this.job.serviceName,
         'SERVICE_COUNT': '0',
         'jobFields': {
           'productStoreId': productStoreId,
-          'systemJobEnumId': job.systemJobEnumId,
+          'systemJobEnumId': this.job.systemJobEnumId,
           'maxRecurrenceCount': '-1',
-          'parentJobId': job.parentJobId,
+          'parentJobId': this.job.parentJobId,
           'recurrenceTimeZone': this.userProfile?.userTimeZone
         },
         'shopifyConfigId': shopifyConfigId,
         'statusId': "SERVICE_PENDING",
-        'systemJobEnumId': job.systemJobEnumId,
+        'systemJobEnumId': this.job.systemJobEnumId,
         'includeAll': true, // true: includes all the product, false: includes only products updated in the last 24 hours
         searchPreferenceId,
         threshold,
@@ -411,41 +404,41 @@ export default defineComponent({
       } as any : {}
 
       // checking if the runtimeData has productStoreId, and if present then adding it on root level
-      job?.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = productStoreId)
-      job?.priority && (payload['SERVICE_PRIORITY'] = job.priority.toString())
+      this.job?.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = productStoreId)
+      this.job?.priority && (payload['SERVICE_PRIORITY'] = this.job.priority.toString())
 
       try {
         const scheduleJobRequests = [];
         // Job will be scheduled for single run where include all will be true
         // This will apply threshold on exisiting products
         // Deep cloning payload so that both the schedules do not share same reference
-        scheduleJobRequests.push(JobService.scheduleJob(JSON.parse(JSON.stringify({ ...job.runtimeData, ...payload }))).catch(error => { return error }))
+        scheduleJobRequests.push(JobService.scheduleJob(JSON.parse(JSON.stringify({ ...this.job.runtimeData, ...payload }))).catch(error => { return error }))
         payload['SERVICE_TEMP_EXPR'] = 'EVERYDAY';
         payload['jobFields'].tempExprId = 'EVERYDAY'; // Need to remove this as we are passing frequency in SERVICE_TEMP_EXPR, currently kept it for backward compatibility
         payload['SERVICE_RUN_AS_SYSTEM'] = 'Y';
         payload['jobFields'].runAsUser = 'system';// default system, but empty in run now. TODO Need to remove this as we are using SERVICE_RUN_AS_SYSTEM, currently kept it for backward compatibility
         payload['includeAll'] =  false;
-        job.runTime && (payload['SERVICE_TIME'] = runTime.toString())
+        this.job.runTime && (payload['SERVICE_TIME'] = runTime.toString())
 
         // Scheduling Job that will run everyday and as system
-        scheduleJobRequests.push(JobService.scheduleJob({ ...job.runtimeData, ...payload }).catch(error => { return error }))
+        scheduleJobRequests.push(JobService.scheduleJob({ ...this.job.runtimeData, ...payload }).catch(error => { return error }))
         let scheduleJobResponse = await Promise.all(scheduleJobRequests);
         let ifScheduleJobSuccess = scheduleJobResponse.every((response: any) => {
           return response.status == 200 && !hasError(response);
         })
         if (ifScheduleJobSuccess) {
           showToast(translate('Service has been scheduled'))
-          this.successJobs.push('newJob')
+          this.successJobs.push('')
         } else {
           let errorMessage = scheduleJobResponse.reduce((errorMessage: string, response: any) => {
             return errorMessage += getResponseError(response);
           }, "")
           showToast(translate('Something went wrong'), errorMessage)
-          this.failedJobs.push('newJob')
+          this.failedJobs.push('')
         }
       } catch (err) {
         showToast(translate('Something went wrong'), err)
-        this.failedJobs.push('newJob')
+        this.failedJobs.push('')
         this.$log.error(err);
       }
       return resp;
@@ -497,7 +490,7 @@ export default defineComponent({
         if (draftExportProductThresholdResponse.status === 'fulfilled' && !hasError(draftExportProductThresholdResponse.value) && draftExportProductThresholdResponse.value.data.count) {
           let job = draftExportProductThresholdResponse.value.data.docs[0] // using 0th index as we will only have a single draft data for a job
 
-          this.draftExportProductThresholdJob = {
+          this.job = {
             ...job,
             id: job.jobId,
             frequency: job.tempExprId,
@@ -511,7 +504,8 @@ export default defineComponent({
         if (pendingExportProductThresholdResponse.status === 'fulfilled' && !hasError(pendingExportProductThresholdResponse.value) && pendingExportProductThresholdResponse.value.data.count) {
           let jobs = pendingExportProductThresholdResponse.value.data.docs // using 0th index as we will only have a single draft data for a job
 
-           this.pendingExportProductThresholdJobs = jobs.map((job: any) => ({
+          // storing the pending jobs in reorder array as those jobs will always available for reordering
+          this.jobsForReorder = jobs.map((job: any) => ({
             ...job,
             id: job.jobId,
             frequency: job.tempExprId,
@@ -522,7 +516,7 @@ export default defineComponent({
           logger.error('Failed to fetch export product threshold pending jobs information')
         }
 
-        const exportProductThresholdJobs = [...this.pendingExportProductThresholdJobs, ...[this.draftExportProductThresholdJob]]
+        const exportProductThresholdJobs = [...this.jobsForReorder, ...[this.job]]
         const tempExpr = exportProductThresholdJobs.map((job: any) => job.tempExprId)
 
         await this.store.dispatch('job/fetchJobDescription', [this.jobEnumId]);
@@ -537,9 +531,6 @@ export default defineComponent({
   async mounted() {
     await this.fetchExportThresholdJobs();
 
-    // Storing the pending jobs in the reorder logic
-    this.jobsForReorder = this.pendingExportProductThresholdJobs;
-
     // Finding the runTime of the first job or if there are no pending jobs then assigning current time
     // to initialRunTime and similarly finding last run time to assign a time to the new job
     this.initialRunTime = this.jobsForReorder[0]?.runTime || DateTime.now().toMillis()
@@ -550,8 +541,8 @@ export default defineComponent({
       'tempExprId': 'EVERYDAY',
       'statusId': 'SERVICE_PENDING',
       'isNew': true,
-      'runTime': this.jobsForReorder[0]?.runTime ? lastRunTime + 900000 : this.initialRunTime,
-      'jobId': 'newJob' // adding jobId as to identify the new job to be scheduled
+      'runTime': this.jobsForReorder.length ? lastRunTime + 900000 : this.initialRunTime,
+      'jobId': '' // adding jobId as to identify the new job to be scheduled
     }
 
     this.jobsForReorder?.push(newJob)

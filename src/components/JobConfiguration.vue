@@ -208,7 +208,7 @@ export default defineComponent({
             text: this.$t('Skip'),
             handler: async () => {
               if (job) {
-                // using updatedRunTime value to update the runTime in the configuration component as currently currentJob state is not maintained
+                // TODO: using updatedRunTime value to update the runTime in the configuration component as currently currentJob state is not maintained
                 const { updatedRunTime } = await this.store.dispatch('job/skipJob', job)
                 if(updatedRunTime) {
                   this.runTime = updatedRunTime;
@@ -216,7 +216,7 @@ export default defineComponent({
                 }
               }
             }
-          }],
+          }]
         });
       return alert.present();
     },
