@@ -47,7 +47,7 @@
             <div v-for="job in jobsForReorder" :key="job.jobId">
               <ion-card>
                 <ion-item>
-                  <ion-label>{{ job.isNew ? jobName : job.jobName }}</ion-label>
+                  <ion-label>{{ job.jobId ? job.jobName : jobName }}</ion-label>
                   <ion-reorder slot="end"></ion-reorder>
                 </ion-item>
                 <ion-card-header>
@@ -117,7 +117,7 @@ import {
   IonToolbar
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
-import { getResponseError, hasError, showToast } from '@/utils';
+import { getResponseError, handleDateTimeInput, hasError, showToast } from '@/utils';
 import { translate } from '@/i18n';
 import { JobService } from '@/services/JobService';
 import { DateTime } from 'luxon';
@@ -184,7 +184,7 @@ export default defineComponent({
   methods: {
     // method to update the run time for all the jobs, for now hardcoded the time diff of 15 mins.
     updateRunTime(ev: CustomEvent, timeDiff = 900000) {
-      const changedDateTime = DateTime.fromISO(ev['detail'].value).toMillis()
+      const changedDateTime = handleDateTimeInput(ev['detail'].value)
       const previousSeq = JSON.parse(JSON.stringify(this.jobsForReorder))
 
       // added this condition to handle the case of method called twice
@@ -264,7 +264,7 @@ export default defineComponent({
       this.successJobs = []
       const solrQuery = this.query
 
-      const jobRunTime = this.updatedJobsOrder.find((job: any) => job.isNew)?.runTime
+      const jobRunTime = this.updatedJobsOrder.find((job: any) => !job.jobId)?.runTime
 
       // re-initialized params object from query as there is no need for grouping or pagination when storing the query
       solrQuery.json.params = {
@@ -292,7 +292,7 @@ export default defineComponent({
           // checking whether the service has been scheduled successfully, if yes then only updating other jobs otherwise not
           if (this.successJobs.includes('')) {
             // filtered jobs by removing the new job as we need to update already existing job
-            const jobsToUpdate = this.updatedJobsOrder.filter((job: any) => !job.isNew)
+            const jobsToUpdate = this.updatedJobsOrder.filter((job: any) => job.jobId)
 
             await Promise.allSettled(jobsToUpdate.map(async (job: any) => {
               // using resp and checking it, as we need jobId that will not be available in case
@@ -549,7 +549,6 @@ export default defineComponent({
       'systemJobEnumId': 'JOB_EXP_PROD_THRSHLD',
       'tempExprId': 'EVERYDAY',
       'statusId': 'SERVICE_PENDING',
-      'isNew': true,
       'runTime': this.jobsForReorder.length ? lastRunTime + 900000 : this.initialRunTime,
       'jobId': '' // adding jobId as to identify the new job to be scheduled
     }
