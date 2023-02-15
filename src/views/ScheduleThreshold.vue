@@ -258,6 +258,8 @@ export default defineComponent({
       return DateTime.local().plus(timeDiff).toRelative();
     },
     async saveThresholdRule() {
+      emitter.emit('presentLoader');
+
       this.isServiceScheduling = true;
       this.failedJobs = []
       this.successJobs = []
@@ -329,6 +331,7 @@ export default defineComponent({
         this.failedJobs.push('newJob')
       }
       this.isServiceScheduling = false
+      emitter.emit('dismissLoader');
 
       // If there are no failed jobs then redirecting the user to the select product page
       if (!this.failedJobs.length) {
@@ -467,9 +470,31 @@ export default defineComponent({
       // as the api calls are not dependent on each other and also we don't need to take any decision based on success
       // of these api calls together
       try {
-        const resp = await JobService.fetchJobInformation(payload, true)
-        if (resp.status === 200 && !hasError(resp) && resp.data.docs) {
-          let job = resp.data.docs[0] // using 0th index as we will only have a single draft data for a job
+        let exportProductThresholdRequest = [];
+
+        exportProductThresholdRequest.push(JobService.fetchJobInformation(JSON.parse(JSON.stringify(payload)), true).catch(error => { return error }))
+
+        exportProductThresholdRequest.push(JobService.fetchJobInformation(JSON.parse(JSON.stringify({
+          ...payload,
+          "inputFields": {
+            "statusId": "SERVICE_PENDING",
+            "statusId_op": "equals",
+            "productStoreId": this.currentEComStore.productStoreId,
+            "productStoreId_op": "equals",
+            "systemJobEnumId": "JOB_EXP_PROD_THRSHLD",
+            "systemJobEnumId_op": "equals"
+          },
+          viewSize: 50
+        }))).catch(error => { return error }))
+
+        let exportProductThresholdResponse = await Promise.allSettled(exportProductThresholdRequest);
+
+        // using specific index as the promise will return the result in the same order as request
+        let draftExportProductThresholdResponse = exportProductThresholdResponse[0]
+        let pendingExportProductThresholdResponse = exportProductThresholdResponse[1]
+
+        if (draftExportProductThresholdResponse.status === 'fulfilled' && !hasError(draftExportProductThresholdResponse.value) && draftExportProductThresholdResponse.value.data.count) {
+          let job = draftExportProductThresholdResponse.value.data.docs[0] // using 0th index as we will only have a single draft data for a job
 
           this.draftExportProductThresholdJob = {
             ...job,
@@ -481,25 +506,11 @@ export default defineComponent({
         } else {
           logger.error('Failed to fetch export product threshold draft job information')
         }
-      } catch(err) {
-        logger.error('Failed to fetch export product threshold draft job information')
-      }
 
-      try {
-        const resp = await JobService.fetchJobInformation({
-          ...payload,
-          "inputFields": {
-            "statusId": "SERVICE_PENDING",
-            "statusId_op": "equals",
-            "productStoreId": this.currentEComStore.productStoreId,
-            "productStoreId_op": "equals",
-            "systemJobEnumId": "JOB_EXP_PROD_THRSHLD",
-            "systemJobEnumId_op": "equals"
-          },
-          viewSize: 50
-        })
-        if (resp.status === 200 && !hasError(resp) && resp.data.docs) {
-          this.pendingExportProductThresholdJobs = resp.data.docs.map((job: any) => ({
+        if (pendingExportProductThresholdResponse.status === 'fulfilled' && !hasError(pendingExportProductThresholdResponse.value) && pendingExportProductThresholdResponse.value.data.count) {
+          let jobs = pendingExportProductThresholdResponse.value.data.docs // using 0th index as we will only have a single draft data for a job
+
+           this.pendingExportProductThresholdJobs = jobs.map((job: any) => ({
             ...job,
             id: job.jobId,
             frequency: job.tempExprId,
@@ -509,15 +520,15 @@ export default defineComponent({
         } else {
           logger.error('Failed to fetch export product threshold pending jobs information')
         }
+
+        const exportProductThresholdJobs = [...this.pendingExportProductThresholdJobs, ...[this.draftExportProductThresholdJob]]
+        const tempExpr = exportProductThresholdJobs.map((job: any) => job.tempExprId)
+
+        await this.store.dispatch('job/fetchJobDescription', [this.jobEnumId]);
+        await this.store.dispatch('job/fetchTemporalExpression', tempExpr)
       } catch(err) {
-        logger.error('Failed to fetch export product threshold pending jobs information')
+        logger.error('Failed to fetch product threshold jobs information')
       }
-
-      const exportProductThresholdJobs = [...this.pendingExportProductThresholdJobs, ...[this.draftExportProductThresholdJob]]
-      const tempExpr = exportProductThresholdJobs.map((job: any) => job.tempExprId)
-
-      await this.store.dispatch('job/fetchJobDescription', [this.jobEnumId]);
-      await this.store.dispatch('job/fetchTemporalExpression', tempExpr)
 
       emitter.emit('dismissLoader');
     }
