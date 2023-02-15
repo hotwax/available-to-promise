@@ -8,7 +8,7 @@
     </ion-header>
 
     <ion-content>
-      <div class="find">
+      <div>
         <aside>
           <ion-list>
             <ion-list-header>{{ $t("Info") }}</ion-list-header>
@@ -42,19 +42,23 @@
           </ion-list>
         </aside>
 
-        <main class="main">
+        <main>
+          <h2>{{ $t("Threshold pipeline") }}</h2>
           <ion-reorder-group @ionItemReorder="doReorder($event)" disabled="false">
             <div v-for="job in jobsForReorder" :key="job.jobId">
               <ion-card>
-                <ion-item>
-                  <ion-label>{{ job.jobId ? job.jobName : jobName }}</ion-label>
-                  <ion-reorder slot="end"></ion-reorder>
-                </ion-item>
                 <ion-card-header>
-                  <ion-card-title>{{ getEnumDescription(job.systemJobEnumId) ? getEnumDescription(job.systemJobEnumId) : job.systemJobEnumId }}</ion-card-title>
-                  <p v-if="failedJobs.includes(job.jobId)">{{ $t('Failed') }}</p>
-                  <p v-if="successJobs.includes(job.jobId)">{{ $t('Success') }}</p>
+                  <ion-card-title>
+                    {{ job.jobId ? job.jobName : jobName }}
+                  </ion-card-title>
+                  <ion-reorder></ion-reorder>
                 </ion-card-header>
+
+                <ion-item>
+                  <ion-label>{{ getEnumDescription(job.systemJobEnumId) ? getEnumDescription(job.systemJobEnumId) : job.systemJobEnumId }}</ion-label>
+                  <ion-icon :icon="checkmarkCircleOutline" color="success" v-if="successJobs.includes(job.jobId)" />
+                  <ion-icon :icon="closeCircleOutline" color="danger" v-if="failedJobs.includes(job.jobId)" />
+                </ion-item>
 
                 <ion-item>
                   <ion-icon slot="start" :icon="timeOutline" />
@@ -90,7 +94,7 @@
 </template>
 
 <script lang="ts">
-import { arrowForwardOutline, copyOutline, optionsOutline, saveOutline, shirtOutline, timerOutline, timeOutline } from 'ionicons/icons'
+import { arrowForwardOutline, checkmarkCircleOutline, closeCircleOutline, copyOutline, optionsOutline, saveOutline, shirtOutline, timerOutline, timeOutline } from 'ionicons/icons'
 import {
   IonBackButton,
   IonBadge,
@@ -569,6 +573,8 @@ export default defineComponent({
 
     return {
       arrowForwardOutline,
+      checkmarkCircleOutline,
+      closeCircleOutline,
       copyOutline,
       optionsOutline,
       router,
@@ -583,28 +589,35 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.actions {
+ion-card-header {
   display: flex;
   justify-content: space-between;
 }
 
-aside {
-  position: sticky;
-  top: var(--spacer-lg);
+h2 {
+  font-size: 18px;
+  margin-left: 10px;
 }
-
-.find {
-  padding: var( --spacer-lg);
-  gap: var(--spacer-lg);
-}
-
-ion-list-header > div {
-  flex: 1;
-  display: flex;
-  justify-content: space-between;
-}
-
 @media (min-width: 991px) {
+  ion-content > div:first-child {
+    display: grid;
+    grid-template-columns: 600px 50ch;
+    gap: var(--spacer-xl);
+    width: max-content;
+    margin: auto;
+  }
+
+  h2 {
+    font-size: revert;
+    text-align: center;
+  }
+
+  aside {
+    position: sticky;
+    top: var(--spacer-sm);
+    height: max-content;
+  }
+
   .action {
     position: fixed;
     z-index: 3;
@@ -616,7 +629,7 @@ ion-list-header > div {
 
 ion-modal {
   --width: 290px;
-  --height: 382px;
+  --height: 385px;
   --border-radius: 8px;
 }
 </style>
