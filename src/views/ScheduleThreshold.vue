@@ -348,15 +348,14 @@ export default defineComponent({
       let shopifyConfigId = this.shopifyConfig[productStoreId]
       let facilityId = this.facilitiesByProductStore[productStoreId]
       let resp = '' as any;
-      job.jobId = 'newJob'
 
-      if (!job) {
+      if (!Object.keys(job).length) {
         await this.fetchExportThresholdJobs();
         job = this.draftExportProductThresholdJob as any
       }
 
       // Used Guard Clause
-      if (!job) {
+      if (!Object.keys(job).length) {
         // adding new job in failed status if the draft job data is not available
         this.failedJobs.push('newJob')
         showToast(translate('Configuration missing'))
@@ -436,17 +435,17 @@ export default defineComponent({
         })
         if (ifScheduleJobSuccess) {
           showToast(translate('Service has been scheduled'))
-          this.successJobs.push(job.jobId)
+          this.successJobs.push('newJob')
         } else {
           let errorMessage = scheduleJobResponse.reduce((errorMessage: string, response: any) => {
             return errorMessage += getResponseError(response);
           }, "")
           showToast(translate('Something went wrong'), errorMessage)
-          this.failedJobs.push(job.jobId)
+          this.failedJobs.push('newJob')
         }
       } catch (err) {
         showToast(translate('Something went wrong'), err)
-        this.failedJobs.push(job.jobId)
+        this.failedJobs.push('newJob')
         this.$log.error(err);
       }
       return resp;
@@ -462,6 +461,7 @@ export default defineComponent({
           "systemJobEnumId": "JOB_EXP_PROD_THRSHLD",
           "systemJobEnumId_op": "equals"
         },
+        "fieldList": [ "systemJobEnumId", "runTime", "tempExprId", "parentJobId", "serviceName", "jobId", "jobName", "currentRetryCount", "statusId", "runtimeDataId", "productStoreId", "priority"],
         "noConditionFind": "Y",
         "viewSize": 1,
         "orderBy": "runTime ASC"
