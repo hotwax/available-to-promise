@@ -208,6 +208,7 @@ export default defineComponent({
             text: this.$t('Skip'),
             handler: async () => {
               if (job) {
+                // using updatedRunTime value to update the runTime in the configuration component as currently currentJob state is not maintained
                 const { updatedRunTime } = await this.store.dispatch('job/skipJob', job)
                 if(updatedRunTime) {
                   this.runTime = updatedRunTime;
@@ -283,7 +284,7 @@ export default defineComponent({
           job?.sinceId && (payload['sinceId'] = job.sinceId)
           job?.jobName && (payload['jobName'] = job.jobName)
 
-          const resp = await JobService.updateJob(job)
+          const resp = await JobService.updateJob(payload)
           if(resp.status == 200 && !hasError(resp) && resp.data.successMessage) {
             this.store.dispatch('job/fetchPendingJobs', {viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums})
             showToast(translate('Service updated successfully'))
