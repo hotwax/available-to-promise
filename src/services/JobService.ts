@@ -1,7 +1,7 @@
 import { api } from '@/adapter';
 import store from "@/store";
-import logger from "@/logger";
 import { hasError } from '@/utils';
+import logger from "@/logger";
 
 const fetchJob = async (payload: any): Promise<any> => {
   let resp;
