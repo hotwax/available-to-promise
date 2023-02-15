@@ -318,17 +318,23 @@ export default defineComponent({
                 } else {
                   // if the job failed when updating then adding the jobId to the failedJobs array
                   this.failedJobs.push(job.jobId)
+                  showToast(translate('Failed to update some jobs'))
+                  logger.error('Failed to update some jobs')
                 }
               } catch(err) {
                 this.failedJobs.push(job.jobId)
+                showToast(translate('Failed to update some jobs'))
+                logger.error(err)
               }
             }))
           } else {
-            logger.error('Failed to update jobs as the service has not been scheduled successfully')
+            logger.error('Failed to schedule service, hence other jobs are not updated')
             this.failedJobs = this.jobsForReorder.map((job: any) => job.jobId)
+            showToast(translate('Failed to schedule service, hence other jobs are not updated'))
           }
         } else {
-          showToast(translate('Something went wrong'))
+          showToast(translate('Failed to schedule service, hence other jobs are not updated'))
+          logger.error('Failed to schedule service as search preference is not created, hence other jobs are not updated')
           this.failedJobs = this.jobsForReorder.map((job: any) => job.jobId)
         }
       } catch (err) {
@@ -438,11 +444,10 @@ export default defineComponent({
           let errorMessage = scheduleJobResponse.reduce((errorMessage: string, response: any) => {
             return errorMessage += getResponseError(response);
           }, "")
-          showToast(translate('Something went wrong'), errorMessage)
+          logger.error(errorMessage)
           this.failedJobs.push('')
         }
       } catch (err) {
-        showToast(translate('Something went wrong'), err)
         this.failedJobs.push('')
         this.$log.error(err);
       }
