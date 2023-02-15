@@ -45,8 +45,11 @@ const actions: ActionTree<UtilState, RootState> = {
     })
 
     if (resp.status === 200 && !hasError(resp) && resp?.data?.docs?.length > 0) {
-      commit(types.UTIL_SHOPIFY_CONFIG_UPDATED, resp.data.docs?.length > 0 ? resp.data.docs[0] : {});
-      return resp.data.docs[0];
+      const shopifyConfig = resp.data.docs[0]
+      commit(types.UTIL_SHOPIFY_CONFIG_UPDATED, resp.data.docs?.length > 0 ? {
+        [shopifyConfig.productStoreId]: shopifyConfig.shopifyConfigId
+      } : {});
+      return shopifyConfig;
     }
     return {};
   },
