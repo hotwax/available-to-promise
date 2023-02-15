@@ -470,11 +470,11 @@ export default defineComponent({
       // as the api calls are not dependent on each other and also we don't need to take any decision based on success
       // of these api calls together
       try {
-        let exportProductThresholdRequest = [];
+        let exportProductThresholdRequests = [];
 
-        exportProductThresholdRequest.push(JobService.fetchJobInformation(JSON.parse(JSON.stringify(payload)), true).catch(error => { return error }))
+        exportProductThresholdRequests.push(JobService.fetchJobInformation(JSON.parse(JSON.stringify(payload)), true).catch(error => { return error }))
 
-        exportProductThresholdRequest.push(JobService.fetchJobInformation(JSON.parse(JSON.stringify({
+        exportProductThresholdRequests.push(JobService.fetchJobInformation({
           ...payload,
           "inputFields": {
             "statusId": "SERVICE_PENDING",
@@ -485,13 +485,13 @@ export default defineComponent({
             "systemJobEnumId_op": "equals"
           },
           viewSize: 50
-        }))).catch(error => { return error }))
+        }).catch(error => { return error }))
 
-        let exportProductThresholdResponse = await Promise.allSettled(exportProductThresholdRequest);
+        let exportProductThresholdResponses = await Promise.allSettled(exportProductThresholdRequests);
 
         // using specific index as the promise will return the result in the same order as request
-        let draftExportProductThresholdResponse = exportProductThresholdResponse[0]
-        let pendingExportProductThresholdResponse = exportProductThresholdResponse[1]
+        let draftExportProductThresholdResponse = exportProductThresholdResponses[0]
+        let pendingExportProductThresholdResponse = exportProductThresholdResponses[1]
 
         if (draftExportProductThresholdResponse.status === 'fulfilled' && !hasError(draftExportProductThresholdResponse.value) && draftExportProductThresholdResponse.value.data.count) {
           let job = draftExportProductThresholdResponse.value.data.docs[0] // using 0th index as we will only have a single draft data for a job
