@@ -1,6 +1,6 @@
 import { api } from '@/adapter';
 import store from "@/store";
-import { hasError } from "@/utils";
+import { hasError } from '@/utils';
 import logger from "@/logger";
 
 const fetchJob = async (payload: any): Promise<any> => {
@@ -34,11 +34,12 @@ const fetchJob = async (payload: any): Promise<any> => {
   }
 }
 
-const fetchJobInformation = async (payload: any): Promise <any>  => {
+const fetchJobInformation = async (payload: any, cache = false): Promise <any>  => {
   return api({
     url: "/findJobs",
     method: "post",
-    data: payload
+    data: payload,
+    cache
   });
 }
 const fetchJobDescription = async (payload: any): Promise <any>  => {

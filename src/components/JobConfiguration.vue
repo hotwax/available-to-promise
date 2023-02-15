@@ -2,7 +2,7 @@
   <section>
     <ion-item lines="none">
       <h1>{{ title }}</h1>
-      <ion-badge slot="end" color="dark" v-if="job?.runTime">{{ $t("running") }} {{ timeTillJob(job.runTime) }}</ion-badge>
+      <ion-badge slot="end" color="dark" v-if="job?.runTime">{{ $t("running") }} {{ timeTillJob(runTime ? runTime : job.runTime) }}</ion-badge>
     </ion-item>
 
     <ion-list>
@@ -15,7 +15,7 @@
       <ion-item>
         <ion-icon slot="start" :icon="timeOutline" />
         <ion-label>{{ $t("Run time") }}</ion-label>
-        <ion-label id="open-run-time-modal" slot="end">{{ job?.runTime ? getTime(job.runTime) : $t('Select run time') }}</ion-label>
+        <ion-label id="open-run-time-modal" slot="end">{{ job?.runTime ? getTime(runTime ? runTime : job.runTime) : $t('Select run time') }}</ion-label>
         <!-- TODO: display a button when we are not having a runtime and open the datetime component
         on click of that button
         Currently, when mapping the same datetime component for label and button so it's not working so for
@@ -114,9 +114,11 @@ import {
   personCircleOutline
 } from "ionicons/icons";
 import { mapGetters, useStore } from "vuex";
-import { handleDateTimeInput } from "@/utils";
-
+import { handleDateTimeInput, hasError, showToast } from "@/utils";
+import { JobService } from "@/services/JobService";
 import { DateTime } from 'luxon';
+import { translate } from "@/i18n";
+import logger from "@/logger";
 import { Actions, hasPermission } from '@/authorization'
 
 export default defineComponent({
@@ -140,16 +142,16 @@ export default defineComponent({
     return {
       jobStatus: this.status,
       ruleName: this.job?.jobName,
-      minDateTime: DateTime.now().toISO()
+      minDateTime: DateTime.now().toISO(),
+      jobEnums: JSON.parse(process.env?.VUE_APP_JOB_ENUMS as string) as any,
+      runTime: ''
     }
   },
   props: ["job", "title", "status", "type", "productCount"],
   computed: {
     ...mapGetters({
-      getJobStatus: 'job/getJobStatus',
-      getJob: 'job/getJob',
       shopifyConfigId: 'user/getShopifyConfigId',
-      currentEComStore: 'user/getCurrentEComStore'
+      userProfile: 'user/getUserProfile'
     }),
     generateFrequencyOptions(): any {
       const optionDefault = [{
@@ -204,12 +206,17 @@ export default defineComponent({
             role: 'cancel'
           }, {
             text: this.$t('Skip'),
-            handler: () => {
+            handler: async () => {
               if (job) {
-                this.store.dispatch('job/skipJob', job)
+                // TODO: using updatedRunTime value to update the runTime in the configuration component as currently currentJob state is not maintained
+                const { updatedRunTime } = await this.store.dispatch('job/skipJob', job)
+                if(updatedRunTime) {
+                  this.runTime = updatedRunTime;
+                  this.store.dispatch('job/fetchPendingJobs', {viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums})
+                }
               }
             }
-          }],
+          }]
         });
       return alert.present();
     },
@@ -223,8 +230,11 @@ export default defineComponent({
             role: 'cancel'
           }, {
             text: this.$t('Cancel'),
-            handler: () => {
-              this.store.dispatch('job/cancelJob', job);
+            handler: async () => {
+              const resp = await this.store.dispatch('job/cancelJob', job);
+              if(resp.status == 200 && !hasError(resp) && resp.data.successMessage) {
+                this.store.dispatch('job/fetchPendingJobs', {viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums})
+              }
             }
           }],
         });
@@ -260,10 +270,31 @@ export default defineComponent({
       const job = this.job;
       job.jobName = this.ruleName;
       job['jobStatus'] = this.jobStatus !== 'SERVICE_DRAFT' ? this.jobStatus : 'HOURLY';
-      if (job?.statusId === 'SERVICE_DRAFT') {
-        this.store.dispatch('job/scheduleService', job)
-      } else if (job?.statusId === 'SERVICE_PENDING') {
-        this.store.dispatch('job/updateJob', job)
+      if (job?.statusId === 'SERVICE_PENDING') {
+        try {
+          const payload = {
+            'jobId': job.jobId,
+            'systemJobEnumId': job.systemJobEnumId,
+            'recurrenceTimeZone': this.userProfile.userTimeZone,
+            'tempExprId': job.frequency ? job.frequency : job.jobStatus, // TODO: change jobStatus to frequency
+            'statusId': "SERVICE_PENDING"
+          } as any
+
+          job?.runTime && (payload['runTime'] = job.runTime)
+          job?.sinceId && (payload['sinceId'] = job.sinceId)
+          job?.jobName && (payload['jobName'] = job.jobName)
+
+          const resp = await JobService.updateJob(payload)
+          if(resp.status == 200 && !hasError(resp) && resp.data.successMessage) {
+            this.store.dispatch('job/fetchPendingJobs', {viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums})
+            showToast(translate('Service updated successfully'))
+          } else {
+            showToast(translate('Something went wrong'))
+          }
+        } catch(err) {
+          showToast(translate('Something went wrong'))
+          logger.error(err)
+        }
       }
     },
     getTime (time: any) {

@@ -40,7 +40,8 @@ const productModule: Module<ProductState, RootState> = {
           "query": "*:*",
           "filter": ["docType: PRODUCT"]
         }
-      }
+      },
+      threshold: 0
     },
     getters,
     actions,

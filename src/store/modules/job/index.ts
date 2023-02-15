@@ -8,7 +8,6 @@ import RootState from '../../RootState'
 const jobModule: Module<JobState, RootState> = {
     namespaced: true,
     state: {
-      cached: {},
       pending: {
         list: [],
         total: 0

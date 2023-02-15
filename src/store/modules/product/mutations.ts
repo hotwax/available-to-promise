@@ -19,6 +19,9 @@ const mutations: MutationTree <ProductState> = {
   },
   [types.PRODUCT_ALL_FILTERS_UPDATED] (state, payload) {
     state.appliedFilters = payload
+  },
+  [types.PRODUCT_THRESHOLD_UPDATED] (state, payload) {
+    state.threshold = payload
   }
 }
 export default mutations;

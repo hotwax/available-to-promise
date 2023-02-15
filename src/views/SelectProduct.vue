@@ -197,7 +197,6 @@ import { defineComponent } from 'vue';
 import { arrowForwardOutline, downloadOutline, filterOutline, saveOutline, pricetagOutline, closeCircle, addCircleOutline, albumsOutline, warningOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
 import { mapGetters, useStore } from 'vuex';
-import SaveThresholdModal from '@/components/SaveThresholdModal.vue';
 import ProductFilterModal from '@/components/ProductFilterModal.vue';
 import { hasError, showToast } from '@/utils';
 import { translate } from '@/i18n';
@@ -453,14 +452,8 @@ export default defineComponent({
           });
         return alert.present();
       }
-      const saveThresholdModal = await modalController.create({
-        component: SaveThresholdModal,
-        componentProps: {
-          threshold: this.threshold,
-          totalSKUs: this.products.total.variant
-        }
-      })
-      saveThresholdModal.present();
+      await this.store.dispatch('product/updateThreshold', this.threshold)
+      this.router.push('/schedule-threshold')
     },
     async searchFilter(label: string, facetToSelect: string, searchfield: string, type: string) {
       const modal = await modalController.create({
