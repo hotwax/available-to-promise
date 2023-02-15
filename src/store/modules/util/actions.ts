@@ -76,6 +76,14 @@ const actions: ActionTree<UtilState, RootState> = {
     }
     return {};
   },
+
+  async clearFacilitiesByProductStore({ commit }) {
+    commit(types.UTIL_PRODUCT_STORE_FACILITY_UPDATED, {})
+  },
+
+  async clearShopifyConfig({ commit }) {
+    commit(types.UTIL_SHOPIFY_CONFIG_UPDATED, {})
+  }
 }
 
 export default actions;
