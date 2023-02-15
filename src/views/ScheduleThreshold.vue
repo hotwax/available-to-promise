@@ -286,7 +286,7 @@ export default defineComponent({
           job?.sinceId && (payload['sinceId'] = job.sinceId)
           job?.jobName && (payload['jobName'] = job.jobName)
 
-          const resp = await JobService.updateJob(job)
+          const resp = await JobService.updateJob(payload)
           if(resp.status == 200 && !hasError(resp) && resp.data.successMessage) {
             // if the job succeded when updating then adding the jobId to the successJobs array
             this.successJobs.push(job.jobId)
@@ -323,6 +323,7 @@ export default defineComponent({
           await this.scheduleService(searchPreferenceId, this.threshold, jobRunTime)
         } else {
           showToast(translate('Something went wrong'))
+          // adding newJob in failed array as to identify the new job
           this.failedJobs.push('newJob')
         }
       } catch (err) {
