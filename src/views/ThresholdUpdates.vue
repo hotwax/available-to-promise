@@ -300,6 +300,7 @@ import JobHistoryModal from '@/components/JobHistoryModal.vue';
 import { DateTime } from 'luxon';
 import { ProductService } from '@/services/ProductService';
 import { Actions, hasPermission } from '@/authorization'
+import emitter from '@/event-bus';
 
 export default defineComponent({
   name: "ThresholdUpdates",
@@ -363,6 +364,10 @@ export default defineComponent({
   },
   mounted(){
     this.store.dispatch('util/getServiceStatusDesc')
+    emitter.on("productStoreChanged", this.refreshJobs);
+  },
+  unmounted() {
+    emitter.off("productStoreChanged", this.refreshJobs);
   },
   methods: {
     getJobExecutionTime(startTime: any, endTime: any){

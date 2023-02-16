@@ -26,9 +26,18 @@
         <ion-item lines="none">
           <ion-label class="ion-text-wrap">
             <p class="overline">{{ instanceUrl }}</p>
-            {{ eComStore?.storeName }}
           </ion-label>
           <ion-note slot="end">{{ userProfile?.userTimeZone }}</ion-note>
+        </ion-item>
+        <ion-item v-if="userProfile?.stores?.length > 1" lines="none">
+          <ion-select interface="popover" :value="eComStore.productStoreId" @ionChange="setEComStore($event)">
+            <ion-select-option v-for="store in (userProfile?.stores ? userProfile.stores : [])" :key="store.productStoreId" :value="store.productStoreId" >{{ store.storeName }}</ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-item v-else lines="none">
+          <ion-label class="ion-text-wrap">
+            {{ eComStore.storeName }}
+          </ion-label>
         </ion-item>
       </ion-toolbar>
     </ion-footer>
@@ -46,6 +55,8 @@
     IonList,
     IonMenu,
     IonNote,
+    IonSelect,
+    IonSelectOption,
     IonTitle,
     IonToolbar,
     menuController
@@ -56,6 +67,7 @@
   import { hasPermission } from "@/authorization";
   import { useRouter } from "vue-router";
 import { options, settings, pulseOutline } from 'ionicons/icons';
+  import emitter from "@/event-bus";
   
   export default defineComponent({
     name: "Menu",
@@ -69,6 +81,8 @@ import { options, settings, pulseOutline } from 'ionicons/icons';
       IonList,
       IonMenu,
       IonNote,
+      IonSelect,
+      IonSelectOption,
       IonTitle,
       IonToolbar
     },
@@ -83,6 +97,12 @@ import { options, settings, pulseOutline } from 'ionicons/icons';
     methods: {
       async closeMenu() {
        await menuController.close();
+      },
+      async setEComStore(event: CustomEvent) {
+        if(this.userProfile && this.eComStore?.productStoreId !== event.detail.value) {
+          await this.store.dispatch('user/setEcomStore', { 'productStoreId': event.detail.value })
+          emitter.emit("productStoreChanged")
+        }
       }
     },
     setup() {
