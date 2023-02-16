@@ -519,10 +519,11 @@ export default defineComponent({
     if (this.jobId) {
       this.applyThresholdRule()
     } else {
+      // subscribing for emitter only we are creating a new rule for job scheduling, as when updating a rule
+      // there is no option to change the product store
+      emitter.on("productStoreChanged", this.getProducts);
       this.getProducts();
     }
-    // TODO
-    emitter.on("productStoreChanged", this.getProducts);
   },
   setup() {
     const router = useRouter();

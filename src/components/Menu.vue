@@ -99,7 +99,7 @@ import { options, settings, pulseOutline } from 'ionicons/icons';
        await menuController.close();
       },
       async setEComStore(event: CustomEvent) {
-        if(this.userProfile && this.eComStore?.productStoreId !== event.detail.value) {
+        if(this.eComStore.productStoreId !== event.detail.value) {
           await this.store.dispatch('user/setEcomStore', { 'productStoreId': event.detail.value })
           emitter.emit("productStoreChanged")
         }
