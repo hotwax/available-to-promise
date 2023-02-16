@@ -30,7 +30,7 @@ const actions: ActionTree<UtilState, RootState> = {
     }
   },
 
-  async getShopifyConfig({ commit }, payload) {
+  async getShopifyConfig({ state, commit }, payload) {
     // TODO: for now passing view size as 1 by considering that one product store id is associated with only
     // one shopify config
     const resp = await UtilService.getShopifyConfig({
@@ -44,17 +44,19 @@ const actions: ActionTree<UtilState, RootState> = {
       "viewSize": 1
     })
 
-    if (resp.status === 200 && !hasError(resp) && resp?.data?.docs?.length > 0) {
+    if (resp.status === 200 && !hasError(resp) && resp.data?.docs?.length > 0) {
       const shopifyConfig = resp.data.docs[0]
-      commit(types.UTIL_SHOPIFY_CONFIG_UPDATED, resp.data.docs?.length > 0 ? {
-        [shopifyConfig.productStoreId]: shopifyConfig.shopifyConfigId
-      } : {});
+
+      const shopifyConfigs = JSON.parse(JSON.stringify(state.shopifyConfig))
+      shopifyConfigs[shopifyConfig.productStoreId] = shopifyConfig.shopifyConfigId
+
+      commit(types.UTIL_SHOPIFY_CONFIG_UPDATED, shopifyConfigs);
       return shopifyConfig;
     }
     return {};
   },
 
-  async fetchFacilitiesByProductStore({ commit }, payload) {
+  async fetchFacilitiesByProductStore({ state, commit }, payload) {
 
     try {
       const resp = await UtilService.fetchFacilitiesByProductStore(payload);
@@ -68,7 +70,10 @@ const actions: ActionTree<UtilState, RootState> = {
           facilities[data.productStoreId].push(data.facilityId)
           return facilities
         }, {})
-        commit(types.UTIL_PRODUCT_STORE_FACILITY_UPDATED, facilities);
+        commit(types.UTIL_PRODUCT_STORE_FACILITY_UPDATED, {
+          ...state.facilitiesByProductStore,
+          ...facilities
+        });
         return facilities;
       }
     } catch (err) {
