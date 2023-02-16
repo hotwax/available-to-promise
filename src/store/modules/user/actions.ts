@@ -120,6 +120,8 @@ const actions: ActionTree<UserState, RootState> = {
     commit(types.USER_END_SESSION)
     this.dispatch('product/clearAllFilters')
     this.dispatch('product/clearProductList');
+    this.dispatch('util/clearFacilitiesByProductStore')
+    this.dispatch('util/clearShopifyConfig')
     this.dispatch('job/clearJobState');
     resetPermissions();
     resetConfig();
