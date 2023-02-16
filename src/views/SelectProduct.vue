@@ -122,7 +122,7 @@
                 <ion-card>
                   <Image :src="variant.mainImageUrl" />
                   <ion-item lines="none">
-                    <ion-label>
+                    <ion-label class="ion-text-wrap">
                       {{ variant.productName }}
                       <p v-if="variant.color">{{ $t("Color") }}: {{ variant.color }}</p>
                       <p v-if="variant.size">{{ $t("Size") }}: {{ variant.size }}</p>
@@ -544,13 +544,24 @@ export default defineComponent({
 </script>
 
 <style scoped>
-
 .section-grid {
-  grid-template-columns: repeat(auto-fill, 200px);
+  grid-auto-flow: column;
+  grid-auto-columns: 200px;
+  grid-template-columns: none;
+  width: 100vw;
+  overflow-x: scroll;
+  scroll-snap-type: x mandatory;
 }
 
-.find {
-  padding: 0 var( --spacer-base);
+.section-grid > div {
+  scroll-snap-align: start;
+  /* Here 20px padding-bottom is given 
+    to match the 10px bottom and 10px top margin of card */
+  padding-bottom: calc(10px * 2);
+}
+
+.section-grid > div > ion-card {
+  height: 100%;
 }
 
 ion-list-header > div {
@@ -563,13 +574,22 @@ ion-list-header > div {
   .find {
     padding: var( --spacer-lg);
     gap: var(--spacer-lg);
-   }
+  } 
+
   .action {
     position: fixed;
     z-index: 3;
     bottom: 10%;
     left: 50%;
     transform: translate(-50%, 0);
+  }
+
+  .section-grid {
+    width: unset;
+    grid-auto-columns: unset;
+    grid-template-columns: repeat(auto-fill, 200px);
+    grid-auto-flow: unset;
+    overflow: unset;
   }
 }
 </style>
