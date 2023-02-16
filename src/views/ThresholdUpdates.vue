@@ -24,7 +24,6 @@
     <ion-content>
       <main>
         <section v-if="segmentSelected === 'pending'">
-          <ion-button @click="openReorderModal">{{ $t('Reorder export jobs') }}</ion-button>
           <!-- Empty state -->
           <div v-if="pendingJobs?.length === 0">
             <p class="ion-text-center">{{ $t("There are no jobs pending right now")}}</p>
@@ -257,6 +256,13 @@
           <JobConfiguration :title="title" :job="currentJob" :productCount="productCount" :status="currentJobStatus" :type="freqType" :key="currentJob"/>
         </aside>
       </main>
+
+      <!-- showing reorder option on pending page and only when we are having pending jobs -->
+      <ion-fab v-if="segmentSelected === 'pending' && pendingJobs?.length !== 0" vertical="bottom" horizontal="end" slot="fixed">
+        <ion-fab-button @click="openReorderModal()">
+          <ion-icon :icon="pencilOutline" />
+        </ion-fab-button>
+      </ion-fab>
     </ion-content>
   </ion-page>
 </template>
@@ -271,6 +277,8 @@ import {
   IonCardHeader,
   IonCardSubtitle,
   IonCardTitle,
+  IonFab,
+  IonFabButton,
   IonHeader,
   IonIcon,
   IonItem,
@@ -293,14 +301,14 @@ import {
   createAnimation
 } from "@ionic/vue";
 import JobConfiguration from '@/components/JobConfiguration.vue'
-import { copyOutline, closeCircleOutline, checkmarkCircleOutline, optionsOutline, timeOutline, timerOutline } from "ionicons/icons";
-
+import { copyOutline, closeCircleOutline, checkmarkCircleOutline, pencilOutline, optionsOutline, timeOutline, timerOutline } from "ionicons/icons";
 import { Plugins } from '@capacitor/core';
 import { hasError, showToast } from '@/utils'
 import JobHistoryModal from '@/components/JobHistoryModal.vue';
 import { DateTime } from 'luxon';
 import { ProductService } from '@/services/ProductService';
 import { Actions, hasPermission } from '@/authorization'
+import JobReorderModal from '@/components/JobReorderModal.vue';
 
 export default defineComponent({
   name: "ThresholdUpdates",
@@ -312,6 +320,8 @@ export default defineComponent({
     IonCardHeader,
     IonCardSubtitle,
     IonCardTitle,
+    IonFab,
+    IonFabButton,
     IonHeader,
     IonIcon,
     IonItem,
@@ -573,7 +583,8 @@ export default defineComponent({
     },
     async openReorderModal() {
       const reorderModal = await modalController.create({
-        component: ''
+        component: JobReorderModal,
+        componentProps: { jobsForReorder: this.pendingJobs.filter((job: any) => job.systemJobEnumId === 'JOB_EXP_PROD_THRSHLD')}
       })
       reorderModal.onDidDismiss().then((result: any) => {
         if (result?.data?.isJobsUpdated) {
@@ -606,6 +617,7 @@ export default defineComponent({
       store,
       closeCircleOutline,
       checkmarkCircleOutline,
+      pencilOutline,
       optionsOutline,
       timeOutline,
       timerOutline,

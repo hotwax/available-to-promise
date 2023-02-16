@@ -15,13 +15,15 @@
       <ion-item v-for="job in jobs" :key="job.jobId">
         <ion-label>{{ job.jobName }}</ion-label>
         <ion-label>{{ job.runTime ? getTime(job.runTime) : "-"  }}</ion-label>
-        <ion-label>{{ timeFromNow(job.runTime)}}</ion-label>
+        <ion-label>{{ timeTillJob(job.runTime)}}</ion-label>
+        <ion-icon :icon="checkmarkCircleOutline" color="success" v-if="successJobs.includes(job.jobId)" />
+        <ion-icon :icon="closeCircleOutline" color="danger" v-if="failedJobs.includes(job.jobId)" />
         <ion-reorder />
       </ion-item>
     </ion-reorder-group>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button @click="save()" :disabled="!this.updatedJobsOrder.length">
+      <ion-fab-button @click="save()" :disabled="!this.updatedJobsOrder.length || this.failedJobs.length">
         <ion-icon :icon="saveOutline" />
       </ion-fab-button>
     </ion-fab>
@@ -46,10 +48,13 @@ import {
   modalController
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
-import { closeOutline, saveOutline } from 'ionicons/icons';
+import { checkmarkCircleOutline, closeCircleOutline, closeOutline, saveOutline } from 'ionicons/icons';
 import { mapGetters, useStore } from 'vuex';
 import { DateTime } from 'luxon';
 import { JobService } from '@/services/JobService';
+import { hasError, showToast } from '@/utils';
+import logger from '@/logger';
+import { translate } from '@/i18n';
 
 export default defineComponent({
   name: 'JobReorderModal',
@@ -70,20 +75,21 @@ export default defineComponent({
   },
   data() {
     return {
-      jobEnumId: 'JOB_EXP_PROD_THRSHLD',
       updatedJobsOrder: [] as any,
       failedJobs: [] as any,
-      successJobs: [] as any
+      successJobs: [] as any,
+      jobs: (this as any).jobsForReorder
     }
   },
   computed: {
     ...mapGetters({
       userProfile: "user/getUserProfile",
-      jobsForReorder: "job/getPendingJobs"
+      pendingJobs: "job/getPendingJobs"
     }),
   },
+  props: ["jobsForReorder"],
   methods: {
-    timeFromNow (time: any) {
+    timeTillJob (time: any) {
       const timeDiff = DateTime.fromMillis(time).diff(DateTime.local());
       return DateTime.local().plus(timeDiff).toRelative();
     },
@@ -104,7 +110,8 @@ export default defineComponent({
       return diffSeq;
     },
     doReorder(event: CustomEvent) {
-      const previousSeq = JSON.parse(JSON.stringify(this.initialJobsOrder))
+      console.log('this.pendingJobs', this.pendingJobs);
+      const previousSeq = JSON.parse(JSON.stringify(this.pendingJobs))
       // returns the updated sequence after reordering
       const updatedSeq = event.detail.complete(JSON.parse(JSON.stringify(this.jobs)));
       let diffSeq = this.findJobDiff(previousSeq, updatedSeq)
@@ -119,7 +126,7 @@ export default defineComponent({
     async save() {
       this.failedJobs = []
       this.successJobs = []
-      await Promise.all(this.updatedJobsOrder.map(async (job: any) => {
+      await Promise.allSettled(this.updatedJobsOrder.map(async (job: any) => {
         const payload = {
           'jobId': job.jobId,
           'systemJobEnumId': job.systemJobEnumId,
@@ -129,15 +136,20 @@ export default defineComponent({
         }
         try {
           const resp = await JobService.updateJob(payload)
-          if (!resp) {
-            // if the job failed when updating then adding the jobId to the failedJobs array
-            this.failedJobs.push(job.jobId)
-          } else if (resp?.status === 200) {
+          if (resp.status == 200 && !hasError(resp) && resp.data.successMessage) {
             // if the job succeded when updating then adding the jobId to the successJobs array
             this.successJobs.push(job.jobId)
+            showToast(translate('Jobs sequence updated successfully'))
+          } else {
+            // if the job failed when updating then adding the jobId to the failedJobs array
+            this.failedJobs.push(job.jobId)
+            logger.error('Failed to update some jobs')
+            showToast(translate('Failed to update some jobs'))
           }
         } catch (err) {
           this.failedJobs.push(job.jobId)
+          logger.error(err)
+          showToast(translate('Failed to update some jobs'))
         }
       }))
       // If there are no failed jobs then redirecting the user to the threshold updates page
@@ -149,6 +161,8 @@ export default defineComponent({
   setup() {
     const store = useStore();
     return {
+      checkmarkCircleOutline,
+      closeCircleOutline,
       closeOutline,
       saveOutline,
       store
