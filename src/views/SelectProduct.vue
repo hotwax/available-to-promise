@@ -122,7 +122,7 @@
                 <ion-card>
                   <Image :src="variant.mainImageUrl" />
                   <ion-item lines="none">
-                    <ion-label>
+                    <ion-label class="ion-text-wrap">
                       {{ variant.productName }}
                       <p v-if="variant.color">{{ $t("Color") }}: {{ variant.color }}</p>
                       <p v-if="variant.size">{{ $t("Size") }}: {{ variant.size }}</p>
@@ -204,6 +204,7 @@ import { ProductService } from '@/services/ProductService';
 import { JobService } from '@/services/JobService';
 import { DateTime } from 'luxon';
 import { Actions, hasPermission } from '@/authorization'
+import emitter from '@/event-bus';
 
 export default defineComponent({
   name: 'SelectProduct',
@@ -510,6 +511,7 @@ export default defineComponent({
     //Cleared query string to clear search keyword whenever user navigates to SelectProduct page
     this.queryString = '';
     this.threshold = '';
+    emitter.off("productStoreChanged", this.getProducts);
   },
   async ionViewWillEnter(){
     this.jobId = this.$route.query.id
@@ -517,6 +519,9 @@ export default defineComponent({
     if (this.jobId) {
       this.applyThresholdRule()
     } else {
+      // subscribing for emitter only we are creating a new rule for job scheduling, as when updating a rule
+      // there is no option to change the product store
+      emitter.on("productStoreChanged", this.getProducts);
       this.getProducts();
     }
   },
@@ -544,13 +549,24 @@ export default defineComponent({
 </script>
 
 <style scoped>
-
 .section-grid {
-  grid-template-columns: repeat(auto-fill, 200px);
+  grid-auto-flow: column;
+  grid-auto-columns: 200px;
+  grid-template-columns: none;
+  width: 100vw;
+  overflow-x: scroll;
+  scroll-snap-type: x mandatory;
 }
 
-.find {
-  padding: 0 var( --spacer-base);
+.section-grid > div {
+  scroll-snap-align: start;
+  /* Here 20px padding-bottom is given 
+    to match the 10px bottom and 10px top margin of card */
+  padding-bottom: calc(10px * 2);
+}
+
+.section-grid > div > ion-card {
+  height: 100%;
 }
 
 ion-list-header > div {
@@ -563,13 +579,22 @@ ion-list-header > div {
   .find {
     padding: var( --spacer-lg);
     gap: var(--spacer-lg);
-   }
+  } 
+
   .action {
     position: fixed;
     z-index: 3;
     bottom: 10%;
     left: 50%;
     transform: translate(-50%, 0);
+  }
+
+  .section-grid {
+    width: unset;
+    grid-auto-columns: unset;
+    grid-template-columns: repeat(auto-fill, 200px);
+    grid-auto-flow: unset;
+    overflow: unset;
   }
 }
 </style>
