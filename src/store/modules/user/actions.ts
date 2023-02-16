@@ -122,6 +122,7 @@ const actions: ActionTree<UserState, RootState> = {
     this.dispatch('product/clearProductList');
     this.dispatch('util/clearFacilitiesByProductStore')
     this.dispatch('util/clearShopifyConfig')
+    this.dispatch('job/clearJobState');
     resetPermissions();
     resetConfig();
   },
@@ -137,9 +138,10 @@ const actions: ActionTree<UserState, RootState> = {
     commit(types.USER_CURRENT_ECOM_STORE_UPDATED, productStore);
     this.dispatch('product/clearAllFilters')
     this.dispatch('product/clearProductList');
+    this.dispatch('job/clearJobState');
     await UserService.setUserPreference({
       'userPrefTypeId': 'SELECTED_BRAND',
-      'userPrefValue': payload.eComStore.productStoreId
+      'userPrefValue': productStore.productStoreId
     });
   },
 
