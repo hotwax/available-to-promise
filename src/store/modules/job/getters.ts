@@ -5,7 +5,7 @@ import parser from 'boolean-parser'
 
 const getters: GetterTree <JobState, RootState> = {
     getPendingJobs (state){
-      return state.pending.list;
+      return JSON.parse(JSON.stringify(state.pending.list));
     },
     getTemporalExpr: (state) => (id: string): any  => {
       return state.temporalExp[id];
