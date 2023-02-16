@@ -23,7 +23,7 @@
     </ion-reorder-group>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button @click="save()" :disabled="!this.updatedJobsOrder.length || this.failedJobs.length">
+      <ion-fab-button @click="save()" :disabled="this.failedJobs.length">
         <ion-icon :icon="saveOutline" />
       </ion-fab-button>
     </ion-fab>
@@ -78,13 +78,13 @@ export default defineComponent({
       updatedJobsOrder: [] as any,
       failedJobs: [] as any,
       successJobs: [] as any,
-      jobs: (this as any).jobsForReorder
+      jobs: (this as any).jobsForReorder,
+      seqBeforeReorder: JSON.parse(JSON.stringify((this as any).jobsForReorder))
     }
   },
   computed: {
     ...mapGetters({
-      userProfile: "user/getUserProfile",
-      pendingJobs: "job/getPendingJobs"
+      userProfile: "user/getUserProfile"
     }),
   },
   props: ["jobsForReorder"],
@@ -110,20 +110,25 @@ export default defineComponent({
       return diffSeq;
     },
     doReorder(event: CustomEvent) {
-      console.log('this.pendingJobs', this.pendingJobs);
-      const previousSeq = JSON.parse(JSON.stringify(this.pendingJobs))
-      // returns the updated sequence after reordering
-      const updatedSeq = event.detail.complete(JSON.parse(JSON.stringify(this.jobs)));
-      let diffSeq = this.findJobDiff(previousSeq, updatedSeq)
-      const updatedRunTime = previousSeq.map((job: any) => job.runTime)
+      // making the item reorder action as complete
+      this.jobs = event.detail.complete(JSON.parse(JSON.stringify(this.jobs)));
+    },
+    async save() {
+      let diffSeq = this.findJobDiff(this.seqBeforeReorder, this.jobs)
+      const updatedRunTime = this.seqBeforeReorder.map((job: any) => job.runTime)
       Object.keys(diffSeq).map((key: any) => {
         diffSeq[key].runTime = updatedRunTime[key]
       })
       diffSeq = Object.keys(diffSeq).map((key) => diffSeq[key])
-      this.jobs = updatedSeq
       this.updatedJobsOrder = diffSeq
-    },
-    async save() {
+
+      // if there are no jobs to update then closing the modal and displaying a toast
+      if(!this.updatedJobsOrder.length) {
+        showToast(translate('No jobs to update'))
+        this.closeModal();
+        return;
+      }
+
       this.failedJobs = []
       this.successJobs = []
       await Promise.allSettled(this.updatedJobsOrder.map(async (job: any) => {
