@@ -258,6 +258,7 @@
       </main>
 
       <!-- showing reorder option on pending page and only when we are having pending jobs -->
+      <!-- Not defined fab button in the pending section div, as the slot property only works in ion-content and defining the button in div makes the fab button scrollable -->
       <ion-fab v-if="segmentSelected === 'pending' && pendingJobs?.length !== 0" vertical="bottom" horizontal="end" slot="fixed">
         <ion-fab-button @click="openReorderModal()">
           <ion-icon :icon="pencilOutline" />
@@ -587,16 +588,16 @@ export default defineComponent({
         .play();
     },
     async openReorderModal() {
-      const reorderModal = await modalController.create({
+      const jobReorderModal = await modalController.create({
         component: JobReorderModal,
         componentProps: { jobsForReorder: this.pendingJobs.filter((job: any) => job.systemJobEnumId === 'JOB_EXP_PROD_THRSHLD')}
       })
-      reorderModal.onDidDismiss().then((result: any) => {
+      jobReorderModal.onDidDismiss().then((result: any) => {
         if (result?.data?.isJobsUpdated) {
           this.store.dispatch('job/fetchPendingJobs', {viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums});
         }
       })
-      return reorderModal.present();
+      return jobReorderModal.present();
     }
   },
   ionViewWillEnter() {
