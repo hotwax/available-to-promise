@@ -204,6 +204,7 @@ import { ProductService } from '@/services/ProductService';
 import { JobService } from '@/services/JobService';
 import { DateTime } from 'luxon';
 import { Actions, hasPermission } from '@/authorization'
+import emitter from '@/event-bus';
 
 export default defineComponent({
   name: 'SelectProduct',
@@ -510,6 +511,7 @@ export default defineComponent({
     //Cleared query string to clear search keyword whenever user navigates to SelectProduct page
     this.queryString = '';
     this.threshold = '';
+    emitter.off("productStoreChanged", this.getProducts);
   },
   async ionViewWillEnter(){
     this.jobId = this.$route.query.id
@@ -517,6 +519,9 @@ export default defineComponent({
     if (this.jobId) {
       this.applyThresholdRule()
     } else {
+      // subscribing for emitter only we are creating a new rule for job scheduling, as when updating a rule
+      // there is no option to change the product store
+      emitter.on("productStoreChanged", this.getProducts);
       this.getProducts();
     }
   },

@@ -150,7 +150,6 @@ export default defineComponent({
   props: ["job", "title", "status", "type", "productCount"],
   computed: {
     ...mapGetters({
-      shopifyConfigId: 'user/getShopifyConfigId',
       userProfile: 'user/getUserProfile'
     }),
     generateFrequencyOptions(): any {
