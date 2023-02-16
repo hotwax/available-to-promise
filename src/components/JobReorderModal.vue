@@ -101,7 +101,7 @@ export default defineComponent({
     },
     findJobDiff(previousSeq: any, updatedSeq: any) {
       const diffSeq: any = Object.keys(previousSeq).reduce((diff, key) => {
-        if (updatedSeq[key].jobId === previousSeq[key].jobId && updatedSeq[key].runTime === previousSeq[key].runTime) return diff
+        if (updatedSeq[key].jobId === previousSeq[key].jobId) return diff
         return {
           ...diff,
           [key]: updatedSeq[key]
@@ -115,19 +115,20 @@ export default defineComponent({
     },
     async save() {
       let diffSeq = this.findJobDiff(this.seqBeforeReorder, this.jobs)
+
+      // if there are no jobs to update then closing the modal and displaying a toast
+      if(!diffSeq.length) {
+        showToast(translate('No jobs to update'))
+        this.closeModal();
+        return;
+      }
+
       const updatedRunTime = this.seqBeforeReorder.map((job: any) => job.runTime)
       Object.keys(diffSeq).map((key: any) => {
         diffSeq[key].runTime = updatedRunTime[key]
       })
       diffSeq = Object.keys(diffSeq).map((key) => diffSeq[key])
       this.updatedJobsOrder = diffSeq
-
-      // if there are no jobs to update then closing the modal and displaying a toast
-      if(!this.updatedJobsOrder.length) {
-        showToast(translate('No jobs to update'))
-        this.closeModal();
-        return;
-      }
 
       this.failedJobs = []
       this.successJobs = []
