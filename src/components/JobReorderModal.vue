@@ -131,6 +131,12 @@ export default defineComponent({
       const diffSeq = this.findJobDiff(this.jobs, this.modifiedJobs)
       this.updatedJobsOrder = Object.keys(diffSeq).map((key) => diffSeq[key])
 
+      if(this.updatedJobsOrder.length) {
+        showToast(translate('No jobs to update'))
+        this.closeModal();
+        return;
+      }
+
       await Promise.allSettled(this.updatedJobsOrder.map(async (job: any) => {
         const payload = {
           'jobId': job.jobId,
