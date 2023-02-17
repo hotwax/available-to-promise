@@ -136,7 +136,6 @@ export default defineComponent({
         const payload = {
           'jobId': job.jobId,
           'systemJobEnumId': job.systemJobEnumId,
-          'recurrenceTimeZone': this.userProfile.userTimeZone,
           'statusId': "SERVICE_PENDING",
           'runTime': job.runTime
         }
