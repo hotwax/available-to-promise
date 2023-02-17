@@ -100,6 +100,7 @@ export default defineComponent({
       return DateTime.fromMillis(time).toLocaleString(DateTime.TIME_SIMPLE);
     },
     findJobDiff(previousSeq: any, updatedSeq: any) {
+      // finding the diff using array element position
       const diffSeq: any = Object.keys(previousSeq).reduce((diff, key) => {
         if (updatedSeq[key].jobId === previousSeq[key].jobId) return diff
         return {
@@ -110,7 +111,7 @@ export default defineComponent({
       return diffSeq;
     },
     doReorder(event: CustomEvent) {
-      // making the item reorder action as complete
+      // making the item reorder action as complete and storing the updated order in jobs
       this.jobs = event.detail.complete(JSON.parse(JSON.stringify(this.jobs)));
     },
     async save() {
