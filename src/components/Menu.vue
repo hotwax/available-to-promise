@@ -8,7 +8,7 @@
     <ion-content>
       <ion-list>
         <ion-item v-if="hasPermission('APP_SELECT_PRODUCT_VIEW')" button @click="closeMenu(); router.push('/select-product')">
-          <ion-icon :icon="options" slot="start" />
+          <ion-icon :icon="optionsOutline" slot="start" />
           <ion-label>{{ $t("Threshold Management") }}</ion-label>
         </ion-item>
         <ion-item v-if="hasPermission('APP_THRESHOLD_UPDATES_VIEW')" button @click="closeMenu(); router.push('/threshold-updates')">
@@ -16,7 +16,7 @@
           <ion-label>{{ $t("Threshold Updates") }}</ion-label>
         </ion-item>
         <ion-item button @click="closeMenu(); router.push('/settings')">
-          <ion-icon :icon="settings" slot="start" />
+          <ion-icon :icon="settingsOutline" slot="start" />
           <ion-label>{{ $t("Settings") }}</ion-label>
         </ion-item>
       </ion-list>
@@ -66,7 +66,7 @@
   import { useStore } from "@/store";
   import { hasPermission } from "@/authorization";
   import { useRouter } from "vue-router";
-import { options, settings, pulseOutline } from 'ionicons/icons';
+  import { optionsOutline, settingsOutline, pulseOutline } from 'ionicons/icons';
   import emitter from "@/event-bus";
   
   export default defineComponent({
@@ -112,8 +112,8 @@ import { options, settings, pulseOutline } from 'ionicons/icons';
         router,
         pulseOutline,
         hasPermission,
-        options,
-        settings,
+        optionsOutline,
+        settingsOutline,
         store
       };
     },
