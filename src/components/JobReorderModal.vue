@@ -102,7 +102,7 @@ export default defineComponent({
     findJobDiff(previousSeq: any, updatedSeq: any) {
       // finding the diff using array element position
       const diffSeq: any = Object.keys(previousSeq).reduce((diff, key) => {
-        if (updatedSeq[key].jobId === previousSeq[key].jobId) return diff
+        if (updatedSeq[key].jobId === previousSeq[key].jobId && updatedSeq[key].runTime === previousSeq[key].runTime) return diff
         return {
           ...diff,
           [key]: updatedSeq[key]
@@ -110,29 +110,28 @@ export default defineComponent({
       }, {})
       return diffSeq;
     },
-    doReorder(event: CustomEvent) {
-      // making the item reorder action as complete and storing the updated order in jobs
-      this.jobs = event.detail.complete(JSON.parse(JSON.stringify(this.jobs)));
-    },
-    async save() {
-      let diffSeq = this.findJobDiff(this.seqBeforeReorder, this.jobs)
-
-      // if there are no jobs to update then closing the modal and displaying a toast
-      if(!diffSeq.length) {
-        showToast(translate('No jobs to update'))
-        this.closeModal();
-        return;
-      }
-
+    updateRunTime(updatedSeq: any) {
+      let diffSeq = this.findJobDiff(this.seqBeforeReorder, updatedSeq)
       const updatedRunTime = this.seqBeforeReorder.map((job: any) => job.runTime)
       Object.keys(diffSeq).map((key: any) => {
         diffSeq[key].runTime = updatedRunTime[key]
       })
       diffSeq = Object.keys(diffSeq).map((key) => diffSeq[key])
       this.updatedJobsOrder = diffSeq
-
+      this.jobs = updatedSeq
+    },
+    doReorder(event: CustomEvent) {
+      // making the item reorder action as complete and storing the updated order in jobs
+      const updatedSeq = event.detail.complete(JSON.parse(JSON.stringify(this.jobs)));
+      this.updateRunTime(updatedSeq);
+    },
+    async save() {
       this.failedJobs = []
       this.successJobs = []
+      
+      const diffSeq = this.findJobDiff(this.seqBeforeReorder, this.jobs)
+      this.updatedJobsOrder = Object.keys(diffSeq).map((key) => diffSeq[key])
+
       await Promise.allSettled(this.updatedJobsOrder.map(async (job: any) => {
         const payload = {
           'jobId': job.jobId,
@@ -146,22 +145,23 @@ export default defineComponent({
           if (resp.status == 200 && !hasError(resp) && resp.data.successMessage) {
             // if the job succeded when updating then adding the jobId to the successJobs array
             this.successJobs.push(job.jobId)
-            showToast(translate('Jobs sequence updated successfully'))
+            
           } else {
             // if the job failed when updating then adding the jobId to the failedJobs array
             this.failedJobs.push(job.jobId)
-            logger.error('Failed to update some jobs')
-            showToast(translate('Failed to update some jobs'))
+            logger.error(`Failed to update job ${job.jobId}`)            
           }
         } catch (err) {
           this.failedJobs.push(job.jobId)
           logger.error(err)
-          showToast(translate('Failed to update some jobs'))
         }
       }))
       // If there are no failed jobs then redirecting the user to the threshold updates page
       if (!this.failedJobs.length) {
         this.closeModal(true);
+        showToast(translate('Jobs sequence updated successfully'))
+      } else {
+        showToast(translate('Failed to update some jobs'))
       }
     },
   },
