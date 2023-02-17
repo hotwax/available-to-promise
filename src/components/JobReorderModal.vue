@@ -75,7 +75,6 @@ export default defineComponent({
   },
   data() {
     return {
-      updatedJobsOrder: [] as any,
       failedJobs: [] as any,
       successJobs: [] as any,
       modifiedJobs: JSON.parse(JSON.stringify((this as any).jobs))
@@ -109,35 +108,31 @@ export default defineComponent({
       }, {})
       return diffSeq;
     },
-    updateRunTime(updatedSeq: any) {
+    doReorder(event: CustomEvent) {
+      // making the item reorder action as complete and storing the updated order in jobs
+      const updatedSeq = event.detail.complete(JSON.parse(JSON.stringify(this.modifiedJobs)));
       let diffSeq = this.findJobDiff(this.jobs, updatedSeq)
       const updatedRunTime = this.jobs.map((job: any) => job.runTime)
       Object.keys(diffSeq).map((key: any) => {
         diffSeq[key].runTime = updatedRunTime[key]
       })
       diffSeq = Object.keys(diffSeq).map((key) => diffSeq[key])
-      this.updatedJobsOrder = diffSeq
       this.modifiedJobs = updatedSeq
-    },
-    doReorder(event: CustomEvent) {
-      // making the item reorder action as complete and storing the updated order in jobs
-      const updatedSeq = event.detail.complete(JSON.parse(JSON.stringify(this.modifiedJobs)));
-      this.updateRunTime(updatedSeq);
     },
     async save() {
       this.failedJobs = []
       this.successJobs = []
       
       const diffSeq = this.findJobDiff(this.jobs, this.modifiedJobs)
-      this.updatedJobsOrder = Object.keys(diffSeq).map((key) => diffSeq[key])
+      const updatedJobsOrder = Object.keys(diffSeq).map((key) => diffSeq[key])
 
-      if(this.updatedJobsOrder.length) {
+      if(updatedJobsOrder.length) {
         showToast(translate('No jobs to update'))
         this.closeModal();
         return;
       }
 
-      await Promise.allSettled(this.updatedJobsOrder.map(async (job: any) => {
+      await Promise.allSettled(updatedJobsOrder.map(async (job: any) => {
         const payload = {
           'jobId': job.jobId,
           'systemJobEnumId': job.systemJobEnumId,
