@@ -14,4 +14,5 @@ export default interface JobState {
     temporalExp: any;
     enumIds: any;
     thresholdRules: any;
+    current: any;
 }

@@ -47,6 +47,9 @@ const mutations: MutationTree <JobState> = {
         if(id) {
             delete state.thresholdRules[id]
         }
-    }
+    },
+    [types.JOB_CURRENT_UPDATED] (state, payload){
+        state.current = payload
+    },
 }
 export default mutations;

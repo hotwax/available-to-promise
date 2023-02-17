@@ -2,20 +2,20 @@
   <section>
     <ion-item lines="none">
       <h1>{{ title }}</h1>
-      <ion-badge slot="end" color="dark" v-if="job?.runTime">{{ $t("running") }} {{ timeTillJob(runTime ? runTime : job.runTime) }}</ion-badge>
+      <ion-badge slot="end" color="dark" v-if="currentJob?.runTime">{{ $t("running") }} {{ timeTillJob(runTime ? runTime : currentJob.runTime) }}</ion-badge>
     </ion-item>
 
     <ion-list>
       <ion-item>
         <ion-icon slot="start" :icon="calendarClearOutline" />
         <ion-label>{{ $t("Last run") }}</ion-label>
-        <ion-label slot="end">{{ job?.lastUpdatedStamp ? getTime(job.lastUpdatedStamp) : $t('No previous occurrence') }}</ion-label>
+        <ion-label slot="end">{{ currentJob?.lastUpdatedStamp ? getTime(currentJob.lastUpdatedStamp) : $t('No previous occurrence') }}</ion-label>
       </ion-item>
 
       <ion-item>
         <ion-icon slot="start" :icon="timeOutline" />
         <ion-label>{{ $t("Run time") }}</ion-label>
-        <ion-label id="open-run-time-modal" slot="end">{{ job?.runTime ? getTime(runTime ? runTime : job.runTime) : $t('Select run time') }}</ion-label>
+        <ion-label id="open-run-time-modal" slot="end">{{ currentJob?.runTime ? getTime(runTime ? runTime : currentJob.runTime) : $t('Select run time') }}</ion-label>
         <!-- TODO: display a button when we are not having a runtime and open the datetime component
         on click of that button
         Currently, when mapping the same datetime component for label and button so it's not working so for
@@ -26,8 +26,8 @@
             <ion-datetime
               hour-cycle="h12"
               :min="minDateTime"
-              :value="job?.runTime ? getDateTime(job.runTime) : ''"
-              @ionChange="updateRunTime($event, job)"
+              :value="currentJob?.runTime ? getDateTime(currentJob.runTime) : ''"
+              @ionChange="updateRunTime($event, currentJob)"
             />
           </ion-content>
         </ion-modal>
@@ -52,13 +52,13 @@
         <ion-label>{{ $t("Auto disable after") }}</ion-label>
         <ion-input :placeholder="$t('occurrences')" v-model="count"/>
       </ion-item> -->
-      <ion-item v-if="job?.systemJobEnumId === 'JOB_EXP_PROD_THRSHLD'" lines="inset">
+      <ion-item v-if="currentJob?.systemJobEnumId === 'JOB_EXP_PROD_THRSHLD'" lines="inset">
         <ion-icon slot="start" :icon="cogOutline" />
         <ion-label>{{ $t("Rule name") }}</ion-label>
         <ion-input class="ion-text-end" name="ruleName" v-model="ruleName" id="ruleName" />
       </ion-item>
 
-      <ion-item v-if="job?.runtimeData?.searchPreferenceId" button detail="true" @click="updateThresholdRule" lines="full">
+      <ion-item v-if="currentJob?.runtimeData?.searchPreferenceId" button detail="true" @click="updateThresholdRule" lines="full">
         <ion-icon slot="start" :icon="pencilOutline" />
         <ion-label class="ion-text-wrap">{{ $t("Edit threshold rule") }}</ion-label>
         <ion-note slot="end">
@@ -69,8 +69,8 @@
     </ion-list>
     <div class="actions desktop-only">
       <div>
-        <ion-button size="small" fill="outline" color="medium" :disabled="!hasPermission(Actions.APP_JOB_UPDATE) || status === 'SERVICE_DRAFT'" @click="skipJob(job)">{{ $t("Skip once") }}</ion-button>
-        <ion-button size="small" fill="outline" color="danger" :disabled="!hasPermission(Actions.APP_JOB_UPDATE) || status === 'SERVICE_DRAFT'" @click="cancelJob(job)">{{ $t("Disable") }}</ion-button>
+        <ion-button size="small" fill="outline" color="medium" :disabled="!hasPermission(Actions.APP_JOB_UPDATE)" @click="skipJob(currentJob)">{{ $t("Skip once") }}</ion-button>
+        <ion-button size="small" fill="outline" color="danger" :disabled="!hasPermission(Actions.APP_JOB_UPDATE)" @click="cancelJob(currentJob)">{{ $t("Disable") }}</ion-button>
       </div>
       <div>
         <ion-button size="small" fill="outline" :disabled="!hasPermission(Actions.APP_JOB_UPDATE)" @click="saveChanges()">{{ $t("Save changes") }}</ion-button>
@@ -78,8 +78,8 @@
     </div>
 
     <div class=" actions mobile-only">
-      <ion-button size="small" fill="outline" color="medium" :disabled="hasPermission(Actions.APP_JOB_UPDATE) || status === 'SERVICE_DRAFT'" @click="skipJob(job)">{{ $t("Skip once") }}</ion-button>
-      <ion-button size="small" fill="outline" color="danger" :disabled="hasPermission(Actions.APP_JOB_UPDATE) || status === 'SERVICE_DRAFT'" @click="cancelJob(job)">{{ $t("Disable") }}</ion-button>
+      <ion-button size="small" fill="outline" color="medium" :disabled="hasPermission(Actions.APP_JOB_UPDATE)" @click="skipJob(currentJob)">{{ $t("Skip once") }}</ion-button>
+      <ion-button size="small" fill="outline" color="danger" :disabled="hasPermission(Actions.APP_JOB_UPDATE)" @click="cancelJob(currentJob)">{{ $t("Disable") }}</ion-button>
       <ion-button expand="block" fill="outline" :disabled="!hasPermission(Actions.APP_JOB_UPDATE)" @click="saveChanges()">{{ $t("Save changes") }}</ion-button>
     </div>
   </section>
@@ -140,17 +140,25 @@ export default defineComponent({
   },
   data() {
     return {
-      jobStatus: this.status,
-      ruleName: this.job?.jobName,
+      jobStatus: '',
+      ruleName: '',
       minDateTime: DateTime.now().toISO(),
       jobEnums: JSON.parse(process.env?.VUE_APP_JOB_ENUMS as string) as any,
       runTime: ''
     }
   },
-  props: ["job", "title", "status", "type", "productCount"],
+  props: ["title", "type", "productCount"],
+  created() {
+    if(this.currentJob) {
+      this.runTime = this.currentJob?.runTime
+      this.ruleName = this.currentJob?.jobName
+      this.jobStatus = this.currentJob?.tempExprId
+    }
+  },
   computed: {
     ...mapGetters({
-      userProfile: 'user/getUserProfile'
+      userProfile: 'user/getUserProfile',
+      currentJob: 'job/getCurrentJob'
     }),
     generateFrequencyOptions(): any {
       const optionDefault = [{
@@ -190,7 +198,7 @@ export default defineComponent({
   },
   methods: {
     updateThresholdRule(){
-      this.$router.push(`select-product?id=${this.job.jobId}`)
+      this.$router.push(`select-product?id=${this.currentJob.jobId}`)
     },
     getDateTime(time: any) {
       return DateTime.fromMillis(time).toISO()
@@ -207,12 +215,7 @@ export default defineComponent({
             text: this.$t('Skip'),
             handler: async () => {
               if (job) {
-                // TODO: using updatedRunTime value to update the runTime in the configuration component as currently currentJob state is not maintained
-                const { updatedRunTime } = await this.store.dispatch('job/skipJob', job)
-                if(updatedRunTime) {
-                  this.runTime = updatedRunTime;
-                  this.store.dispatch('job/fetchPendingJobs', {viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums})
-                }
+                await this.store.dispatch('job/skipJob', job)
               }
             }
           }]
@@ -230,10 +233,7 @@ export default defineComponent({
           }, {
             text: this.$t('Cancel'),
             handler: async () => {
-              const resp = await this.store.dispatch('job/cancelJob', job);
-              if(resp.status == 200 && !hasError(resp) && resp.data.successMessage) {
-                this.store.dispatch('job/fetchPendingJobs', {viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums})
-              }
+              await this.store.dispatch('job/cancelJob', job);
             }
           }],
         });
@@ -266,34 +266,11 @@ export default defineComponent({
       return alert.present();
     },
     async updateJob() {
-      const job = this.job;
+      const job = this.currentJob;
       job.jobName = this.ruleName;
       job['jobStatus'] = this.jobStatus !== 'SERVICE_DRAFT' ? this.jobStatus : 'HOURLY';
       if (job?.statusId === 'SERVICE_PENDING') {
-        try {
-          const payload = {
-            'jobId': job.jobId,
-            'systemJobEnumId': job.systemJobEnumId,
-            'recurrenceTimeZone': this.userProfile.userTimeZone,
-            'tempExprId': job.frequency ? job.frequency : job.jobStatus, // TODO: change jobStatus to frequency
-            'statusId': "SERVICE_PENDING"
-          } as any
-
-          job?.runTime && (payload['runTime'] = job.runTime)
-          job?.sinceId && (payload['sinceId'] = job.sinceId)
-          job?.jobName && (payload['jobName'] = job.jobName)
-
-          const resp = await JobService.updateJob(payload)
-          if(resp.status == 200 && !hasError(resp) && resp.data.successMessage) {
-            this.store.dispatch('job/fetchPendingJobs', {viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums})
-            showToast(translate('Service updated successfully'))
-          } else {
-            showToast(translate('Something went wrong'))
-          }
-        } catch(err) {
-          showToast(translate('Something went wrong'))
-          logger.error(err)
-        }
+        await this.store.dispatch('job/updateJob', job)
       }
     },
     getTime (time: any) {

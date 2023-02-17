@@ -22,7 +22,8 @@ const jobModule: Module<JobState, RootState> = {
       },
       temporalExp: [],
       enumIds: {},
-      thresholdRules: {}
+      thresholdRules: {},
+      current: {}
     },
     getters,
     actions,

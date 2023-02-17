@@ -50,6 +50,9 @@ const getters: GetterTree <JobState, RootState> = {
     },
     getThresholdRule: (state) => (id: string): any => {
       return state.thresholdRules[id];
+    },
+    getCurrentJob (state) {
+      return state.current;
     }
   }
 

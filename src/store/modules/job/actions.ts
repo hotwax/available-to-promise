@@ -265,9 +265,10 @@ const actions: ActionTree<JobState, RootState> = {
     commit(types.JOB_PENDING_UPDATED, {jobs: [], total: 0});
     commit(types.JOB_HISTORY_UPDATED, {jobs: [], total: 0});
     commit(types.JOB_RUNNING_UPDATED, {jobs: [], total: 0});
+    commit(types.JOB_CURRENT_UPDATED, {});
   },
 
-  async skipJob({ getters }, job) {
+  async skipJob({ commit, dispatch, getters, state }, job) {
     let skipTime = {};
     const integer1 = getters['getTemporalExpr'](job.tempExprId).integer1;
     const integer2 = getters['getTemporalExpr'](job.tempExprId).integer2
@@ -291,17 +292,33 @@ const actions: ActionTree<JobState, RootState> = {
       'statusId': "SERVICE_PENDING"
     } as any
 
-    const resp = await JobService.updateJob(payload)
-    if (resp.status === 200 && !hasError(resp) && resp.data.successMessage) {
-      // TODO: improve the condition to store the current job in state.
-      // returning the updated runTime on success as, the job configuration component does not get updated when
-      // skipping a job from there.
-      return { updatedRunTime: payload.runTime }
+    let resp;
+
+    try {
+      resp = await JobService.updateJob(payload)
+      if (resp.status === 200 && !hasError(resp) && resp.data.successMessage) {
+        // fetching pendingJobs as we can only udpate the jobs from pending page
+        await dispatch('fetchPendingJobs', {viewSize: process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: JSON.parse(process.env?.VUE_APP_JOB_ENUMS as string) as any})
+
+        // checking that if there is a current job set, then updating current job information
+        if(state.current && Object.keys(state.current).length) {
+          const currentJob = state.pending.list.find((pendingJob: any) => pendingJob?.jobId === job?.jobId);
+          commit(types.JOB_CURRENT_UPDATED, currentJob);
+        }
+
+        showToast(translate('Service updated successfully'))
+      } else {
+        showToast(translate('Failed to update service'))
+        logger.error('Failed to update service')
+      }
+    } catch (err) {
+      logger.error(err)
+      showToast(translate('Something went wrong'))
     }
     return resp;
   },
 
-  async cancelJob({ dispatch }, job) {
+  async cancelJob({ commit, dispatch }, job) {
     let resp;
 
     try {
@@ -314,7 +331,11 @@ const actions: ActionTree<JobState, RootState> = {
       });
       if (resp.status == 200 && !hasError(resp)) {
         showToast(translate('Service updated successfully'))
+        // fetching pendingJobs as we can only udpate the jobs from pending page
+        await dispatch('fetchPendingJobs', {viewSize: process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: JSON.parse(process.env?.VUE_APP_JOB_ENUMS as string) as any})
+        commit(types.JOB_CURRENT_UPDATED, {});
       } else {
+        logger.error('Failed to update service')
         showToast(translate('Something went wrong'), getResponseError(resp))
       }
     } catch (err) {
@@ -327,5 +348,84 @@ const actions: ActionTree<JobState, RootState> = {
     }
     return resp;
   },
+
+  async updateJob({ commit, dispatch, state }, job) {
+    try {
+      const payload = {
+        'jobId': job.jobId,
+        'systemJobEnumId': job.systemJobEnumId,
+        'recurrenceTimeZone': this.state.user.current.userTimeZone,
+        'tempExprId': job.frequency ? job.frequency : job.jobStatus, // TODO: change jobStatus to frequency
+        'statusId': "SERVICE_PENDING"
+      } as any
+
+      job?.runTime && (payload['runTime'] = job.runTime)
+      job?.sinceId && (payload['sinceId'] = job.sinceId)
+      job?.jobName && (payload['jobName'] = job.jobName)
+
+      const resp = await JobService.updateJob(payload)
+      if(resp.status == 200 && !hasError(resp) && resp.data.successMessage) {
+        await dispatch('job/fetchPendingJobs', {viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: JSON.parse(process.env?.VUE_APP_JOB_ENUMS as string) as any})
+
+        // checking that if there is a current job set, then updating current job information
+        if(state.current && Object.keys(state.current).length) {
+          const currentJob = state.pending.list.find((pendingJob: any) => pendingJob?.jobId === job?.jobId);
+          commit(types.JOB_CURRENT_UPDATED, currentJob);
+        }
+        
+        showToast(translate('Service updated successfully'))
+      } else {
+        showToast(translate('Something went wrong'))
+        logger.error('Something went wrong')
+      }
+    } catch(err) {
+      showToast(translate('Something went wrong'))
+      logger.error(err)
+    }
+  },
+
+  async updateCurrentJob({ commit, state, dispatch }, payload) {
+
+    if(payload?.job) {
+      commit(types.JOB_CURRENT_UPDATED, payload.job);
+      return payload?.job;
+    }
+
+    const currentJob = state.pending.list.find((job: any) => job.jobId === payload.jobId);
+
+    if(currentJob) {
+      commit(types.JOB_CURRENT_UPDATED, currentJob);
+      return currentJob;
+    }
+
+    let resp;
+    try {
+      const params = {
+        "inputFields": {
+          "jobId": payload?.jobId
+        } as any,
+        "viewSize": 1,
+        "fieldList": ["systemJobEnumId", "runTime", "tempExprId", "parentJobId", "serviceName", "jobId", "jobName", "currentRetryCount", "statusId", "description"],
+        "noConditionFind": "Y"
+      }
+      resp = await JobService.fetchJobInformation(params);
+      if(resp.status === 200 && resp.data.docs?.length > 0 && !hasError(resp)) {
+        const currentJob = {
+          ...resp.data.docs[0],
+          'status': resp.data.docs[0]?.statusId
+        }
+        commit(types.JOB_CURRENT_UPDATED, currentJob);
+
+        const enumIds = resp.data.docs.map((item: any) => {
+          return item.systemJobEnumId
+        })
+        await dispatch('fetchJobDescription', enumIds);
+
+        return currentJob;
+      }
+    } catch (err) {
+      logger.error(err);
+    }
+  }
 }
 export default actions;

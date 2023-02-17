@@ -252,8 +252,8 @@
           </div>          
         </section>
 
-        <aside class="desktop-only" v-show="segmentSelected === 'pending' && currentJob">
-          <JobConfiguration :title="title" :job="currentJob" :productCount="productCount" :status="currentJobStatus" :type="freqType" :key="currentJob"/>
+        <aside class="desktop-only" v-show="segmentSelected === 'pending' && currentJob && Object.keys(currentJob).length">
+          <JobConfiguration :title="title" :productCount="productCount" :type="freqType" :key="currentJob"/>
         </aside>
       </main>
     </ion-content>
@@ -336,9 +336,7 @@ export default defineComponent({
       jobEnums: [
         ...JSON.parse(process.env?.VUE_APP_JOB_ENUMS as string) as any
       ],
-      currentJob: '' as any,
       title: '',
-      currentJobStatus: '',
       freqType: '' as any,
       isJobDetailAnimationCompleted: false,
       isDesktop: isPlatform('desktop'),
@@ -359,7 +357,8 @@ export default defineComponent({
       isRunningJobsScrollable: 'job/isRunningJobsScrollable',
       isHistoryJobsScrollable: 'job/isHistoryJobsScrollable',
       products: 'product/getProducts',
-      query: 'job/getThresholdRule'
+      query: 'job/getThresholdRule',
+      currentJob: 'job/getCurrentJob'
     })
   },
   mounted(){
@@ -471,7 +470,6 @@ export default defineComponent({
               text: this.$t('Skip'),
               handler: async () => {
                 await this.store.dispatch('job/skipJob', job);
-                await this.store.dispatch('job/fetchPendingJobs', {viewIndex: 0, jobEnums: this.jobEnums})
               },
             }
           ]
@@ -506,10 +504,7 @@ export default defineComponent({
             {
               text: this.$t("CANCEL"),
               handler: async () => {
-                const resp = await this.store.dispatch('job/cancelJob', job);
-                if(resp.status == 200 && !hasError(resp) && resp.data.successMessage) {
-                  this.store.dispatch('job/fetchPendingJobs', {viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums})
-                }
+                await this.store.dispatch('job/cancelJob', job);
               },
             }
           ],
@@ -517,7 +512,7 @@ export default defineComponent({
 
        return alert.present();
     },    
-    viewJobConfiguration(job: any) {
+    async viewJobConfiguration(job: any) {
       if(!this.isDesktop) {
         return;
       }
@@ -526,12 +521,13 @@ export default defineComponent({
         const query = JSON.parse(JSON.stringify(this.query(job.runtimeData.searchPreferenceId)))
         this.getProductCount(query);
       }
-      this.currentJob = {id: job.jobId, ...job}
+
       this.title = this.getEnumName(job.systemJobEnumId)
-      this.currentJobStatus = job.tempExprId
       const id = this.jobEnums.find((enums) => enums === job.systemJobEnumId)
       this.freqType = id && (Object.entries(this.jobFrequencyType).find((freq) => freq[0] == id) as any)[1]
-      if (this.currentJob && !this.isJobDetailAnimationCompleted) {
+
+      await this.store.dispatch('job/updateCurrentJob', { job });
+      if (Object.keys(this.currentJob).length && !this.isJobDetailAnimationCompleted) {
         this.playAnimation();
         this.isJobDetailAnimationCompleted = true;
       }
@@ -576,9 +572,9 @@ export default defineComponent({
         .play();
     }
   },
-  ionViewWillEnter() {
+  async ionViewWillEnter() {
     // reassigning current job when entering in the view to not display the job config component if previously opened
-    this.currentJob = undefined
+    await this.store.dispatch('job/updateCurrentJob', { job: {} });
     this.isJobDetailAnimationCompleted = false
     if (this.segmentSelected === 'pending') {
       this.store.dispatch('job/fetchPendingJobs', {viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums})
