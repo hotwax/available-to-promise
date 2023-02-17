@@ -590,7 +590,7 @@ export default defineComponent({
     async openReorderModal() {
       const jobReorderModal = await modalController.create({
         component: JobReorderModal,
-        componentProps: { jobsForReorder: this.pendingJobs.filter((job: any) => job.systemJobEnumId === 'JOB_EXP_PROD_THRSHLD')} // passing export jobs, as we will only reorder export threshold jobs
+        componentProps: { jobs: this.pendingJobs.filter((job: any) => job.systemJobEnumId === 'JOB_EXP_PROD_THRSHLD')} // passing export jobs, as we will only reorder export threshold jobs
       })
       jobReorderModal.onDidDismiss().then((result: any) => {
         if (result?.data?.isJobsUpdated) {

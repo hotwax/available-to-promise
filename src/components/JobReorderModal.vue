@@ -12,7 +12,7 @@
 
   <ion-content>
     <ion-reorder-group @ionItemReorder="doReorder($event)" disabled="false">
-      <ion-item v-for="job in jobs" :key="job.jobId">
+      <ion-item v-for="job in modifiedJobs" :key="job.jobId">
         <ion-label>{{ job.jobName }}</ion-label>
         <ion-label>{{ job.runTime ? getTime(job.runTime) : "-"  }}</ion-label>
         <ion-label>{{ timeTillJob(job.runTime)}}</ion-label>
@@ -78,8 +78,7 @@ export default defineComponent({
       updatedJobsOrder: [] as any,
       failedJobs: [] as any,
       successJobs: [] as any,
-      jobs: (this as any).jobsForReorder,
-      seqBeforeReorder: JSON.parse(JSON.stringify((this as any).jobsForReorder))
+      modifiedJobs: JSON.parse(JSON.stringify((this as any).jobs))
     }
   },
   computed: {
@@ -87,7 +86,7 @@ export default defineComponent({
       userProfile: "user/getUserProfile"
     }),
   },
-  props: ["jobsForReorder"],
+  props: ["jobs"],
   methods: {
     timeTillJob (time: any) {
       const timeDiff = DateTime.fromMillis(time).diff(DateTime.local());
@@ -111,25 +110,25 @@ export default defineComponent({
       return diffSeq;
     },
     updateRunTime(updatedSeq: any) {
-      let diffSeq = this.findJobDiff(this.seqBeforeReorder, updatedSeq)
-      const updatedRunTime = this.seqBeforeReorder.map((job: any) => job.runTime)
+      let diffSeq = this.findJobDiff(this.jobs, updatedSeq)
+      const updatedRunTime = this.jobs.map((job: any) => job.runTime)
       Object.keys(diffSeq).map((key: any) => {
         diffSeq[key].runTime = updatedRunTime[key]
       })
       diffSeq = Object.keys(diffSeq).map((key) => diffSeq[key])
       this.updatedJobsOrder = diffSeq
-      this.jobs = updatedSeq
+      this.modifiedJobs = updatedSeq
     },
     doReorder(event: CustomEvent) {
       // making the item reorder action as complete and storing the updated order in jobs
-      const updatedSeq = event.detail.complete(JSON.parse(JSON.stringify(this.jobs)));
+      const updatedSeq = event.detail.complete(JSON.parse(JSON.stringify(this.modifiedJobs)));
       this.updateRunTime(updatedSeq);
     },
     async save() {
       this.failedJobs = []
       this.successJobs = []
       
-      const diffSeq = this.findJobDiff(this.seqBeforeReorder, this.jobs)
+      const diffSeq = this.findJobDiff(this.jobs, this.modifiedJobs)
       this.updatedJobsOrder = Object.keys(diffSeq).map((key) => diffSeq[key])
 
       await Promise.allSettled(this.updatedJobsOrder.map(async (job: any) => {
