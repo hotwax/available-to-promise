@@ -112,11 +112,11 @@ export default defineComponent({
       // making the item reorder action as complete and storing the updated order in jobs
       const updatedSeq = event.detail.complete(JSON.parse(JSON.stringify(this.modifiedJobs)));
       let diffSeq = this.findJobDiff(this.jobs, updatedSeq)
-      const updatedRunTime = this.jobs.map((job: any) => job.runTime)
-      Object.keys(diffSeq).map((key: any) => {
-        diffSeq[key].runTime = updatedRunTime[key]
+      const runTimeSequence = this.jobs.map((job: any) => job.runTime)
+      diffSeq = Object.keys(diffSeq).map((key: any) => {
+        diffSeq[key].runTime = runTimeSequence[key]
+        return diffSeq[key]
       })
-      diffSeq = Object.keys(diffSeq).map((key) => diffSeq[key])
       this.modifiedJobs = updatedSeq
     },
     async save() {
@@ -126,7 +126,7 @@ export default defineComponent({
       const diffSeq = this.findJobDiff(this.jobs, this.modifiedJobs)
       const updatedJobsOrder = Object.keys(diffSeq).map((key) => diffSeq[key])
 
-      if(updatedJobsOrder.length) {
+      if(!updatedJobsOrder.length) {
         showToast(translate('No jobs to update'))
         this.closeModal();
         return;
