@@ -270,6 +270,12 @@ export default defineComponent({
 
       const jobRunTime = this.updatedJobsOrder.find((job: any) => !job.jobId)?.runTime
 
+      let diffSeq = this.findJobDiff(this.initialJobsOrder, this.jobsForReorder)
+      this.updatedJobsOrder = Object.keys(diffSeq).map((key) => diffSeq[key])
+
+      // filtered jobs by removing the new job as we need to update already existing job
+      const jobsToUpdate = this.updatedJobsOrder.filter((job: any) => job.jobId)
+
       // re-initialized params object from query as there is no need for grouping or pagination when storing the query
       solrQuery.json.params = {
         "q.op": "AND"
@@ -295,8 +301,6 @@ export default defineComponent({
 
           // checking whether the service has been scheduled successfully, if yes then only updating other jobs otherwise not
           if (this.successJobs.includes('')) {
-            // filtered jobs by removing the new job as we need to update already existing job
-            const jobsToUpdate = this.updatedJobsOrder.filter((job: any) => job.jobId)
 
             await Promise.allSettled(jobsToUpdate.map(async (job: any) => {
               // using resp and checking it, as we need jobId that will not be available in case
@@ -306,7 +310,6 @@ export default defineComponent({
                 const payload = {
                   'jobId': job.jobId,
                   'systemJobEnumId': job.systemJobEnumId,
-                  'recurrenceTimeZone': this.userProfile.userTimeZone,
                   'tempExprId': job.frequency ? job.frequency : job.jobStatus,
                   'statusId': "SERVICE_PENDING"
                 } as any
@@ -333,18 +336,20 @@ export default defineComponent({
             }))
           } else {
             logger.error('Failed to schedule service, hence other jobs are not updated')
-            this.failedJobs = this.jobsForReorder.map((job: any) => job.jobId)
+            this.failedJobs = this.updatedJobsOrder.map((job: any) => job.jobId)
             showToast(translate('Failed to schedule service, hence other jobs are not updated'))
           }
         } else {
           showToast(translate('Failed to schedule service, hence other jobs are not updated'))
           logger.error('Failed to schedule service as search preference is not created, hence other jobs are not updated')
-          this.failedJobs = this.jobsForReorder.map((job: any) => job.jobId)
+          this.failedJobs = this.updatedJobsOrder.map((job: any) => job.jobId)
+          this.failedJobs.push('')
         }
       } catch (err) {
         logger.error(err)
         showToast(translate('Something went wrong'))
-        this.failedJobs = this.jobsForReorder.map((job: any) => job.jobId)
+        this.failedJobs = this.updatedJobsOrder.map((job: any) => job.jobId)
+        this.failedJobs.push('')
       }
       this.isServiceScheduling = false
       emitter.emit('dismissLoader');
@@ -541,7 +546,7 @@ export default defineComponent({
       emitter.emit('dismissLoader');
     }
   },
-  async mounted() {
+  async ionViewWillEnter() {
     await this.fetchExportThresholdJobs();
 
     // Finding the runTime of the first job or if there are no pending jobs then assigning current time
@@ -566,6 +571,19 @@ export default defineComponent({
     // maintaining the initial order of jobs to take the diff from the updated seq after reordering
     this.initialJobsOrder = JSON.parse(JSON.stringify(this.jobsForReorder))
     this.updatedJobsOrder = [ newJob ]
+  },
+  ionViewDidLeave() {
+    // TODO: remove this initialization from the hook and update the code accordingly
+    // Done this as currently the component is not being unmounted when changing the route as there exist
+    // a connection between parent and child and ionViewWillEnter hook does not reinitialize the
+    // local data property
+    this.jobName = ''
+    this.jobsForReorder = []
+    this.initialJobsOrder = []
+    this.initialRunTime = ''
+    this.updatedJobsOrder = []
+    this.failedJobs = []
+    this.successJobs = []
   },
   setup() {
     const store = useStore();
