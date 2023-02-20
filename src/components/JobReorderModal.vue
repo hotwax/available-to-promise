@@ -23,7 +23,7 @@
     </ion-reorder-group>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button @click="save()" :disabled="this.failedJobs.length">
+      <ion-fab-button @click="save()" :disabled="failedJobs.length">
         <ion-icon :icon="saveOutline" />
       </ion-fab-button>
     </ion-fab>
