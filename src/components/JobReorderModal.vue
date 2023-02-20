@@ -23,7 +23,7 @@
     </ion-reorder-group>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button @click="save()" :disabled="failedJobs.length">
+      <ion-fab-button @click="save()" :disabled="failedJobs.length || isReordering">
         <ion-icon :icon="saveOutline" />
       </ion-fab-button>
     </ion-fab>
@@ -77,7 +77,8 @@ export default defineComponent({
     return {
       failedJobs: [] as any,
       successJobs: [] as any,
-      modifiedJobs: JSON.parse(JSON.stringify((this as any).jobs))
+      modifiedJobs: JSON.parse(JSON.stringify((this as any).jobs)),
+      isReordering: false
     }
   },
   computed: {
@@ -120,6 +121,7 @@ export default defineComponent({
       this.modifiedJobs = updatedSeq
     },
     async save() {
+      this.isReordering = true;
       this.failedJobs = []
       this.successJobs = []
       
@@ -155,6 +157,8 @@ export default defineComponent({
           logger.error(err)
         }
       }))
+
+      this.isReordering = false;
       // If there are no failed jobs then redirecting the user to the threshold updates page
       if (!this.failedJobs.length) {
         this.closeModal(true);
