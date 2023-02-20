@@ -27,7 +27,9 @@ export default defineComponent({
   data() {
     return {
       loader: null as any,
-      maxAge: process.env.VUE_APP_CACHE_MAX_AGE ? parseInt(process.env.VUE_APP_CACHE_MAX_AGE) : 0
+      maxAge: process.env.VUE_APP_CACHE_MAX_AGE ? parseInt(process.env.VUE_APP_CACHE_MAX_AGE) : 0,
+      alias: JSON.parse(process.env.VUE_APP_ALIAS) as any,
+      defaultAlias: process.env.VUE_APP_DEFAULT_ALIAS,
     };
   },
   computed: {
@@ -36,6 +38,7 @@ export default defineComponent({
       userProfile: 'user/getUserProfile',
       eComStore: 'user/getCurrentEComStore',
       userToken: 'user/getUserToken',
+      isAuthenticated: 'user/isAuthenticated',
     })
   },
   methods: {
@@ -78,6 +81,11 @@ export default defineComponent({
     // Luxon timezzone should be set with the user's selected timezone
     if (this.userProfile && this.userProfile.userTimeZone) {
       Settings.defaultZone = this.userProfile.userTimeZone;
+    }
+    if (this.isAuthenticated && !this.instanceUrl && !process.env.VUE_APP_BASE_URL) {
+      // If the current URL is available in alias show it for consistency
+      const defaultAliasInstanceUrl = this.alias[this.defaultAlias];
+      this.store.dispatch("user/setUserInstanceUrl", defaultAliasInstanceUrl);
     }
   },
   unmounted() {
