@@ -22,7 +22,7 @@
             </ion-item>
 
             <ion-item>
-              <ion-label>{{ $t("Rule name") }}</ion-label>
+              <ion-label color="medium">{{ $t("Name") }}</ion-label>
               <ion-input :placeholder="$t('rule name')" v-model="jobName"/>
             </ion-item>
 
