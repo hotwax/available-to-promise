@@ -23,7 +23,7 @@
     </ion-reorder-group>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button @click="save()" :disabled="failedJobs.length || isReordering">
+      <ion-fab-button @click="save()" :disabled="!hasPermission(Actions.APP_JOB_UPDATE) || failedJobs.length || isReordering">
         <ion-icon :icon="saveOutline" />
       </ion-fab-button>
     </ion-fab>
@@ -55,6 +55,7 @@ import { JobService } from '@/services/JobService';
 import { hasError, showToast } from '@/utils';
 import logger from '@/logger';
 import { translate } from '@/i18n';
+import { Actions, hasPermission } from '@/authorization'
 
 export default defineComponent({
   name: 'JobReorderModal',
@@ -171,9 +172,11 @@ export default defineComponent({
   setup() {
     const store = useStore();
     return {
+      Actions,
       checkmarkCircleOutline,
       closeCircleOutline,
       closeOutline,
+      hasPermission,
       saveOutline,
       store
     };

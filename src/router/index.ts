@@ -103,7 +103,10 @@ const routes: Array<RouteRecordRaw> = [
     path: '/schedule-threshold',
     name: 'ScheduleThreshold',
     component: ScheduleThreshold,
-    beforeEnter: authGuard
+    beforeEnter: authGuard,
+    meta: {
+      permissionId: "APP_SAVE_THRESHOLD_VIEW"
+    }
   },
 ]
 
