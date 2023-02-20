@@ -32,7 +32,11 @@
               <ion-label id="open-run-time-modal" slot="end">{{ initialRunTime ? getTime(initialRunTime) : $t('Select run time') }}</ion-label>
               <ion-modal trigger="open-run-time-modal">
                 <ion-content force-overscroll="false">
+                  <!-- TODO: check why datetime component is not unmounted after scheduling the job -->
+                  <!-- For now added a key with current time to re-render the component always when coming to the page -->
                   <ion-datetime
+                    hour-cycle="h12"
+                    :key="DateTime.now().toMillis()"
                     :value="initialRunTime ? getDateTime(initialRunTime) : ''"
                     @ionChange="updateRunTime($event)"
                   />
@@ -584,12 +588,14 @@ export default defineComponent({
     this.updatedJobsOrder = []
     this.failedJobs = []
     this.successJobs = []
+    this.isServiceScheduling = false
   },
   setup() {
     const store = useStore();
     const router = useRouter();
 
     return {
+      DateTime,
       arrowForwardOutline,
       checkmarkCircleOutline,
       closeCircleOutline,
