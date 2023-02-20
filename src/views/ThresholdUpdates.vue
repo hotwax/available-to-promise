@@ -256,6 +256,14 @@
           <JobConfiguration :title="title" :job="currentJob" :productCount="productCount" :status="currentJobStatus" :type="freqType" :key="currentJob"/>
         </aside>
       </main>
+
+      <!-- showing reorder option on pending page and only when we are having pending jobs -->
+      <!-- Not defined fab button in the pending section div, as the slot property only works in ion-content and defining the button in div makes the fab button scrollable -->
+      <ion-fab v-if="segmentSelected === 'pending' && pendingJobs?.length !== 0" vertical="bottom" horizontal="end" slot="fixed">
+        <ion-fab-button @click="openReorderModal()">
+          <ion-icon :icon="pencilOutline" />
+        </ion-fab-button>
+      </ion-fab>
     </ion-content>
   </ion-page>
 </template>
@@ -270,6 +278,8 @@ import {
   IonCardHeader,
   IonCardSubtitle,
   IonCardTitle,
+  IonFab,
+  IonFabButton,
   IonHeader,
   IonIcon,
   IonItem,
@@ -292,14 +302,14 @@ import {
   createAnimation
 } from "@ionic/vue";
 import JobConfiguration from '@/components/JobConfiguration.vue'
-import { copyOutline, closeCircleOutline, checkmarkCircleOutline, optionsOutline, timeOutline, timerOutline } from "ionicons/icons";
-
+import { copyOutline, closeCircleOutline, checkmarkCircleOutline, pencilOutline, optionsOutline, timeOutline, timerOutline } from "ionicons/icons";
 import { Plugins } from '@capacitor/core';
 import { hasError, showToast } from '@/utils'
 import JobHistoryModal from '@/components/JobHistoryModal.vue';
 import { DateTime } from 'luxon';
 import { ProductService } from '@/services/ProductService';
 import { Actions, hasPermission } from '@/authorization'
+import JobReorderModal from '@/components/JobReorderModal.vue';
 import emitter from '@/event-bus';
 
 export default defineComponent({
@@ -312,6 +322,8 @@ export default defineComponent({
     IonCardHeader,
     IonCardSubtitle,
     IonCardTitle,
+    IonFab,
+    IonFabButton,
     IonHeader,
     IonIcon,
     IonItem,
@@ -574,6 +586,18 @@ export default defineComponent({
       createAnimation()
         .addAnimation([gapAnimation, revealAnimation])
         .play();
+    },
+    async openReorderModal() {
+      const jobReorderModal = await modalController.create({
+        component: JobReorderModal,
+        componentProps: { jobs: this.pendingJobs.filter((job: any) => job.systemJobEnumId === 'JOB_EXP_PROD_THRSHLD')} // passing export jobs, as we will only reorder export threshold jobs
+      })
+      jobReorderModal.onDidDismiss().then((result: any) => {
+        if (result?.data?.isJobsUpdated) {
+          this.store.dispatch('job/fetchPendingJobs', {viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums});
+        }
+      })
+      return jobReorderModal.present();
     }
   },
   ionViewWillEnter() {
@@ -599,6 +623,7 @@ export default defineComponent({
       store,
       closeCircleOutline,
       checkmarkCircleOutline,
+      pencilOutline,
       optionsOutline,
       timeOutline,
       timerOutline,
