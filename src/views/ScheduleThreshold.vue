@@ -268,10 +268,11 @@ export default defineComponent({
       this.successJobs = []
       const solrQuery = this.query
 
-      let diffSeq = this.findJobDiff(this.initialJobsOrder, this.updatedJobsOrder)
+      const jobRunTime = this.updatedJobsOrder.find((job: any) => !job.jobId)?.runTime
+
+      let diffSeq = this.findJobDiff(this.initialJobsOrder, this.jobsForReorder)
       this.updatedJobsOrder = Object.keys(diffSeq).map((key) => diffSeq[key])
 
-      const jobRunTime = this.updatedJobsOrder.find((job: any) => !job.jobId)?.runTime
       // filtered jobs by removing the new job as we need to update already existing job
       const jobsToUpdate = this.updatedJobsOrder.filter((job: any) => job.jobId)
 
@@ -342,11 +343,13 @@ export default defineComponent({
           showToast(translate('Failed to schedule service, hence other jobs are not updated'))
           logger.error('Failed to schedule service as search preference is not created, hence other jobs are not updated')
           this.failedJobs = this.updatedJobsOrder.map((job: any) => job.jobId)
+          this.failedJobs.push('')
         }
       } catch (err) {
         logger.error(err)
         showToast(translate('Something went wrong'))
         this.failedJobs = this.updatedJobsOrder.map((job: any) => job.jobId)
+        this.failedJobs.push('')
       }
       this.isServiceScheduling = false
       emitter.emit('dismissLoader');
