@@ -54,7 +54,7 @@
       </ion-item> -->
       <ion-item v-if="job?.systemJobEnumId === 'JOB_EXP_PROD_THRSHLD'" lines="inset">
         <ion-icon slot="start" :icon="cogOutline" />
-        <ion-label>{{ $t("Rule name") }}</ion-label>
+        <ion-label>{{ $t("Name") }}</ion-label>
         <ion-input class="ion-text-end" name="ruleName" v-model="ruleName" id="ruleName" />
       </ion-item>
 
