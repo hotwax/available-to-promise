@@ -15,13 +15,13 @@
       <ion-item>
         <ion-icon slot="start" :icon="timeOutline" />
         <ion-label>{{ $t("Run time") }}</ion-label>
-        <ion-label id="open-run-time-modal" slot="end">{{ job?.runTime ? getTime(runTime ? runTime : job.runTime) : $t('Select run time') }}</ion-label>
+        <ion-label @click="() => isOpen = true" slot="end">{{ job?.runTime ? getTime(runTime ? runTime : job.runTime) : $t('Select run time') }}</ion-label>
         <!-- TODO: display a button when we are not having a runtime and open the datetime component
         on click of that button
         Currently, when mapping the same datetime component for label and button so it's not working so for
         now commented the button and added a fallback string -->
         <!-- <ion-button id="open-run-time-modal" size="small" fill="outline" color="medium" v-show="!job?.runTime">{{ $t("Select run time") }}</ion-button> -->
-        <ion-modal trigger="open-run-time-modal">
+        <ion-modal :is-open="isOpen" @didDismiss="() => isOpen = false">
           <ion-content force-overscroll="false">
             <ion-datetime
               hour-cycle="h12"
@@ -144,7 +144,8 @@ export default defineComponent({
       ruleName: this.job?.jobName,
       minDateTime: DateTime.now().toISO(),
       jobEnums: JSON.parse(process.env?.VUE_APP_JOB_ENUMS as string) as any,
-      runTime: ''
+      runTime: '',
+      isOpen: false
     }
   },
   props: ["job", "title", "status", "type", "productCount"],
@@ -359,9 +360,13 @@ ion-list {
   }  
 }
 
+ion-item:nth-child(2) > ion-label:nth-child(3) {
+  cursor: pointer;
+}
+
 ion-modal {
   --width: 290px;
-  --height: 382px;
+  --height: 390px;
   --border-radius: 8px;
 }
 </style>

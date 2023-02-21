@@ -29,8 +29,8 @@
             <ion-item>
               <ion-icon slot="start" :icon="timeOutline" />
               <ion-label>{{ $t("Run time") }}</ion-label>
-              <ion-label id="open-run-time-modal" slot="end">{{ initialRunTime ? getTime(initialRunTime) : $t('Select run time') }}</ion-label>
-              <ion-modal trigger="open-run-time-modal">
+              <ion-label @click="() => isOpen = true" slot="end">{{ initialRunTime ? getTime(initialRunTime) : $t('Select run time') }}</ion-label>
+              <ion-modal :is-open="isOpen" @didDismiss="() => isOpen = false">
                 <ion-content force-overscroll="false">
                   <!-- TODO: check why datetime component is not unmounted after scheduling the job -->
                   <!-- For now added a key with current time to re-render the component always when coming to the page -->
@@ -173,7 +173,8 @@ export default defineComponent({
       updatedJobsOrder: [] as any,
       failedJobs: [] as any,
       successJobs: [] as any,
-      job: {} as any
+      job: {} as any,
+      isOpen: false
     }
   },
   computed: {
@@ -600,6 +601,7 @@ export default defineComponent({
     this.failedJobs = []
     this.successJobs = []
     this.isServiceScheduling = false
+    this.isOpen = false
   },
   setup() {
     const store = useStore();
@@ -662,9 +664,13 @@ h2 {
   }
 }
 
+ion-label:nth-child(3) {
+  cursor: pointer;
+}
+
 ion-modal {
   --width: 290px;
-  --height: 385px;
+  --height: 390px;
   --border-radius: 8px;
 }
 </style>
