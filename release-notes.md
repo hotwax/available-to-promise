@@ -4,6 +4,7 @@
 * Fixed: label on schedule threshold page(#179) by @ymaheshwari1 in https://github.com/hotwax/threshold-management/pull/180
 * Fixed: permission issue on reorder and schedule job page(#85zrnnfqb) by @ymaheshwari1 in https://github.com/hotwax/threshold-management/pull/181
 * Fixed: datetime not working when coming to the schedule threshold page again after scheduling a job successfully and redirect the user to select page when refreshing on schedule threshold page(#85zrnnfqb) by @ymaheshwari1 in https://github.com/hotwax/threshold-management/pull/182
+* Fixed: navigation to login failed for token expire (oms-api#61) by @adityasharma7 in https://github.com/hotwax/threshold-management/pull/184
 
 
 **Full Changelog**: https://github.com/hotwax/threshold-management/compare/v2.0.0...v2.0.1
