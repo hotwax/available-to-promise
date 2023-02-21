@@ -556,6 +556,7 @@ export default defineComponent({
     // so redirecting the user to select-product page in this case
     // if a user is coming to the schedule page from product page then always the length of filter will be more than 2
     if(this.query.json.filter.length < 2) {
+      showToast(translate('No rules found, redirecting to product page'))
       this.store.dispatch('product/clearAllFilters')
       this.router.push('/select-product')
       return;
