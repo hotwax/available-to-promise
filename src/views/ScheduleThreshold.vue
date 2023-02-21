@@ -32,7 +32,11 @@
               <ion-label id="open-run-time-modal" slot="end">{{ initialRunTime ? getTime(initialRunTime) : $t('Select run time') }}</ion-label>
               <ion-modal trigger="open-run-time-modal">
                 <ion-content force-overscroll="false">
+                  <!-- TODO: check why datetime component is not unmounted after scheduling the job -->
+                  <!-- For now added a key with current time to re-render the component always when coming to the page -->
                   <ion-datetime
+                    hour-cycle="h12"
+                    :key="DateTime.now().toMillis()"
                     :value="initialRunTime ? getDateTime(initialRunTime) : ''"
                     @ionChange="updateRunTime($event)"
                   />
@@ -547,6 +551,17 @@ export default defineComponent({
     }
   },
   async ionViewWillEnter() {
+    // TODO: check if we can handle this in a more better way
+    // added this check as on refresh on schedule page the product filters gets reset and all the filters are cleared in the query
+    // so redirecting the user to select-product page in this case
+    // if a user is coming to the schedule page from product page then always the length of filter will be more than 2
+    if(this.query.json.filter.length < 2) {
+      showToast(translate('No rules found, redirecting to product page'))
+      this.store.dispatch('product/clearAllFilters')
+      this.router.push('/select-product')
+      return;
+    }
+
     await this.fetchExportThresholdJobs();
 
     // Finding the runTime of the first job or if there are no pending jobs then assigning current time
@@ -584,12 +599,14 @@ export default defineComponent({
     this.updatedJobsOrder = []
     this.failedJobs = []
     this.successJobs = []
+    this.isServiceScheduling = false
   },
   setup() {
     const store = useStore();
     const router = useRouter();
 
     return {
+      DateTime,
       arrowForwardOutline,
       checkmarkCircleOutline,
       closeCircleOutline,
