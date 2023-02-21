@@ -193,7 +193,16 @@ export default defineComponent({
   methods: {
     // method to update the run time for all the jobs, for now hardcoded the time diff of 15 mins.
     updateRunTime(ev: CustomEvent, timeDiff = 900000) {
-      const changedDateTime = handleDateTimeInput(ev['detail'].value)
+      const currTime = DateTime.now().toMillis();
+      const setTime = handleDateTimeInput(ev['detail'].value);
+      let changedDateTime: any;
+
+      if(setTime > currTime) {
+        changedDateTime = setTime;
+      } else {
+        showToast(translate("Provide a future date and time"))
+      }
+
       const previousSeq = JSON.parse(JSON.stringify(this.jobsForReorder))
 
       // added this condition to handle the case of method called twice

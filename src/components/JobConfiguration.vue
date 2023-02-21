@@ -25,7 +25,6 @@
           <ion-content force-overscroll="false">
             <ion-datetime
               hour-cycle="h12"
-              :min="minDateTime"
               :value="job?.runTime ? getDateTime(job.runTime) : ''"
               @ionChange="updateRunTime($event, job)"
             />
@@ -142,7 +141,6 @@ export default defineComponent({
     return {
       jobStatus: this.status,
       ruleName: this.job?.jobName,
-      minDateTime: DateTime.now().toISO(),
       jobEnums: JSON.parse(process.env?.VUE_APP_JOB_ENUMS as string) as any,
       runTime: '',
       isOpen: false
@@ -306,7 +304,14 @@ export default defineComponent({
     },
     updateRunTime(ev: CustomEvent, job: any) {
       if (job) {
-        job.runTime = handleDateTimeInput(ev['detail'].value)
+        const currTime = DateTime.now().toMillis();
+        const setTime = handleDateTimeInput(ev['detail'].value);
+
+        if(setTime > currTime) {
+          job.runTime = setTime;
+        } else {
+          showToast(translate("Provide a future date and time"))
+        }
       }
     }
   },
