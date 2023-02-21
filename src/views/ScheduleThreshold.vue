@@ -551,6 +551,16 @@ export default defineComponent({
     }
   },
   async ionViewWillEnter() {
+    // TODO: check if we can handle this in a more better way
+    // added this check as on refresh on schedule page the product filters gets reset and all the filters are cleared in the query
+    // so redirecting the user to select-product page in this case
+    // if a user is coming to the schedule page from product page then always the length of filter will be more than 2
+    if(this.query.json.filter.length < 2) {
+      this.store.dispatch('product/clearAllFilters')
+      this.router.push('/select-product')
+      return;
+    }
+
     await this.fetchExportThresholdJobs();
 
     // Finding the runTime of the first job or if there are no pending jobs then assigning current time
