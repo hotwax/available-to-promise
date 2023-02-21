@@ -89,7 +89,7 @@ const actions: ActionTree<UserState, RootState> = {
       if (userProfile.userTimeZone) {
         Settings.defaultZone = userProfile.userTimeZone;
       }
-      updateToken(resp.data.token)
+      updateToken(token)
 
       // TODO user single mutation
       commit(types.USER_INFO_UPDATED, userProfile);
