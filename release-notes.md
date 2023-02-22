@@ -1,3 +1,12 @@
+# Release 2.0.3
+
+## What's Changed
+* Fixed: jobs schedule and update not working after reordering jobs(#85zrnwg91) by @ymaheshwari1 in https://github.com/hotwax/threshold-management/pull/191
+* Added: default buttons in dateTime modal by @disha1202 in https://github.com/hotwax/threshold-management/pull/188
+
+
+**Full Changelog**: https://github.com/hotwax/threshold-management/compare/v2.0.2...v2.0.3
+
 # Release 2.0.2
 
 ## What's Changed
