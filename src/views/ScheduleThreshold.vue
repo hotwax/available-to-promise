@@ -35,6 +35,7 @@
                   <!-- TODO: check why datetime component is not unmounted after scheduling the job -->
                   <!-- For now added a key with current time to re-render the component always when coming to the page -->
                   <ion-datetime
+                    show-default-buttons
                     hour-cycle="h12"
                     :key="DateTime.now().toMillis()"
                     :value="initialRunTime ? getDateTime(initialRunTime) : ''"
@@ -679,7 +680,7 @@ ion-label:nth-child(3) {
 
 ion-modal {
   --width: 290px;
-  --height: 390px;
+  --height: 440px;
   --border-radius: 8px;
 }
 </style>

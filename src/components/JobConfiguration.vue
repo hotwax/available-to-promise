@@ -24,6 +24,7 @@
         <ion-modal :is-open="isOpen" @didDismiss="() => isOpen = false">
           <ion-content force-overscroll="false">
             <ion-datetime
+              show-default-buttons
               hour-cycle="h12"
               :value="job?.runTime ? getDateTime(job.runTime) : ''"
               @ionChange="updateRunTime($event, job)"
@@ -371,7 +372,7 @@ ion-item:nth-child(2) > ion-label:nth-child(3) {
 
 ion-modal {
   --width: 290px;
-  --height: 390px;
+  --height: 440px;
   --border-radius: 8px;
 }
 </style>
