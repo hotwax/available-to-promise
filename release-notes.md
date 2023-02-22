@@ -1,3 +1,47 @@
+# Release 2.0.2
+
+## What's Changed
+* Fixed: issue of dateTime modal flicker effect when using trigger, also fixed the styling for dateTime modal by @ymaheshwari1 in https://github.com/hotwax/threshold-management/pull/185
+
+
+**Full Changelog**: https://github.com/hotwax/threshold-management/compare/v2.0.1...v2.0.2
+
+# Release 2.0.1
+
+## What's Changed
+* Fixed: label on schedule threshold page(#179) by @ymaheshwari1 in https://github.com/hotwax/threshold-management/pull/180
+* Fixed: permission issue on reorder and schedule job page(#85zrnnfqb) by @ymaheshwari1 in https://github.com/hotwax/threshold-management/pull/181
+* Fixed: datetime not working when coming to the schedule threshold page again after scheduling a job successfully and redirect the user to select page when refreshing on schedule threshold page(#85zrnnfqb) by @ymaheshwari1 in https://github.com/hotwax/threshold-management/pull/182
+* Fixed: navigation to login failed for token expire (oms-api#61) by @adityasharma7 in https://github.com/hotwax/threshold-management/pull/184
+
+
+**Full Changelog**: https://github.com/hotwax/threshold-management/compare/v2.0.0...v2.0.1
+
+# Release 2.0.0
+
+## What's Changed
+* Changed "Rule name" to "Rule" and "Rule name" color to "color medium". by @Dhiraj1405 in https://github.com/hotwax/threshold-management/pull/154
+* Added hotwax-apps-theme package(#85zrj08rb) by @disha1202 in https://github.com/hotwax/threshold-management/pull/156
+* Improved: Updated UI of Settings page(#32j3r6t) by @shashwatbangar in https://github.com/hotwax/threshold-management/pull/147
+* Implemented: Code to show app version & build information on Settings page(#85zrhn8w8) by @shashwatbangar in https://github.com/hotwax/threshold-management/pull/157
+* Implemented logger using vue logger plugin(#21uxamh) by @disha1202 in https://github.com/hotwax/threshold-management/pull/160
+* Implemented: support for using api and client methods from OMS api package (#85zrm1ktj) by @k2maan in https://github.com/hotwax/threshold-management/pull/166
+* Fixed: build and locale warnings in the app(#85zrmg3u1) by @ymaheshwari1 in https://github.com/hotwax/threshold-management/pull/164 and https://github.com/hotwax/threshold-management/pull/165
+* Implemented: feature for user authorisation (#159) by @adityasharma7 in https://github.com/hotwax/threshold-management/pull/161
+* Implemented: functionality to reorder export threshold jobs or change the runTime of jobs in bulk(#2adm0cu) by @ymaheshwari1 in https://github.com/hotwax/threshold-management/pull/167
+* Updated: styling for the schedule threshold page(#2dewjnh) by @ymaheshwari1 in https://github.com/hotwax/threshold-management/pull/169
+* Updated grid layout of products on select product page(#2cxuh4m) by @azkyakhan in https://github.com/hotwax/threshold-management/pull/92
+* Added: support to change the product store from menu footer(#2e5w2hb) by @ymaheshwari1 in https://github.com/hotwax/threshold-management/pull/171
+* Fixed: issue of facilitiesByProductStore and ShopifyConfig data not cleared on logout(#85zrn9yfn) by @ymaheshwari1 in https://github.com/hotwax/threshold-management/pull/170
+* Updated: icons in menu to use outline icons by @ymaheshwari1 in https://github.com/hotwax/threshold-management/pull/173
+* Implemented: support to reorder pending export jobs from the updates page(#2dmggua) by @ymaheshwari1 in https://github.com/hotwax/threshold-management/pull/172
+* Fixed: issue when scheduling/reordering jobs from schedule page by @ymaheshwari1 in https://github.com/hotwax/threshold-management/pull/175
+
+## New Contributors
+* @Dhiraj1405 made their first contribution in https://github.com/hotwax/threshold-management/pull/154
+
+**Full Changelog**: https://github.com/hotwax/threshold-management/compare/v1.2.0...v2.0.0
+
 # Release 1.2.0
 
 ## What's Changed

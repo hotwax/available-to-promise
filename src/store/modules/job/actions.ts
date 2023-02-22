@@ -47,7 +47,7 @@ const actions: ActionTree<JobState, RootState> = {
         "systemJobEnumId_fld1_value": payload.jobEnums[1],
         "systemJobEnumId_fld1_grp": "2",
         "systemJobEnumId_fld1_op": "equals",
-        "productStoreId": payload.eComStoreId,
+        "productStoreId": this.state.user.currentEComStore.productStoreId,
         "productStoreId_grp": "2",
         "statusId": ["SERVICE_CANCELLED", "SERVICE_CRASHED", "SERVICE_FAILED", "SERVICE_FINISHED"],
         "statusId_op": "in",
@@ -103,7 +103,7 @@ const actions: ActionTree<JobState, RootState> = {
         "systemJobEnumId_fld1_value": payload.jobEnums[1],
         "systemJobEnumId_fld1_grp": "2",
         "systemJobEnumId_fld1_op": "equals",
-        "productStoreId": payload.eComStoreId,
+        "productStoreId": this.state.user.currentEComStore.productStoreId,
         "productStoreId_grp": "2",
         "statusId": ["SERVICE_RUNNING", "SERVICE_QUEUED"],
         "statusId_op": "in",
@@ -159,7 +159,7 @@ const actions: ActionTree<JobState, RootState> = {
         "systemJobEnumId_fld1_value": payload.jobEnums[1],
         "systemJobEnumId_fld1_grp": "2",
         "systemJobEnumId_fld1_op": "equals",
-        "productStoreId": payload.eComStoreId,
+        "productStoreId": this.state.user.currentEComStore.productStoreId,
         "productStoreId_grp": "2",
         "statusId": "SERVICE_PENDING",
         "systemJobEnumId_op": "not-empty"
@@ -260,142 +260,14 @@ const actions: ActionTree<JobState, RootState> = {
   removeThresholdRule({ commit }, id){
     commit(types.JOB_THRESHOLD_RULE_REMOVED, id);
   },
-  
-  async fetchJobs ({ state, commit, dispatch }, payload) {
-    const resp = await JobService.fetchJobInformation({
-      "inputFields":{
-        "statusId": ['SERVICE_DRAFT', 'SERVICE_PENDING'],
-        "statusId_op": "in",
-        ...payload.inputFields
-      },
-      "entityName": "JobSandbox",
-      "noConditionFind": "Y",
-      "viewSize": payload.viewSize ? payload.viewSize : (payload.inputFields?.systemJobEnumId?.length * 2)
-    })
-    if (resp.status === 200 && !hasError(resp) && resp.data.docs) {
-      const cached = JSON.parse(JSON.stringify(state.cached)); 
-
-      resp.data.docs.filter((job: any) => job.statusId === 'SERVICE_PENDING').map((job: any) => {
-        
-        return cached[job.systemJobEnumId] = {
-          ...job,
-          id: job.jobId,
-          frequency: job.tempExprId,
-          enumId: job.systemJobEnumId,
-          status: job.statusId
-        }
-      })  
-
-      resp.data.docs.filter((job: any) => job.statusId === 'SERVICE_DRAFT').map((job: any) => {
-        return cached[job.systemJobEnumId] = cached[job.systemJobEnumId] ? cached[job.systemJobEnumId] : {
-          ...job,
-          id: job.jobId,
-          frequency: job.tempExprId,
-          enumId: job.systemJobEnumId,
-          status: job.statusId
-        }
-      });
-
-      // fetching temp expressions
-      const tempExpr = Object.values(cached).map((job: any) => job.tempExprId)
-      await dispatch('fetchTemporalExpression', tempExpr)
-
-      commit(types.JOB_UPDATED_BULK, cached);
-    }
-    return resp;
-  },
-  async updateJob ({ dispatch }, job) {
-    let resp;
-    const jobEnums = process.env?.VUE_APP_JOB_ENUMS ? JSON.parse(process.env?.VUE_APP_JOB_ENUMS) : [];
-
-    const payload = {
-      'jobId': job.jobId,
-      'systemJobEnumId': job.systemJobEnumId,
-      'recurrenceTimeZone': this.state.user.current.userTimeZone,
-      'tempExprId': job.jobStatus,
-      'statusId': "SERVICE_PENDING"
-    } as any
-
-    job?.runTime && (payload['runTime'] = job.runTime)
-    job?.sinceId && (payload['sinceId'] = job.sinceId)
-    job?.jobName && (payload['jobName'] = job.jobName)
-
-    try {
-      resp = await JobService.updateJob(payload)
-      if (resp.status === 200 && !hasError(resp) && resp.data.successMessage) {
-        showToast(translate('Service updated successfully'))
-        dispatch('fetchJobs', {
-          inputFields: {
-            'systemJobEnumId': payload.systemJobEnumId,
-            'systemJobEnumId_op': 'equals'
-          }
-        })
-        await dispatch('fetchPendingJobs', {eComStoreId: this.state.user.currentEComStore.productStoreId, viewSize: this.state.job.pending.total, viewIndex: 0, jobEnums: jobEnums});
-      } else {
-        showToast(translate('Something went wrong'), getResponseError(resp))
-      }
-    } catch (err) {
-      showToast(translate('Something went wrong'), err)
-      logger.error(err)
-    }
-    return resp;
-  },
-
-  async scheduleService({ dispatch }, job) {
-    let resp;
-
-    const payload = {
-      'JOB_NAME': job.jobName,
-      'SERVICE_NAME': job.serviceName,
-      'SERVICE_COUNT': '0',
-      'SERVICE_TEMP_EXPR': job.jobStatus,
-      'jobFields': {
-        'productStoreId': this.state.user.currentEComStore.productStoreId,
-        'systemJobEnumId': job.systemJobEnumId,
-        'tempExprId': job.jobStatus, // Need to remove this as we are passing frequency in SERVICE_TEMP_EXPR, currently kept it for backward compatibility
-        'maxRecurrenceCount': '-1',
-        'parentJobId': job.parentJobId,
-        'runAsUser': 'system', // default system, but empty in run now
-        'recurrenceTimeZone': this.state.user.current.userTimeZone,
-      },
-      'shopifyConfigId': this.state.user.shopifyConfig,
-      'statusId': "SERVICE_PENDING",
-      'systemJobEnumId': job.systemJobEnumId
-    } as any
-
-    // checking if the runtimeData has productStoreId, and if present then adding it on root level
-    job?.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = this.state.user.currentEComStore.productStoreId)
-    job?.priority && (payload['SERVICE_PRIORITY'] = job.priority.toString())
-    job?.runTime && (payload['SERVICE_TIME'] = job.runTime.toString())
-
-    try {
-      resp = await JobService.scheduleJob({ ...job.runtimeData, ...payload });
-      if (resp.status == 200 && !hasError(resp)) {
-        showToast(translate('Service has been scheduled'))
-        dispatch('fetchJobs', {
-          inputFields: {
-            'systemJobEnumId': payload.systemJobEnumId,
-            'systemJobEnumId_op': 'equals'
-          }
-        })
-      } else {
-        showToast(translate('Something went wrong'), getResponseError(resp))
-      }
-    } catch (err) {
-      showToast(translate('Something went wrong'), err)
-      logger.error(err)
-    }
-    return resp;
-  },
 
   clearJobState({commit}) {
     commit(types.JOB_PENDING_UPDATED, {jobs: [], total: 0});
     commit(types.JOB_HISTORY_UPDATED, {jobs: [], total: 0});
     commit(types.JOB_RUNNING_UPDATED, {jobs: [], total: 0});
-    commit(types.JOB_UPDATED_BULK, {})
   },
 
-  async skipJob({ commit, getters }, job) {
+  async skipJob({ getters }, job) {
     let skipTime = {};
     const integer1 = getters['getTemporalExpr'](job.tempExprId).integer1;
     const integer2 = getters['getTemporalExpr'](job.tempExprId).integer2
@@ -420,13 +292,16 @@ const actions: ActionTree<JobState, RootState> = {
     } as any
 
     const resp = await JobService.updateJob(payload)
-    if (resp.status === 200 && !hasError(resp) && resp.data.docs) {
-      commit(types.JOB_UPDATED, { job });
+    if (resp.status === 200 && !hasError(resp) && resp.data.successMessage) {
+      // TODO: improve the condition to store the current job in state.
+      // returning the updated runTime on success as, the job configuration component does not get updated when
+      // skipping a job from there.
+      return { updatedRunTime: payload.runTime }
     }
     return resp;
   },
 
-  async cancelJob({ dispatch, state }, job) {
+  async cancelJob({ dispatch }, job) {
     let resp;
 
     try {
@@ -439,14 +314,6 @@ const actions: ActionTree<JobState, RootState> = {
       });
       if (resp.status == 200 && !hasError(resp)) {
         showToast(translate('Service updated successfully'))
-        // deleting the enum from cached job as we will not store the job with cancelled status
-        delete state.cached[job?.systemJobEnumId]
-        dispatch('fetchJobs', {
-          inputFields: {
-            'systemJobEnumId': job.systemJobEnumId,
-            'systemJobEnumId_op': 'equals'
-          }
-        })
       } else {
         showToast(translate('Something went wrong'), getResponseError(resp))
       }

@@ -1,5 +1,4 @@
 export default interface JobState {
-    cached: any;
     pending: {
       list: any,
       total: 0

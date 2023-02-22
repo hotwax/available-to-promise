@@ -122,7 +122,7 @@
                 <ion-card>
                   <Image :src="variant.mainImageUrl" />
                   <ion-item lines="none">
-                    <ion-label>
+                    <ion-label class="ion-text-wrap">
                       {{ variant.productName }}
                       <p v-if="variant.color">{{ $t("Color") }}: {{ variant.color }}</p>
                       <p v-if="variant.size">{{ $t("Size") }}: {{ variant.size }}</p>
@@ -140,21 +140,21 @@
       </div>
 
       <div class="action desktop-only">
-        <ion-button v-if="jobId" :disabled="isJobEditable() || isServiceScheduling" @click="updateThreshold()">
+        <ion-button v-if="jobId" :disabled="!hasPermission(Actions.APP_THRESHOLD_RULE_UPDATE) || isJobEditable() || isServiceScheduling" @click="updateThreshold()">
           <ion-icon slot="start" :icon="saveOutline" />
           {{ $t("Update threshold rule") }}
         </ion-button>
-        <ion-button v-else @click="saveThreshold()">
+        <ion-button :disabled="!hasPermission(Actions.APP_THRESHOLD_RULE_UPDATE)" v-else @click="saveThreshold()">
           <ion-icon slot="start" :icon="saveOutline" />
           {{ $t("Save threshold rule") }}
         </ion-button>
       </div>
 
       <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="mobile-only">
-        <ion-fab-button v-if="jobId" :disabled="isServiceScheduling || isJobEditable()" @click="updateThreshold()">
+        <ion-fab-button v-if="jobId" :disabled="!hasPermission(Actions.APP_THRESHOLD_RULE_UPDATE) || isServiceScheduling || isJobEditable()" @click="updateThreshold()">
           <ion-icon :icon="arrowForwardOutline" />
         </ion-fab-button>
-        <ion-fab-button v-else @click="saveThreshold()">
+        <ion-fab-button :disabled="!hasPermission(Actions.APP_THRESHOLD_RULE_UPDATE)" v-else @click="saveThreshold()">
           <ion-icon :icon="arrowForwardOutline" />
         </ion-fab-button>
       </ion-fab>
@@ -197,13 +197,14 @@ import { defineComponent } from 'vue';
 import { arrowForwardOutline, downloadOutline, filterOutline, saveOutline, pricetagOutline, closeCircle, addCircleOutline, albumsOutline, warningOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
 import { mapGetters, useStore } from 'vuex';
-import SaveThresholdModal from '@/components/SaveThresholdModal.vue';
 import ProductFilterModal from '@/components/ProductFilterModal.vue';
 import { hasError, showToast } from '@/utils';
 import { translate } from '@/i18n';
 import { ProductService } from '@/services/ProductService';
 import { JobService } from '@/services/JobService';
 import { DateTime } from 'luxon';
+import { Actions, hasPermission } from '@/authorization'
+import emitter from '@/event-bus';
 
 export default defineComponent({
   name: 'SelectProduct',
@@ -452,14 +453,8 @@ export default defineComponent({
           });
         return alert.present();
       }
-      const saveThresholdModal = await modalController.create({
-        component: SaveThresholdModal,
-        componentProps: {
-          threshold: this.threshold,
-          totalSKUs: this.products.total.variant
-        }
-      })
-      saveThresholdModal.present();
+      await this.store.dispatch('product/updateThreshold', this.threshold)
+      this.router.push('/schedule-threshold')
     },
     async searchFilter(label: string, facetToSelect: string, searchfield: string, type: string) {
       const modal = await modalController.create({
@@ -516,6 +511,7 @@ export default defineComponent({
     //Cleared query string to clear search keyword whenever user navigates to SelectProduct page
     this.queryString = '';
     this.threshold = '';
+    emitter.off("productStoreChanged", this.getProducts);
   },
   async ionViewWillEnter(){
     this.jobId = this.$route.query.id
@@ -523,6 +519,9 @@ export default defineComponent({
     if (this.jobId) {
       this.applyThresholdRule()
     } else {
+      // subscribing for emitter only we are creating a new rule for job scheduling, as when updating a rule
+      // there is no option to change the product store
+      emitter.on("productStoreChanged", this.getProducts);
       this.getProducts();
     }
   },
@@ -531,9 +530,11 @@ export default defineComponent({
     const store = useStore();
 
     return {
+      Actions,
       arrowForwardOutline,
       downloadOutline,
       filterOutline,
+      hasPermission,
       router,
       saveOutline,
       store,
@@ -548,13 +549,24 @@ export default defineComponent({
 </script>
 
 <style scoped>
-
 .section-grid {
-  grid-template-columns: repeat(auto-fill, 200px);
+  grid-auto-flow: column;
+  grid-auto-columns: 200px;
+  grid-template-columns: none;
+  width: 100vw;
+  overflow-x: scroll;
+  scroll-snap-type: x mandatory;
 }
 
-.find {
-  padding: 0 var( --spacer-base);
+.section-grid > div {
+  scroll-snap-align: start;
+  /* Here 20px padding-bottom is given 
+    to match the 10px bottom and 10px top margin of card */
+  padding-bottom: calc(10px * 2);
+}
+
+.section-grid > div > ion-card {
+  height: 100%;
 }
 
 ion-list-header > div {
@@ -567,13 +579,22 @@ ion-list-header > div {
   .find {
     padding: var( --spacer-lg);
     gap: var(--spacer-lg);
-   }
+  } 
+
   .action {
     position: fixed;
     z-index: 3;
     bottom: 10%;
     left: 50%;
     transform: translate(-50%, 0);
+  }
+
+  .section-grid {
+    width: unset;
+    grid-auto-columns: unset;
+    grid-template-columns: repeat(auto-fill, 200px);
+    grid-auto-flow: unset;
+    overflow: unset;
   }
 }
 </style>

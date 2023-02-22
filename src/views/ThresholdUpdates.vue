@@ -28,7 +28,7 @@
           <div v-if="pendingJobs?.length === 0">
             <p class="ion-text-center">{{ $t("There are no jobs pending right now")}}</p>
             <div class="ion-text-center">
-              <ion-button fill="outline" @click="refreshJobs()">
+              <ion-button fill="outline" @click="refreshJobs(undefined, true)">
                 {{ $t('retry') }}
                 <ion-spinner v-if="isRetrying" name="crescent" />
               </ion-button>
@@ -76,8 +76,8 @@
 
               <div class="actions">
                 <div>
-                  <ion-button fill="clear" @click.stop="skipJob(job)">{{ $t("Skip") }}</ion-button>
-                  <ion-button color="danger" fill="clear" @click.stop="cancelJob(job)">{{ $t("Cancel") }}</ion-button>
+                  <ion-button :disabled="!hasPermission(Actions.APP_JOB_UPDATE)" fill="clear" @click.stop="skipJob(job)">{{ $t("Skip") }}</ion-button>
+                  <ion-button :disabled="!hasPermission(Actions.APP_JOB_UPDATE)" color="danger" fill="clear" @click.stop="cancelJob(job)">{{ $t("Cancel") }}</ion-button>
                 </div>
                 <div>
                   <ion-button fill="clear" color="medium" slot="end" @click.stop="copyJobInformation(job)">
@@ -103,7 +103,7 @@
           <div v-if="runningJobs?.length === 0">
             <p class="ion-text-center">{{ $t("There are no jobs running right now")}}</p>
             <div class="ion-text-center">
-              <ion-button fill="outline" @click="refreshJobs()">
+              <ion-button fill="outline" @click="refreshJobs(undefined, true)">
                 {{ $t('retry') }}
                 <ion-spinner v-if="isRetrying" name="crescent" />
               </ion-button>
@@ -178,7 +178,7 @@
           <div v-if="jobHistory?.length === 0">
             <p class="ion-text-center">{{ $t("No jobs have run yet")}}</p>
             <div class="ion-text-center">
-              <ion-button fill="outline" @click="refreshJobs()">
+              <ion-button fill="outline" @click="refreshJobs(undefined, true)">
                 {{ $t('retry') }}
                 <ion-spinner v-if="isRetrying" name="crescent" />
               </ion-button>
@@ -256,6 +256,14 @@
           <JobConfiguration :title="title" :job="currentJob" :productCount="productCount" :status="currentJobStatus" :type="freqType" :key="currentJob"/>
         </aside>
       </main>
+
+      <!-- showing reorder option on pending page and only when we are having pending jobs -->
+      <!-- Not defined fab button in the pending section div, as the slot property only works in ion-content and defining the button in div makes the fab button scrollable -->
+      <ion-fab v-if="segmentSelected === 'pending' && pendingJobs?.length !== 0" vertical="bottom" horizontal="end" slot="fixed">
+        <ion-fab-button @click="openReorderModal()">
+          <ion-icon :icon="pencilOutline" />
+        </ion-fab-button>
+      </ion-fab>
     </ion-content>
   </ion-page>
 </template>
@@ -270,6 +278,8 @@ import {
   IonCardHeader,
   IonCardSubtitle,
   IonCardTitle,
+  IonFab,
+  IonFabButton,
   IonHeader,
   IonIcon,
   IonItem,
@@ -292,13 +302,15 @@ import {
   createAnimation
 } from "@ionic/vue";
 import JobConfiguration from '@/components/JobConfiguration.vue'
-import { copyOutline, closeCircleOutline, checkmarkCircleOutline, optionsOutline, timeOutline, timerOutline } from "ionicons/icons";
-
+import { copyOutline, closeCircleOutline, checkmarkCircleOutline, pencilOutline, optionsOutline, timeOutline, timerOutline } from "ionicons/icons";
 import { Plugins } from '@capacitor/core';
 import { hasError, showToast } from '@/utils'
 import JobHistoryModal from '@/components/JobHistoryModal.vue';
 import { DateTime } from 'luxon';
 import { ProductService } from '@/services/ProductService';
+import { Actions, hasPermission } from '@/authorization'
+import JobReorderModal from '@/components/JobReorderModal.vue';
+import emitter from '@/event-bus';
 
 export default defineComponent({
   name: "ThresholdUpdates",
@@ -310,6 +322,8 @@ export default defineComponent({
     IonCardHeader,
     IonCardSubtitle,
     IonCardTitle,
+    IonFab,
+    IonFabButton,
     IonHeader,
     IonIcon,
     IonItem,
@@ -353,7 +367,6 @@ export default defineComponent({
       getTags: 'job/getTags',
       getEnumDescription: 'job/getEnumDescription',
       getEnumName: 'job/getEnumName',
-      getCurrentEComStore:'user/getCurrentEComStore',
       isPendingJobsScrollable: 'job/isPendingJobsScrollable',
       isRunningJobsScrollable: 'job/isRunningJobsScrollable',
       isHistoryJobsScrollable: 'job/isHistoryJobsScrollable',
@@ -363,6 +376,10 @@ export default defineComponent({
   },
   mounted(){
     this.store.dispatch('util/getServiceStatusDesc')
+    emitter.on("productStoreChanged", this.refreshJobs);
+  },
+  unmounted() {
+    emitter.off("productStoreChanged", this.refreshJobs);
   },
   methods: {
     getJobExecutionTime(startTime: any, endTime: any){
@@ -427,20 +444,20 @@ export default defineComponent({
         event.target.complete();
       })
     },
-    async refreshJobs(event: any) {
-      this.isRetrying = true;
+    async refreshJobs(event: any, isRetrying = false) {
+      this.isRetrying = isRetrying;
       if(this.segmentSelected === 'pending') {
-        this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums}).then(() => {
+        this.store.dispatch('job/fetchPendingJobs', {viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums}).then(() => {
           if(event) event.target.complete();
           this.isRetrying = false;
         });
       } else if(this.segmentSelected === 'running') {
-        this.store.dispatch('job/fetchRunningJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums}).then(() => {
+        this.store.dispatch('job/fetchRunningJobs', {viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums}).then(() => {
           if(event) event.target.complete();
           this.isRetrying = false;
         });
       } else {
-        this.store.dispatch('job/fetchJobHistory', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums}).then(() => {
+        this.store.dispatch('job/fetchJobHistory', {viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums}).then(() => {
           if(event) event.target.complete();
           this.isRetrying = false;
         });
@@ -448,9 +465,9 @@ export default defineComponent({
     },
     segmentChanged (e: CustomEvent) {
       this.segmentSelected = e.detail.value
-      this.segmentSelected === 'pending' ? this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums}) : 
-      this.segmentSelected === 'running' ? this.store.dispatch('job/fetchRunningJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums}) :
-      this.store.dispatch('job/fetchJobHistory', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums});
+      this.segmentSelected === 'pending' ? this.store.dispatch('job/fetchPendingJobs', {viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums}) : 
+      this.segmentSelected === 'running' ? this.store.dispatch('job/fetchRunningJobs', {viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums}) :
+      this.store.dispatch('job/fetchJobHistory', {viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums});
     },
     async skipJob (job: any) {
       const alert = await alertController
@@ -466,7 +483,7 @@ export default defineComponent({
               text: this.$t('Skip'),
               handler: async () => {
                 await this.store.dispatch('job/skipJob', job);
-                await this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewIndex: 0, jobEnums: this.jobEnums})
+                await this.store.dispatch('job/fetchPendingJobs', {viewIndex: 0, jobEnums: this.jobEnums})
               },
             }
           ]
@@ -476,17 +493,17 @@ export default defineComponent({
     async getPendingJobs(vSize: any, vIndex: any) {
       const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
       const viewIndex = vIndex ? vIndex : 0;
-      await this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize, viewIndex, jobEnums: this.jobEnums});
+      await this.store.dispatch('job/fetchPendingJobs', {viewSize, viewIndex, jobEnums: this.jobEnums});
     },
     async getRunningJobs(vSize: any, vIndex: any) {
       const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
       const viewIndex = vIndex ? vIndex : 0;
-      await this.store.dispatch('job/fetchRunningJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize, viewIndex, jobEnums: this.jobEnums});
+      await this.store.dispatch('job/fetchRunningJobs', {viewSize, viewIndex, jobEnums: this.jobEnums});
     },
     async getJobHistory(vSize: any, vIndex: any) {
       const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
       const viewIndex = vIndex ? vIndex : 0;
-      await this.store.dispatch('job/fetchJobHistory', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize, viewIndex, jobEnums: this.jobEnums});
+      await this.store.dispatch('job/fetchJobHistory', {viewSize, viewIndex, jobEnums: this.jobEnums});
     },
     async cancelJob(job: any){
       const alert = await alertController
@@ -501,8 +518,10 @@ export default defineComponent({
             {
               text: this.$t("CANCEL"),
               handler: async () => {
-                await this.store.dispatch('job/cancelJob', job);
-                await this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewIndex: 0, jobEnums: this.jobEnums});
+                const resp = await this.store.dispatch('job/cancelJob', job);
+                if(resp.status == 200 && !hasError(resp) && resp.data.successMessage) {
+                  this.store.dispatch('job/fetchPendingJobs', {viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums})
+                }
               },
             }
           ],
@@ -567,17 +586,30 @@ export default defineComponent({
       createAnimation()
         .addAnimation([gapAnimation, revealAnimation])
         .play();
+    },
+    async openReorderModal() {
+      const jobReorderModal = await modalController.create({
+        component: JobReorderModal,
+        componentProps: { jobs: this.pendingJobs.filter((job: any) => job.systemJobEnumId === 'JOB_EXP_PROD_THRSHLD')} // passing export jobs, as we will only reorder export threshold jobs
+      })
+      jobReorderModal.onDidDismiss().then((result: any) => {
+        if (result?.data?.isJobsUpdated) {
+          this.store.dispatch('job/fetchPendingJobs', {viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums});
+        }
+      })
+      return jobReorderModal.present();
     }
   },
   ionViewWillEnter() {
     // reassigning current job when entering in the view to not display the job config component if previously opened
     this.currentJob = undefined
+    this.isJobDetailAnimationCompleted = false
     if (this.segmentSelected === 'pending') {
-      this.store.dispatch('job/fetchPendingJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums})
+      this.store.dispatch('job/fetchPendingJobs', {viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums})
     } else if (this.segmentSelected === 'running') {
-      this.store.dispatch('job/fetchRunningJobs', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums})
+      this.store.dispatch('job/fetchRunningJobs', {viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums})
     } else {
-      this.store.dispatch('job/fetchJobHistory', {eComStoreId: this.getCurrentEComStore.productStoreId, viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums});
+      this.store.dispatch('job/fetchJobHistory', {viewSize:process.env.VUE_APP_VIEW_SIZE, viewIndex:0, jobEnums: this.jobEnums});
     }
   },
   setup() {
@@ -585,10 +617,13 @@ export default defineComponent({
     const segmentSelected = ref('pending');
 
     return {
+      Actions,
       copyOutline,
+      hasPermission,
       store,
       closeCircleOutline,
       checkmarkCircleOutline,
+      pencilOutline,
       optionsOutline,
       timeOutline,
       timerOutline,

@@ -4,17 +4,11 @@ import RootState from '../../RootState'
 import parser from 'boolean-parser'
 
 const getters: GetterTree <JobState, RootState> = {
-    getJobStatus: (state) => (id: string): any  => {
-      return state.cached[id] ? (state.cached[id].status === "SERVICE_DRAFT" ? state.cached[id].status : state.cached[id].frequency) : 'SERVICE_DRAFT';
-    },
     getPendingJobs (state){
       return state.pending.list;
     },
     getTemporalExpr: (state) => (id: string): any  => {
       return state.temporalExp[id];
-    },
-    getJob: (state) => (id: string): any => {
-      return state.cached[id]
     },
     getEnumDescription: (state) => (id: string): any => {
       return state.enumIds[id]?.description;
@@ -36,9 +30,6 @@ const getters: GetterTree <JobState, RootState> = {
     },
     getJobHistory (state){
       return state.history.list;
-    },
-    getJobs: (state) => {
-      return state.cached;
     },
     getTagsAndOperator: (state, getters) => (id: string, type: string): any => {
       const tagString = getters.getTags(id, type);

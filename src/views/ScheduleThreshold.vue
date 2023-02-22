@@ -35,7 +35,10 @@
                   <!-- TODO: check why datetime component is not unmounted after scheduling the job -->
                   <!-- For now added a key with current time to re-render the component always when coming to the page -->
                   <ion-datetime
+<<<<<<< HEAD
                     show-default-buttons
+=======
+>>>>>>> 7015cf17efe0dab3bfbfa9330fcaa9ea0b9c73c7
                     hour-cycle="h12"
                     :key="DateTime.now().toMillis()"
                     :value="initialRunTime ? getDateTime(initialRunTime) : ''"

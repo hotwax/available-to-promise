@@ -21,4 +21,5 @@ export default interface ProductState {
     }
   };
   query: any;
+  threshold: number;
 }
