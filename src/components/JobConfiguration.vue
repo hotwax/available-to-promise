@@ -24,6 +24,7 @@
         <ion-modal trigger="open-run-time-modal">
           <ion-content force-overscroll="false">
             <ion-datetime
+              show-default-buttons
               hour-cycle="h12"
               :min="minDateTime"
               :value="job?.runTime ? getDateTime(job.runTime) : ''"
@@ -328,7 +329,7 @@ ion-list {
 
 ion-modal {
   --width: 290px;
-  --height: 382px;
+  --height: 440px;
   --border-radius: 8px;
 }
 </style>
