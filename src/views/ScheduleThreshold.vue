@@ -282,7 +282,7 @@ export default defineComponent({
       this.successJobs = []
       const solrQuery = this.query
 
-      const jobRunTime = this.updatedJobsOrder.find((job: any) => !job.jobId)?.runTime
+      const jobRunTime = this.jobsForReorder.find((job: any) => !job.jobId)?.runTime
 
       let diffSeq = this.findJobDiff(this.initialJobsOrder, this.jobsForReorder)
       this.updatedJobsOrder = Object.keys(diffSeq).map((key) => diffSeq[key])
@@ -452,7 +452,7 @@ export default defineComponent({
         payload['SERVICE_RUN_AS_SYSTEM'] = 'Y';
         payload['jobFields'].runAsUser = 'system';// default system, but empty in run now. TODO Need to remove this as we are using SERVICE_RUN_AS_SYSTEM, currently kept it for backward compatibility
         payload['includeAll'] =  false;
-        this.job.runTime && (payload['SERVICE_TIME'] = runTime.toString())
+        payload['SERVICE_TIME'] = runTime.toString()
 
         // Scheduling Job that will run everyday and as system
         scheduleJobRequests.push(JobService.scheduleJob({ ...this.job.runtimeData, ...payload }).catch(error => { return error }))
