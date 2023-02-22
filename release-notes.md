@@ -1,3 +1,11 @@
+# Release 2.0.2
+
+## What's Changed
+* Fixed: issue of dateTime modal flicker effect when using trigger, also fixed the styling for dateTime modal by @ymaheshwari1 in https://github.com/hotwax/threshold-management/pull/185
+
+
+**Full Changelog**: https://github.com/hotwax/threshold-management/compare/v2.0.1...v2.0.2
+
 # Release 2.0.1
 
 ## What's Changed
