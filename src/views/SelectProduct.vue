@@ -50,7 +50,7 @@
                 </ion-select>
               </ion-item>
               <ion-card-content>
-                <ion-chip v-for="(tag, index) in appliedFilters['included']['tags'].list" :key="index">
+                <ion-chip [outline]="true" v-for="(tag, index) in appliedFilters['included']['tags'].list" :key="index">
                   <ion-icon :icon="pricetagOutline" />
                   <ion-label>{{ tag }}</ion-label>
                   <ion-icon :icon="closeCircle" @click="removeFilters('included', 'tags', tag)"/>
@@ -81,7 +81,7 @@
                 </ion-select>
               </ion-item>
               <ion-card-content>
-                <ion-chip v-for="(tag, index) in appliedFilters['excluded']['tags'].list" :key="index">
+                <ion-chip [outline]="true" v-for="(tag, index) in appliedFilters['excluded']['tags'].list" :key="index">
                   <ion-icon :icon="pricetagOutline" />
                   <ion-label>{{ tag }}</ion-label>
                   <ion-icon :icon="closeCircle" @click="removeFilters('excluded', 'tags', tag)"/>
