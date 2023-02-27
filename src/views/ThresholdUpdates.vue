@@ -3,7 +3,7 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-menu-button slot="start" />
-        <ion-title>{{ $t("Threshold updates") }}</ion-title>
+        <ion-title>{{ $t("Rule pipeline") }}</ion-title>
       </ion-toolbar>
 
       <ion-toolbar>

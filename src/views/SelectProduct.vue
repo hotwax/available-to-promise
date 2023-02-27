@@ -4,7 +4,7 @@
       <ion-toolbar>
         <ion-menu-button v-if="!jobId" slot="start" />
         <ion-back-button v-if="jobId" slot="start" @click="navigateBack" default-href="/" />
-        <ion-title>{{ $t("Threshold management") }}</ion-title>
+        <ion-title>{{ $t("Create rule") }}</ion-title>
         <ion-buttons slot="end">
           <ion-button fill="clear" class="mobile-only">
             <ion-icon :icon="downloadOutline" />

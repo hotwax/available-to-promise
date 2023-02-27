@@ -9,11 +9,11 @@
       <ion-list>
         <ion-item v-if="hasPermission('APP_SELECT_PRODUCT_VIEW')" button @click="closeMenu(); router.push('/select-product')">
           <ion-icon :icon="optionsOutline" slot="start" />
-          <ion-label>{{ $t("Threshold Management") }}</ion-label>
+          <ion-label>{{ $t("Create Rule") }}</ion-label>
         </ion-item>
         <ion-item v-if="hasPermission('APP_THRESHOLD_UPDATES_VIEW')" button @click="closeMenu(); router.push('/threshold-updates')">
           <ion-icon :icon="pulseOutline" slot="start" />
-          <ion-label>{{ $t("Threshold Updates") }}</ion-label>
+          <ion-label>{{ $t("Rule Pipeline") }}</ion-label>
         </ion-item>
         <ion-item button @click="closeMenu(); router.push('/settings')">
           <ion-icon :icon="settingsOutline" slot="start" />
