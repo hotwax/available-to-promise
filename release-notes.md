@@ -1,3 +1,11 @@
+# Release 2.0.4
+
+## What's Changed
+* Improved: page name from Threshold management to Create Rule & from Threshold update to Rule Pipeline by @Dhiraj1405 in https://github.com/hotwax/threshold-management/pull/194
+
+
+**Full Changelog**: https://github.com/hotwax/threshold-management/compare/v2.0.3...v2.0.4
+
 # Release 2.0.3
 
 ## What's Changed
