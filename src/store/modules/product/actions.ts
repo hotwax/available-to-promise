@@ -77,7 +77,7 @@ const actions: ActionTree<ProductState, RootState> = {
     // initializing the filter always on updateQuery call because we are adding values in the filter
     // as string and if some value is removed then we need to do multiple operations on the filter string
     // to remove that value from the query filter
-    state.query.json['filter'] = ["docType: PRODUCT", "groupId: *", `productStoreIds: ${this.state.user.currentEComStore.productStoreId ? this.state.user.currentEComStore.productStoreId : '*'}`]
+    state.query.json['filter'] = ["docType: PRODUCT", "groupId: *", `prodCatalogIds: ${this.state.user.currentEComStore.prodCatalogId}`]
     state.query.json['params'] = {
       "group": true,
       "group.field": "groupId",

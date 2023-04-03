@@ -46,16 +46,18 @@ const setUserTimeZone = async (payload: any): Promise <any>  => {
     data: payload
   });
 }
-const getEComStores = async (token: any): Promise<any> => {
+const getEComStores = async (token: any, partyId: any): Promise<any> => {
   try {
     const params = {
       "inputFields": {
-        "storeName_op": "not-empty"
+        "storeName_op": "not-empty",
+        partyId
       },
       "fieldList": ["productStoreId", "storeName"],
-      "entityName": "ProductStore",
+      "entityName": "ProductStoreAndRole",
       "distinct": "Y",
-      "noConditionFind": "Y"
+      "noConditionFind": "Y",
+      "filterByDate": 'Y',
     }
     const baseURL = store.getters['user/getBaseUrl'];
     const resp = await client({
@@ -77,6 +79,40 @@ const getEComStores = async (token: any): Promise<any> => {
     return Promise.reject(error)
   }
 }
+const getEcommerceCatalog = async (token: any, productStoreId: any): Promise<any> => {
+  try {
+    const params = {
+      "inputFields": {
+        productStoreId
+      },
+      "fieldList": ["productStoreId", "prodCatalogId"],
+      "entityName": "ProductStoreCatalog",
+      "distinct": "Y",
+      "noConditionFind": "Y",
+      "filterByDate": 'Y',
+    }
+    const baseURL = store.getters['user/getBaseUrl'];
+    const resp = await client({
+      url: "performFind",
+      method: "get",
+      baseURL,
+      params,
+      headers: {
+        Authorization:  'Bearer ' + token,
+        'Content-Type': 'application/json'
+      }
+    });
+    if (hasError(resp) || resp.data.docs?.length == 0) {
+      // if has error or not catalog found
+      return Promise.reject(resp.data.docs);
+    } else {
+      return Promise.resolve(resp.data.docs[0]);
+    }
+  } catch(error: any) {
+    return Promise.reject(error)
+  }
+}
+
 
 const setUserPreference = async (payload: any): Promise<any> => {
   return api({
@@ -213,6 +249,7 @@ const getUserPermissions = async (payload: any, token: any): Promise<any> => {
 
 
 export const UserService = {
+    getEcommerceCatalog,
     getPreferredStore,
     getUserPermissions,
     getUserProfile,
