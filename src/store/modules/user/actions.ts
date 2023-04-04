@@ -74,7 +74,7 @@ const actions: ActionTree<UserState, RootState> = {
       }
 
       const userProfile = await UserService.getUserProfile(token);
-      userProfile.stores = await UserService.getEComStores(token);
+      userProfile.stores = await UserService.getEComStores(token, userProfile.partyId);
 
       let preferredStore = userProfile.stores.length ?  userProfile.stores[0] : {};
 
@@ -83,6 +83,9 @@ const actions: ActionTree<UserState, RootState> = {
         const store = userProfile.stores.find((store: any) => store.productStoreId === preferredStoreId);
         store && (preferredStore = store)
       }
+      // prodCatalogId will be used getting the products instead of productStoreIds as the productStoreIds is tokenized
+      // For STORE, the results will have  X_STORE results as well
+      preferredStore.prodCatalogId = (await UserService.getEcommerceCatalog(token, preferredStore.productStoreId))?.prodCatalogId;
       /*  ---- Guard clauses ends here --- */
 
       setPermissions(appPermissions);
@@ -135,6 +138,10 @@ const actions: ActionTree<UserState, RootState> = {
     if(!productStore) {
       productStore = this.state.user.current.stores.find((store: any) => store.productStoreId === payload.productStoreId);
     }
+    // prodCatalogId will be used getting the products instead of productStoreIds as the productStoreIds is tokenized
+    // For STORE, the results will have  X_STORE results as well
+    productStore.prodCatalogId = (await UserService.getEcommerceCatalog(undefined, productStore.productStoreId))?.prodCatalogId;
+
     commit(types.USER_CURRENT_ECOM_STORE_UPDATED, productStore);
     this.dispatch('product/clearAllFilters')
     this.dispatch('product/clearProductList');
