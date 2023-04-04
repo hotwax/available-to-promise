@@ -71,7 +71,7 @@ const getEComStores = async (token: any, partyId: any): Promise<any> => {
       }
     });
     // Disallow login if the user is not associated with any product store
-    if (hasError(resp) || resp.data.docs === 0) {
+    if (hasError(resp) || resp.data.docs.length === 0) {
       return Promise.reject(resp.data);
     } else {
       return Promise.resolve(resp.data.docs);

@@ -6,7 +6,7 @@ import ErrorMessageModal from "@/components/ErrorMessageModal.vue";
 
 // TODO Remove it when HC APIs are fully REST compliant
 const hasError = (response: any) => {
-    return !!response.data._ERROR_MESSAGE_ || !!response.data._ERROR_MESSAGE_LIST_;
+    return typeof response.data != "object" || !!response.data._ERROR_MESSAGE_ || !!response.data._ERROR_MESSAGE_LIST_ || !!response.data.error;
 }
 
 const showToast = async (message: string, err?: any) => {
