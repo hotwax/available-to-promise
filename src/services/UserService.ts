@@ -70,7 +70,8 @@ const getEComStores = async (token: any, partyId: any): Promise<any> => {
         'Content-Type': 'application/json'
       }
     });
-    if (hasError(resp)) {
+    // Disallow login if the user is not associated with any product store
+    if (hasError(resp) || resp.data.docs === 0) {
       return Promise.reject(resp.data);
     } else {
       return Promise.resolve(resp.data.docs);
