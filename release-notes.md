@@ -1,3 +1,10 @@
+# Release 2.1.0
+
+## What's Changed
+* Improved: Store specific access to the threshold app (#85zruaewr) by @adityasharma7 in https://github.com/hotwax/threshold-management/pull/197
+
+
+**Full Changelog**: https://github.com/hotwax/threshold-management/compare/v2.0.4...v2.1.0
 # Release 2.0.4
 
 ## What's Changed
