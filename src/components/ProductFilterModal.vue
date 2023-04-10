@@ -3,12 +3,12 @@
     <ion-toolbar>
       <ion-buttons slot="start">
         <ion-button @click="closeModal">
-          <ion-icon slot="icon-only" :icon="closeOutline" />
+          <ion-icon slot="icon-only" :icon="arrowBackOutline" />
         </ion-button>
       </ion-buttons>
       <ion-title>{{ $t(`${ type === 'included' ? `Include ${label}` : `Exclude ${label}` }`) }}</ion-title>
       <ion-buttons slot="end">
-        <ion-button fill="clear" color="danger" @click="clearFilters()">{{ $t("Clear All") }}</ion-button>
+        <ion-button fill="clear" color="danger" @click="selectedTags = []">{{ $t("Clear All") }}</ion-button>
       </ion-buttons>
     </ion-toolbar>
   </ion-header>
@@ -17,13 +17,18 @@
     <ion-searchbar :placeholder="$t(`Search ${label}`)" v-model="queryString" @keyup.enter="queryString = $event.target.value; search($event)"/>
 
     <ion-list>
-      <ion-item v-for="option in facetOptions" :key="option.id">
+      <ion-item v-for="option in facetOptions" :key="option.id"  @click="updateSelectedTags(option.id)">
         <ion-label>{{ option.label }}</ion-label>
-        <!-- Added key on checkbox as when clicking on the checkbox the checked value is changed but not reflected on UI -->
-        <ion-checkbox v-if="!isAlreadyApplied(option.id)" :checked="appliedFilters[type][searchfield].list.includes(option.id)" :key="appliedFilters[type][searchfield].list.includes(option.id)" @click="updateFilter(option.id)"/>
+        <ion-checkbox v-if="!isAlreadyApplied(option.id)" :checked="selectedTags.includes(option.id)" />
         <ion-note v-else slot="end" color="danger">{{ type === 'included' ? $t("excluded") : $t("included") }}</ion-note>
       </ion-item>
     </ion-list>
+    <!-- Added padding for better visiblity of the checkboxes beside the FAB -->
+    <ion-fab class="ion-padding" vertical="bottom" horizontal="end" slot="fixed">
+      <ion-fab-button @click="updateFilters()">
+        <ion-icon :icon="checkmarkOutline" />
+      </ion-fab-button>
+    </ion-fab>
     <ion-infinite-scroll @ionInfinite="loadMoreTags($event)" threshold="100px" :disabled="!isScrollable">
       <ion-infinite-scroll-content loading-spinner="crescent" :loading-text="$t('Loading')"/>
     </ion-infinite-scroll>
@@ -37,6 +42,8 @@ import {
   IonButtons,
   IonCheckbox,
   IonContent,
+  IonFab,
+  IonFabButton,
   IonHeader,
   IonIcon,
   IonInfiniteScroll,
@@ -50,7 +57,7 @@ import {
   IonToolbar,
   modalController
 } from "@ionic/vue";
-import { closeOutline } from 'ionicons/icons'
+import { arrowBackOutline, checkmarkOutline } from 'ionicons/icons'
 import { ProductService } from "@/services/ProductService";
 import { mapGetters, useStore } from "vuex";
 
@@ -61,6 +68,8 @@ export default defineComponent({
     IonButtons,
     IonCheckbox,
     IonContent,
+    IonFab,
+    IonFabButton,
     IonHeader,
     IonIcon,
     IonInfiniteScroll,
@@ -79,6 +88,7 @@ export default defineComponent({
       facetOptions: [] as any,
       isFilterChanged: false,
       isScrollable: true,
+      selectedTags: [] as Array<string>
     }
   },
   computed: {
@@ -87,6 +97,9 @@ export default defineComponent({
     })
   },
   props: ["label", "facetToSelect", "searchfield", 'type'],
+  mounted() {
+    this.selectedTags = JSON.parse(JSON.stringify(this.appliedFilters[this.type][this.searchfield])).list;
+  },
   methods: {
     closeModal() {
       modalController.dismiss({ dismissed: true, isFilterChanged: this.isFilterChanged });
@@ -129,19 +142,34 @@ export default defineComponent({
         event.target.complete();
       })
     },
-    async updateFilter(value: string) {
+    updateSelectedTags(value: string) {
+      this.selectedTags.includes(value) ? this.selectedTags.splice(this.selectedTags.indexOf(value), 1) : this.selectedTags.push(value);
+    },
+    async updateFilters() {
+      this.isFilterChanged = true;
+      this.selectedTags.length ? await this.updateAppliedFilters() : await this.clearFilters();
+      this.closeModal();
+    },
+    async updateAppliedFilters() {
+      // if filters are not updated
+      if (JSON.stringify(this.appliedFilters[this.type][this.searchfield].list) == JSON.stringify(this.selectedTags)) {
+        this.isFilterChanged = false;
+        return;
+      }
+
       await this.store.dispatch('product/updateAppliedFilters', {
         type: this.type,
         id: this.searchfield,
-        value
+        value: this.selectedTags
       })
-      this.isFilterChanged = true;
     },
     async clearFilters() {
-      // checking that if the current field does not have any attribute selected then not making the solr query
-      if (this.appliedFilters[this.type][this.searchfield].length <= 0) {
+      // if no filters are already not applied
+      if (!this.appliedFilters[this.type][this.searchfield].list.length) {
+        this.isFilterChanged = false;
         return;
       }
+
       await this.store.dispatch('product/clearFilters', {
         type: this.type,
         id: this.searchfield,
@@ -150,7 +178,6 @@ export default defineComponent({
           operator: 'OR'
         }
       })
-      this.isFilterChanged = true;
     },
     isAlreadyApplied(value: string) {
       const type = this.type === 'included' ? 'excluded' : 'included'
@@ -161,7 +188,8 @@ export default defineComponent({
     const store = useStore();
 
     return {
-      closeOutline,
+      arrowBackOutline,
+      checkmarkOutline,
       store
     }
   }
