@@ -58,23 +58,14 @@ const actions: ActionTree<ProductState, RootState> = {
   },
 
   async updateAppliedFilters({ commit, state, dispatch }, payload) {
-    const value = payload.value
-    const appliedFilters = JSON.parse(JSON.stringify((state.appliedFilters as any)[payload.type][payload.id]))
-    if(!Array.isArray(value)) {
-      appliedFilters.list.includes(value) ? appliedFilters.list.splice(appliedFilters.list.indexOf(value), 1) : appliedFilters.list.push(value)
-    } else {
-      appliedFilters.list = value
-    }
-    commit(types.PRODUCT_FILTER_UPDATED, {id: payload.id, type: payload.type, value: appliedFilters})
+    commit(types.PRODUCT_FILTER_UPDATED, { id: payload.id, type: payload.type, value: payload.value })
     dispatch('updateQuery')
   },
 
   async updateAppliedFilterOperator({ commit, state, dispatch }, payload) {
-    const appliedFilters = JSON.parse(JSON.stringify((state.appliedFilters as any)[payload.type][payload.id]))
-    appliedFilters.operator = payload.value;
-    commit(types.PRODUCT_FILTER_UPDATED, {id: payload.id, type: payload.type, value: appliedFilters})
+    commit(types.PRODUCT_FILTER_UPDATED, { id: payload.id, type: payload.type, value: payload.value })
     // If we have list items then only apply filters again
-    if(appliedFilters.list.length) dispatch('updateQuery')
+    if((state.appliedFilters as any)[payload.type][payload.id].list.length) dispatch('updateQuery')
   },
 
   async updateQuery({ commit, dispatch, state }, payload) {

@@ -476,10 +476,13 @@ export default defineComponent({
       modal.present();
     },
     async removeFilters(type: string, id: string, value: string) {
+      const appliedFilters = JSON.parse(JSON.stringify(this.appliedFilters[type][id]))
+      appliedFilters.list.splice(appliedFilters.list.indexOf(value), 1)
+
       await this.store.dispatch('product/updateAppliedFilters', {
         type,
         id,
-        value
+        value: appliedFilters
       })
       this.queryString = ''
       this.isFilterChanged = true;
@@ -488,11 +491,15 @@ export default defineComponent({
       // TODO Find a better way
       // This is done as when applying the exisiting rule as the value of the select box changes
       // query is sent multiple times
-      if (this.appliedFilters[type]['tags'].operator === value) return;
+      if (this.appliedFilters[type][id].operator === value) return;
+      
+      const appliedFilters = JSON.parse(JSON.stringify(this.appliedFilters[type][id]))
+      appliedFilters.operator = value;
+
       await this.store.dispatch('product/updateAppliedFilterOperator', {
         type,
         id,
-        value
+        value: appliedFilters
       })
       this.queryString = ''
       this.isFilterChanged = true;

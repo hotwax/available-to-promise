@@ -8,7 +8,7 @@
       </ion-buttons>
       <ion-title>{{ $t(`${ type === 'included' ? `Include ${label}` : `Exclude ${label}` }`) }}</ion-title>
       <ion-buttons slot="end">
-        <ion-button fill="clear" color="danger" @click="selectedTags = []">{{ $t("Clear All") }}</ion-button>
+        <ion-button fill="clear" color="danger" @click="selectedValues = []">{{ $t("Clear All") }}</ion-button>
       </ion-buttons>
     </ion-toolbar>
   </ion-header>
@@ -17,9 +17,9 @@
     <ion-searchbar :placeholder="$t(`Search ${label}`)" v-model="queryString" @keyup.enter="queryString = $event.target.value; search($event)"/>
 
     <ion-list>
-      <ion-item v-for="option in facetOptions" :key="option.id"  @click="updateSelectedTags(option.id)">
+      <ion-item v-for="option in facetOptions" :key="option.id"  @click="updateSelectedValues(option.id)">
         <ion-label>{{ option.label }}</ion-label>
-        <ion-checkbox v-if="!isAlreadyApplied(option.id)" :checked="selectedTags.includes(option.id)" />
+        <ion-checkbox v-if="!isAlreadyApplied(option.id)" :checked="selectedValues.includes(option.id)" />
         <ion-note v-else slot="end" color="danger">{{ type === 'included' ? $t("excluded") : $t("included") }}</ion-note>
       </ion-item>
     </ion-list>
@@ -88,7 +88,7 @@ export default defineComponent({
       facetOptions: [] as any,
       isFilterChanged: false,
       isScrollable: true,
-      selectedTags: [] as Array<string>
+      selectedValues: [] as Array<string>
     }
   },
   computed: {
@@ -98,7 +98,7 @@ export default defineComponent({
   },
   props: ["label", "facetToSelect", "searchfield", 'type'],
   mounted() {
-    this.selectedTags = JSON.parse(JSON.stringify(this.appliedFilters[this.type][this.searchfield])).list;
+    this.selectedValues = JSON.parse(JSON.stringify(this.appliedFilters[this.type][this.searchfield])).list;
   },
   methods: {
     closeModal() {
@@ -142,25 +142,28 @@ export default defineComponent({
         event.target.complete();
       })
     },
-    updateSelectedTags(value: string) {
-      this.selectedTags.includes(value) ? this.selectedTags.splice(this.selectedTags.indexOf(value), 1) : this.selectedTags.push(value);
+    updateSelectedValues(value: string) {
+      this.selectedValues.includes(value) ? this.selectedValues.splice(this.selectedValues.indexOf(value), 1) : this.selectedValues.push(value);
     },
     async updateFilters() {
       this.isFilterChanged = true;
-      this.selectedTags.length ? await this.updateAppliedFilters() : await this.clearFilters();
+      this.selectedValues.length ? await this.updateAppliedFilters() : await this.clearFilters();
       this.closeModal();
     },
     async updateAppliedFilters() {
       // if filters are not updated
-      if (JSON.stringify(this.appliedFilters[this.type][this.searchfield].list) == JSON.stringify(this.selectedTags)) {
+      if (JSON.stringify(this.appliedFilters[this.type][this.searchfield].list) == JSON.stringify(this.selectedValues)) {
         this.isFilterChanged = false;
         return;
       }
 
+      const appliedFilters = JSON.parse(JSON.stringify(this.appliedFilters[this.type][this.searchfield]))
+      appliedFilters.list = this.selectedValues
+      
       await this.store.dispatch('product/updateAppliedFilters', {
         type: this.type,
         id: this.searchfield,
-        value: this.selectedTags
+        value: appliedFilters
       })
     },
     async clearFilters() {
