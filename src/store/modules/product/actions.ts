@@ -82,17 +82,14 @@ const actions: ActionTree<ProductState, RootState> = {
       "group": true,
       "group.field": "groupId",
       "group.limit": 10000,
-      "group.ngroups": true,
-      "q.op": "AND"
+      "group.ngroups": true
     }
     state.query.json['query'] = "*:*"
 
     if(payload && payload.queryString) {
       state.query.json.params.defType = 'edismax'
       state.query.json.params.qf = 'productId productName upc sku internalName brandName parentProductName'
-      // passed this operator to do not split search string and consider the search string as a single value
-      state.query.json.params['q.op'] = 'AND'
-      state.query.json.query = `*${payload.queryString}*`
+      state.query.json.query = `${payload.queryString}`
     }
 
     if (payload) {
