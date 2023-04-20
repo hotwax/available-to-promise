@@ -63,9 +63,11 @@ const actions: ActionTree<ProductState, RootState> = {
   },
 
   async updateAppliedFilterOperator({ commit, state, dispatch }, payload) {
-    commit(types.PRODUCT_FILTER_UPDATED, { id: payload.id, type: payload.type, value: payload.value })
+    const appliedFilters = JSON.parse(JSON.stringify((state.appliedFilters as any)[payload.type][payload.id]))
+    appliedFilters.operator = payload.value;
+    commit(types.PRODUCT_FILTER_UPDATED, {id: payload.id, type: payload.type, value: appliedFilters})
     // If we have list items then only apply filters again
-    if((state.appliedFilters as any)[payload.type][payload.id].list.length) dispatch('updateQuery')
+    if(appliedFilters.list.length) dispatch('updateQuery')
   },
 
   async updateQuery({ commit, dispatch, state }, payload) {

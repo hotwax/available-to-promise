@@ -492,14 +492,11 @@ export default defineComponent({
       // This is done as when applying the exisiting rule as the value of the select box changes
       // query is sent multiple times
       if (this.appliedFilters[type][id].operator === value) return;
-      
-      const appliedFilters = JSON.parse(JSON.stringify(this.appliedFilters[type][id]))
-      appliedFilters.operator = value;
 
       await this.store.dispatch('product/updateAppliedFilterOperator', {
         type,
         id,
-        value: appliedFilters
+        value
       })
       this.queryString = ''
       this.isFilterChanged = true;
