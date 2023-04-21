@@ -1,3 +1,11 @@
+# Release 2.2.0
+## What's Changed
+* Improved; optimised query removing wildcards by @adityasharma7 in https://github.com/hotwax/threshold-management/pull/199
+* Added: close button in the tag modal (#85zrvzfqv) by @k2maan in https://github.com/hotwax/threshold-management/pull/198
+
+
+**Full Changelog**: https://github.com/hotwax/threshold-management/compare/v2.1.0...v2.2.0
+
 # Release 2.1.0
 
 ## What's Changed
