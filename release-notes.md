@@ -1,3 +1,13 @@
+# Release 2.3.0
+
+## What's Changed
+* Updated favicon by @Nidbhagwat in https://github.com/hotwax/threshold-management/pull/201
+
+## New Contributors
+* @Nidbhagwat made their first contribution in https://github.com/hotwax/threshold-management/pull/201
+
+**Full Changelog**: https://github.com/hotwax/threshold-management/compare/v2.2.0...v2.3.0
+
 # Release 2.2.0
 ## What's Changed
 * Improved; optimised query removing wildcards by @adityasharma7 in https://github.com/hotwax/threshold-management/pull/199
