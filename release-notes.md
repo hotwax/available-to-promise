@@ -1,5 +1,5 @@
 Latest release notes are maintained on Github only. Refer to below link:
-https://github.com/hotwax/inventory-count/releases
+https://github.com/hotwax/threshold-management/releases
 
 # Release 2.3.0
 
