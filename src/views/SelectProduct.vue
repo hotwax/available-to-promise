@@ -120,7 +120,7 @@
             <section class="section-grid">
               <div v-for="variant in product.variants" :key="variant">
                 <ion-card>
-                  <Image :src="variant.mainImageUrl" />
+                  <ShopifyImg :src="variant.mainImageUrl" />
                   <ion-item lines="none">
                     <ion-label class="ion-text-wrap">
                       {{ variant.productName }}
@@ -163,7 +163,7 @@
 </template>
 
 <script lang="ts">
-import Image from '@/components/Image.vue';
+import { ShopifyImg } from 'dxp-components';
 import {
   alertController,
   IonBackButton,
@@ -234,7 +234,7 @@ export default defineComponent({
     IonSelectOption,
     IonTitle,
     IonToolbar,
-    Image
+    ShopifyImg
   },
   computed: {
     ...mapGetters({
