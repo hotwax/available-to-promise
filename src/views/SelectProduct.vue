@@ -163,7 +163,7 @@
 </template>
 
 <script lang="ts">
-import { ShopifyImg } from 'dxp-components';
+import { ShopifyImg } from '@hotwax/dxp-components'; 
 import {
   alertController,
   IonBackButton,
