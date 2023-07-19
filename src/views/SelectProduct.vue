@@ -123,7 +123,6 @@
                   <Image :src="variant.mainImageUrl" />
                   <ion-item lines="none">
                     <ion-label class="ion-text-wrap">
-                      <!-- {{ variant.productName }} -->
                       {{ getProductIdentificationValue(productIdentificationPref.primaryId, variant) }}
                       <p v-if="variant.color">{{ $t("Color") }}: {{ variant.color }}</p>
                       <p v-if="variant.size">{{ $t("Size") }}: {{ variant.size }}</p>
