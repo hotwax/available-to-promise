@@ -123,7 +123,8 @@
                   <Image :src="variant.mainImageUrl" />
                   <ion-item lines="none">
                     <ion-label class="ion-text-wrap">
-                      {{ variant.productName }}
+                      <!-- {{ variant.productName }} -->
+                      {{ getProductIdentificationValue(productIdentificationPref.primaryId, variant) }}
                       <p v-if="variant.color">{{ $t("Color") }}: {{ variant.color }}</p>
                       <p v-if="variant.size">{{ $t("Size") }}: {{ variant.size }}</p>
                     </ion-label>
@@ -193,12 +194,12 @@ import {
   IonInfiniteScroll,
   IonInfiniteScrollContent
 } from '@ionic/vue';
-import { defineComponent } from 'vue';
+import { defineComponent, inject } from 'vue';
 import { arrowForwardOutline, downloadOutline, filterOutline, saveOutline, pricetagOutline, closeCircle, addCircleOutline, albumsOutline, warningOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
 import { mapGetters, useStore } from 'vuex';
 import ProductFilterModal from '@/components/ProductFilterModal.vue';
-import { hasError, showToast } from '@/utils';
+import { hasError, showToast, getProductIdentificationValue } from '@/utils';
 import { translate } from '@/i18n';
 import { ProductService } from '@/services/ProductService';
 import { JobService } from '@/services/JobService';
@@ -533,6 +534,9 @@ export default defineComponent({
     const router = useRouter();
     const store = useStore();
 
+    // Injecting identifier preference from app.view
+    const productIdentificationPref: any  = inject("productIdentificationPref");
+
     return {
       Actions,
       arrowForwardOutline,
@@ -546,7 +550,9 @@ export default defineComponent({
       closeCircle,
       addCircleOutline,
       albumsOutline,
-      warningOutline
+      warningOutline,
+      getProductIdentificationValue,
+      productIdentificationPref
     };
   },
 });
