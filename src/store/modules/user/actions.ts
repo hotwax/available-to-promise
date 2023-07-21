@@ -14,6 +14,7 @@ import {
   setPermissions
 } from '@/authorization'
 import { updateInstanceUrl, updateToken, resetConfig } from '@/adapter'
+import { useProductIdentificationStore } from '@hotwax/dxp-components'
 
 
 
@@ -150,6 +151,12 @@ const actions: ActionTree<UserState, RootState> = {
       'userPrefTypeId': 'SELECTED_BRAND',
       'userPrefValue': productStore.productStoreId
     });
+
+    // Get product identification from api using dxp-component and set the state if eComStore is defined
+    if (productStore.productStoreId) {
+      await useProductIdentificationStore().getIdentificationPref(productStore.productStoreId)
+        .catch((error) => console.log(error));
+    }
   },
 
   /**
