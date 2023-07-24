@@ -110,7 +110,7 @@ const actions: ActionTree<UserState, RootState> = {
       // Get product identification from api using dxp-component and set the state if eComStore is defined
       if(preferredStore.productStoreId){
         await useProductIdentificationStore().getIdentificationPref(preferredStore.productStoreId)
-        .catch((error) => console.log(error));
+        .catch((error) => logger.error('Failed to fetch product identification preference', error));
       }
 
     } catch (err: any) {
@@ -161,7 +161,7 @@ const actions: ActionTree<UserState, RootState> = {
     // Get product identification from api using dxp-component and set the state if eComStore is defined
     if (productStore.productStoreId) {
       await useProductIdentificationStore().getIdentificationPref(productStore.productStoreId)
-        .catch((error) => console.log(error));
+        .catch((error) => logger.error('Failed to fetch product identification preference', error));
     }
   },
 
