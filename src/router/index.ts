@@ -5,7 +5,6 @@ import SelectFacilityCSVUpload from '@/views/SelectFacilityCSVUpload.vue'
 import SelectProduct from '@/views/SelectProduct.vue'
 import SelectProductCSVUpload from '@/views/SelectProductCSVUpload.vue'
 import ThresholdUpdates from '@/views/ThresholdUpdates.vue'
-import Login from '@/views/Login.vue'
 import Settings from "@/views/Settings.vue"
 import store from '@/store'
 import ScheduleThreshold from '@/views/ScheduleThreshold.vue'
@@ -15,6 +14,8 @@ import { showToast } from '@/utils'
 import { translate } from '@/i18n'
 
 import 'vue-router'
+import { Login, useAuthStore } from '@hotwax/dxp-components';
+import { loader } from '@/user-utils';
 
 // Defining types for the meta values
 declare module 'vue-router' {
@@ -23,20 +24,24 @@ declare module 'vue-router' {
   }
 }
 
-const authGuard = (to: any, from: any, next: any) => {
-  if (store.getters['user/isAuthenticated']) {
-      next()
-  } else {
-    next("/login")
+const authGuard = async (to: any, from: any, next: any) => {
+  const authStore = useAuthStore()
+  if (!authStore.isAuthenticated || !store.getters['user/isAuthenticated']) {
+    await loader.present('Authenticating')
+    // TODO use authenticate() when support is there
+    const redirectUrl = window.location.origin + '/login'
+    window.location.href = `${process.env.VUE_APP_LOGIN_URL}?redirectUrl=${redirectUrl}`
+    loader.dismiss()
   }
+  next()
 };
 
 const loginGuard = (to: any, from: any, next: any) => {
-  if (!store.getters['user/isAuthenticated']) {
-      next()
-  } else {
-    next("/")
+  const authStore = useAuthStore()
+  if (authStore.isAuthenticated && !to.query?.token && !to.query?.oms) {
+    next('/')
   }
+  next();
 };
 
 const routes: Array<RouteRecordRaw> = [
