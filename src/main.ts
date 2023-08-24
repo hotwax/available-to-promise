@@ -33,7 +33,8 @@ import store from './store'
 import permissionPlugin from '@/authorization';
 import permissionRules from '@/authorization/Rules';
 import permissionActions from '@/authorization/Actions';
-import { dxpComponents } from '@hotwax/dxp-components';
+import { dxpComponents } from '@hotwax/dxp-components'
+import { login, logout, loader } from './user-utils';
 
 
 const app = createApp(App)
@@ -51,7 +52,11 @@ const app = createApp(App)
     actions: permissionActions
   })
   .use(dxpComponents, {
-    defaultImgUrl: require("@/assets/images/defaultImage.png")
+    defaultImgUrl: require("@/assets/images/defaultImage.png"),
+    login,
+    logout,
+    loader,
+    appLoginUrl: process.env.VUE_APP_LOGIN_URL as string
   });
 
 // Filters are removed in Vue 3 and global filter introduced https://v3.vuejs.org/guide/migration/filters.html#global-filters
