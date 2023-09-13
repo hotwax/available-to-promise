@@ -13,7 +13,7 @@ import {
   resetPermissions,
   setPermissions
 } from '@/authorization'
-import { updateInstanceUrl, updateToken, resetConfig } from '@/adapter'
+import { logout, updateInstanceUrl, updateToken, resetConfig } from '@/adapter'
 import { useAuthStore } from '@hotwax/dxp-components'
 
 
@@ -95,7 +95,13 @@ const actions: ActionTree<UserState, RootState> = {
   /**
    * Logout user
    */
-  async logout ({ commit }) {
+  async logout ({ commit }, payload) {
+    // Calling the logout api to flag the user as logged out, only when user is authorised
+    // if the user is already unauthorised then not calling the logout api as it returns 401 again that results in a loop, thus there is no need to call logout api if the user is unauthorised
+    if(!payload?.isUserUnauthorised) {
+      await logout();
+    }
+
     const authStore = useAuthStore()
 
     // TODO add any other tasks if need
