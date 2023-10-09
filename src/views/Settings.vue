@@ -128,8 +128,7 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       userProfile: 'user/getUserProfile',
-      currentEComStore: 'user/getCurrentEComStore',
-      instanceUrl: 'user/getInstanceUrl'
+      currentEComStore: 'user/getCurrentEComStore'
     })
   },
   mounted() {
