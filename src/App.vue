@@ -16,6 +16,7 @@ import { mapGetters, useStore } from 'vuex';
 import { Settings } from 'luxon'
 import Menu from '@/components/Menu.vue';
 import { initialise, resetConfig } from '@/adapter'
+import { useProductIdentificationStore } from '@hotwax/dxp-components';
 
 export default defineComponent({
   name: 'App',
@@ -104,6 +105,10 @@ export default defineComponent({
       const defaultAliasInstanceUrl = this.alias[this.defaultAlias];
       this.store.dispatch("user/setUserInstanceUrl", defaultAliasInstanceUrl);
     }
+
+    // Get product identification from api using dxp-component
+    await useProductIdentificationStore().getIdentificationPref(this.eComStore?.productStoreId)
+      .catch((error) => console.error(error));
   },
   unmounted() {
     emitter.off('presentLoader', this.presentLoader);

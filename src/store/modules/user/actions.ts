@@ -14,7 +14,7 @@ import {
   setPermissions
 } from '@/authorization'
 import { logout, updateInstanceUrl, updateToken, resetConfig } from '@/adapter'
-import { useAuthStore } from '@hotwax/dxp-components'
+import { useAuthStore, useProductIdentificationStore } from '@hotwax/dxp-components'
 import emitter from '@/event-bus'
 
 
@@ -67,6 +67,11 @@ const actions: ActionTree<UserState, RootState> = {
         const store = userProfile.stores.find((store: any) => store.productStoreId === preferredStoreId);
         store && (preferredStore = store)
       }
+
+      // Get product identification from api using dxp-component
+      await useProductIdentificationStore().getIdentificationPref(preferredStoreId)
+      .catch((error) => console.error(error));
+
       // prodCatalogId will be used getting the products instead of productStoreIds as the productStoreIds is tokenized
       // For STORE, the results will have  X_STORE results as well
       preferredStore.prodCatalogId = (await UserService.getEcommerceCatalog(token, preferredStore.productStoreId))?.prodCatalogId;
@@ -159,6 +164,10 @@ const actions: ActionTree<UserState, RootState> = {
       'userPrefTypeId': 'SELECTED_BRAND',
       'userPrefValue': productStore.productStoreId
     });
+
+    // Get product identification from api using dxp-component
+    await useProductIdentificationStore().getIdentificationPref(productStore.productStoreId)
+      .catch((error) => console.error(error));
   },
 
   /**

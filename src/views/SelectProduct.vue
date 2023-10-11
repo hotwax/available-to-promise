@@ -123,7 +123,7 @@
                   <ShopifyImg :src="variant.mainImageUrl" />
                   <ion-item lines="none">
                     <ion-label class="ion-text-wrap">
-                      {{ variant.productName }}
+                      {{ getProductIdentificationValue(productIdentificationPref.primaryId, variant) ? getProductIdentificationValue(productIdentificationPref.primaryId, variant) : variant.productName}}
                       <p v-if="variant.color">{{ $t("Color") }}: {{ variant.color }}</p>
                       <p v-if="variant.size">{{ $t("Size") }}: {{ variant.size }}</p>
                     </ion-label>
@@ -193,7 +193,7 @@ import {
   IonInfiniteScroll,
   IonInfiniteScrollContent
 } from '@ionic/vue';
-import { defineComponent } from 'vue';
+import { computed, defineComponent } from 'vue';
 import { arrowForwardOutline, downloadOutline, filterOutline, saveOutline, pricetagOutline, closeCircle, addCircleOutline, albumsOutline, warningOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
 import { mapGetters, useStore } from 'vuex';
@@ -205,6 +205,7 @@ import { JobService } from '@/services/JobService';
 import { DateTime } from 'luxon';
 import { Actions, hasPermission } from '@/authorization'
 import emitter from '@/event-bus';
+import { getProductIdentificationValue, useProductIdentificationStore } from '@hotwax/dxp-components';
 
 export default defineComponent({
   name: 'SelectProduct',
@@ -532,12 +533,15 @@ export default defineComponent({
   setup() {
     const router = useRouter();
     const store = useStore();
+    const productIdentificationStore = useProductIdentificationStore();
+    let productIdentificationPref = computed(() => productIdentificationStore.getProductIdentificationPref)
 
     return {
       Actions,
       arrowForwardOutline,
       downloadOutline,
       filterOutline,
+      getProductIdentificationValue,
       hasPermission,
       router,
       saveOutline,
@@ -546,7 +550,8 @@ export default defineComponent({
       closeCircle,
       addCircleOutline,
       albumsOutline,
-      warningOutline
+      productIdentificationPref,
+      warningOutline,
     };
   },
 });
