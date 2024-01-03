@@ -10,7 +10,8 @@ const utilModule: Module<UtilState, RootState> = {
   state: {
     statusDesc: {},
     shopifyConfig: {},
-    facilitiesByProductStore: {}
+    facilitiesByProductStore: {},
+    channels: []
   },
   getters,
   actions,

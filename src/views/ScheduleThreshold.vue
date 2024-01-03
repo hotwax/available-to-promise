@@ -20,7 +20,13 @@
               <ion-icon :icon="optionsOutline" slot="start" />
               <ion-label>{{ threshold }} {{ $t('threshold') }}</ion-label>
             </ion-item>
-
+            <ion-item-divider color="light">
+              <ion-label>{{ $t('Channels') }}</ion-label>
+            </ion-item-divider>
+            <ion-item v-for="channel in channels" :key="channel.facilityGroupId">
+              <ion-label>{{ channel?.facilityGroupName }}</ion-label>
+              <ion-toggle :checked="isChannelChecked(channel.facilityGroupId)" :disabled="isChannelDisabled(channel.facilityGroupId)" slot="end" @ionChange="updateChannels($event, channel.facilityGroupId)"/>
+            </ion-item>
             <ion-item>
               <ion-label color="medium">{{ $t("Name") }}</ion-label>
               <ion-input :placeholder="$t('rule name')" v-model="jobName"/>
@@ -115,6 +121,7 @@ import {
   IonIcon,
   IonInput,
   IonItem,
+  IonItemDivider,
   IonLabel,
   IonList,
   IonListHeader,
@@ -123,6 +130,7 @@ import {
   IonReorder,
   IonReorderGroup,
   IonTitle,
+  IonToggle,
   IonToolbar
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
@@ -153,6 +161,7 @@ export default defineComponent({
     IonIcon,
     IonInput,
     IonItem,
+    IonItemDivider,
     IonLabel,
     IonList,
     IonListHeader,
@@ -161,6 +170,7 @@ export default defineComponent({
     IonReorder,
     IonReorderGroup,
     IonTitle,
+    IonToggle,
     IonToolbar
   },
   data() {
@@ -175,13 +185,15 @@ export default defineComponent({
       failedJobs: [] as any,
       successJobs: [] as any,
       job: {} as any,
-      isOpen: false
+      isOpen: false,
+      selectedChannels: [] as any
     }
   },
   computed: {
     ...mapGetters({
       currentEComStore: 'user/getCurrentEComStore',
       shopifyConfig: 'util/getShopifyConfig',
+      channels: 'util/getChannels',
       facilitiesByProductStore: 'util/getFacilityByProductStore',
       query: 'product/getQuery',
       temporalExpr: 'job/getTemporalExpr',
@@ -399,7 +411,9 @@ export default defineComponent({
         const resp = await this.store.dispatch('util/fetchFacilitiesByProductStore', {
           inputFields: {
             productStoreId,
-            facilityTypeId: 'CONFIGURATION'
+            facilityTypeId: 'CONFIGURATION',
+            facilityGroupId: this.selectedChannels,
+            facilityGroupId_op: 'in'
           },
           entityName: 'ProductStoreFacilityDetail',
           fieldList: ['facilityId', 'productStoreId'],
@@ -559,6 +573,23 @@ export default defineComponent({
       }
 
       emitter.emit('dismissLoader');
+    },
+    updateChannels(event: CustomEvent, facilityGroupId: string) {
+      if (event.detail.checked && this.selectedChannels?.some((channel: any) => channel === facilityGroupId)) {
+        return;
+      }
+
+      if (this.selectedChannels?.some((channel:any) => channel === facilityGroupId)) {
+        this.selectedChannels.splice(this.selectedChannels?.indexOf(facilityGroupId), 1);
+      } else {
+        this.selectedChannels.push(facilityGroupId);
+      }
+    },
+    isChannelChecked(facilityGroupId: string) {
+      return this.selectedChannels?.some((channel: any) => channel === facilityGroupId)
+    },
+    isChannelDisabled(facilityGroupId: string) {
+      return this.selectedChannels?.length == 1 && this.selectedChannels?.some((channel: any) => channel === facilityGroupId)
     }
   },
   async ionViewWillEnter() {
@@ -597,6 +628,10 @@ export default defineComponent({
     // maintaining the initial order of jobs to take the diff from the updated seq after reordering
     this.initialJobsOrder = JSON.parse(JSON.stringify(this.jobsForReorder))
     this.updatedJobsOrder = [ newJob ]
+    
+    //fetch channels and preselect all
+    await this.store.dispatch('util/fetchChannels')
+    this.selectedChannels = this.channels.map((channel: any) => channel.facilityGroupId)
   },
   ionViewDidLeave() {
     // TODO: remove this initialization from the hook and update the code accordingly

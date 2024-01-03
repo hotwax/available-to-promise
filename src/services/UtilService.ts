@@ -25,8 +25,18 @@ const fetchFacilitiesByProductStore = async (payload: any): Promise <any>  => {
   });
 }
 
+
+const fetchChannels = async (payload: any): Promise<any> => {
+  return api({
+    url: "performFind",
+    method: "POST",
+    data: payload
+  })
+}
+
 export const UtilService = {
   fetchFacilitiesByProductStore,
   getServiceStatusDesc,
-  getShopifyConfig
+  getShopifyConfig,
+  fetchChannels
 }

@@ -81,6 +81,32 @@ const actions: ActionTree<UtilState, RootState> = {
     }
     return {};
   },
+  
+  async fetchChannels({ commit }) {
+    let channels = []
+    const params = {
+      entityName: "FacilityGroup",
+      inputFields: {
+        facilityGroupTypeId: 'CHANNEL_FAC_GROUP'
+      },
+      noConditionFind: 'Y',
+      orderBy: "facilityGroupName ASC",
+      fieldList: ["facilityGroupId", "facilityGroupTypeId", "facilityGroupName", "description"],
+      viewSize: 50
+    }
+
+    try {
+      const resp = await UtilService.fetchChannels(params)
+      if (!hasError(resp)) {
+        channels = resp.data.docs
+      } else {
+        throw resp.data
+      }
+    } catch (error) {
+      logger.error(error)
+    }
+    commit(types.UTIL_CHANNELS_UPDATED, channels)
+  },
 
   async clearFacilitiesByProductStore({ commit }) {
     commit(types.UTIL_PRODUCT_STORE_FACILITY_UPDATED, {})
