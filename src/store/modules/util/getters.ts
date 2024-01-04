@@ -11,6 +11,9 @@ const getters: GetterTree <UtilState, RootState> = {
   },
   getFacilityByProductStore(state) {
     return state.facilitiesByProductStore
+  },
+  getChannels(state) {
+    return state.channels;
   }
 }
 export default getters;

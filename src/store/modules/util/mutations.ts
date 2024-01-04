@@ -13,6 +13,9 @@ const mutations: MutationTree <UtilState> = {
   },
   [types.UTIL_PRODUCT_STORE_FACILITY_UPDATED] (state, payload) {
     state.facilitiesByProductStore = payload
+  },
+  [types.UTIL_CHANNELS_UPDATED](state, payload) {
+    state.channels = payload
   }
 }
 export default mutations;
