@@ -24,8 +24,7 @@
               <ion-label>{{ $t('Channels') }}</ion-label>
             </ion-item-divider>
             <ion-item v-for="channel in channels" :key="channel.facilityGroupId">
-              <ion-label>{{ channel?.facilityGroupName }}</ion-label>
-              <ion-toggle :checked="isChannelChecked(channel.facilityGroupId)" :disabled="isChannelDisabled(channel.facilityGroupId)" @ionChange="updateChannels($event, channel.facilityGroupId)">{{ channel?.facilityGroupName }}</ion-toggle>
+              <ion-toggle :checked="isChannelChecked(channel.facilityGroupId)" :disabled="isChannelDisabled(channel.facilityGroupId)" @ionChange="updateChannels(channel.facilityGroupId)">{{ channel?.facilityGroupName }}</ion-toggle>
             </ion-item>
             <ion-item>
               <ion-input :label="$t('Name')" :placeholder="$t('rule name')" v-model="jobName"/>
@@ -573,11 +572,7 @@ export default defineComponent({
 
       emitter.emit('dismissLoader');
     },
-    updateChannels(event: CustomEvent, facilityGroupId: string) {
-      if (event.detail.checked && this.selectedChannels?.some((channel: any) => channel === facilityGroupId)) {
-        return;
-      }
-
+    updateChannels(facilityGroupId: string) {
       if (this.selectedChannels?.some((channel:any) => channel === facilityGroupId)) {
         this.selectedChannels.splice(this.selectedChannels?.indexOf(facilityGroupId), 1);
       } else {

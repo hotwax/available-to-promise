@@ -135,12 +135,7 @@ export default defineComponent({
   },
   methods: {
     setEComStore(event: any) {
-      // If the value is same, no need to update
-      // Handled case for programmatical changes
-      // https://github.com/ionic-team/ionic-framework/discussions/25532
-      // https://github.com/ionic-team/ionic-framework/issues/20106
-      // https://github.com/ionic-team/ionic-framework/pull/25858
-      if(this.userProfile?.stores && this.currentEComStore?.productStoreId !== event.detail.value) {
+      if(this.userProfile?.stores) {
         this.store.dispatch('user/setEcomStore', {
           'productStoreId': event.detail.value
         })

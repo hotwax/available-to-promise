@@ -485,11 +485,6 @@ export default defineComponent({
       this.isFilterChanged = true;
     },
     async applyOperator(type: string, id: string, value: string) {
-      // TODO Find a better way
-      // This is done as when applying the exisiting rule as the value of the select box changes
-      // query is sent multiple times
-      if (this.appliedFilters[type][id].operator === value) return;
-
       await this.store.dispatch('product/updateAppliedFilterOperator', {
         type,
         id,
