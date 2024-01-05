@@ -35,8 +35,7 @@
 
       <ion-item lines="inset">
         <ion-icon slot="start" :icon="timerOutline" />
-        <ion-label>{{ $t("Schedule") }}</ion-label>
-        <ion-select :interface-options="customPopoverOptions" interface="popover" :value="jobStatus" :placeholder="$t('Disabled')" @ionChange="($event) => jobStatus = $event['detail'].value">
+        <ion-select :label="$t('Schedule')" :interface-options="customPopoverOptions" interface="popover" :value="jobStatus" :placeholder="$t('Disabled')" @ionChange="($event) => jobStatus = $event['detail'].value">
           <ion-select-option v-for="freq in generateFrequencyOptions" :key="freq.value" :value="freq.value">{{ $t(freq.label) }}</ion-select-option>
         </ion-select>
       </ion-item>
@@ -54,8 +53,7 @@
       </ion-item> -->
       <ion-item v-if="job?.systemJobEnumId === 'JOB_EXP_PROD_THRSHLD'" lines="inset">
         <ion-icon slot="start" :icon="cogOutline" />
-        <ion-label>{{ $t("Name") }}</ion-label>
-        <ion-input class="ion-text-end" name="ruleName" v-model="ruleName" id="ruleName" />
+        <ion-input :label="$t('Name')" class="ion-text-end" name="ruleName" v-model="ruleName" id="ruleName" />
       </ion-item>
 
       <ion-item v-if="job?.runtimeData?.searchPreferenceId" button detail="true" @click="updateThresholdRule" lines="full">

@@ -25,8 +25,7 @@
         <aside class="filters desktop-only">
           <ion-list>
             <ion-item lines="inset">
-              <ion-label>{{ $t("Threshold") }}</ion-label>
-              <ion-input type="number" :placeholder="$t('global threshold')" v-model="threshold"/>
+              <ion-input :label="$t('Threshold')" type="number" :placeholder="$t('global threshold')" v-model="threshold"/>
             </ion-item>
             <ion-list-header>
               <div>
@@ -43,8 +42,7 @@
                 </ion-button>
               </ion-item>
               <ion-item lines="none">
-                <ion-label>{{ $t("Operator") }}</ion-label>
-                <ion-select interface="popover" @ionChange="applyOperator('included', 'tags', $event.detail.value)" :value="appliedFilters['included']['tags'].operator">
+                <ion-select :label="$t('Operator')" interface="popover" @ionChange="applyOperator('included', 'tags', $event.detail.value)" :value="appliedFilters['included']['tags'].operator">
                   <ion-select-option value="AND">AND</ion-select-option>
                   <ion-select-option value="OR">OR</ion-select-option>
                 </ion-select>
@@ -74,8 +72,7 @@
                 </ion-button>
               </ion-item>
               <ion-item lines="none">
-                <ion-label>{{ $t("Operator") }}</ion-label>
-                <ion-select @ionChange="applyOperator('excluded', 'tags', $event.detail.value)" interface="popover" :value="appliedFilters['excluded']['tags'].operator">
+                <ion-select :label="$t('Operator')" @ionChange="applyOperator('excluded', 'tags', $event.detail.value)" interface="popover" :value="appliedFilters['excluded']['tags'].operator">
                   <ion-select-option value="AND">AND</ion-select-option>
                   <ion-select-option value="OR">OR</ion-select-option>
                 </ion-select>
@@ -109,7 +106,7 @@
                 <ion-item lines="none">
                   <ion-label>
                     {{ product.productName }}
-                    <p>{{ product.variants.length}} {{ $t("variants") }}</p>
+                    <p>{{ product.variants.length }} {{ $t("variants") }}</p>
                   </ion-label>
                 </ion-item>
               </div>

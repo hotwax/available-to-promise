@@ -18,8 +18,7 @@
 
     <ion-list>
       <ion-item v-for="option in facetOptions" :key="option.id"  @click="updateSelectedValues(option.id)">
-        <ion-label>{{ option.label }}</ion-label>
-        <ion-checkbox v-if="!isAlreadyApplied(option.id)" :checked="selectedValues.includes(option.id)" />
+        <ion-checkbox v-if="!isAlreadyApplied(option.id)" :checked="selectedValues.includes(option.id)">{{ option.label }}</ion-checkbox>
         <ion-note v-else slot="end" color="danger">{{ type === 'included' ? $t("excluded") : $t("included") }}</ion-note>
       </ion-item>
     </ion-list>
@@ -49,7 +48,6 @@ import {
   IonInfiniteScroll,
   IonInfiniteScrollContent,
   IonItem,
-  IonLabel,
   IonList,
   IonNote,
   IonSearchbar,
@@ -75,7 +73,6 @@ export default defineComponent({
     IonInfiniteScroll,
     IonInfiniteScrollContent,
     IonItem,
-    IonLabel,
     IonList,
     IonNote,
     IonSearchbar,
