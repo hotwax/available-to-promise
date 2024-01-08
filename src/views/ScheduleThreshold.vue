@@ -43,7 +43,7 @@
                 </ion-content>
               </ion-modal>
             </ion-item>
-            <ion-item-divider v-if="channels.length > 0" color="light">
+            <ion-item-divider v-if="channels.length" color="light">
               <ion-label>{{ $t('Channels') }}</ion-label>
             </ion-item-divider>
             <ion-item v-for="channel in channels" :key="channel.facilityGroupId">
