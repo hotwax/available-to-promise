@@ -7,15 +7,15 @@
     </ion-header>
     <ion-content>
       <ion-list>
-        <ion-menu-toggle auto-hide="false" v-for="(p,i) in appPages" :key="i">
+        <ion-menu-toggle auto-hide="false" v-for="(p,i) in getValidMenuItems(appPages)" :key="i">
           <ion-item 
-          button
-          router-direction="root"
-          :router-link="p.url"
-          class="hydrated"
-          :class="{ selected: selectedIndex === i}">
-          <ion-icon slot="start" :ios="p.iosIcon" :md="p.mdIcon"></ion-icon>
-          <ion-label>{{ p.title }}</ion-label>
+            button
+            router-direction="root"
+            :router-link="p.url"
+            class="hydrated"
+            :class="{ selected: selectedIndex === i}">
+            <ion-icon slot="start" :ios="p.iosIcon" :md="p.mdIcon"></ion-icon>
+            <ion-label>{{ p.title }}</ion-label>
           </ion-item>
         </ion-menu-toggle>
       </ion-list>
@@ -63,6 +63,7 @@
   import { defineComponent, computed } from "vue";
   import { mapGetters } from "vuex";
   import { useStore } from "@/store";
+  import { hasPermission } from "@/authorization";
   import { useRouter } from "vue-router";
   import { optionsOutline, settingsOutline, pulseOutline } from 'ionicons/icons';
   import emitter from "@/event-bus";
@@ -100,6 +101,9 @@
           emitter.emit("productStoreChanged")
         }
       },
+      getValidMenuItems(appPages: any) {
+        return appPages.filter((appPage: any) => (!appPage.meta || !appPage.meta.permissionId) || hasPermission(appPage.meta.permissionId));
+      }
     },
     setup() {
       const store = useStore();
@@ -108,16 +112,21 @@
         {
           title: "Create Rule",
           url: "/select-product",
-          childRoutes: ['/select-product'],
           iosIcon: optionsOutline,
-          mdIcon: optionsOutline
+          mdIcon: optionsOutline,
+          meta: {
+            permissionId: "APP_SELECT_PRODUCT_VIEW"
+
+          }
         },
         {
           title: "Rule Pipeline",
           url: "/threshold-updates",
-          childRoutes: ['/threshold-updates'],
           iosIcon: pulseOutline,
-          mdicon: pulseOutline
+          mdIcon: pulseOutline,
+          meta: {
+            permissionId: "APP_THRESHOLD_UPDATES_VIEW"
+          }
         },
         {
           title: "Settings",
@@ -126,13 +135,15 @@
           mdIcon: settingsOutline
         }
       ];
+
       const selectedIndex = computed(() => {
-      const path = router.currentRoute.value.path
-      return appPages.findIndex((screen) => screen.url === path || screen.childRoutes?.includes(path) || screen.childRoutes?.some((route: any) => path.includes(route)))
-    })
+        const path = router.currentRoute.value.path;
+        return appPages.findIndex((screen) => screen.url === path);
+      });
 
       return {
         appPages,
+        hasPermission,
         router,
         pulseOutline,
         optionsOutline,
