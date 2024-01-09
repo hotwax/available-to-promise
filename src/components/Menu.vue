@@ -138,7 +138,7 @@
 
       const selectedIndex = computed(() => {
         const path = router.currentRoute.value.path;
-        return appPages.findIndex((screen) => screen.url === path);
+          return appPages.findIndex((screen) => screen.url === path);
       });
 
       return {
