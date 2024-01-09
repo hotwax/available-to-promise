@@ -7,15 +7,15 @@
     </ion-header>
     <ion-content>
       <ion-list>
-        <ion-item v-if="hasPermission('APP_SELECT_PRODUCT_VIEW')" button @click="closeMenu(); router.push('/select-product')">
+        <ion-item v-if="hasPermission('APP_SELECT_PRODUCT_VIEW')" button @click="closeMenu(); router.push('/select-product')" class="hydrated" :class="{ selected: isSelected('/select-product')}">
           <ion-icon :icon="optionsOutline" slot="start" />
           <ion-label>{{ $t("Create Rule") }}</ion-label>
         </ion-item>
-        <ion-item v-if="hasPermission('APP_THRESHOLD_UPDATES_VIEW')" button @click="closeMenu(); router.push('/threshold-updates')">
+        <ion-item v-if="hasPermission('APP_THRESHOLD_UPDATES_VIEW')" button @click="closeMenu(); router.push('/threshold-updates')" class="hydrated" :class="{ selected: isSelected('/threshold-updates')}">
           <ion-icon :icon="pulseOutline" slot="start" />
           <ion-label>{{ $t("Rule Pipeline") }}</ion-label>
         </ion-item>
-        <ion-item button @click="closeMenu(); router.push('/settings')">
+        <ion-item button @click="closeMenu(); router.push('/settings')" class="hydrated" :class="{ selected: isSelected('/settings')}">
           <ion-icon :icon="settingsOutline" slot="start" />
           <ion-label>{{ $t("Settings") }}</ion-label>
         </ion-item>
@@ -103,7 +103,10 @@
           await this.store.dispatch('user/setEcomStore', { 'productStoreId': event.detail.value })
           emitter.emit("productStoreChanged")
         }
-      }
+      },
+      isSelected(select:any){
+        return this.$route.path===select
+      },
     },
     setup() {
       const store = useStore();
