@@ -7,18 +7,17 @@
     </ion-header>
     <ion-content>
       <ion-list>
-        <ion-item v-if="hasPermission('APP_SELECT_PRODUCT_VIEW')" button @click="closeMenu(); router.push('/select-product')" class="hydrated" :class="{ selected: isSelected('/select-product')}">
-          <ion-icon :icon="optionsOutline" slot="start" />
-          <ion-label>{{ $t("Create Rule") }}</ion-label>
-        </ion-item>
-        <ion-item v-if="hasPermission('APP_THRESHOLD_UPDATES_VIEW')" button @click="closeMenu(); router.push('/threshold-updates')" class="hydrated" :class="{ selected: isSelected('/threshold-updates')}">
-          <ion-icon :icon="pulseOutline" slot="start" />
-          <ion-label>{{ $t("Rule Pipeline") }}</ion-label>
-        </ion-item>
-        <ion-item button @click="closeMenu(); router.push('/settings')" class="hydrated" :class="{ selected: isSelected('/settings')}">
-          <ion-icon :icon="settingsOutline" slot="start" />
-          <ion-label>{{ $t("Settings") }}</ion-label>
-        </ion-item>
+        <ion-menu-toggle auto-hide="false" v-for="(p,i) in appPages" :key="i">
+          <ion-item 
+          button
+          router-direction="root"
+          :router-link="p.url"
+          class="hydrated"
+          :class="{ selected: selectedIndex === i}">
+          <ion-icon slot="start" :ios="p.iosIcon" :md="p.mdIcon"></ion-icon>
+          <ion-label>{{ p.title }}</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
       </ion-list>
     </ion-content>
     <ion-footer>
@@ -54,17 +53,16 @@
     IonLabel,
     IonList,
     IonMenu,
+    IonMenuToggle,
     IonNote,
     IonSelect,
     IonSelectOption,
     IonTitle,
     IonToolbar,
-    menuController
   } from "@ionic/vue";
-  import { defineComponent } from "vue";
+  import { defineComponent, computed } from "vue";
   import { mapGetters } from "vuex";
   import { useStore } from "@/store";
-  import { hasPermission } from "@/authorization";
   import { useRouter } from "vue-router";
   import { optionsOutline, settingsOutline, pulseOutline } from 'ionicons/icons';
   import emitter from "@/event-bus";
@@ -80,6 +78,7 @@
       IonLabel,
       IonList,
       IonMenu,
+      IonMenuToggle,
       IonNote,
       IonSelect,
       IonSelectOption,
@@ -95,29 +94,51 @@
       })
     },
     methods: {
-      async closeMenu() {
-       await menuController.close();
-      },
       async setEComStore(event: CustomEvent) {
         if(this.eComStore.productStoreId !== event.detail.value) {
           await this.store.dispatch('user/setEcomStore', { 'productStoreId': event.detail.value })
           emitter.emit("productStoreChanged")
         }
       },
-      isSelected(select:any){
-        return this.$route.path===select
-      },
     },
     setup() {
       const store = useStore();
       const router = useRouter();
+      const appPages = [
+        {
+          title: "Create Rule",
+          url: "/select-product",
+          childRoutes: ['/select-product'],
+          iosIcon: optionsOutline,
+          mdIcon: optionsOutline
+        },
+        {
+          title: "Rule Pipeline",
+          url: "/threshold-updates",
+          childRoutes: ['/threshold-updates'],
+          iosIcon: pulseOutline,
+          mdicon: pulseOutline
+        },
+        {
+          title: "Settings",
+          url: "/Settings",
+          iosIcon: settingsOutline,
+          mdIcon: settingsOutline
+        }
+      ];
+      const selectedIndex = computed(() => {
+      const path = router.currentRoute.value.path
+      return appPages.findIndex((screen) => screen.url === path || screen.childRoutes?.includes(path) || screen.childRoutes?.some((route: any) => path.includes(route)))
+    })
+
       return {
+        appPages,
         router,
         pulseOutline,
-        hasPermission,
         optionsOutline,
         settingsOutline,
-        store
+        store,
+        selectedIndex
       };
     },
   });
