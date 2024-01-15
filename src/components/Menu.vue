@@ -7,15 +7,15 @@
     </ion-header>
     <ion-content>
       <ion-list>
-        <ion-menu-toggle auto-hide="false" v-for="(p,i) in getValidMenuItems(appPages)" :key="i">
+        <ion-menu-toggle auto-hide="false" v-for="(page, index) in getValidMenuItems(appPages)" :key="index">
           <ion-item 
             button
             router-direction="root"
-            :router-link="p.url"
+            :router-link="page.url"
             class="hydrated"
-            :class="{ selected: selectedIndex === i}">
-            <ion-icon slot="start" :ios="p.iosIcon" :md="p.mdIcon"></ion-icon>
-            <ion-label>{{ p.title }}</ion-label>
+            :class="{ selected: selectedIndex === index}">
+            <ion-icon slot="start" :ios="page.iosIcon" :md="page.mdIcon"></ion-icon>
+            <ion-label>{{ page.title }}</ion-label>
           </ion-item>
         </ion-menu-toggle>
       </ion-list>
@@ -138,7 +138,7 @@
 
       const selectedIndex = computed(() => {
         const path = router.currentRoute.value.path;
-          return appPages.findIndex((screen) => screen.url === path);
+        return appPages.findIndex((screen) => screen.url === path);
       });
 
       return {
@@ -148,8 +148,8 @@
         pulseOutline,
         optionsOutline,
         settingsOutline,
+        selectedIndex,
         store,
-        selectedIndex
       };
     },
   });
