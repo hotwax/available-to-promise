@@ -47,9 +47,9 @@ const actions: ActionTree<UserState, RootState> = {
       if (permissionId) {
         // As the token is not yet set in the state passing token headers explicitly
         // TODO Abstract this out, how token is handled should be part of the method not the callee
-        const hasPermission = appPermissions.some((appPermissionId: any) => appPermissionId === permissionId );
+        const hasPermission = appPermissions.some((appPermission: any) => appPermission.action === permissionId);
         // If there are any errors or permission check fails do not allow user to login
-        if (hasPermission) {
+        if (!hasPermission) {
           const permissionError = 'You do not have permission to access the app.';
           showToast(translate(permissionError));
           logger.error("error", permissionError);
@@ -57,8 +57,10 @@ const actions: ActionTree<UserState, RootState> = {
         }
       }
 
+      const isAdminUser = appPermissions.some((appPermission: any) => appPermission?.action === "MERCHANDISING_ADMIN");
+
       const userProfile = await UserService.getUserProfile(token);
-      userProfile.stores = await UserService.getEComStores(token, userProfile.partyId);
+      userProfile.stores = await UserService.getEComStores(token, userProfile.partyId, isAdminUser);
 
       let preferredStore = userProfile.stores.length ?  userProfile.stores[0] : {};
 
