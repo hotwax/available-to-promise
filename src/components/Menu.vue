@@ -130,7 +130,7 @@
         },
         {
           title: "Settings",
-          url: "/Settings",
+          url: "/settings",
           iosIcon: settingsOutline,
           mdIcon: settingsOutline
         }
