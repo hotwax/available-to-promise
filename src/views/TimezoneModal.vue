@@ -36,7 +36,7 @@
         </ion-radio-group>
       </ion-list>
     </div>
-    
+
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
       <ion-fab-button :disabled="!timeZoneId" @click="saveAlert">
         <ion-icon :icon="save" />
@@ -98,7 +98,7 @@ export default defineComponent({
       filteredTimeZones: [],
       timeZones: [],
       timeZoneId: '',
-      isLoading: true
+      isLoading: false
     }
   },
   methods: {
@@ -147,7 +147,7 @@ export default defineComponent({
           });
           this.findTimeZone();
         }
-        //this.isLoading = false;
+        this.isLoading = false;
       })
     },
     selectSearchBarText(event: any) {
