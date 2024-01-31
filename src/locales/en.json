@@ -38,6 +38,7 @@
   "Failed": "Failed",
   "Failed to update some jobs": "Failed to update some jobs",
   "Failed to schedule service, hence other jobs are not updated": "Failed to schedule service, hence other jobs are not updated",
+  "Fetching time zones": "Fetching time zones",
   "Go to Launchpad": "Go to Launchpad",
   "Go to OMS": "Go to OMS",
   "History": "History",
