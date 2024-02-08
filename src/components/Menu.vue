@@ -7,18 +7,17 @@
     </ion-header>
     <ion-content>
       <ion-list>
-        <ion-item v-if="hasPermission('APP_SELECT_PRODUCT_VIEW')" button @click="closeMenu(); router.push('/select-product')">
-          <ion-icon :icon="optionsOutline" slot="start" />
-          <ion-label>{{ $t("Create Rule") }}</ion-label>
-        </ion-item>
-        <ion-item v-if="hasPermission('APP_THRESHOLD_UPDATES_VIEW')" button @click="closeMenu(); router.push('/threshold-updates')">
-          <ion-icon :icon="pulseOutline" slot="start" />
-          <ion-label>{{ $t("Rule Pipeline") }}</ion-label>
-        </ion-item>
-        <ion-item button @click="closeMenu(); router.push('/settings')">
-          <ion-icon :icon="settingsOutline" slot="start" />
-          <ion-label>{{ $t("Settings") }}</ion-label>
-        </ion-item>
+        <ion-menu-toggle auto-hide="false" v-for="(page, index) in getValidMenuItems(appPages)" :key="index">
+          <ion-item 
+            button
+            router-direction="root"
+            :router-link="page.url"
+            class="hydrated"
+            :class="{ selected: selectedIndex === index}">
+            <ion-icon slot="start" :ios="page.iosIcon" :md="page.mdIcon"></ion-icon>
+            <ion-label>{{ page.title }}</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
       </ion-list>
     </ion-content>
     <ion-footer>
@@ -54,14 +53,14 @@
     IonLabel,
     IonList,
     IonMenu,
+    IonMenuToggle,
     IonNote,
     IonSelect,
     IonSelectOption,
     IonTitle,
     IonToolbar,
-    menuController
   } from "@ionic/vue";
-  import { defineComponent } from "vue";
+  import { defineComponent, computed } from "vue";
   import { mapGetters } from "vuex";
   import { useStore } from "@/store";
   import { hasPermission } from "@/authorization";
@@ -80,6 +79,7 @@
       IonLabel,
       IonList,
       IonMenu,
+      IonMenuToggle,
       IonNote,
       IonSelect,
       IonSelectOption,
@@ -95,26 +95,61 @@
       })
     },
     methods: {
-      async closeMenu() {
-       await menuController.close();
-      },
       async setEComStore(event: CustomEvent) {
         if(this.eComStore.productStoreId !== event.detail.value) {
           await this.store.dispatch('user/setEcomStore', { 'productStoreId': event.detail.value })
           emitter.emit("productStoreChanged")
         }
+      },
+      getValidMenuItems(appPages: any) {
+        return appPages.filter((appPage: any) => (!appPage.meta || !appPage.meta.permissionId) || hasPermission(appPage.meta.permissionId));
       }
     },
     setup() {
       const store = useStore();
       const router = useRouter();
+      const appPages = [
+        {
+          title: "Create Rule",
+          url: "/select-product",
+          iosIcon: optionsOutline,
+          mdIcon: optionsOutline,
+          meta: {
+            permissionId: "APP_SELECT_PRODUCT_VIEW"
+
+          }
+        },
+        {
+          title: "Rule Pipeline",
+          url: "/threshold-updates",
+          iosIcon: pulseOutline,
+          mdIcon: pulseOutline,
+          meta: {
+            permissionId: "APP_THRESHOLD_UPDATES_VIEW"
+          }
+        },
+        {
+          title: "Settings",
+          url: "/settings",
+          iosIcon: settingsOutline,
+          mdIcon: settingsOutline
+        }
+      ];
+
+      const selectedIndex = computed(() => {
+        const path = router.currentRoute.value.path;
+        return appPages.findIndex((screen) => screen.url === path);
+      });
+
       return {
+        appPages,
+        hasPermission,
         router,
         pulseOutline,
-        hasPermission,
         optionsOutline,
         settingsOutline,
-        store
+        selectedIndex,
+        store,
       };
     },
   });
