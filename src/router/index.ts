@@ -8,6 +8,11 @@ import ThresholdUpdates from '@/views/ThresholdUpdates.vue'
 import Settings from "@/views/Settings.vue"
 import store from '@/store'
 import ScheduleThreshold from '@/views/ScheduleThreshold.vue'
+import Threshold from '@/views/Threshold.vue'
+import SafetyStock from '@/views/SafetyStock.vue'
+import StorePickup from '@/views/StorePickup.vue'
+import Shipping from '@/views/Shipping.vue'
+import InventoryChannels from '@/views/InventoryChannels.vue'
 
 import { hasPermission } from '@/authorization';
 import { showToast } from '@/utils'
@@ -58,6 +63,51 @@ const routes: Array<RouteRecordRaw> = [
       permissionId: "APP_SELECT_PRODUCT_VIEW"
     }
   },    
+  {
+    path: '/threshold',
+    name: 'Threshold',
+    component: Threshold,
+    beforeEnter: authGuard,
+    meta: {
+      permissionId: "APP_SELECT_PRODUCT_VIEW"
+    }
+  },    
+  {
+    path: '/safety-stock',
+    name: 'Safety stock',
+    component: SafetyStock,
+    beforeEnter: authGuard,
+    meta: {
+      permissionId: "APP_SELECT_PRODUCT_VIEW"
+    }
+  },  
+  {
+    path: '/store-pickup',
+    name: 'Store pickup',
+    component: StorePickup,
+    beforeEnter: authGuard,
+    meta: {
+      permissionId: "APP_SELECT_PRODUCT_VIEW"
+    }
+  },  
+  {
+    path: '/shipping',
+    name: 'Shipping',
+    component: Shipping,
+    beforeEnter: authGuard,
+    meta: {
+      permissionId: "APP_SELECT_PRODUCT_VIEW"
+    }
+  },  
+  {
+    path: '/inventory-channels',
+    name: 'Inventory channels',
+    component: InventoryChannels,
+    beforeEnter: authGuard,
+    meta: {
+      permissionId: "APP_SELECT_PRODUCT_VIEW"
+    }
+  },  
   {
     path: '/select-product-csv-upload',
     name: 'SelectProductCSVUpload',

@@ -1,8 +1,8 @@
 <template>
-  <ion-menu side="start" menu-id="first" content-id="main" type="overlay" :disabled="!isUserAuthenticated">
+  <ion-menu content-id="main" type="overlay" :disabled="!isUserAuthenticated">
     <ion-header>
       <ion-toolbar>
-        <ion-title>{{ $t("Menu") }}</ion-title>
+        <ion-title>{{ $t("Available to Promise") }}</ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content>
@@ -65,7 +65,7 @@
   import { useStore } from "@/store";
   import { hasPermission } from "@/authorization";
   import { useRouter } from "vue-router";
-  import { optionsOutline, settingsOutline, pulseOutline } from 'ionicons/icons';
+  import { cloudUploadOutline, globeOutline, optionsOutline, settingsOutline, sendOutline, storefrontOutline, pulseOutline } from 'ionicons/icons';
   import emitter from "@/event-bus";
   
   export default defineComponent({
@@ -129,6 +129,51 @@
           }
         },
         {
+          title: "Threshold",
+          url: "/threshold",
+          iosIcon: globeOutline,
+          mdIcon: globeOutline,
+          meta: {
+            permissionId: "APP_THRESHOLD_UPDATES_VIEW"
+          }
+        },
+        {
+          title: "Safety stock",
+          url: "/safety-stock",
+          iosIcon: pulseOutline,
+          mdIcon: pulseOutline,
+          meta: {
+            permissionId: "APP_THRESHOLD_UPDATES_VIEW"
+          }
+        },
+        {
+          title: "Store pickup",
+          url: "/store pickup",
+          iosIcon: storefrontOutline,
+          mdIcon: storefrontOutline,
+          meta: {
+            permissionId: "APP_THRESHOLD_UPDATES_VIEW"
+          }
+        },
+        {
+          title: "Shipping",
+          url: "/shipping",
+          iosIcon: sendOutline,
+          mdIcon: sendOutline,
+          meta: {
+            permissionId: "APP_THRESHOLD_UPDATES_VIEW"
+          }
+        },
+        {
+          title: "Inventory channels",
+          url: "/inventory-channels",
+          iosIcon: cloudUploadOutline,
+          mdIcon: cloudUploadOutline,
+          meta: {
+            permissionId: "APP_THRESHOLD_UPDATES_VIEW"
+          }
+        },
+        {
           title: "Settings",
           url: "/settings",
           iosIcon: settingsOutline,
@@ -143,12 +188,16 @@
 
       return {
         appPages,
+        cloudUploadOutline,
         hasPermission,
         router,
+        globeOutline,
         pulseOutline,
         optionsOutline,
         settingsOutline,
         selectedIndex,
+        sendOutline,
+        storefrontOutline,
         store,
       };
     },
