@@ -87,7 +87,7 @@
         </ion-item>
 
         <ion-item lines="none">
-          <ion-button fill="clear">{{ "Run now" }}</ion-button>
+          <ion-button fill="clear">{{ translate("Run now") }}</ion-button>
           <ion-button color="medium" fill="clear" slot="end" @click="openRuleActionsPopover($event)">
             <ion-icon :icon="ellipsisVerticalOutline" slot="icon-only"/>
           </ion-button>
@@ -109,6 +109,7 @@ import {
   IonItemDivider,
   IonLabel,
   IonList,
+  IonToggle,
   alertController,
   popoverController
 } from '@ionic/vue';
@@ -131,7 +132,8 @@ export default defineComponent({
     IonItem,
     IonItemDivider,
     IonLabel,
-    IonList
+    IonList,
+    IonToggle
   },
   data() {
     return {
@@ -160,7 +162,7 @@ export default defineComponent({
         header: translate("Edit threshold"),
         inputs: [{
           name: "threshold",
-          placeholder: translate("threshold"),
+          placeholder: translate("Threshold"),
           type: "number",
           min: 0
         }],
@@ -180,7 +182,7 @@ export default defineComponent({
         header: translate("Edit safety stock"),
         inputs: [{
           name: "safety-stock",
-          placeholder: translate("safety stock"),
+          placeholder: translate("Safety stock"),
           type: "number",
           min: 0
         }],

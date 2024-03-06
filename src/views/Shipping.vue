@@ -2,16 +2,19 @@
   <ion-page>
     <ion-header :translucent="true">
       <ion-toolbar>
-        <ion-title>{{ $t("Shipping") }}</ion-title>
+        <ion-title>{{ translate("Shipping") }}</ion-title>
       </ion-toolbar>
 
       <ion-toolbar>
         <ion-segment>
           <ion-segment-button value="productAndFacility">
-            <ion-label>{{ $t("Product and facility") }}</ion-label>
+            <ion-label>{{ translate("Product and facility") }}</ion-label>
           </ion-segment-button>
           <ion-segment-button value="productAndChannel">
-            <ion-label>{{ $t("Product and channel") }}</ion-label>
+            <ion-label>{{ translate("Product and channel") }}</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="productAndChannel">
+            <ion-label>{{ translate("Facility") }}</ion-label>
           </ion-segment-button>
         </ion-segment>
       </ion-toolbar>
@@ -51,6 +54,7 @@ import {
 import { defineComponent } from 'vue';
 import { addOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue'
+import { translate } from '@hotwax/dxp-components';
 
 export default defineComponent({
   name: 'Shipping',
@@ -71,6 +75,7 @@ export default defineComponent({
   setup() {
     return {
       addOutline,
+      translate
     };
   },
 });

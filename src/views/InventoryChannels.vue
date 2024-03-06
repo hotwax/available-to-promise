@@ -2,16 +2,16 @@
   <ion-page>
     <ion-header :translucent="true">
       <ion-toolbar>
-        <ion-title>{{ $t("Inventory channels") }}</ion-title>
+        <ion-title>{{ translate("Inventory channels") }}</ion-title>
       </ion-toolbar>
 
       <ion-toolbar>
         <ion-segment>
           <ion-segment-button value="channels">
-            <ion-label>{{ $t("Channels") }}</ion-label>
+            <ion-label>{{ translate("Channels") }}</ion-label>
           </ion-segment-button>
           <ion-segment-button value="publish">
-            <ion-label>{{ $t("Publish") }}</ion-label>
+            <ion-label>{{ translate("Publish") }}</ion-label>
           </ion-segment-button>
         </ion-segment>
       </ion-toolbar>
@@ -89,6 +89,7 @@ import {
   IonIcon,
   IonItem,
   IonLabel,
+  IonList,
   IonPage,
   IonSegment,
   IonSegmentButton,
@@ -115,6 +116,7 @@ export default defineComponent({
     IonIcon,
     IonItem,
     IonLabel,
+    IonList,
     IonPage,
     IonSegment,
     IonSegmentButton,
