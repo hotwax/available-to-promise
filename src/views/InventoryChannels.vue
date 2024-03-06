@@ -138,10 +138,13 @@ export default defineComponent({
 </script>
 
 <style scoped>
+ion-card {
+  min-width: 375px;
+}
 ion-card-header {
   display: flex;
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 0px;
 }
 </style>

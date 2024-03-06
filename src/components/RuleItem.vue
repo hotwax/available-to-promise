@@ -28,13 +28,11 @@
     </ion-item>
     <ion-item lines="full" v-else-if="selectedPage.path === '/store-pickup'">
       <ion-icon slot="start" :icon="storefrontOutline"/>
-      <ion-label class="ion-text-wrap">{{ translate(selectedPage.name) }}</ion-label>
-      <ion-toggle slot="end" />
+      <ion-toggle>{{ translate(selectedPage.name) }}</ion-toggle>
     </ion-item>
     <ion-item lines="full" v-else-if="selectedPage.path === '/shipping'">
       <ion-icon slot="start" :icon="sendOutline"/>
-      <ion-label class="ion-text-wrap">{{ translate(selectedPage.name) }}</ion-label>
-      <ion-toggle slot="end" />
+      <ion-toggle>{{ translate(selectedPage.name) }}</ion-toggle>
     </ion-item>
 
     <ion-list>
@@ -225,8 +223,8 @@ ion-card {
 }
 ion-card-header {
   display: flex;
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 0px;
 }
 </style>
