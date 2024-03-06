@@ -61,11 +61,11 @@
 
       <ion-item>
         <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
-        <ion-label class="ion-text-wrap">{{ "<Group name, Group name>" }}</ion-label>
+        <ion-label class="ion-text-wrap">{{ "<Product Tag, Product Tag>" }}</ion-label>
       </ion-item>
       <ion-item lines="none">
         <ion-icon slot="start" :icon="closeCircleOutline"/>
-        <ion-label class="ion-text-wrap">{{ "<Group name, Group name>" }}</ion-label>
+        <ion-label class="ion-text-wrap">{{ "<Product Tag, Product Tag>" }}</ion-label>
       </ion-item>
 
       <ion-item-divider color="light">
@@ -77,11 +77,11 @@
 
       <ion-item>
         <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
-        <ion-label class="ion-text-wrap">{{ "<Group name, Group name>" }}</ion-label>
+        <ion-label class="ion-text-wrap">{{ "<Product Features, Product Features>" }}</ion-label>
       </ion-item>
       <ion-item lines="full">
         <ion-icon slot="start" :icon="closeCircleOutline"/>
-        <ion-label class="ion-text-wrap">{{ "<Group name, Group name>" }}</ion-label>
+        <ion-label class="ion-text-wrap">{{ "<Product Features, Product Features>" }}</ion-label>
         </ion-item>
 
         <ion-item lines="none">

@@ -67,46 +67,31 @@ const routes: Array<RouteRecordRaw> = [
     path: '/threshold',
     name: 'Threshold',
     component: Threshold,
-    beforeEnter: authGuard,
-    meta: {
-      permissionId: "APP_SELECT_PRODUCT_VIEW"
-    }
-  },    
+    beforeEnter: authGuard
+  },
   {
     path: '/safety-stock',
     name: 'Safety stock',
     component: SafetyStock,
-    beforeEnter: authGuard,
-    meta: {
-      permissionId: "APP_SELECT_PRODUCT_VIEW"
-    }
-  },  
+    beforeEnter: authGuard
+  },
   {
     path: '/store-pickup',
     name: 'Store pickup',
     component: StorePickup,
-    beforeEnter: authGuard,
-    meta: {
-      permissionId: "APP_SELECT_PRODUCT_VIEW"
-    }
-  },  
+    beforeEnter: authGuard
+  },
   {
     path: '/shipping',
     name: 'Shipping',
     component: Shipping,
-    beforeEnter: authGuard,
-    meta: {
-      permissionId: "APP_SELECT_PRODUCT_VIEW"
-    }
-  },  
+    beforeEnter: authGuard
+  },
   {
     path: '/inventory-channels',
     name: 'Inventory channels',
     component: InventoryChannels,
-    beforeEnter: authGuard,
-    meta: {
-      permissionId: "APP_SELECT_PRODUCT_VIEW"
-    }
+    beforeEnter: authGuard
   },  
   {
     path: '/select-product-csv-upload',

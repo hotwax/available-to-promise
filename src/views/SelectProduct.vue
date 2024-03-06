@@ -150,7 +150,7 @@
         </ion-button>
       </div>
 
-      <ion-fab vertical="bottom" horizontal="end" slot="fixed" >
+      <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="mobile-only">
         <ion-fab-button v-if="jobId" :disabled="!hasPermission(Actions.APP_THRESHOLD_RULE_UPDATE) || isServiceScheduling || isJobEditable()" @click="updateThreshold()">
           <ion-icon :icon="arrowForwardOutline" />
         </ion-fab-button>

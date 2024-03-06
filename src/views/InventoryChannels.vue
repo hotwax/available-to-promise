@@ -26,10 +26,12 @@
                 <ion-card-subtitle class="overline">{{ "Group ID" }}</ion-card-subtitle>
                 <ion-card-title>{{ "Group name" }}</ion-card-title>
               </div>
+
               <ion-button fill="clear" color="medium">
                 <ion-icon :icon="copyOutline" slot="icon-only" />
               </ion-button>
             </ion-card-header>
+
             <ion-list>
               <ion-item lines="full">
                 <ion-icon slot="start" :icon="globeOutline"/>
@@ -39,6 +41,7 @@
                 </ion-label>
                 <ion-chip slot="end" outline>4</ion-chip>
               </ion-item>
+
               <ion-item lines="full">
                 <ion-icon slot="start" :icon="storefrontOutline"/>
                 <ion-label>
@@ -46,6 +49,7 @@
                 </ion-label>
                 <ion-chip slot="end" outline>15</ion-chip>
               </ion-item>
+
               <ion-item lines="full">
                 <ion-icon slot="start" :icon="businessOutline"/>
                 <ion-label>

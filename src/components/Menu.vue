@@ -2,7 +2,7 @@
   <ion-menu content-id="main" type="overlay" :disabled="!isUserAuthenticated">
     <ion-header>
       <ion-toolbar>
-        <ion-title>{{ $t("Available to Promise") }}</ion-title>
+        <ion-title>{{ translate("Available to Promise") }}</ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content>
@@ -67,6 +67,7 @@
   import { useRouter } from "vue-router";
   import { cloudUploadOutline, globeOutline, optionsOutline, settingsOutline, sendOutline, storefrontOutline, pulseOutline } from 'ionicons/icons';
   import emitter from "@/event-bus";
+  import { translate } from "@hotwax/dxp-components";
   
   export default defineComponent({
     name: "Menu",
@@ -132,46 +133,31 @@
           title: "Threshold",
           url: "/threshold",
           iosIcon: globeOutline,
-          mdIcon: globeOutline,
-          meta: {
-            permissionId: "APP_THRESHOLD_UPDATES_VIEW"
-          }
+          mdIcon: globeOutline
         },
         {
           title: "Safety stock",
           url: "/safety-stock",
           iosIcon: pulseOutline,
-          mdIcon: pulseOutline,
-          meta: {
-            permissionId: "APP_THRESHOLD_UPDATES_VIEW"
-          }
+          mdIcon: pulseOutline
         },
         {
           title: "Store pickup",
           url: "/store-pickup",
           iosIcon: storefrontOutline,
-          mdIcon: storefrontOutline,
-          meta: {
-            permissionId: "APP_THRESHOLD_UPDATES_VIEW"
-          }
+          mdIcon: storefrontOutline
         },
         {
           title: "Shipping",
           url: "/shipping",
           iosIcon: sendOutline,
-          mdIcon: sendOutline,
-          meta: {
-            permissionId: "APP_THRESHOLD_UPDATES_VIEW"
-          }
+          mdIcon: sendOutline
         },
         {
           title: "Inventory channels",
           url: "/inventory-channels",
           iosIcon: cloudUploadOutline,
-          mdIcon: cloudUploadOutline,
-          meta: {
-            permissionId: "APP_THRESHOLD_UPDATES_VIEW"
-          }
+          mdIcon: cloudUploadOutline
         },
         {
           title: "Settings",
@@ -189,16 +175,17 @@
       return {
         appPages,
         cloudUploadOutline,
-        hasPermission,
-        router,
         globeOutline,
-        pulseOutline,
+        hasPermission,
         optionsOutline,
+        pulseOutline,
+        router,
         settingsOutline,
         selectedIndex,
         sendOutline,
         storefrontOutline,
         store,
+        translate
       };
     },
   });

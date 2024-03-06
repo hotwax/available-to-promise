@@ -37,6 +37,7 @@ import { login, logout, loader } from './user-utils';
 import { getConfig, initialise } from '@/adapter'
 import localeMessages from '@/locales';
 
+
 const app = createApp(App)
   .use(IonicVue, {
     mode: 'md'
