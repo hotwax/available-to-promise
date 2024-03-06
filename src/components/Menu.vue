@@ -148,7 +148,7 @@
         },
         {
           title: "Store pickup",
-          url: "/store pickup",
+          url: "/store-pickup",
           iosIcon: storefrontOutline,
           mdIcon: storefrontOutline,
           meta: {

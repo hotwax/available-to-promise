@@ -7,25 +7,44 @@
         <ion-card-subtitle>{{ "1/4" }}</ion-card-subtitle>
       </div>
       <div>
-        <ion-button fill="clear" color="medium">
+        <ion-button fill="clear" color="medium" class="ion-no-padding">
           <ion-icon :icon="chevronUpOutline" slot="icon-only" />
         </ion-button>
-        <ion-button fill="clear" color="medium">
+        <ion-button fill="clear" color="medium" class="ion-no-padding">
           <ion-icon :icon="chevronDownOutline" slot="icon-only" />
         </ion-button>
       </div>
     </ion-card-header>
-    <ion-item lines="full">
+
+    <ion-item lines="full" v-if="selectedPage.path === '/threshold'">
       <ion-icon slot="start" :icon="globeOutline"/>
-      <ion-label class="ion-text-wrap">{{ "Threshold" }}</ion-label>
-      <ion-chip slot="end" outline>5</ion-chip>
+      <ion-label class="ion-text-wrap">{{ translate(selectedPage.name) }}</ion-label>
+      <ion-chip slot="end" outline @click="editThreshold()">5</ion-chip>
     </ion-item>
+    <ion-item lines="full" v-else-if="selectedPage.path === '/safety-stock'">
+      <ion-icon slot="start" :icon="pulseOutline"/>
+      <ion-label class="ion-text-wrap">{{ translate(selectedPage.name) }}</ion-label>
+      <ion-chip slot="end" outline @click="editSafetyStock()">5</ion-chip>
+    </ion-item>
+    <ion-item lines="full" v-else-if="selectedPage.path === '/store-pickup'">
+      <ion-icon slot="start" :icon="storefrontOutline"/>
+      <ion-label class="ion-text-wrap">{{ translate(selectedPage.name) }}</ion-label>
+      <ion-toggle slot="end" />
+    </ion-item>
+    <ion-item lines="full" v-else-if="selectedPage.path === '/shipping'">
+      <ion-icon slot="start" :icon="sendOutline"/>
+      <ion-label class="ion-text-wrap">{{ translate(selectedPage.name) }}</ion-label>
+      <ion-toggle slot="end" />
+    </ion-item>
+
     <ion-list>
       <ion-item-divider color="light">
-        <ion-label>
-          {{ "Facility groups" }}
-        </ion-label>
+        <ion-label>{{ translate("Facility groups") }}</ion-label>
+        <ion-button slot="end" fill="clear" color="medium">
+          <ion-icon :icon="optionsOutline" slot="icon-only" />
+        </ion-button>
       </ion-item-divider>
+
       <ion-item>
         <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
         <ion-label class="ion-text-wrap">{{ "<Group name, Group name>" }}</ion-label>
@@ -34,11 +53,14 @@
         <ion-icon slot="start" :icon="closeCircleOutline"/>
         <ion-label class="ion-text-wrap">{{ "<Group name, Group name>" }}</ion-label>
       </ion-item>
+
       <ion-item-divider color="light">
-        <ion-label>
-          {{ "Product tags" }}
-        </ion-label>
+        <ion-label>{{ translate("Product tags") }}</ion-label>
+        <ion-button slot="end" fill="clear" color="medium">
+          <ion-icon :icon="optionsOutline" slot="icon-only" />
+        </ion-button>
       </ion-item-divider>
+
       <ion-item>
         <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
         <ion-label class="ion-text-wrap">{{ "<Group name, Group name>" }}</ion-label>
@@ -47,11 +69,14 @@
         <ion-icon slot="start" :icon="closeCircleOutline"/>
         <ion-label class="ion-text-wrap">{{ "<Group name, Group name>" }}</ion-label>
       </ion-item>
+
       <ion-item-divider color="light">
-        <ion-label>
-          {{ "Product features" }}
-        </ion-label>
+        <ion-label>{{ translate("Product features") }}</ion-label>
+        <ion-button slot="end" fill="clear" color="medium">
+          <ion-icon :icon="optionsOutline" slot="icon-only" />
+        </ion-button>
       </ion-item-divider>
+
       <ion-item>
         <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
         <ion-label class="ion-text-wrap">{{ "<Group name, Group name>" }}</ion-label>
@@ -60,11 +85,12 @@
         <ion-icon slot="start" :icon="closeCircleOutline"/>
         <ion-label class="ion-text-wrap">{{ "<Group name, Group name>" }}</ion-label>
         </ion-item>
+
         <ion-item lines="none">
           <ion-button fill="clear">{{ "Run now" }}</ion-button>
-          <ion-button fill="clear" slot="end">
-          <ion-icon :icon="ellipsisVerticalOutline" slot="icon-only"/>
-        </ion-button>
+          <ion-button color="medium" fill="clear" slot="end" @click="openRuleActionsPopover($event)">
+            <ion-icon :icon="ellipsisVerticalOutline" slot="icon-only"/>
+          </ion-button>
       </ion-item>
     </ion-list>
   </ion-card>
@@ -72,39 +98,120 @@
 
 <script lang="ts">
 import {
-  IonContent,
-  IonHeader,
-  IonPage,
-  IonSegment,
-  IonSegmentButton,
-  IonTitle,
-  IonToolbar
+  IonButton,
+  IonCard,
+  IonCardHeader,
+  IonCardSubtitle,
+  IonCardTitle,
+  IonChip,
+  IonIcon,
+  IonItem,
+  IonItemDivider,
+  IonLabel,
+  IonList,
+  alertController,
+  popoverController
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
-import { checkmarkDoneCircleOutline, chevronDownOutline, chevronUpOutline, closeCircleOutline, ellipsisVerticalOutline, globeOutline } from 'ionicons/icons';
+import { checkmarkDoneCircleOutline, chevronDownOutline, chevronUpOutline, closeCircleOutline, ellipsisVerticalOutline, globeOutline, optionsOutline, pulseOutline, sendOutline, storefrontOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
-import { Actions, hasPermission } from '@/authorization'
+import { translate } from '@hotwax/dxp-components';
+import RuleActionsPopover from "@/components/RuleActionsPopover.vue";
 
 export default defineComponent({
   name: 'RuleItem',
   components: {
+    IonButton,
+    IonCard,
+    IonCardHeader,
+    IonCardSubtitle,
+    IonCardTitle,
+    IonChip,
+    IonIcon,
+    IonItem,
+    IonItemDivider,
+    IonLabel,
+    IonList
+  },
+  data() {
+    return {
+      selectedPage: {
+        path: '',
+        name: ''
+      } as any
+    }
+  },
+  mounted() {
+    this.selectedPage.path = this.router.currentRoute.value.path
+    this.selectedPage.name = this.router.currentRoute.value.name
+  },
+  methods: {
+    async openRuleActionsPopover(event: Event) {
+      const popover = await popoverController.create({
+        component: RuleActionsPopover,
+        showBackdrop: false,
+        event
+      });
+
+      return popover.present();
+    },
+    async editThreshold() {
+      const alert = await alertController.create({
+        header: translate("Edit threshold"),
+        inputs: [{
+          name: "threshold",
+          placeholder: translate("threshold"),
+          type: "number",
+          min: 0
+        }],
+        buttons: [{
+          text: translate('Cancel'),
+          role: "cancel"
+        },
+        {
+          text: translate('Update'),
+        }]
+      })
+
+      await alert.present()
+    },
+    async editSafetyStock() {
+      const alert = await alertController.create({
+        header: translate("Edit safety stock"),
+        inputs: [{
+          name: "safety-stock",
+          placeholder: translate("safety stock"),
+          type: "number",
+          min: 0
+        }],
+        buttons: [{
+          text: translate('Cancel'),
+          role: "cancel"
+        },
+        {
+          text: translate('Update'),
+        }]
+      })
+
+      await alert.present()
+    }
   },
   setup() {
     const router = useRouter();
-    const store = useStore();
 
     return {
-      Actions,
       checkmarkDoneCircleOutline,
       chevronDownOutline,
       chevronUpOutline,
       closeCircleOutline,
       ellipsisVerticalOutline,
       globeOutline,
-      hasPermission,
+      optionsOutline,
+      pulseOutline,
       router,
-      store,
+      sendOutline,
+      storefrontOutline,
+      translate
     };
   },
 });

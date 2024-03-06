@@ -7,52 +7,59 @@
     </ion-header>
 
     <ion-content>
-      <h1>This is Safety Stock</h1>
+      <main>
+        <section>
+          <RuleItem />
+          <RuleItem />
+        </section>
+      </main>
     </ion-content>
+
+    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+      <ion-fab-button>
+        <ion-icon :icon="addOutline" />
+      </ion-fab-button>
+    </ion-fab>
   </ion-page>
 </template>
 
 <script lang="ts">
 import {
   IonContent,
+  IonFab,
+  IonFabButton,
   IonHeader,
+  IonIcon,
+  IonLabel,
   IonPage,
+  IonSegment,
+  IonSegmentButton,
   IonTitle,
-  IonToolbar,
+  IonToolbar
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
-import { arrowForwardOutline, downloadOutline, filterOutline, saveOutline, pricetagOutline, closeCircle, addCircleOutline, albumsOutline, warningOutline } from 'ionicons/icons';
-import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
-import { Actions, hasPermission } from '@/authorization'
+import { addOutline } from 'ionicons/icons';
+import RuleItem from '@/components/RuleItem.vue';
 
 export default defineComponent({
   name: 'SafetyStock',
   components: {
     IonContent,
+    IonFab,
+    IonFabButton,
     IonHeader,
+    IonIcon,
+    IonLabel,
     IonPage,
+    IonSegment,
+    IonSegmentButton,
     IonTitle,
     IonToolbar,
+    RuleItem
   },
   setup() {
-    const router = useRouter();
-    const store = useStore();
-
     return {
-      Actions,
-      arrowForwardOutline,
-      downloadOutline,
-      filterOutline,
-      hasPermission,
-      router,
-      saveOutline,
-      store,
-      pricetagOutline,
-      closeCircle,
-      addCircleOutline,
-      albumsOutline,
-      warningOutline
+      addOutline
     };
   },
 });

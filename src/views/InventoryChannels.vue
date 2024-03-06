@@ -4,56 +4,142 @@
       <ion-toolbar>
         <ion-title>{{ $t("Inventory channels") }}</ion-title>
       </ion-toolbar>
+
+      <ion-toolbar>
+        <ion-segment>
+          <ion-segment-button value="channels">
+            <ion-label>{{ $t("Channels") }}</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="publish">
+            <ion-label>{{ $t("Publish") }}</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+      </ion-toolbar>
     </ion-header>
 
     <ion-content>
-      <h1>This is inventory channels</h1>
+      <main>
+        <section>
+          <ion-card>
+            <ion-card-header>
+              <div>
+                <ion-card-subtitle class="overline">{{ "Group ID" }}</ion-card-subtitle>
+                <ion-card-title>{{ "Group name" }}</ion-card-title>
+              </div>
+              <ion-button fill="clear" color="medium">
+                <ion-icon :icon="copyOutline" slot="icon-only" />
+              </ion-button>
+            </ion-card-header>
+            <ion-list>
+              <ion-item lines="full">
+                <ion-icon slot="start" :icon="globeOutline"/>
+                <ion-label>
+                  {{ "<threshold facility name>" }}
+                  <p>{{ "<facilityId>" }}</p>
+                </ion-label>
+                <ion-chip slot="end" outline>4</ion-chip>
+              </ion-item>
+              <ion-item lines="full">
+                <ion-icon slot="start" :icon="storefrontOutline"/>
+                <ion-label>
+                  {{ "<retail type facilityid count>" }}
+                </ion-label>
+                <ion-chip slot="end" outline>15</ion-chip>
+              </ion-item>
+              <ion-item lines="full">
+                <ion-icon slot="start" :icon="businessOutline"/>
+                <ion-label>
+                  {{ "<warehouse type facilityId count>" }}
+                </ion-label>
+                <ion-chip slot="end" outline>1</ion-chip>
+              </ion-item>
+  
+              <ion-item lines="none">
+                <ion-button fill="clear">{{ translate("View details") }}</ion-button>
+                  <ion-button color="medium" fill="clear" slot="end">
+                  <ion-icon :icon="ellipsisVerticalOutline" slot="icon-only"/>
+                </ion-button>
+              </ion-item>
+            </ion-list>
+          </ion-card>
+        </section>
+      </main>
     </ion-content>
+
+    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+      <ion-fab-button>
+        <ion-icon :icon="addOutline" />
+      </ion-fab-button>
+    </ion-fab>
   </ion-page>
 </template>
 
 <script lang="ts">
 import {
+  IonButton,
+  IonCard,
+  IonCardHeader,
+  IonCardSubtitle,
+  IonCardTitle,
+  IonChip,
   IonContent,
+  IonFab,
+  IonFabButton,
   IonHeader,
+  IonIcon,
+  IonItem,
+  IonLabel,
   IonPage,
+  IonSegment,
+  IonSegmentButton,
   IonTitle,
-  IonToolbar,
+  IonToolbar
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
-import { arrowForwardOutline, downloadOutline, filterOutline, saveOutline, pricetagOutline, closeCircle, addCircleOutline, albumsOutline, warningOutline } from 'ionicons/icons';
-import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
-import { Actions, hasPermission } from '@/authorization'
+import { addOutline, businessOutline, copyOutline, ellipsisVerticalOutline, globeOutline, storefrontOutline } from 'ionicons/icons';
+import { translate } from '@hotwax/dxp-components';
 
 export default defineComponent({
   name: 'Inventory channels',
   components: {
+    IonButton,
+    IonCard,
+    IonCardHeader,
+    IonCardSubtitle,
+    IonCardTitle,
+    IonChip,
     IonContent,
+    IonFab,
+    IonFabButton,
     IonHeader,
+    IonIcon,
+    IonItem,
+    IonLabel,
     IonPage,
+    IonSegment,
+    IonSegmentButton,
     IonTitle,
-    IonToolbar,
+    IonToolbar
   },
   setup() {
-    const router = useRouter();
-    const store = useStore();
-
     return {
-      Actions,
-      arrowForwardOutline,
-      downloadOutline,
-      filterOutline,
-      hasPermission,
-      router,
-      saveOutline,
-      store,
-      pricetagOutline,
-      closeCircle,
-      addCircleOutline,
-      albumsOutline,
-      warningOutline
+      addOutline,
+      businessOutline,
+      copyOutline,
+      ellipsisVerticalOutline,
+      globeOutline,
+      storefrontOutline,
+      translate
     };
   },
 });
 </script>
+
+<style scoped>
+ion-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0px;
+}
+</style>
