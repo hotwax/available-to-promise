@@ -139,7 +139,7 @@
         </main>
       </div>
 
-      <!-- <div class="action desktop-only">
+      <div class="action desktop-only">
         <ion-button v-if="jobId" :disabled="!hasPermission(Actions.APP_THRESHOLD_RULE_UPDATE) || isJobEditable() || isServiceScheduling" @click="updateThreshold()">
           <ion-icon slot="start" :icon="saveOutline" />
           {{ $t("Update threshold rule") }}
@@ -148,33 +148,17 @@
           <ion-icon slot="start" :icon="saveOutline" />
           {{ $t("Save threshold rule") }}
         </ion-button>
-      </div> -->
+      </div>
 
-      <!-- <ion-fab vertical="bottom" horizontal="end" slot="fixed" >
+      <ion-fab vertical="bottom" horizontal="end" slot="fixed" >
         <ion-fab-button v-if="jobId" :disabled="!hasPermission(Actions.APP_THRESHOLD_RULE_UPDATE) || isServiceScheduling || isJobEditable()" @click="updateThreshold()">
           <ion-icon :icon="arrowForwardOutline" />
         </ion-fab-button>
         <ion-fab-button :disabled="!hasPermission(Actions.APP_THRESHOLD_RULE_UPDATE)" v-else @click="saveThreshold()">
           <ion-icon :icon="arrowForwardOutline" />
         </ion-fab-button>
-      </ion-fab> -->
-
-      <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-        <ion-button >
-          <ion-label>
-            Buttons
-          </ion-label>
-          <ion-icon slot="end" :icon="arrowForwardOutline" />
-        </ion-button>
-        <ion-button >
-          <ion-label>
-            Buttons
-          </ion-label>
-          <ion-icon slot="end" :icon="arrowForwardOutline" />
-        </ion-button>
       </ion-fab>
     </ion-content>
-
   </ion-page>
 </template>
 
@@ -232,8 +216,8 @@ export default defineComponent({
     IonCardContent,
     IonChip,
     IonContent,
-    // IonFab,
-    // IonFabButton,
+    IonFab,
+    IonFabButton,
     IonHeader,
     IonIcon,
     IonInfiniteScroll,

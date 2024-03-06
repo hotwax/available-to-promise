@@ -49,10 +49,7 @@ export default defineComponent({
     IonFabButton,
     IonHeader,
     IonIcon,
-    IonLabel,
     IonPage,
-    IonSegment,
-    IonSegmentButton,
     IonTitle,
     IonToolbar,
     RuleItem
