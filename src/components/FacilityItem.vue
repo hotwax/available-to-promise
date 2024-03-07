@@ -1,10 +1,8 @@
 <template>
   <ion-card>
     <ion-card-header>
-      <div>
-        <ion-card-subtitle class="overline">{{ "Facility ID" }}</ion-card-subtitle>
-        <ion-card-title>{{ "Facility Name" }}</ion-card-title>
-      </div>
+      <ion-card-subtitle class="overline">{{ "Facility ID" }}</ion-card-subtitle>
+      <ion-card-title>{{ "Facility Name" }}</ion-card-title>
     </ion-card-header>
 
     <ion-item lines="full" v-if="selectedPage.path === '/store-pickup'">
@@ -128,15 +126,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style scoped>
-ion-card {
-  min-width: 375px;
-}
-ion-card-header {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-}
-</style>

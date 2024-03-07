@@ -15,14 +15,14 @@
               <ion-card-title>{{ "Rule Configuration" }}</ion-card-title>
             </ion-card-header>
 
-            <ion-card-content class="rule-inputs">
+            <div class="rule-inputs ion-padding">
               <ion-item>
                 <ion-input label="Name" label-placement="floating" />
               </ion-item>
               <ion-item>
                 <ion-input label="Safety stock" label-placement="floating" />
               </ion-item>
-            </ion-card-content>
+            </div>
           </ion-card>
         </div>
       </section>
@@ -172,11 +172,6 @@ import {
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { addCircleOutline, closeCircle, saveOutline } from 'ionicons/icons'
-import { mapGetters, useStore } from 'vuex';
-import { useRouter } from 'vue-router';
-import TimeZoneModal from '@/views/TimezoneModal.vue';
-import Image from '@/components/Image.vue'
-import { DateTime } from 'luxon';
 import { translate } from "@hotwax/dxp-components";
 
 export default defineComponent({
@@ -202,14 +197,9 @@ export default defineComponent({
     IonToolbar
   },
   setup(){
-    const store = useStore();
-    const router = useRouter();
-
     return {
       addCircleOutline,
       closeCircle,
-      store,
-      router,
       saveOutline,
       translate,
     }
@@ -230,8 +220,6 @@ section {
 
 .rule-config {
   grid-column: span 2;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(700px, 1fr));
 }
 
 .rule-inputs {

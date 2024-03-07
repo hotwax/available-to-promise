@@ -312,6 +312,13 @@ hr {
   border-bottom: var(--border-medium);
 }
 
+@media (min-width: 700px) {
+  main {
+    max-width: 375px;
+    margin: auto;
+  }
+}
+
 @media (min-width: 991px) {
   .find {
     grid: "search  main" min-content
@@ -363,15 +370,6 @@ hr {
 
   ion-header {
     display: flex;
-  }
-
-  main {
-    display: flex;
-    justify-content: center;
-    align-items: start;
-    gap: var(--spacer-2xl);
-    max-width: 990px;
-    margin: var(--spacer-base) auto 0;
   }
 
   main>section {
