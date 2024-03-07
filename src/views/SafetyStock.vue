@@ -16,7 +16,7 @@
     </ion-content>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button>
+      <ion-fab-button @click="createRule()">
         <ion-icon :icon="addOutline" />
       </ion-fab-button>
     </ion-fab>
@@ -30,16 +30,14 @@ import {
   IonFabButton,
   IonHeader,
   IonIcon,
-  IonLabel,
   IonPage,
-  IonSegment,
-  IonSegmentButton,
   IonTitle,
   IonToolbar
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { addOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue';
+import { useRouter } from 'vue-router';
 
 export default defineComponent({
   name: 'SafetyStock',
@@ -54,9 +52,17 @@ export default defineComponent({
     IonToolbar,
     RuleItem
   },
+  methods: {
+    createRule() {
+      this.router.replace({ path: '/create-rule' })
+    }
+  },
   setup() {
+    const router = useRouter()
+
     return {
-      addOutline
+      addOutline,
+      router
     };
   },
 });

@@ -138,6 +138,7 @@
         {
           title: "Safety stock",
           url: "/safety-stock",
+          childRoutes: ["/create-rule"],
           iosIcon: pulseOutline,
           mdIcon: pulseOutline
         },
@@ -169,7 +170,7 @@
 
       const selectedIndex = computed(() => {
         const path = router.currentRoute.value.path;
-        return appPages.findIndex((screen) => screen.url === path);
+        return appPages.findIndex((screen) => screen.url === path || screen.childRoutes?.includes(path) || screen.childRoutes?.some((route: any)=> path.includes(route)));
       });
 
       return {

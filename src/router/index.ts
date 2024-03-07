@@ -13,6 +13,7 @@ import SafetyStock from '@/views/SafetyStock.vue'
 import StorePickup from '@/views/StorePickup.vue'
 import Shipping from '@/views/Shipping.vue'
 import InventoryChannels from '@/views/InventoryChannels.vue'
+import CreateRule from '@/views/CreateRule.vue'
 
 import { hasPermission } from '@/authorization';
 import { showToast } from '@/utils'
@@ -92,7 +93,13 @@ const routes: Array<RouteRecordRaw> = [
     name: 'Inventory channels',
     component: InventoryChannels,
     beforeEnter: authGuard
-  },  
+  },
+  {
+    path: '/create-rule',
+    name: 'Create rule',
+    component: CreateRule,
+    beforeEnter: authGuard
+  },
   {
     path: '/select-product-csv-upload',
     name: 'SelectProductCSVUpload',
