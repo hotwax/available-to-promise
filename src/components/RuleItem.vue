@@ -68,21 +68,23 @@
         <ion-label class="ion-text-wrap">{{ "<Product Tag, Product Tag>" }}</ion-label>
       </ion-item>
 
-      <ion-item-divider color="light">
-        <ion-label>{{ translate("Product features") }}</ion-label>
-        <ion-button slot="end" fill="clear" color="medium">
-          <ion-icon :icon="optionsOutline" slot="icon-only" />
-        </ion-button>
-      </ion-item-divider>
-
-      <ion-item>
-        <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
-        <ion-label class="ion-text-wrap">{{ "<Product Features, Product Features>" }}</ion-label>
-      </ion-item>
-      <ion-item lines="full">
-        <ion-icon slot="start" :icon="closeCircleOutline"/>
-        <ion-label class="ion-text-wrap">{{ "<Product Features, Product Features>" }}</ion-label>
+      <template v-if="selectedPage.path === '/threshold' || selectedPage.path === '/safety-stock'">
+        <ion-item-divider color="light">
+          <ion-label>{{ translate("Product features") }}</ion-label>
+          <ion-button slot="end" fill="clear" color="medium">
+            <ion-icon :icon="optionsOutline" slot="icon-only" />
+          </ion-button>
+        </ion-item-divider>
+  
+        <ion-item>
+          <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
+          <ion-label class="ion-text-wrap">{{ "<Product Features, Product Features>" }}</ion-label>
         </ion-item>
+        <ion-item lines="full">
+          <ion-icon slot="start" :icon="closeCircleOutline"/>
+          <ion-label class="ion-text-wrap">{{ "<Product Features, Product Features>" }}</ion-label>
+        </ion-item>
+      </template>
 
         <ion-item lines="none">
           <ion-button fill="clear">{{ translate("Run now") }}</ion-button>

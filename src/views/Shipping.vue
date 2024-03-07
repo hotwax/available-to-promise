@@ -6,14 +6,14 @@
       </ion-toolbar>
 
       <ion-toolbar>
-        <ion-segment>
+        <ion-segment v-model="selectedSegment">
           <ion-segment-button value="productAndFacility">
             <ion-label>{{ translate("Product and facility") }}</ion-label>
           </ion-segment-button>
           <ion-segment-button value="productAndChannel">
             <ion-label>{{ translate("Product and channel") }}</ion-label>
           </ion-segment-button>
-          <ion-segment-button value="productAndChannel">
+          <ion-segment-button value="facility">
             <ion-label>{{ translate("Facility") }}</ion-label>
           </ion-segment-button>
         </ion-segment>
@@ -22,9 +22,17 @@
 
     <ion-content>
       <main>
-        <section>
+        <section v-if="selectedSegment === 'productAndFacility'">
           <RuleItem />
           <RuleItem />
+        </section>
+        <section v-else-if="selectedSegment === 'productAndChannel'">
+          <RuleItem />
+          <RuleItem />
+        </section>
+        <section v-else>
+          <FacilityItem />
+          <FacilityItem />
         </section>
       </main>
     </ion-content>
@@ -55,10 +63,12 @@ import { defineComponent } from 'vue';
 import { addOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue'
 import { translate } from '@hotwax/dxp-components';
+import FacilityItem from '@/components/FacilityItem.vue';
 
 export default defineComponent({
   name: 'Shipping',
   components: {
+    FacilityItem,
     IonContent,
     IonFab,
     IonFabButton,
@@ -71,6 +81,11 @@ export default defineComponent({
     IonTitle,
     IonToolbar,
     RuleItem
+  },
+  data() {
+    return {
+      selectedSegment: 'productAndFacility'
+    }
   },
   setup() {
     return {
