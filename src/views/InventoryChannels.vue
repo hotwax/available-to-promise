@@ -6,7 +6,7 @@
       </ion-toolbar>
 
       <ion-toolbar>
-        <ion-segment>
+        <ion-segment v-model="selectedSegment">
           <ion-segment-button value="channels">
             <ion-label>{{ translate("Channels") }}</ion-label>
           </ion-segment-button>
@@ -19,7 +19,7 @@
 
     <ion-content>
       <main>
-        <section>
+        <section v-if="selectedSegment === 'channels'">
           <ion-card>
             <ion-card-header>
               <div>
@@ -67,6 +67,46 @@
             </ion-list>
           </ion-card>
         </section>
+        <section v-else-if="selectedSegment === 'publish'">
+          <ion-card>
+            <ion-card-header>
+              <div>
+                <ion-card-subtitle class="overline">{{ "SHOP CONFIG ID" }}</ion-card-subtitle>
+                <ion-card-title>{{ "Shop name" }}</ion-card-title>
+              </div>
+            </ion-card-header>
+
+            <ion-list>
+              <ion-item lines="full">
+                <ion-icon slot="start" :icon="timeOutline"/>
+                <ion-select :label="translate('Run time')" :placeholder="translate('Select')" interface="popover">
+                  <ion-select-option value="">A</ion-select-option>
+                </ion-select>
+              </ion-item>
+
+              <ion-item lines="full">
+                <ion-icon slot="start" :icon="timerOutline"/>
+                <ion-select :label="translate('Frequency')" value="" :placeholder="translate('Select')" interface="popover">
+                  <ion-select-option value="">{{ "Every 5 minute" }}</ion-select-option>
+                </ion-select>
+              </ion-item>
+
+              <ion-item lines="full">
+                <ion-icon slot="start" :icon="albumsOutline"/>
+                <ion-select :label="translate('Inventory group')" value="" :placeholder="translate('Select')" interface="popover">
+                  <ion-select-option value="">{{ "Group name" }}</ion-select-option>
+                </ion-select>
+              </ion-item>
+  
+              <ion-item lines="none">
+                <ion-button fill="clear">{{ translate("View details") }}</ion-button>
+                  <ion-button color="medium" fill="clear" slot="end">
+                  <ion-icon :icon="ellipsisVerticalOutline" slot="icon-only"/>
+                </ion-button>
+              </ion-item>
+            </ion-list>
+          </ion-card>
+        </section>
       </main>
     </ion-content>
 
@@ -97,11 +137,13 @@ import {
   IonPage,
   IonSegment,
   IonSegmentButton,
+  IonSelect,
+  IonSelectOption,
   IonTitle,
   IonToolbar
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
-import { addOutline, businessOutline, copyOutline, ellipsisVerticalOutline, globeOutline, storefrontOutline } from 'ionicons/icons';
+import { addOutline, albumsOutline, businessOutline, copyOutline, ellipsisVerticalOutline, globeOutline, storefrontOutline, timeOutline, timerOutline } from 'ionicons/icons';
 import { translate } from '@hotwax/dxp-components';
 
 export default defineComponent({
@@ -124,17 +166,27 @@ export default defineComponent({
     IonPage,
     IonSegment,
     IonSegmentButton,
+    IonSelect,
+    IonSelectOption,
     IonTitle,
     IonToolbar
+  },
+  data() {
+    return {
+      selectedSegment: 'channels'
+    }
   },
   setup() {
     return {
       addOutline,
+      albumsOutline,
       businessOutline,
       copyOutline,
       ellipsisVerticalOutline,
       globeOutline,
       storefrontOutline,
+      timeOutline,
+      timerOutline,
       translate
     };
   },
