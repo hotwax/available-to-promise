@@ -13,6 +13,10 @@ const userModule: Module<UserState, RootState> = {
       current: {},
       instanceUrl: '',
       currentEComStore: {},
+      pwaState: {
+        updateExists: false,
+        registration: null,
+      }
     },
     getters,
     actions,
