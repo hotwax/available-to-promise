@@ -89,7 +89,6 @@ import { mapGetters, useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import TimeZoneModal from '@/views/TimezoneModal.vue';
 import Image from '@/components/Image.vue'
-import { DxpOmsInstanceNavigator } from '@hotwax/dxp-components';
 
 export default defineComponent({
   name: 'Settings',
