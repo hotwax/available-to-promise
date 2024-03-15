@@ -5,6 +5,7 @@
   "Are you sure you want to change the time zone to?": "Are you sure you want to change the time zone to?",
   "Authenticating": "Authenticating",
   "Blank": "Blank",
+  "Built: ": "Built: {builtDateTime}",
   "Cancel": "Cancel",
   "CANCEL": "CANCEL",
   "Canceling this job will cancel this occurrence and all following occurrences. This job will have to be re-enabled manually to run it again.": "Canceling this job will cancel this occurrence and all following occurrences. This job will have to be re-enabled manually to run it again.",
@@ -162,6 +163,7 @@
   "Username": "Username",
   "virtual, ": "virtual, ",
   "variants": "variants",
+  "Version: ": "Version: {appVersion}",
   "You can also download the products, locations and safety stock you selected in a CSV to upload in other systems": "You can also download the products, locations and safety stock you selected in a CSV to upload in other systems",
   "You do not have permission to access this page": "You do not have permission to access this page",
   "You do not have permission to access the app.": "You do not have permission to access the app."
