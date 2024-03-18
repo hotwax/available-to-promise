@@ -35,13 +35,15 @@
                 {{ "<threshold facility name>" }}
                 <p>{{ "<facilityId>" }}</p>
               </ion-label>
-              <ion-chip slot="end" outline>4</ion-chip>
+              <ion-button slot="end" fill="clear" color="medium" @click="openLinkThresholdFacilitesModal()">
+                <ion-icon :icon="optionsOutline" slot="icon-only" />
+              </ion-button>
             </ion-item>
 
             <ion-list>
               <ion-item-divider color="light">
                 <ion-label>{{ translate("Facilities") }}</ion-label>
-                <ion-button slot="end" fill="clear" color="medium">
+                <ion-button slot="end" fill="clear" color="medium" @click="openLinkFacilitiesModal()">
                   <ion-icon :icon="optionsOutline" slot="icon-only" />
                 </ion-button>
               </ion-item-divider>
@@ -111,7 +113,7 @@
     </ion-content>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button>
+      <ion-fab-button @click="openCreateGroupModal()">
         <ion-icon :icon="addOutline" />
       </ion-fab-button>
     </ion-fab>
@@ -119,11 +121,14 @@
 </template>
 
 <script setup lang="ts">
-import { IonBadge, IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonItemDivider, IonLabel, IonList, IonPage, IonSegment, IonSegmentButton, IonSelect, IonSelectOption, IonTitle, IonToolbar, popoverController } from '@ionic/vue';
+import { IonBadge, IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonItemDivider, IonLabel, IonList, IonPage, IonSegment, IonSegmentButton, IonSelect, IonSelectOption, IonTitle, IonToolbar, modalController, popoverController } from '@ionic/vue';
 import { ref } from 'vue';
 import { addOutline, albumsOutline, businessOutline, ellipsisVerticalOutline, globeOutline, optionsOutline, storefrontOutline, timeOutline, timerOutline } from 'ionicons/icons';
 import { translate } from '@hotwax/dxp-components';
 import ShopActionsPopover from '@/components/ShopActionsPopover.vue'
+import CreateGroupModal from '@/components/CreateGroupModal.vue'
+import LinkFacilitiesModal from '@/components/LinkFacilitiesModal.vue'
+import LinkThresholdFacilitiesModal from '@/components/LinkThresholdFacilitiesModal.vue'
 
 const selectedSegment = ref("channels")
 
@@ -132,6 +137,30 @@ async function openShopActionsPopover(event: Event) {
     component: ShopActionsPopover,
     showBackdrop: false,
     event
+  });
+
+  return popover.present();
+}
+
+async function openCreateGroupModal() {
+  const popover = await modalController.create({
+    component: CreateGroupModal
+  });
+
+  return popover.present();
+}
+
+async function openLinkFacilitiesModal() {
+  const popover = await modalController.create({
+    component: LinkFacilitiesModal
+  });
+
+  return popover.present();
+}
+
+async function openLinkThresholdFacilitesModal() {
+  const popover = await modalController.create({
+    component: LinkThresholdFacilitiesModal
   });
 
   return popover.present();
