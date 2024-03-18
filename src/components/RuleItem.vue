@@ -36,21 +36,45 @@
     </ion-item>
 
     <ion-list>
-      <ion-item-divider color="light">
-        <ion-label>{{ translate("Facility groups") }}</ion-label>
-        <ion-button slot="end" fill="clear" color="medium">
-          <ion-icon :icon="optionsOutline" slot="icon-only" />
-        </ion-button>
-      </ion-item-divider>
+      <template v-if="selectedSegment === 'productAndChannel'">
+        <ion-item-divider color="light">
+          <ion-label>{{ translate("Channels") }}</ion-label>
+          <ion-button slot="end" fill="clear" color="medium">
+            <ion-icon :icon="optionsOutline" slot="icon-only" />
+          </ion-button>
+        </ion-item-divider>
+        
+        <ion-item lines="none">
+          <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
+          <ion-label class="ion-text-wrap">{{ "<Config facility Id>, <Config facility Id>" }}</ion-label>
+        </ion-item>
+      </template>
 
-      <ion-item>
-        <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
-        <ion-label class="ion-text-wrap">{{ "<Group name, Group name>" }}</ion-label>
-      </ion-item>
-      <ion-item lines="none">
-        <ion-icon slot="start" :icon="closeCircleOutline"/>
-        <ion-label class="ion-text-wrap">{{ "<Group name, Group name>" }}</ion-label>
-      </ion-item>
+      <template v-else>
+        <ion-item-divider color="light">
+          <ion-label>{{ translate("Facility groups") }}</ion-label>
+          <ion-button slot="end" fill="clear" color="medium">
+            <ion-icon :icon="optionsOutline" slot="icon-only" />
+          </ion-button>
+        </ion-item-divider>
+
+        <ion-item v-if="selectedPage.path === '/threshold'" lines="none">
+          <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
+          <ion-label class="ion-text-wrap">{{ "<Config facility Name, Config facility Name>" }}</ion-label>
+        </ion-item>
+  
+        <template v-else>
+          <ion-item>
+            <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
+            <ion-label class="ion-text-wrap">{{ "<Group name, Group name>" }}</ion-label>
+          </ion-item>
+    
+          <ion-item lines="none">
+            <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
+            <ion-label class="ion-text-wrap">{{ "<Group name, Group name>" }}</ion-label>
+          </ion-item>
+        </template>
+      </template>
 
       <ion-item-divider color="light">
         <ion-label>{{ translate("Product tags") }}</ion-label>
@@ -86,137 +110,78 @@
         </ion-item>
       </template>
 
-        <ion-item lines="none">
-          <ion-button fill="clear">{{ translate("Run now") }}</ion-button>
-          <ion-button color="medium" fill="clear" slot="end" @click="openRuleActionsPopover($event)">
-            <ion-icon :icon="ellipsisVerticalOutline" slot="icon-only"/>
-          </ion-button>
+      <ion-item lines="none">
+        <ion-button fill="clear">{{ translate("Edit name") }}</ion-button>
+        <ion-button color="medium" fill="clear" slot="end">
+          <ion-icon :icon="archiveOutline" slot="icon-only"/>
+        </ion-button>
       </ion-item>
     </ion-list>
   </ion-card>
 </template>
 
-<script lang="ts">
-import {
-  IonButton,
-  IonCard,
-  IonCardHeader,
-  IonCardSubtitle,
-  IonCardTitle,
-  IonChip,
-  IonIcon,
-  IonItem,
-  IonItemDivider,
-  IonLabel,
-  IonList,
-  IonToggle,
-  alertController,
-  popoverController
-} from '@ionic/vue';
-import { defineComponent } from 'vue';
-import { checkmarkDoneCircleOutline, chevronDownOutline, chevronUpOutline, closeCircleOutline, ellipsisVerticalOutline, globeOutline, optionsOutline, pulseOutline, sendOutline, storefrontOutline } from 'ionicons/icons';
+<script setup lang="ts">
+import { IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonChip, IonIcon, IonItem, IonItemDivider, IonLabel, IonList, IonToggle, alertController, popoverController } from '@ionic/vue';
+import { defineProps, onMounted, ref } from 'vue';
+import { archiveOutline, checkmarkDoneCircleOutline, chevronDownOutline, chevronUpOutline, closeCircleOutline, globeOutline, optionsOutline, pulseOutline, sendOutline, storefrontOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
 import { translate } from '@hotwax/dxp-components';
-import RuleActionsPopover from "@/components/RuleActionsPopover.vue";
 
-export default defineComponent({
-  name: 'RuleItem',
-  components: {
-    IonButton,
-    IonCard,
-    IonCardHeader,
-    IonCardSubtitle,
-    IonCardTitle,
-    IonChip,
-    IonIcon,
-    IonItem,
-    IonItemDivider,
-    IonLabel,
-    IonList,
-    IonToggle
-  },
-  data() {
-    return {
-      selectedPage: {
-        path: '',
-        name: ''
-      } as any
-    }
-  },
-  mounted() {
-    this.selectedPage.path = this.router.currentRoute.value.path
-    this.selectedPage.name = this.router.currentRoute.value.name
-  },
-  methods: {
-    async openRuleActionsPopover(event: Event) {
-      const popover = await popoverController.create({
-        component: RuleActionsPopover,
-        showBackdrop: false,
-        event
-      });
+const router = useRouter();
 
-      return popover.present();
+defineProps(["selectedSegment"])
+
+const selectedPage = ref({
+  path: '',
+  name: ''
+}) as any;
+
+onMounted(() => {
+  selectedPage.value.path = router.currentRoute.value.path
+  selectedPage.value.name = router.currentRoute.value.name
+})
+
+async function editThreshold() {
+  const alert = await alertController.create({
+    header: translate("Edit threshold"),
+    inputs: [{
+      name: "threshold",
+      placeholder: translate("Threshold"),
+      type: "number",
+      min: 0
+    }],
+    buttons: [{
+      text: translate('Cancel'),
+      role: "cancel"
     },
-    async editThreshold() {
-      const alert = await alertController.create({
-        header: translate("Edit threshold"),
-        inputs: [{
-          name: "threshold",
-          placeholder: translate("Threshold"),
-          type: "number",
-          min: 0
-        }],
-        buttons: [{
-          text: translate('Cancel'),
-          role: "cancel"
-        },
-        {
-          text: translate('Update'),
-        }]
-      })
+    {
+      text: translate('Update'),
+    }]
+  })
 
-      await alert.present()
+  await alert.present()
+}
+
+async function editSafetyStock() {
+  const alert = await alertController.create({
+    header: translate("Edit safety stock"),
+    inputs: [{
+      name: "safety-stock",
+      placeholder: translate("Safety stock"),
+      type: "number",
+      min: 0
+    }],
+    buttons: [{
+      text: translate('Cancel'),
+      role: "cancel"
     },
-    async editSafetyStock() {
-      const alert = await alertController.create({
-        header: translate("Edit safety stock"),
-        inputs: [{
-          name: "safety-stock",
-          placeholder: translate("Safety stock"),
-          type: "number",
-          min: 0
-        }],
-        buttons: [{
-          text: translate('Cancel'),
-          role: "cancel"
-        },
-        {
-          text: translate('Update'),
-        }]
-      })
+    {
+      text: translate('Update'),
+    }]
+  })
 
-      await alert.present()
-    }
-  },
-  setup() {
-    const router = useRouter();
-
-    return {
-      checkmarkDoneCircleOutline,
-      chevronDownOutline,
-      chevronUpOutline,
-      closeCircleOutline,
-      ellipsisVerticalOutline,
-      globeOutline,
-      optionsOutline,
-      pulseOutline,
-      router,
-      sendOutline,
-      storefrontOutline,
-      translate
-    };
-  },
-});
+  await alert.present()
+}
 </script>
 
 <style scoped>

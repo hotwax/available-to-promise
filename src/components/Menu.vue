@@ -110,25 +110,25 @@
       const store = useStore();
       const router = useRouter();
       const appPages = [
-        {
-          title: "Create Rule",
-          url: "/select-product",
-          iosIcon: optionsOutline,
-          mdIcon: optionsOutline,
-          meta: {
-            permissionId: "APP_SELECT_PRODUCT_VIEW"
+        // {
+        //   title: "Create Rule",
+        //   url: "/select-product",
+        //   iosIcon: optionsOutline,
+        //   mdIcon: optionsOutline,
+        //   meta: {
+        //     permissionId: "APP_SELECT_PRODUCT_VIEW"
 
-          }
-        },
-        {
-          title: "Rule Pipeline",
-          url: "/threshold-updates",
-          iosIcon: pulseOutline,
-          mdIcon: pulseOutline,
-          meta: {
-            permissionId: "APP_THRESHOLD_UPDATES_VIEW"
-          }
-        },
+        //   }
+        // },
+        // {
+        //   title: "Rule Pipeline",
+        //   url: "/threshold-updates",
+        //   iosIcon: pulseOutline,
+        //   mdIcon: pulseOutline,
+        //   meta: {
+        //     permissionId: "APP_THRESHOLD_UPDATES_VIEW"
+        //   }
+        // },
         {
           title: "Threshold",
           url: "/threshold",

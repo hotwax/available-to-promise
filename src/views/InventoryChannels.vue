@@ -25,48 +25,47 @@
               <div>
                 <ion-card-subtitle class="overline">{{ "Group ID" }}</ion-card-subtitle>
                 <ion-card-title>{{ "Group name" }}</ion-card-title>
+                <ion-card-subtitle>{{ "Group desc" }}</ion-card-subtitle>
               </div>
-
-              <ion-button fill="clear" color="medium">
-                <ion-icon :icon="copyOutline" slot="icon-only" />
-              </ion-button>
             </ion-card-header>
 
-            <ion-list>
-              <ion-item lines="full">
-                <ion-icon slot="start" :icon="globeOutline"/>
-                <ion-label>
-                  {{ "<threshold facility name>" }}
-                  <p>{{ "<facilityId>" }}</p>
-                </ion-label>
-                <ion-chip slot="end" outline>4</ion-chip>
-              </ion-item>
+            <ion-item lines="full">
+              <ion-icon slot="start" :icon="globeOutline"/>
+              <ion-label>
+                {{ "<threshold facility name>" }}
+                <p>{{ "<facilityId>" }}</p>
+              </ion-label>
+              <ion-chip slot="end" outline>4</ion-chip>
+            </ion-item>
 
-              <ion-item lines="full">
+            <ion-list>
+              <ion-item-divider color="light">
+                <ion-label>{{ translate("Facilities") }}</ion-label>
+                <ion-button slot="end" fill="clear" color="medium">
+                  <ion-icon :icon="optionsOutline" slot="icon-only" />
+                </ion-button>
+              </ion-item-divider>
+
+              <ion-item>
                 <ion-icon slot="start" :icon="storefrontOutline"/>
-                <ion-label>
-                  {{ "<retail type facilityid count>" }}
-                </ion-label>
-                <ion-chip slot="end" outline>15</ion-chip>
+                <ion-label>{{ "15 retail facilities" }}</ion-label>
               </ion-item>
 
               <ion-item lines="full">
                 <ion-icon slot="start" :icon="businessOutline"/>
-                <ion-label>
-                  {{ "<warehouse type facilityId count>" }}
-                </ion-label>
-                <ion-chip slot="end" outline>1</ion-chip>
+                <ion-label>{{ "1 warehouse" }}</ion-label>
               </ion-item>
   
               <ion-item lines="none">
                 <ion-button fill="clear">{{ translate("View details") }}</ion-button>
-                  <ion-button color="medium" fill="clear" slot="end">
+                <ion-button color="medium" fill="clear" slot="end">
                   <ion-icon :icon="ellipsisVerticalOutline" slot="icon-only"/>
                 </ion-button>
               </ion-item>
             </ion-list>
           </ion-card>
         </section>
+ 
         <section v-else-if="selectedSegment === 'publish'">
           <ion-card>
             <ion-card-header>
@@ -74,6 +73,7 @@
                 <ion-card-subtitle class="overline">{{ "SHOP CONFIG ID" }}</ion-card-subtitle>
                 <ion-card-title>{{ "Shop name" }}</ion-card-title>
               </div>
+              <ion-badge color="dark">{{ "in 2 minutes" }}</ion-badge>
             </ion-card-header>
 
             <ion-list>
@@ -99,8 +99,8 @@
               </ion-item>
   
               <ion-item lines="none">
-                <ion-button fill="clear">{{ translate("View details") }}</ion-button>
-                  <ion-button color="medium" fill="clear" slot="end">
+                <ion-button fill="clear">{{ translate("Save changes") }}</ion-button>
+                <ion-button color="medium" fill="clear" slot="end" @click="openShopActionsPopover($event)">
                   <ion-icon :icon="ellipsisVerticalOutline" slot="icon-only"/>
                 </ion-button>
               </ion-item>
@@ -118,79 +118,24 @@
   </ion-page>
 </template>
 
-<script lang="ts">
-import {
-  IonButton,
-  IonCard,
-  IonCardHeader,
-  IonCardSubtitle,
-  IonCardTitle,
-  IonChip,
-  IonContent,
-  IonFab,
-  IonFabButton,
-  IonHeader,
-  IonIcon,
-  IonItem,
-  IonLabel,
-  IonList,
-  IonPage,
-  IonSegment,
-  IonSegmentButton,
-  IonSelect,
-  IonSelectOption,
-  IonTitle,
-  IonToolbar
-} from '@ionic/vue';
-import { defineComponent } from 'vue';
-import { addOutline, albumsOutline, businessOutline, copyOutline, ellipsisVerticalOutline, globeOutline, storefrontOutline, timeOutline, timerOutline } from 'ionicons/icons';
+<script setup lang="ts">
+import { IonBadge, IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonItemDivider, IonLabel, IonList, IonPage, IonSegment, IonSegmentButton, IonSelect, IonSelectOption, IonTitle, IonToolbar, popoverController } from '@ionic/vue';
+import { ref } from 'vue';
+import { addOutline, albumsOutline, businessOutline, ellipsisVerticalOutline, globeOutline, optionsOutline, storefrontOutline, timeOutline, timerOutline } from 'ionicons/icons';
 import { translate } from '@hotwax/dxp-components';
+import ShopActionsPopover from '@/components/ShopActionsPopover.vue'
 
-export default defineComponent({
-  name: 'Inventory channels',
-  components: {
-    IonButton,
-    IonCard,
-    IonCardHeader,
-    IonCardSubtitle,
-    IonCardTitle,
-    IonChip,
-    IonContent,
-    IonFab,
-    IonFabButton,
-    IonHeader,
-    IonIcon,
-    IonItem,
-    IonLabel,
-    IonList,
-    IonPage,
-    IonSegment,
-    IonSegmentButton,
-    IonSelect,
-    IonSelectOption,
-    IonTitle,
-    IonToolbar
-  },
-  data() {
-    return {
-      selectedSegment: 'channels'
-    }
-  },
-  setup() {
-    return {
-      addOutline,
-      albumsOutline,
-      businessOutline,
-      copyOutline,
-      ellipsisVerticalOutline,
-      globeOutline,
-      storefrontOutline,
-      timeOutline,
-      timerOutline,
-      translate
-    };
-  },
-});
+const selectedSegment = ref("channels")
+
+async function openShopActionsPopover(event: Event) {
+  const popover = await popoverController.create({
+    component: ShopActionsPopover,
+    showBackdrop: false,
+    event
+  });
+
+  return popover.present();
+}
 </script>
 
 <style scoped>

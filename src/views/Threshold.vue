@@ -8,6 +8,8 @@
 
     <ion-content>
       <main>
+        <ScheduleRuleItem />
+
         <section>
           <RuleItem />
           <RuleItem />
@@ -23,38 +25,9 @@
   </ion-page>
 </template>
 
-<script lang="ts">
-import {
-  IonContent,
-  IonFab,
-  IonFabButton,
-  IonHeader,
-  IonIcon,
-  IonPage,
-  IonTitle,
-  IonToolbar
-} from '@ionic/vue';
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
 import { addOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue'
-
-export default defineComponent({
-  name: 'SelectProduct',
-  components: {
-    IonContent,
-    IonFab,
-    IonFabButton,
-    IonHeader,
-    IonIcon,
-    IonPage,
-    IonTitle,
-    IonToolbar,
-    RuleItem
-  },
-  setup() {
-    return {
-      addOutline
-    };
-  },
-});
+import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
 </script>

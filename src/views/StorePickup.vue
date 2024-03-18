@@ -22,13 +22,11 @@
 
     <ion-content>
       <main>
-        <section v-if="selectedSegment === 'productAndFacility'">
-          <RuleItem />
-          <RuleItem />
-        </section>
-        <section v-else-if="selectedSegment === 'productAndChannel'">
-          <RuleItem />
-          <RuleItem />
+        <ScheduleRuleItem v-if="selectedSegment !== 'facility'" />
+
+        <section v-if="selectedSegment === 'productAndFacility' || selectedSegment === 'productAndChannel'">
+          <RuleItem :selectedSegment="selectedSegment" />
+          <RuleItem :selectedSegment="selectedSegment" />
         </section>
         <section v-else>
           <FacilityItem />
@@ -45,53 +43,14 @@
   </ion-page>
 </template>
 
-<script lang="ts">
-import {
-  IonContent,
-  IonFab,
-  IonFabButton,
-  IonHeader,
-  IonIcon,
-  IonLabel,
-  IonPage,
-  IonSegment,
-  IonSegmentButton,
-  IonTitle,
-  IonToolbar
-} from '@ionic/vue';
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonLabel, IonPage, IonSegment, IonSegmentButton, IonTitle, IonToolbar } from '@ionic/vue';
+import { ref } from 'vue';
 import { addOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue'
 import FacilityItem from '@/components/FacilityItem.vue'
 import { translate } from '@hotwax/dxp-components';
+import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
 
-export default defineComponent({
-  name: 'StorePickup',
-  components: {
-    FacilityItem,
-    IonContent,
-    IonFab,
-    IonFabButton,
-    IonHeader,
-    IonIcon,
-    IonLabel,
-    IonPage,
-    IonSegment,
-    IonSegmentButton,
-    IonTitle,
-    IonToolbar,
-    RuleItem
-  },
-  data() {
-    return {
-      selectedSegment: 'productAndFacility'
-    }
-  },
-  setup() {
-    return {
-      addOutline,
-      translate
-    };
-  },
-});
+const selectedSegment = ref("productAndFacility")
 </script>

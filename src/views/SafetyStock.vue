@@ -8,6 +8,8 @@
 
     <ion-content>
       <main>
+        <ScheduleRuleItem />
+
         <section>
           <RuleItem />
           <RuleItem />
@@ -23,47 +25,16 @@
   </ion-page>
 </template>
 
-<script lang="ts">
-import {
-  IonContent,
-  IonFab,
-  IonFabButton,
-  IonHeader,
-  IonIcon,
-  IonPage,
-  IonTitle,
-  IonToolbar
-} from '@ionic/vue';
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
 import { addOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue';
-import { useRouter } from 'vue-router';
+import { useRouter } from "vue-router";
+import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
 
-export default defineComponent({
-  name: 'SafetyStock',
-  components: {
-    IonContent,
-    IonFab,
-    IonFabButton,
-    IonHeader,
-    IonIcon,
-    IonPage,
-    IonTitle,
-    IonToolbar,
-    RuleItem
-  },
-  methods: {
-    createRule() {
-      this.router.replace({ path: '/create-rule' })
-    }
-  },
-  setup() {
-    const router = useRouter()
+const router = useRouter()
 
-    return {
-      addOutline,
-      router
-    };
-  },
-});
+function createRule() {
+  router.replace({ path: '/create-rule' })
+}
 </script>
