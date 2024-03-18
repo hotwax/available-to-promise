@@ -110,47 +110,31 @@
       const store = useStore();
       const router = useRouter();
       const appPages = [
-        // {
-        //   title: "Create Rule",
-        //   url: "/select-product",
-        //   iosIcon: optionsOutline,
-        //   mdIcon: optionsOutline,
-        //   meta: {
-        //     permissionId: "APP_SELECT_PRODUCT_VIEW"
-
-        //   }
-        // },
-        // {
-        //   title: "Rule Pipeline",
-        //   url: "/threshold-updates",
-        //   iosIcon: pulseOutline,
-        //   mdIcon: pulseOutline,
-        //   meta: {
-        //     permissionId: "APP_THRESHOLD_UPDATES_VIEW"
-        //   }
-        // },
         {
           title: "Threshold",
           url: "/threshold",
+          childRoutes: ["/create-threshold"],
           iosIcon: globeOutline,
           mdIcon: globeOutline
         },
         {
           title: "Safety stock",
           url: "/safety-stock",
-          childRoutes: ["/create-rule"],
+          childRoutes: ["/create-safety-stock"],
           iosIcon: pulseOutline,
           mdIcon: pulseOutline
         },
         {
           title: "Store pickup",
           url: "/store-pickup",
+          childRoutes: ["/create-store-pickup"],
           iosIcon: storefrontOutline,
           mdIcon: storefrontOutline
         },
         {
           title: "Shipping",
           url: "/shipping",
+          childRoutes: ["/create-shipping"],
           iosIcon: sendOutline,
           mdIcon: sendOutline
         },

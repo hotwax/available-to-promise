@@ -13,7 +13,10 @@ import SafetyStock from '@/views/SafetyStock.vue'
 import StorePickup from '@/views/StorePickup.vue'
 import Shipping from '@/views/Shipping.vue'
 import InventoryChannels from '@/views/InventoryChannels.vue'
-import CreateRule from '@/views/CreateRule.vue'
+import CreateThreshold from '@/views/CreateThreshold.vue';
+import CreateSafetyStock from '@/views/CreateSafetyStock.vue'
+import CreateStorePickup from '@/views/CreateStorePickup.vue'
+import CreateShipping from '@/views/CreateShipping.vue'
 
 import { hasPermission } from '@/authorization';
 import { showToast } from '@/utils'
@@ -53,7 +56,7 @@ const loginGuard = (to: any, from: any, next: any) => {
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    redirect: '/select-product'
+    redirect: '/threshold'
   },
   {
     path: '/select-product',
@@ -95,45 +98,65 @@ const routes: Array<RouteRecordRaw> = [
     beforeEnter: authGuard
   },
   {
-    path: '/create-rule',
-    name: 'Create rule',
-    component: CreateRule,
+    path: '/create-threshold',
+    name: 'Create threshold',
+    component: CreateThreshold,
     beforeEnter: authGuard
   },
   {
-    path: '/select-product-csv-upload',
-    name: 'SelectProductCSVUpload',
-    component: SelectProductCSVUpload,
-    meta: {
-      permissionId: ""
-    }
+    path: '/create-safety-stock',
+    name: 'Create safety stock',
+    component: CreateSafetyStock,
+    beforeEnter: authGuard
   },
   {
-    path: '/select-facility',
-    name: 'SelectFacility',
-    component: SelectFacility,
-    beforeEnter: authGuard,
-    meta: {
-      permissionId: ""
-    }
+    path: '/create-store-pickup',
+    name: 'Create store pickup',
+    component: CreateStorePickup,
+    beforeEnter: authGuard
   },
   {
-    path: '/select-facility-csv-upload',
-    name: 'SelectFacilityCSVUpload',
-    component: SelectFacilityCSVUpload,
-    meta: {
-      permissionId: ""
-    }
+    path: '/create-shipping',
+    name: 'Create shipping',
+    component: CreateShipping,
+    beforeEnter: authGuard
   },
-  {
-    path: '/threshold-updates',
-    name: 'ThresholdUpdates',
-    component: ThresholdUpdates,
-    beforeEnter: authGuard,
-    meta: {
-      permissionId: "APP_THRESHOLD_UPDATES_VIEW"
-    }
-  },
+
+
+  // {
+  //   path: '/select-product-csv-upload',
+  //   name: 'SelectProductCSVUpload',
+  //   component: SelectProductCSVUpload,
+  //   meta: {
+  //     permissionId: ""
+  //   }
+  // },
+  // {
+  //   path: '/select-facility',
+  //   name: 'SelectFacility',
+  //   component: SelectFacility,
+  //   beforeEnter: authGuard,
+  //   meta: {
+  //     permissionId: ""
+  //   }
+  // },
+  // {
+  //   path: '/select-facility-csv-upload',
+  //   name: 'SelectFacilityCSVUpload',
+  //   component: SelectFacilityCSVUpload,
+  //   meta: {
+  //     permissionId: ""
+  //   }
+  // },
+  // {
+  //   path: '/threshold-updates',
+  //   name: 'ThresholdUpdates',
+  //   component: ThresholdUpdates,
+  //   beforeEnter: authGuard,
+  //   meta: {
+  //     permissionId: "APP_THRESHOLD_UPDATES_VIEW"
+  //   }
+  // },
   {
     path: '/login',
     name: 'DxpLogin',
@@ -146,15 +169,15 @@ const routes: Array<RouteRecordRaw> = [
     component: Settings,
     beforeEnter: authGuard
   },
-  {
-    path: '/schedule-threshold',
-    name: 'ScheduleThreshold',
-    component: ScheduleThreshold,
-    beforeEnter: authGuard,
-    meta: {
-      permissionId: "APP_SAVE_THRESHOLD_VIEW"
-    }
-  },
+  // {
+  //   path: '/schedule-threshold',
+  //   name: 'ScheduleThreshold',
+  //   component: ScheduleThreshold,
+  //   beforeEnter: authGuard,
+  //   meta: {
+  //     permissionId: "APP_SAVE_THRESHOLD_VIEW"
+  //   }
+  // },
 ]
 
 const router = createRouter({

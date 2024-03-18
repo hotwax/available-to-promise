@@ -312,6 +312,25 @@ hr {
   border-bottom: var(--border-medium);
 }
 
+.rule-config {
+  grid-column: span 2;
+}
+
+.rule-inputs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+}
+
+.section-header {
+  padding: var(--spacer-xs) 10px 0px;
+}
+
+ion-content>section {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  align-items: start;
+}
+
 @media (min-width: 700px) {
   main {
     max-width: 375px;

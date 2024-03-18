@@ -35,7 +35,7 @@
       </main>
 
       <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-        <ion-fab-button>
+        <ion-fab-button @click="createStorePickup()">
           <ion-icon :icon="addOutline" />
         </ion-fab-button>
       </ion-fab>
@@ -51,6 +51,13 @@ import RuleItem from '@/components/RuleItem.vue'
 import FacilityItem from '@/components/FacilityItem.vue'
 import { translate } from '@hotwax/dxp-components';
 import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
+import { useRouter } from 'vue-router';
 
 const selectedSegment = ref("productAndFacility")
+
+const router = useRouter()
+
+function createStorePickup() {
+  router.replace({ path: '/create-store-pickup' })
+}
 </script>

@@ -35,6 +35,6 @@ import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
 const router = useRouter()
 
 function createRule() {
-  router.replace({ path: '/create-rule' })
+  router.replace({ path: '/create-safety-stock' })
 }
 </script>

@@ -36,7 +36,7 @@
     </ion-content>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button>
+      <ion-fab-button @click="createShipping()">
         <ion-icon :icon="addOutline" />
       </ion-fab-button>
     </ion-fab>
@@ -51,6 +51,13 @@ import RuleItem from '@/components/RuleItem.vue'
 import { translate } from '@hotwax/dxp-components';
 import FacilityItem from '@/components/FacilityItem.vue';
 import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
+import { useRouter } from 'vue-router';
 
 const selectedSegment = ref("productAndFacility")
+
+const router = useRouter()
+
+function createShipping() {
+  router.replace({ path: '/create-shipping' })
+}
 </script>
