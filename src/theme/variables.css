@@ -390,8 +390,4 @@ ion-content>section {
   ion-header {
     display: flex;
   }
-
-  main>section {
-    max-width: 50ch;
-  }
 }

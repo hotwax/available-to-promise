@@ -37,5 +37,4 @@ const router = useRouter()
 function CreateThreshold() {
   router.replace({ path: '/create-threshold' })
 }
-
 </script>
