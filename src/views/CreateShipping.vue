@@ -107,22 +107,14 @@ const selectedSegment = ref("facility")
 </script>
 
 <style scoped>
-section {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  align-items: start;
+ion-card-header {
+  display: flex;
+  flex-direction: row ;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.section-header {
-  padding: var(--spacer-xs) 10px 0px;
-}
-
-.rule-config {
-  grid-column: span 2;
-}
-
-.rule-inputs {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+ion-card-header > ion-checkbox {
+  flex-shrink: 0;
 }
 </style>
