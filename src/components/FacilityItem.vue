@@ -36,11 +36,12 @@ import { storefrontOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
 import { translate } from '@hotwax/dxp-components';
 
+const router = useRouter();
+
 const selectedPage = ref({
   path: '',
   name: ''
 }) as any
-const router = useRouter();
 
 onMounted(() => {
     selectedPage.value.path = router.currentRoute.value.path

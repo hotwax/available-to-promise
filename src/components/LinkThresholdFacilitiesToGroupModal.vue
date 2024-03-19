@@ -6,39 +6,39 @@
           <ion-icon slot="icon-only" :icon="close" />
         </ion-button>
       </ion-buttons>
-      <ion-title>{{ translate("Link facilities") }}</ion-title>
+      <ion-title>{{ translate("Link threshold") }}</ion-title>
     </ion-toolbar>
   </ion-header>
 
   <ion-content>
     <ion-searchbar />
 
-    <ion-list>
-      <ion-item lines="none">
-        <ion-checkbox>
+    <ion-radio-group>
+      <ion-item>
+        <ion-radio>
           <ion-label>
-            {{ "facilityName" }}
-            <p>{{ "facilityId" }}</p>
+            {{ "Facility name" }}
+            <p>{{ "Facility ID" }}</p>
           </ion-label>
-        </ion-checkbox>
+        </ion-radio>
       </ion-item>
-      <ion-item lines="none">
-        <ion-checkbox>
+      <ion-item>
+        <ion-radio>
           <ion-label>
-            {{ "facilityName" }}
-            <p>{{ "facilityId" }}</p>
+            {{ "Facility name" }}
+            <p>{{ "Facility ID" }}</p>
           </ion-label>
-        </ion-checkbox>
+        </ion-radio>
       </ion-item>
-      <ion-item lines="none">
-        <ion-checkbox>
+      <ion-item>
+        <ion-radio>
           <ion-label>
-            {{ "facilityName" }}
-            <p>{{ "facilityId" }}</p>
+            {{ "Facility name" }}
+            <p>{{ "Facility ID" }}</p>
           </ion-label>
-        </ion-checkbox>
-      </ion-item> 
-    </ion-list>
+        </ion-radio>
+      </ion-item>
+    </ion-radio-group>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
       <ion-fab-button>
@@ -49,9 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonButton, IonButtons, IonCheckbox, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonSearchbar, IonTitle, IonToolbar } from "@ionic/vue";
+import { IonButton, IonButtons, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonLabel, IonRadio, IonRadioGroup, IonSearchbar, IonTitle, IonToolbar } from "@ionic/vue";
 import { close, saveOutline } from "ionicons/icons";
 import { translate } from '@hotwax/dxp-components'
-
-
 </script>

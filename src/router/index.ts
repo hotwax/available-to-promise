@@ -121,42 +121,6 @@ const routes: Array<RouteRecordRaw> = [
     component: CreateShipping,
     beforeEnter: authGuard
   },
-
-
-  // {
-  //   path: '/select-product-csv-upload',
-  //   name: 'SelectProductCSVUpload',
-  //   component: SelectProductCSVUpload,
-  //   meta: {
-  //     permissionId: ""
-  //   }
-  // },
-  // {
-  //   path: '/select-facility',
-  //   name: 'SelectFacility',
-  //   component: SelectFacility,
-  //   beforeEnter: authGuard,
-  //   meta: {
-  //     permissionId: ""
-  //   }
-  // },
-  // {
-  //   path: '/select-facility-csv-upload',
-  //   name: 'SelectFacilityCSVUpload',
-  //   component: SelectFacilityCSVUpload,
-  //   meta: {
-  //     permissionId: ""
-  //   }
-  // },
-  // {
-  //   path: '/threshold-updates',
-  //   name: 'ThresholdUpdates',
-  //   component: ThresholdUpdates,
-  //   beforeEnter: authGuard,
-  //   meta: {
-  //     permissionId: "APP_THRESHOLD_UPDATES_VIEW"
-  //   }
-  // },
   {
     path: '/login',
     name: 'DxpLogin',
@@ -168,16 +132,7 @@ const routes: Array<RouteRecordRaw> = [
     name: "Settings",
     component: Settings,
     beforeEnter: authGuard
-  },
-  // {
-  //   path: '/schedule-threshold',
-  //   name: 'ScheduleThreshold',
-  //   component: ScheduleThreshold,
-  //   beforeEnter: authGuard,
-  //   meta: {
-  //     permissionId: "APP_SAVE_THRESHOLD_VIEW"
-  //   }
-  // },
+  }
 ]
 
 const router = createRouter({

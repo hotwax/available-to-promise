@@ -42,81 +42,7 @@
         </ion-card>
       </section>
 
-      <div class="section-header">
-        <h1>{{ translate("Products by tags") }}</h1>
-      </div>
-
-      <section>
-        <ion-card>
-          <ion-item lines="none">
-            <ion-label>{{ translate("Included") }}</ion-label>
-            <ion-button fill="clear">
-              {{ translate("Add") }}
-              <ion-icon :icon="addCircleOutline" slot="end" />
-            </ion-button>
-          </ion-item>
-          <ion-card-content>
-            <ion-chip outline>
-              {{ "Tag name" }}
-              <ion-icon :icon="closeCircle"/>
-            </ion-chip>
-          </ion-card-content>
-        </ion-card>
-
-        <ion-card>
-          <ion-item lines="none"> 
-            <ion-label>{{ translate("Excluded") }}</ion-label>
-            <ion-button fill="clear">
-              {{ translate("Add") }}
-              <ion-icon :icon="addCircleOutline" slot="end" />
-            </ion-button>
-          </ion-item>
-          <ion-card-content>
-            <ion-chip outline>
-              {{ "Tag name" }}
-              <ion-icon :icon="closeCircle"/>
-            </ion-chip>
-          </ion-card-content>
-        </ion-card>
-      </section>
-
-      <div class="section-header">
-        <h1>{{ translate("Products by feature") }}</h1>
-      </div>
-
-      <section>
-        <ion-card>
-          <ion-item lines="none">
-            <ion-label>{{ translate("Included") }}</ion-label>
-            <ion-button fill="clear">
-              {{ translate("Add") }}
-              <ion-icon :icon="addCircleOutline" slot="end" />
-            </ion-button>
-          </ion-item>
-          <ion-card-content>
-            <ion-chip outline>
-              {{ "Feature name" }}
-              <ion-icon :icon="closeCircle"/>
-            </ion-chip>
-          </ion-card-content>
-        </ion-card>
-
-        <ion-card>
-          <ion-item lines="none"> 
-            <ion-label>{{ translate("Excluded") }}</ion-label>
-            <ion-button fill="clear">
-              {{ translate("Add") }}
-              <ion-icon :icon="addCircleOutline" slot="end" />
-            </ion-button>
-          </ion-item>
-          <ion-card-content>
-            <ion-chip outline>
-              {{ "Feature name" }}
-              <ion-icon :icon="closeCircle"/>
-            </ion-chip>
-          </ion-card-content>
-        </ion-card>
-      </section>
+      <ProductFilterByItem />
     </ion-content>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
@@ -128,9 +54,10 @@
 </template>
 
 <script setup lang="ts">
-import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
-import { addCircleOutline, closeCircle, saveOutline } from 'ionicons/icons'
+import { IonBackButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
+import { saveOutline } from 'ionicons/icons'
 import { translate } from "@hotwax/dxp-components";
+import ProductFilterByItem from '@/components/ProductFilterByItem.vue';
 </script>
 
 <style scoped>

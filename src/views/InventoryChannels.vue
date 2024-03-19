@@ -35,7 +35,7 @@
                 {{ "<threshold facility name>" }}
                 <p>{{ "<facilityId>" }}</p>
               </ion-label>
-              <ion-button slot="end" fill="clear" color="medium" @click="openLinkThresholdFacilitesModal()">
+              <ion-button slot="end" fill="clear" color="medium" @click="openLinkThresholdFacilitiesToGroupModal()">
                 <ion-icon :icon="optionsOutline" slot="icon-only" />
               </ion-button>
             </ion-item>
@@ -43,7 +43,7 @@
             <ion-list>
               <ion-item-divider color="light">
                 <ion-label>{{ translate("Facilities") }}</ion-label>
-                <ion-button slot="end" fill="clear" color="medium" @click="openLinkFacilitiesModal()">
+                <ion-button slot="end" fill="clear" color="medium" @click="openLinkFacilitiesToGroupModal()">
                   <ion-icon :icon="optionsOutline" slot="icon-only" />
                 </ion-button>
               </ion-item-divider>
@@ -127,8 +127,8 @@ import { addOutline, albumsOutline, businessOutline, ellipsisVerticalOutline, gl
 import { translate } from '@hotwax/dxp-components';
 import ShopActionsPopover from '@/components/ShopActionsPopover.vue'
 import CreateGroupModal from '@/components/CreateGroupModal.vue'
-import LinkFacilitiesModal from '@/components/LinkFacilitiesModal.vue'
-import LinkThresholdFacilitiesModal from '@/components/LinkThresholdFacilitiesModal.vue'
+import LinkFacilitiesToGroupModal from '@/components/LinkFacilitiesToGroupModal.vue'
+import LinkThresholdFacilitiesToGroupModal from '@/components/LinkThresholdFacilitiesToGroupModal.vue'
 
 const selectedSegment = ref("channels")
 
@@ -150,17 +150,17 @@ async function openCreateGroupModal() {
   return popover.present();
 }
 
-async function openLinkFacilitiesModal() {
+async function openLinkFacilitiesToGroupModal() {
   const popover = await modalController.create({
-    component: LinkFacilitiesModal
+    component: LinkFacilitiesToGroupModal
   });
 
   return popover.present();
 }
 
-async function openLinkThresholdFacilitesModal() {
+async function openLinkThresholdFacilitiesToGroupModal() {
   const popover = await modalController.create({
-    component: LinkThresholdFacilitiesModal
+    component: LinkThresholdFacilitiesToGroupModal
   });
 
   return popover.present();
