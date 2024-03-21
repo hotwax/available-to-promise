@@ -199,7 +199,7 @@ import { useRouter } from 'vue-router';
 import { mapGetters, useStore } from 'vuex';
 import ProductFilterModal from '@/components/ProductFilterModal.vue';
 import { hasError, showToast } from '@/utils';
-import { translate } from '@/i18n';
+import { translate } from '@hotwax/dxp-components';
 import { ProductService } from '@/services/ProductService';
 import { JobService } from '@/services/JobService';
 import { DateTime } from 'luxon';

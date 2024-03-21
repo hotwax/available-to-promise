@@ -4,7 +4,7 @@ import RootState from '@/store/RootState'
 import ProductState from './ProductState'
 import * as types from './mutation-types'
 import { hasError, showToast, getFeature } from '@/utils'
-import { translate } from '@/i18n'
+import { translate } from '@hotwax/dxp-components'
 import logger from "@/logger";
 
 const actions: ActionTree<ProductState, RootState> = {

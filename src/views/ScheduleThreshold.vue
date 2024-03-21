@@ -135,7 +135,7 @@ import {
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { getResponseError, handleDateTimeInput, hasError, showToast } from '@/utils';
-import { translate } from '@/i18n';
+import { translate } from '@hotwax/dxp-components';
 import { JobService } from '@/services/JobService';
 import { DateTime } from 'luxon';
 import { mapGetters, useStore } from 'vuex';

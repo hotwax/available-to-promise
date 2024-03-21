@@ -117,7 +117,7 @@ import { mapGetters, useStore } from "vuex";
 import { handleDateTimeInput, hasError, showToast } from "@/utils";
 import { JobService } from "@/services/JobService";
 import { DateTime } from 'luxon';
-import { translate } from "@/i18n";
+import { translate } from "@hotwax/dxp-components";
 import logger from "@/logger";
 import { Actions, hasPermission } from '@/authorization'
 

@@ -54,7 +54,7 @@ import { DateTime } from 'luxon';
 import { JobService } from '@/services/JobService';
 import { hasError, showToast } from '@/utils';
 import logger from '@/logger';
-import { translate } from '@/i18n';
+import { translate } from '@hotwax/dxp-components';
 import { Actions, hasPermission } from '@/authorization'
 
 export default defineComponent({

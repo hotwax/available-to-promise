@@ -4,7 +4,7 @@ import JobState from './JobState'
 import * as types from './mutation-types'
 import { getResponseError, hasError, showToast } from '@/utils'
 import { JobService } from '@/services/JobService'
-import { translate } from '@/i18n'
+import { translate } from '@hotwax/dxp-components'
 import { DateTime } from 'luxon';
 import logger from "@/logger";
 
