@@ -3,7 +3,7 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-menu-button slot="start" />
-        <ion-title>{{ $t("Settings") }}</ion-title>
+        <ion-title>{{ translate("Settings") }}</ion-title>
       </ion-toolbar>
     </ion-header>
     
@@ -22,17 +22,17 @@
               <ion-card-title>{{ userProfile?.partyName }}</ion-card-title>
             </ion-card-header>
           </ion-item>
-          <ion-button color="danger" @click="logout()">{{ $t("Logout") }}</ion-button>
+          <ion-button color="danger" @click="logout()">{{ translate("Logout") }}</ion-button>
           <ion-button fill="outline" @click="goToLaunchpad()">
-            {{ $t("Go to Launchpad") }}
+            {{ translate("Go to Launchpad") }}
             <ion-icon slot="end" :icon="openOutline" />
           </ion-button>
           <!-- Commenting this code as we currently do not have reset password functionality -->
-          <!-- <ion-button fill="outline" color="medium">{{ $t("Reset password") }}</ion-button> -->
+          <!-- <ion-button fill="outline" color="medium">{{ translate("Reset password") }}</ion-button> -->
         </ion-card>
       </div>
       <div class="section-header">
-        <h1>{{ $t('OMS') }}</h1>
+        <h1>{{ translate('OMS') }}</h1>
       </div>
       <section>
         <DxpOmsInstanceNavigator />
@@ -40,17 +40,17 @@
         <ion-card>
           <ion-card-header>
             <ion-card-subtitle>
-              {{ $t("Product Store") }}
+              {{ translate("Product Store") }}
             </ion-card-subtitle>
             <ion-card-title>
-              {{ $t("Store") }}
+              {{ translate("Store") }}
             </ion-card-title>
           </ion-card-header>
           <ion-card-content>
-            {{ $t('A store repesents a company or a unique catalog of products. If your OMS is connected to multiple eCommerce stores sellling different collections of products, you may have multiple Product Stores set up in HotWax Commerce.') }}
+            {{ translate('A store repesents a company or a unique catalog of products. If your OMS is connected to multiple eCommerce stores sellling different collections of products, you may have multiple Product Stores set up in HotWax Commerce.') }}
           </ion-card-content>
           <ion-item lines="none">
-            <ion-label>{{ $t("Select store") }}</ion-label>
+            <ion-label>{{ translate("Select store") }}</ion-label>
             <ion-select interface="popover" :value="currentEComStore.productStoreId" @ionChange="setEComStore($event)">
               <ion-select-option v-for="store in (userProfile ? userProfile.stores : [])" :key="store.productStoreId" :value="store.productStoreId" >{{ store.storeName }}</ion-select-option>
             </ion-select>
@@ -65,15 +65,15 @@
         <ion-card>
           <ion-card-header>
             <ion-card-title>
-              {{ $t('Timezone') }}
+              {{ translate('Timezone') }}
             </ion-card-title>
           </ion-card-header>
           <ion-card-content>
-            {{ $t('The timezone you select is used to ensure automations you schedule are always accurate to the time you select.') }}
+            {{ translate('The timezone you select is used to ensure automations you schedule are always accurate to the time you select.') }}
           </ion-card-content>
           <ion-item lines="none">
             <ion-label> {{ userProfile && userProfile.userTimeZone ? userProfile.userTimeZone : '-' }} </ion-label>
-            <ion-button @click="changeTimeZone()" slot="end" fill="outline" color="dark">{{ $t("Change") }}</ion-button>
+            <ion-button @click="changeTimeZone()" slot="end" fill="outline" color="dark">{{ translate("Change") }}</ion-button>
           </ion-item>
         </ion-card>
       </section>
@@ -88,7 +88,8 @@ import { codeWorkingOutline, ellipsisVertical, globeOutline, openOutline, person
 import { mapGetters, useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import TimeZoneModal from '@/views/TimezoneModal.vue';
-import Image from '@/components/Image.vue'
+import Image from '@/components/Image.vue';
+import { translate } from '@hotwax/dxp-components';
 
 export default defineComponent({
   name: 'Settings',
@@ -169,7 +170,8 @@ export default defineComponent({
       store,
       router,
       timeOutline,
-      openOutline
+      openOutline,
+      translate
     }
   }
 });

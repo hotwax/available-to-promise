@@ -6,18 +6,18 @@
           <ion-icon slot="icon-only" :icon="closeOutline" />
         </ion-button>
       </ion-buttons>
-      <ion-title>{{ $t("Set safety stock") }}</ion-title>
+      <ion-title>{{ translate("Set safety stock") }}</ion-title>
     </ion-toolbar>
   </ion-header>
 
   <ion-content>
     <ion-item>
-      <ion-label>{{ $t("Safety stock") }}</ion-label>
+      <ion-label>{{ translate("Safety stock") }}</ion-label>
       <ion-input placeholder="new safety stock" />
     </ion-item>
     
     <ion-list>
-      <ion-list-header>{{ $t("Info") }}</ion-list-header>
+      <ion-list-header>{{ translate("Info") }}</ion-list-header>
     
       <ion-item>
         <ion-icon :icon="shirtOutline" slot="start" />
@@ -29,11 +29,11 @@
       </ion-item>
 
       <ion-item lines="none">
-        <ion-label class="ion-text-wrap">{{ $t("You can also download the products, locations and safety stock you selected in a CSV to upload in other systems") }}</ion-label>
+        <ion-label class="ion-text-wrap">{{ translate("You can also download the products, locations and safety stock you selected in a CSV to upload in other systems") }}</ion-label>
       </ion-item>
     </ion-list>
 
-    <ion-button fill="outline" color="medium">{{ $t("Download data in csv") }}</ion-button>
+    <ion-button fill="outline" color="medium">{{ translate("Download data in csv") }}</ion-button>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
       <ion-fab-button>
@@ -68,6 +68,7 @@ import {
   businessOutline,
   cloudUploadOutline
 } from 'ionicons/icons';
+import { translate } from '@hotwax/dxp-components';
 
 export default defineComponent({
   name: 'SatetyStockModal',
@@ -98,6 +99,7 @@ export default defineComponent({
       cloudUploadOutline,
       shirtOutline,
       businessOutline,
+      translate
     };
   },
 });

@@ -2,25 +2,25 @@
   <section>
     <ion-item lines="none">
       <h1>{{ title }}</h1>
-      <ion-badge slot="end" color="dark" v-if="job?.runTime">{{ $t("running") }} {{ timeTillJob(runTime ? runTime : job.runTime) }}</ion-badge>
+      <ion-badge slot="end" color="dark" v-if="job?.runTime">{{ translate("running") }} {{ timeTillJob(runTime ? runTime : job.runTime) }}</ion-badge>
     </ion-item>
 
     <ion-list>
       <ion-item>
         <ion-icon slot="start" :icon="calendarClearOutline" />
-        <ion-label>{{ $t("Last run") }}</ion-label>
-        <ion-label slot="end">{{ job?.lastUpdatedStamp ? getTime(job.lastUpdatedStamp) : $t('No previous occurrence') }}</ion-label>
+        <ion-label>{{ translate("Last run") }}</ion-label>
+        <ion-label slot="end">{{ job?.lastUpdatedStamp ? getTime(job.lastUpdatedStamp) : translate('No previous occurrence') }}</ion-label>
       </ion-item>
 
       <ion-item>
         <ion-icon slot="start" :icon="timeOutline" />
-        <ion-label>{{ $t("Run time") }}</ion-label>
-        <ion-label @click="() => isOpen = true" slot="end">{{ job?.runTime ? getTime(runTime ? runTime : job.runTime) : $t('Select run time') }}</ion-label>
+        <ion-label>{{ translate("Run time") }}</ion-label>
+        <ion-label @click="() => isOpen = true" slot="end">{{ job?.runTime ? getTime(runTime ? runTime : job.runTime) : translate('Select run time') }}</ion-label>
         <!-- TODO: display a button when we are not having a runtime and open the datetime component
         on click of that button
         Currently, when mapping the same datetime component for label and button so it's not working so for
         now commented the button and added a fallback string -->
-        <!-- <ion-button id="open-run-time-modal" size="small" fill="outline" color="medium" v-show="!job?.runTime">{{ $t("Select run time") }}</ion-button> -->
+        <!-- <ion-button id="open-run-time-modal" size="small" fill="outline" color="medium" v-show="!job?.runTime">{{ translate("Select run time") }}</ion-button> -->
         <ion-modal :is-open="isOpen" @didDismiss="() => isOpen = false">
           <ion-content force-overscroll="false">
             <ion-datetime
@@ -35,52 +35,52 @@
 
       <ion-item lines="inset">
         <ion-icon slot="start" :icon="timerOutline" />
-        <ion-label>{{ $t("Schedule") }}</ion-label>
-        <ion-select :interface-options="customPopoverOptions" interface="popover" :value="jobStatus" :placeholder="$t('Disabled')" @ionChange="($event) => jobStatus = $event['detail'].value">
-          <ion-select-option v-for="freq in generateFrequencyOptions" :key="freq.value" :value="freq.value">{{ $t(freq.label) }}</ion-select-option>
+        <ion-label>{{ translate("Schedule") }}</ion-label>
+        <ion-select :interface-options="customPopoverOptions" interface="popover" :value="jobStatus" :placeholder="translate('Disabled')" @ionChange="($event) => jobStatus = $event['detail'].value">
+          <ion-select-option v-for="freq in generateFrequencyOptions" :key="freq.value" :value="freq.value">{{ translate(freq.label) }}</ion-select-option>
         </ion-select>
       </ion-item>
 
       <!-- TODO: enable this feature of passing count when supported on backend -->
       <!-- <ion-item>
         <ion-icon slot="start" :icon="syncOutline" />
-        <ion-label>{{ $t("Repeat untill disabled") }}</ion-label>
+        <ion-label>{{ translate("Repeat untill disabled") }}</ion-label>
         <ion-checkbox slot="end" :checked="repeat" @ionChange="repeatUntillDisabled($event['detail'].checked)"/>
       </ion-item>
 
       <ion-item v-show="!repeat">
-        <ion-label>{{ $t("Auto disable after") }}</ion-label>
-        <ion-input :placeholder="$t('occurrences')" v-model="count"/>
+        <ion-label>{{ translate("Auto disable after") }}</ion-label>
+        <ion-input :placeholder="translate('occurrences')" v-model="count"/>
       </ion-item> -->
       <ion-item v-if="job?.systemJobEnumId === 'JOB_EXP_PROD_THRSHLD'" lines="inset">
         <ion-icon slot="start" :icon="cogOutline" />
-        <ion-label>{{ $t("Name") }}</ion-label>
+        <ion-label>{{ translate("Name") }}</ion-label>
         <ion-input class="ion-text-end" name="ruleName" v-model="ruleName" id="ruleName" />
       </ion-item>
 
       <ion-item v-if="job?.runtimeData?.searchPreferenceId" button detail="true" @click="updateThresholdRule" lines="full">
         <ion-icon slot="start" :icon="pencilOutline" />
-        <ion-label class="ion-text-wrap">{{ $t("Edit threshold rule") }}</ion-label>
+        <ion-label class="ion-text-wrap">{{ translate("Edit threshold rule") }}</ion-label>
         <ion-note slot="end">
-          {{ productCount }} {{ $t("products selected")}}
+          {{ productCount }} {{ translate("products selected")}}
         </ion-note>
       </ion-item>
 
     </ion-list>
     <div class="actions desktop-only">
       <div>
-        <ion-button size="small" fill="outline" color="medium" :disabled="!hasPermission(Actions.APP_JOB_UPDATE) || status === 'SERVICE_DRAFT'" @click="skipJob(job)">{{ $t("Skip once") }}</ion-button>
-        <ion-button size="small" fill="outline" color="danger" :disabled="!hasPermission(Actions.APP_JOB_UPDATE) || status === 'SERVICE_DRAFT'" @click="cancelJob(job)">{{ $t("Disable") }}</ion-button>
+        <ion-button size="small" fill="outline" color="medium" :disabled="!hasPermission(Actions.APP_JOB_UPDATE) || status === 'SERVICE_DRAFT'" @click="skipJob(job)">{{ translate("Skip once") }}</ion-button>
+        <ion-button size="small" fill="outline" color="danger" :disabled="!hasPermission(Actions.APP_JOB_UPDATE) || status === 'SERVICE_DRAFT'" @click="cancelJob(job)">{{ translate("Disable") }}</ion-button>
       </div>
       <div>
-        <ion-button size="small" fill="outline" :disabled="!hasPermission(Actions.APP_JOB_UPDATE)" @click="saveChanges()">{{ $t("Save changes") }}</ion-button>
+        <ion-button size="small" fill="outline" :disabled="!hasPermission(Actions.APP_JOB_UPDATE)" @click="saveChanges()">{{ translate("Save changes") }}</ion-button>
       </div>
     </div>
 
     <div class=" actions mobile-only">
-      <ion-button size="small" fill="outline" color="medium" :disabled="hasPermission(Actions.APP_JOB_UPDATE) || status === 'SERVICE_DRAFT'" @click="skipJob(job)">{{ $t("Skip once") }}</ion-button>
-      <ion-button size="small" fill="outline" color="danger" :disabled="hasPermission(Actions.APP_JOB_UPDATE) || status === 'SERVICE_DRAFT'" @click="cancelJob(job)">{{ $t("Disable") }}</ion-button>
-      <ion-button expand="block" fill="outline" :disabled="!hasPermission(Actions.APP_JOB_UPDATE)" @click="saveChanges()">{{ $t("Save changes") }}</ion-button>
+      <ion-button size="small" fill="outline" color="medium" :disabled="hasPermission(Actions.APP_JOB_UPDATE) || status === 'SERVICE_DRAFT'" @click="skipJob(job)">{{ translate("Skip once") }}</ion-button>
+      <ion-button size="small" fill="outline" color="danger" :disabled="hasPermission(Actions.APP_JOB_UPDATE) || status === 'SERVICE_DRAFT'" @click="cancelJob(job)">{{ translate("Disable") }}</ion-button>
+      <ion-button expand="block" fill="outline" :disabled="!hasPermission(Actions.APP_JOB_UPDATE)" @click="saveChanges()">{{ translate("Save changes") }}</ion-button>
     </div>
   </section>
 </template>
@@ -198,13 +198,13 @@ export default defineComponent({
     async skipJob(job: any) {
       const alert = await alertController
         .create({
-          header: this.$t('Skip job'),
-          message: this.$t('Skipping will run this job at the next occurrence based on the temporal expression.'),
+          header: translate('Skip job'),
+          message: translate('Skipping will run this job at the next occurrence based on the temporal expression.'),
           buttons: [{
-            text: this.$t("Don't skip"),
+            text: translate("Don't skip"),
             role: 'cancel'
           }, {
-            text: this.$t('Skip'),
+            text: translate('Skip'),
             handler: async () => {
               if (job) {
                 // TODO: using updatedRunTime value to update the runTime in the configuration component as currently currentJob state is not maintained
@@ -222,13 +222,13 @@ export default defineComponent({
     async cancelJob(job: any) {
       const alert = await alertController
         .create({
-          header: this.$t('Cancel job'),
-          message: this.$t('Canceling this job will cancel this occurrence and all following occurrences. This job will have to be re-enabled manually to run it again.'),
+          header: translate('Cancel job'),
+          message: translate('Canceling this job will cancel this occurrence and all following occurrences. This job will have to be re-enabled manually to run it again.'),
           buttons: [{
-            text: this.$t("Don't cancel"),
+            text: translate("Don't cancel"),
             role: 'cancel'
           }, {
-            text: this.$t('Cancel'),
+            text: translate('Cancel'),
             handler: async () => {
               const resp = await this.store.dispatch('job/cancelJob', job);
               if(resp.status == 200 && !hasError(resp) && resp.data.successMessage) {
@@ -242,13 +242,13 @@ export default defineComponent({
     async saveChanges() {
       const alert = await alertController
         .create({
-          header: this.$t('Save changes'),
-          message: this.$t('Are you sure you want to save these changes?'),
+          header: translate('Save changes'),
+          message: translate('Are you sure you want to save these changes?'),
           buttons: [{
-            text: this.$t('Cancel'),
+            text: translate('Cancel'),
             role: 'cancel'
           }, {
-            text: this.$t('Save'),
+            text: translate('Save'),
             handler: () => {
               this.updateJob();
             }
@@ -259,9 +259,9 @@ export default defineComponent({
     async discardChanges() {
       const alert = await alertController
         .create({
-          header: this.$t('Discard changes'),
-          message: this.$t('All unsaved changes will be lost. Are you sure you want to leave this page.'),
-          buttons: [this.$t('Cancel'), this.$t('Save')],
+          header: translate('Discard changes'),
+          message: translate('All unsaved changes will be lost. Are you sure you want to leave this page.'),
+          buttons: [translate('Cancel'), translate('Save')],
         });
       return alert.present();
     },
@@ -334,7 +334,8 @@ export default defineComponent({
       store,
       syncOutline,
       pencilOutline,
-      personCircleOutline
+      personCircleOutline,
+      translate
     };
   }
 });

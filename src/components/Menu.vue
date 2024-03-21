@@ -2,7 +2,7 @@
   <ion-menu side="start" menu-id="first" content-id="main" type="overlay" :disabled="!isUserAuthenticated">
     <ion-header>
       <ion-toolbar>
-        <ion-title>{{ $t("Menu") }}</ion-title>
+        <ion-title>{{ translate("Menu") }}</ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content>
@@ -67,6 +67,7 @@
   import { useRouter } from "vue-router";
   import { optionsOutline, settingsOutline, pulseOutline } from 'ionicons/icons';
   import emitter from "@/event-bus";
+  import { translate } from "@hotwax/dxp-components";
   
   export default defineComponent({
     name: "Menu",
@@ -150,6 +151,7 @@
         settingsOutline,
         selectedIndex,
         store,
+        translate
       };
     },
   });

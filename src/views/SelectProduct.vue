@@ -4,7 +4,7 @@
       <ion-toolbar>
         <ion-menu-button v-if="!jobId" slot="start" />
         <ion-back-button v-if="jobId" slot="start" @click="navigateBack" default-href="/" />
-        <ion-title>{{ $t("Create rule") }}</ion-title>
+        <ion-title>{{ translate("Create rule") }}</ion-title>
         <ion-buttons slot="end">
           <ion-button fill="clear" class="mobile-only">
             <ion-icon :icon="downloadOutline" />
@@ -25,25 +25,25 @@
         <aside class="filters desktop-only">
           <ion-list>
             <ion-item lines="inset">
-              <ion-label>{{ $t("Threshold") }}</ion-label>
-              <ion-input type="number" :placeholder="$t('global threshold')" v-model="threshold"/>
+              <ion-label>{{ translate("Threshold") }}</ion-label>
+              <ion-input type="number" :placeholder="translate('global threshold')" v-model="threshold"/>
             </ion-item>
             <ion-list-header>
               <div>
-                <h3>{{ $t("Include") }}</h3>
-                <ion-button fill="clear" color="warning" @click="resetFilters('included')">{{ $t('reset') }}</ion-button>
+                <h3>{{ translate("Include") }}</h3>
+                <ion-button fill="clear" color="warning" @click="resetFilters('included')">{{ translate('reset') }}</ion-button>
               </div>
             </ion-list-header>
             <ion-card>
               <ion-item lines="none">
-                <ion-label>{{ $t("Tags") }}</ion-label>
+                <ion-label>{{ translate("Tags") }}</ion-label>
                 <ion-button fill="clear" slot="end" size="small" @click="searchFilter('tags', 'tagsFacet', 'tags', 'included')">
-                  <ion-label>{{ $t('add') }}</ion-label>
+                  <ion-label>{{ translate('add') }}</ion-label>
                   <ion-icon :icon="addCircleOutline" />
                 </ion-button>
               </ion-item>
               <ion-item lines="none">
-                <ion-label>{{ $t("Operator") }}</ion-label>
+                <ion-label>{{ translate("Operator") }}</ion-label>
                 <ion-select interface="popover" @ionChange="applyOperator('included', 'tags', $event.detail.value)" :value="appliedFilters['included']['tags'].operator">
                   <ion-select-option value="AND">AND</ion-select-option>
                   <ion-select-option value="OR">OR</ion-select-option>
@@ -61,20 +61,20 @@
           <ion-list>
             <ion-list-header>
               <div>
-                <h3>{{ $t("Exclude") }}</h3>
-                <ion-button fill="clear" color="warning" @click="resetFilters('excluded')">{{ $t('reset') }}</ion-button>
+                <h3>{{ translate("Exclude") }}</h3>
+                <ion-button fill="clear" color="warning" @click="resetFilters('excluded')">{{ translate('reset') }}</ion-button>
               </div>
             </ion-list-header>
             <ion-card>
               <ion-item lines="none">
-                <ion-label>{{ $t("Tags") }}</ion-label>
+                <ion-label>{{ translate("Tags") }}</ion-label>
                 <ion-button fill="clear" slot="end" size="small" @click="searchFilter('tags', 'tagsFacet', 'tags', 'excluded')">
-                  <ion-label>{{ $t('add') }}</ion-label>
+                  <ion-label>{{ translate('add') }}</ion-label>
                   <ion-icon :icon="addCircleOutline" />
                 </ion-button>
               </ion-item>
               <ion-item lines="none">
-                <ion-label>{{ $t("Operator") }}</ion-label>
+                <ion-label>{{ translate("Operator") }}</ion-label>
                 <ion-select @ionChange="applyOperator('excluded', 'tags', $event.detail.value)" interface="popover" :value="appliedFilters['excluded']['tags'].operator">
                   <ion-select-option value="AND">AND</ion-select-option>
                   <ion-select-option value="OR">OR</ion-select-option>
@@ -94,11 +94,11 @@
         <main class="main">
           <section class="sort">
             <ion-item lines="none">
-              <h2>{{ $t("Results") }}: {{ products.total.virtual }} {{ $t("virtual, ") }} {{ products.total.variant }} {{ $t("variants") }}</h2>
+              <h2>{{ translate("Results") }}: {{ products.total.virtual }} {{ translate("virtual, ") }} {{ products.total.variant }} {{ translate("variants") }}</h2>
             </ion-item>
 
             <section class="search">
-              <ion-searchbar :placeholder="$t('Check products')" v-model="queryString" @keyup.enter="queryString = $event.target.value; searchProducts($event)" />
+              <ion-searchbar :placeholder="translate('Check products')" v-model="queryString" @keyup.enter="queryString = $event.target.value; searchProducts($event)" />
             </section>  
           </section>
 
@@ -109,7 +109,7 @@
                 <ion-item lines="none">
                   <ion-label>
                     {{ product.productName }}
-                    <p>{{ product.variants.length}} {{ $t("variants") }}</p>
+                    <p>{{ product.variants.length}} {{ translate("variants") }}</p>
                   </ion-label>
                 </ion-item>
               </div>
@@ -124,8 +124,8 @@
                   <ion-item lines="none">
                     <ion-label class="ion-text-wrap">
                       {{ variant.productName }}
-                      <p v-if="variant.color">{{ $t("Color") }}: {{ variant.color }}</p>
-                      <p v-if="variant.size">{{ $t("Size") }}: {{ variant.size }}</p>
+                      <p v-if="variant.color">{{ translate("Color") }}: {{ variant.color }}</p>
+                      <p v-if="variant.size">{{ translate("Size") }}: {{ variant.size }}</p>
                     </ion-label>
                   </ion-item>
                 </ion-card>
@@ -134,7 +134,7 @@
             <hr />
           </div>
           <ion-infinite-scroll @ionInfinite="loadMoreProducts($event)" threshold="100px" :disabled="!isScrollable">
-            <ion-infinite-scroll-content loading-spinner="crescent" :loading-text="$t('Loading')"/>
+            <ion-infinite-scroll-content loading-spinner="crescent" :loading-text="translate('Loading')"/>
           </ion-infinite-scroll>
         </main>
       </div>
@@ -142,11 +142,11 @@
       <div class="action desktop-only">
         <ion-button v-if="jobId" :disabled="!hasPermission(Actions.APP_THRESHOLD_RULE_UPDATE) || isJobEditable() || isServiceScheduling" @click="updateThreshold()">
           <ion-icon slot="start" :icon="saveOutline" />
-          {{ $t("Update threshold rule") }}
+          {{ translate("Update threshold rule") }}
         </ion-button>
         <ion-button :disabled="!hasPermission(Actions.APP_THRESHOLD_RULE_UPDATE)" v-else @click="saveThreshold()">
           <ion-icon slot="start" :icon="saveOutline" />
-          {{ $t("Save threshold rule") }}
+          {{ translate("Save threshold rule") }}
         </ion-button>
       </div>
 
@@ -301,15 +301,15 @@ export default defineComponent({
     async navigateBack(){
       if(this.isFilterChanged || this.threshold != this.job?.runtimeData?.threshold){
         const alert = await alertController.create({
-          header: this.$t("Save changes"),
-          message: this.$t("Make sure you have saved your changes. All unsaved changes to this rule will be lost."),
+          header: translate("Save changes"),
+          message: translate("Make sure you have saved your changes. All unsaved changes to this rule will be lost."),
           buttons: [
             {
-              text: this.$t("Keep editing"),
+              text: translate("Keep editing"),
               role: 'cancel',
             },
             {
-              text: this.$t("Discard"),
+              text: translate("Discard"),
               handler: () => {
                 this.isFilterChanged = false;
                 this.store.dispatch('product/clearAllFilters');
@@ -444,10 +444,10 @@ export default defineComponent({
       if (!this.threshold) {
         const alert = await alertController
           .create({
-            header: this.$t('Enter threshold value'),
-            message: this.$t('Please enter a threshold value to set for these products before proceeding.'),
+            header: translate('Enter threshold value'),
+            message: translate('Please enter a threshold value to set for these products before proceeding.'),
             buttons: [{
-              text: this.$t("Ok"),
+              text: translate("Ok"),
               role: 'cancel'
             }],
           });
@@ -546,7 +546,8 @@ export default defineComponent({
       closeCircle,
       addCircleOutline,
       albumsOutline,
-      warningOutline
+      warningOutline,
+      translate
     };
   },
 });

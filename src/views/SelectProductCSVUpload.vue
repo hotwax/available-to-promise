@@ -3,37 +3,37 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-back-button slot="start" default-href="/" />
-        <ion-title>{{ $t("Upload CSV") }}</ion-title>
+        <ion-title>{{ translate("Upload CSV") }}</ion-title>
       </ion-toolbar>
     </ion-header>
 
     <ion-content>
       <main>
         <ion-item>
-          <ion-label>{{ $t("Product list") }}</ion-label>
-          <ion-input :placeholder="$t('Select CSV')" />
-          <ion-button fill="outline">{{ $t("Upload") }}</ion-button>
+          <ion-label>{{ translate("Product list") }}</ion-label>
+          <ion-input :placeholder="translate('Select CSV')" />
+          <ion-button fill="outline">{{ translate("Upload") }}</ion-button>
         </ion-item>
 
         <ion-item lines="none">
-          <ion-label>{{ $t("Select the column index for the following information in the uploaded CSV") }}</ion-label>
+          <ion-label>{{ translate("Select the column index for the following information in the uploaded CSV") }}</ion-label>
         </ion-item>
         <ion-item>
-          <ion-label>{{ $t("Product SKU column") }}</ion-label>
-          <ion-select :placeholder="$t('Select')">
+          <ion-label>{{ translate("Product SKU column") }}</ion-label>
+          <ion-select :placeholder="translate('Select')">
             <ion-select-option>1234</ion-select-option>
             <ion-select-option>5678</ion-select-option>
             <ion-select-option>9012</ion-select-option>
           </ion-select>
         </ion-item>
 
-        <ion-button expand="block" size="large" color="medium">{{ $t("Save") }}</ion-button>
+        <ion-button expand="block" size="large" color="medium">{{ translate("Save") }}</ion-button>
 
         <ion-item>
-          <ion-label>50 {{ $t("products selected") }}</ion-label>
+          <ion-label>50 {{ translate("products selected") }}</ion-label>
           <ion-button slot="end" fill="outline" color="dark">
             <ion-icon slot="start" :icon="downloadOutline" />
-            {{ $t("Download") }}
+            {{ translate("Download") }}
           </ion-button>
         </ion-item>
       </main>
@@ -59,6 +59,7 @@ import {
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { downloadOutline } from 'ionicons/icons';
+import { translate } from '@hotwax/dxp-components';
 
 export default defineComponent({
   name: 'SelectProductCSVUpload',
@@ -80,6 +81,7 @@ export default defineComponent({
   setup() {
     return {
       downloadOutline,
+      translate
     };
   },
 });

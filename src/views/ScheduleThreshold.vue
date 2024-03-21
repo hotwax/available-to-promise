@@ -3,7 +3,7 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-back-button slot="start" default-href="/select-product"/>
-        <ion-title>{{ $t("Schedule new threshold") }}</ion-title>
+        <ion-title>{{ translate("Schedule new threshold") }}</ion-title>
       </ion-toolbar>
     </ion-header>
 
@@ -11,24 +11,24 @@
       <div>
         <aside>
           <ion-list>
-            <ion-list-header>{{ $t("Info") }}</ion-list-header>
+            <ion-list-header>{{ translate("Info") }}</ion-list-header>
             <ion-item>
               <ion-icon :icon="shirtOutline" slot="start" />
-              <ion-label>{{ products.total.variant }} {{ $t('SKUs') }}</ion-label>
+              <ion-label>{{ products.total.variant }} {{ translate('SKUs') }}</ion-label>
             </ion-item>
             <ion-item>
               <ion-icon :icon="optionsOutline" slot="start" />
-              <ion-label>{{ threshold }} {{ $t('threshold') }}</ion-label>
+              <ion-label>{{ threshold }} {{ translate('threshold') }}</ion-label>
             </ion-item>
             <ion-item>
-              <ion-label color="medium">{{ $t("Name") }}</ion-label>
-              <ion-input :placeholder="$t('rule name')" v-model="jobName"/>
+              <ion-label color="medium">{{ translate("Name") }}</ion-label>
+              <ion-input :placeholder="translate('rule name')" v-model="jobName"/>
             </ion-item>
 
             <ion-item>
               <ion-icon slot="start" :icon="timeOutline" />
-              <ion-label>{{ $t("Run time") }}</ion-label>
-              <ion-label @click="() => isOpen = true" slot="end">{{ initialRunTime ? getTime(initialRunTime) : $t('Select run time') }}</ion-label>
+              <ion-label>{{ translate("Run time") }}</ion-label>
+              <ion-label @click="() => isOpen = true" slot="end">{{ initialRunTime ? getTime(initialRunTime) : translate('Select run time') }}</ion-label>
               <ion-modal :is-open="isOpen" @didDismiss="() => isOpen = false">
                 <ion-content force-overscroll="false">
                   <!-- TODO: check why datetime component is not unmounted after scheduling the job -->
@@ -44,7 +44,7 @@
               </ion-modal>
             </ion-item>
             <ion-item-divider v-if="channels.length" color="light">
-              <ion-label>{{ $t('Channels') }}</ion-label>
+              <ion-label>{{ translate('Channels') }}</ion-label>
             </ion-item-divider>
             <ion-item v-for="channel in channels" :key="channel.facilityGroupId">
               <ion-label>{{ channel?.facilityGroupName }}</ion-label>
@@ -54,7 +54,7 @@
         </aside>
 
         <main>
-          <h2>{{ $t("Threshold pipeline") }}</h2>
+          <h2>{{ translate("Threshold pipeline") }}</h2>
           <ion-reorder-group @ionItemReorder="doReorder($event)" disabled="false">
             <div v-for="job in jobsForReorder" :key="job.jobId">
               <ion-card>
@@ -91,7 +91,7 @@
         <!-- disabling button as once user have clicked schedule job and some jobs have failed then clicking the button again will re-run the whole process -->
         <ion-button @click="saveThresholdRule()" :disabled="failedJobs.length || isServiceScheduling">
           <ion-icon slot="start" :icon="saveOutline" />
-          {{ $t("Schedule Job") }}
+          {{ translate("Schedule Job") }}
         </ion-button>
       </div>
 
@@ -664,7 +664,8 @@ export default defineComponent({
       shirtOutline,
       store,
       timerOutline,
-      timeOutline
+      timeOutline,
+      translate
     }
   }
 });

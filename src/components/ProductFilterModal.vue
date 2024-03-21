@@ -6,21 +6,21 @@
           <ion-icon slot="icon-only" :icon="arrowBackOutline" />
         </ion-button>
       </ion-buttons>
-      <ion-title>{{ $t(`${ type === 'included' ? `Include ${label}` : `Exclude ${label}` }`) }}</ion-title>
+      <ion-title>{{ translate(`${ type === 'included' ? `Include ${label}` : `Exclude ${label}` }`) }}</ion-title>
       <ion-buttons slot="end">
-        <ion-button fill="clear" color="danger" @click="selectedValues = []">{{ $t("Clear All") }}</ion-button>
+        <ion-button fill="clear" color="danger" @click="selectedValues = []">{{ translate("Clear All") }}</ion-button>
       </ion-buttons>
     </ion-toolbar>
   </ion-header>
 
   <ion-content>
-    <ion-searchbar :placeholder="$t(`Search ${label}`)" v-model="queryString" @keyup.enter="queryString = $event.target.value; search($event)"/>
+    <ion-searchbar :placeholder="translate(`Search ${label}`)" v-model="queryString" @keyup.enter="queryString = $event.target.value; search($event)"/>
 
     <ion-list>
       <ion-item v-for="option in facetOptions" :key="option.id"  @click="updateSelectedValues(option.id)">
         <ion-label>{{ option.label }}</ion-label>
         <ion-checkbox v-if="!isAlreadyApplied(option.id)" :checked="selectedValues.includes(option.id)" />
-        <ion-note v-else slot="end" color="danger">{{ type === 'included' ? $t("excluded") : $t("included") }}</ion-note>
+        <ion-note v-else slot="end" color="danger">{{ type === 'included' ? translate("excluded") : translate("included") }}</ion-note>
       </ion-item>
     </ion-list>
     <!-- Added padding for better visiblity of the checkboxes beside the FAB -->
@@ -30,7 +30,7 @@
       </ion-fab-button>
     </ion-fab>
     <ion-infinite-scroll @ionInfinite="loadMoreTags($event)" threshold="100px" :disabled="!isScrollable">
-      <ion-infinite-scroll-content loading-spinner="crescent" :loading-text="$t('Loading')"/>
+      <ion-infinite-scroll-content loading-spinner="crescent" :loading-text="translate('Loading')"/>
     </ion-infinite-scroll>
   </ion-content>
 </template>
@@ -60,6 +60,7 @@ import {
 import { arrowBackOutline, checkmarkOutline } from 'ionicons/icons'
 import { ProductService } from "@/services/ProductService";
 import { mapGetters, useStore } from "vuex";
+import { translate } from "@hotwax/dxp-components";
 
 export default defineComponent({
   name: "ProductFilterModal",
@@ -193,7 +194,8 @@ export default defineComponent({
     return {
       arrowBackOutline,
       checkmarkOutline,
-      store
+      store,
+      translate
     }
   }
 })
