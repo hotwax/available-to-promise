@@ -47,9 +47,8 @@ const actions: ActionTree<UserState, RootState> = {
       if (permissionId) {
         // As the token is not yet set in the state passing token headers explicitly
         // TODO Abstract this out, how token is handled should be part of the method not the callee
-        const hasPermission = appPermissions.some((appPermissionId: any) => appPermissionId === permissionId );
-        // If there are any errors or permission check fails do not allow user to login
-        if (hasPermission) {
+        const hasPermission = appPermissions.some((appPermission: any) => appPermission.action === permissionId );        // If there are any errors or permission check fails do not allow user to login
+        if (!hasPermission) {
           const permissionError = 'You do not have permission to access the app.';
           showToast(translate(permissionError));
           logger.error("error", permissionError);
@@ -187,6 +186,10 @@ const actions: ActionTree<UserState, RootState> = {
     commit(types.USER_INSTANCE_URL_UPDATED, payload)
     updateInstanceUrl(payload)
   },
+
+  updatePwaState({ commit }, payload) {
+    commit(types.USER_PWA_STATE_UPDATED, payload);
+  }
 }
 
 export default actions;
