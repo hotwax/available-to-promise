@@ -20,12 +20,33 @@
         </ion-menu-toggle>
       </ion-list>
     </ion-content>
+    <ion-footer>
+      <ion-toolbar>
+        <ion-item lines="none">
+          <ion-label class="ion-text-wrap">
+            <p class="overline">{{ instanceUrl }}</p>
+          </ion-label>
+          <ion-note slot="end">{{ userProfile?.timeZone }}</ion-note>
+        </ion-item>
+        <ion-item v-if="userProfile?.stores?.length > 1" lines="none">
+          <ion-select interface="popover" :value="eComStore.productStoreId" @ionChange="setEComStore($event)">
+            <ion-select-option v-for="store in (userProfile?.stores ? userProfile.stores : [])" :key="store.productStoreId" :value="store.productStoreId" >{{ store.storeName }}</ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-item v-else lines="none">
+          <ion-label class="ion-text-wrap">
+            {{ eComStore.storeName }}
+          </ion-label>
+        </ion-item>
+      </ion-toolbar>
+    </ion-footer>
   </ion-menu>
 </template>
   
 <script lang="ts">
   import {
     IonContent,
+    IonFooter,
     IonHeader,
     IonIcon,
     IonItem,
@@ -33,6 +54,9 @@
     IonList,
     IonMenu,
     IonMenuToggle,
+    IonNote,
+    IonSelect,
+    IonSelectOption,
     IonTitle,
     IonToolbar,
   } from "@ionic/vue";
@@ -46,6 +70,7 @@
     name: "Menu",
     components: {
       IonContent,
+      IonFooter,
       IonHeader,
       IonIcon,
       IonItem,
@@ -53,16 +78,26 @@
       IonList,
       IonMenu,
       IonMenuToggle,
+      IonNote,
+      IonSelect,
+      IonSelectOption,
       IonTitle,
       IonToolbar
     },
     computed: {
       ...mapGetters({
         isUserAuthenticated: 'user/isUserAuthenticated',
+        eComStore: 'user/getCurrentEComStore',
         instanceUrl: 'user/getInstanceUrl',
+        userProfile: 'user/getUserProfile',
       })
     },
     methods: {
+      async setEComStore(event: CustomEvent) {
+        if(this.eComStore.productStoreId !== event.detail.value) {
+          await this.store.dispatch('user/setEcomStore', { 'productStoreId': event.detail.value })
+        }
+      },
       getValidMenuItems(appPages: any) {
         return appPages.filter((appPage: any) => (!appPage.meta || !appPage.meta.permissionId));
       }

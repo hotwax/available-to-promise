@@ -26,10 +26,7 @@ const login = async (username: string, password: string): Promise <any> => {
 }
 
 const getUserProfile = async (token: any): Promise<any> => {
-  console.log('sdo');
   const baseURL = store.getters["user/getBaseUrl"];
-  console.log(baseURL);
-  
   try {
     const resp = await client({
       url: "user/profile",
@@ -45,6 +42,22 @@ const getUserProfile = async (token: any): Promise<any> => {
   } catch(error: any) {
     return Promise.reject(error)
   }
+}
+
+const getAvailableTimeZones = async (): Promise <any>  => {
+  return api({
+    url: "user/getAvailableTimeZones",
+    method: "get",
+    cache: true
+  });
+}
+
+const setUserTimeZone = async (payload: any): Promise <any>  => {
+  return api({
+    url: "setUserTimeZone",
+    method: "post",
+    data: payload
+  });
 }
 
 const getEComStores = async (token: any): Promise<any> => {
@@ -68,22 +81,6 @@ const getEComStores = async (token: any): Promise<any> => {
   } catch(error: any) {
     return Promise.reject(error)
   }
-}
-
-const getAvailableTimeZones = async (): Promise <any>  => {
-  return api({
-    url: "user/getAvailableTimeZones",
-    method: "get",
-    cache: true
-  });
-}
-
-const setUserTimeZone = async (payload: any): Promise <any>  => {
-  return api({
-    url: "setUserTimeZone",
-    method: "post",
-    data: payload
-  });
 }
 
 export const UserService = {
