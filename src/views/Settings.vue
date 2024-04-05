@@ -18,24 +18,34 @@
             is added on sides from ion-item and ion-padding-vertical to compensate the removed
             vertical padding -->
             <ion-card-header class="ion-no-padding ion-padding-vertical">
-              <ion-card-subtitle>{{ userProfile.userLoginId }}</ion-card-subtitle>
-              <ion-card-title>{{ userProfile?.partyName }}</ion-card-title>
+              <ion-card-subtitle>{{ userProfile.userId }}</ion-card-subtitle>
+              <ion-card-title>{{ userProfile?.userFullName }}</ion-card-title>
             </ion-card-header>
           </ion-item>
           <ion-button color="danger" @click="logout()">{{ $t("Logout") }}</ion-button>
-          <ion-button fill="outline" @click="goToLaunchpad()">
-            {{ $t("Go to Launchpad") }}
-            <ion-icon slot="end" :icon="openOutline" />
-          </ion-button>
-          <!-- Commenting this code as we currently do not have reset password functionality -->
-          <!-- <ion-button fill="outline" color="medium">{{ $t("Reset password") }}</ion-button> -->
         </ion-card>
       </div>
       <div class="section-header">
         <h1>{{ $t('OMS') }}</h1>
       </div>
       <section>
-        <DxpOmsInstanceNavigator />
+        <ion-card>
+          <ion-card-header>
+            <ion-card-subtitle>
+              {{ $t('OMS instance') }}
+            </ion-card-subtitle>
+            <ion-card-title>
+              {{ oms }}
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            {{ $t('This is the name of the OMS you are connected to right now. Make sure that you are connected to the right instance before proceeding.') }}
+          </ion-card-content>
+          <ion-button @click="goToOms()" fill="clear">
+            {{ $t('Go to OMS') }}
+            <ion-icon slot="end" :icon="openOutline" />
+          </ion-button>
+        </ion-card>
 
         <ion-card>
           <ion-card-header>
@@ -59,7 +69,13 @@
       </section>
       <hr />
 
-      <DxpAppVersionInfo />
+      <div class="section-header">
+        <h1>
+          {{ translate("App") }}
+          <p class="overline" >{{ translate("Version:") + appVersion }}</p>
+        </h1>
+        <p class="overline">{{ translate("Built:") + getDateTime(appInfo.builtTime) }}</p>
+      </div>
 
       <section>
         <ion-card>
@@ -72,7 +88,7 @@
             {{ $t('The timezone you select is used to ensure automations you schedule are always accurate to the time you select.') }}
           </ion-card-content>
           <ion-item lines="none">
-            <ion-label> {{ userProfile && userProfile.userTimeZone ? userProfile.userTimeZone : '-' }} </ion-label>
+            <ion-label> {{ userProfile && userProfile.timeZone ? userProfile.timeZone : '-' }} </ion-label>
             <ion-button @click="changeTimeZone()" slot="end" fill="outline" color="dark">{{ $t("Change") }}</ion-button>
           </ion-item>
         </ion-card>
@@ -89,6 +105,8 @@ import { mapGetters, useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import TimeZoneModal from '@/views/TimezoneModal.vue';
 import Image from '@/components/Image.vue'
+import { DateTime } from "luxon";
+import { translate } from '@/i18n';
 
 export default defineComponent({
   name: 'Settings',
@@ -115,13 +133,17 @@ export default defineComponent({
   },
   data() {
     return {
-      baseURL: process.env.VUE_APP_BASE_URL
+      baseURL: process.env.VUE_APP_BASE_URL,
+      appVersion: '',
+      appInfo: process.env.VUE_APP_VERSION_INFO ? JSON.parse(process.env.VUE_APP_VERSION_INFO) : {} as any
     };
   },
   computed: {
     ...mapGetters({
       userProfile: 'user/getUserProfile',
-      currentEComStore: 'user/getCurrentEComStore'
+      currentEComStore: 'user/getCurrentEComStore',
+      oms: 'user/getInstanceUrl',
+      token: 'user/user/getUserToken',
     })
   },
   methods: {
@@ -143,18 +165,24 @@ export default defineComponent({
       });
       return timeZoneModal.present();
     },
-    logout () {
-      this.store.dispatch('user/logout', { isUserUnauthorised: false }).then((redirectionUrl) => {
-        // if not having redirection url then redirect the user to launchpad
-        if(!redirectionUrl) {
-          const redirectUrl = window.location.origin + '/login'
-          window.location.href = `${process.env.VUE_APP_LOGIN_URL}?isLoggedOut=true&redirectUrl=${redirectUrl}`
-        }
+    logout() {
+      this.store.dispatch("user/logout").then(() => {
+        this.router.push("/login");
       })
     },
     goToLaunchpad() {
       window.location.href = `${process.env.VUE_APP_LOGIN_URL}`
     },
+    getDateTime(time: any) {
+      return time ? DateTime.fromMillis(time).toLocaleString(DateTime.DATETIME_MED) : "";
+    },
+    goToOms() {
+      const link = (this.oms.startsWith('http') ? this.oms.replace(/\/api\/?|\/$/, "") : `https://${this.oms}.hotwax.io`) + `/qapps?token=${this.token}`
+      window.open(link, '_blank', 'noopener, noreferrer')
+    }
+  },
+  mounted() {
+    this.appVersion = this.appInfo.branch ? (this.appInfo.branch + "-" + this.appInfo.revision) : this.appInfo.tag;
   },
   setup(){
     const store = useStore();
@@ -169,6 +197,7 @@ export default defineComponent({
       store,
       router,
       timeOutline,
+      translate,
       openOutline
     }
   }

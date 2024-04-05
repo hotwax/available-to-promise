@@ -9,14 +9,9 @@ const userModule: Module<UserState, RootState> = {
     namespaced: true,
     state: {
       token: '',
-      permissions: [],
       current: {},
       instanceUrl: '',
-      currentEComStore: {},
-      pwaState: {
-        updateExists: false,
-        registration: null,
-      }
+      currentEComStore: {}
     },
     getters,
     actions,
