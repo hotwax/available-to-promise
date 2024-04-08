@@ -13,10 +13,10 @@ import SafetyStock from '@/views/SafetyStock.vue'
 import StorePickup from '@/views/StorePickup.vue'
 import Shipping from '@/views/Shipping.vue'
 import InventoryChannels from '@/views/InventoryChannels.vue'
-import CreateThreshold from '@/views/CreateThreshold.vue';
-import CreateSafetyStock from '@/views/CreateSafetyStock.vue'
-import CreateStorePickup from '@/views/CreateStorePickup.vue'
-import CreateShipping from '@/views/CreateShipping.vue'
+import CreateThresholdRule from '@/views/CreateThresholdRule.vue';
+import CreateSafetyStockRule from '@/views/CreateSafetyStockRule.vue'
+import CreateStorePickupRule from '@/views/CreateStorePickupRule.vue'
+import CreateShippingRule from '@/views/CreateShippingRule.vue'
 
 import { hasPermission } from '@/authorization';
 import { showToast } from '@/utils'
@@ -100,25 +100,25 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/create-threshold',
     name: 'Create threshold',
-    component: CreateThreshold,
+    component: CreateThresholdRule,
     beforeEnter: authGuard
   },
   {
     path: '/create-safety-stock',
     name: 'Create safety stock',
-    component: CreateSafetyStock,
+    component: CreateSafetyStockRule,
     beforeEnter: authGuard
   },
   {
     path: '/create-store-pickup',
     name: 'Create store pickup',
-    component: CreateStorePickup,
+    component: CreateStorePickupRule,
     beforeEnter: authGuard
   },
   {
     path: '/create-shipping',
     name: 'Create shipping',
-    component: CreateShipping,
+    component: CreateShippingRule,
     beforeEnter: authGuard
   },
   {
