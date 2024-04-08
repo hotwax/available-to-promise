@@ -79,5 +79,5 @@
 <script setup lang="ts">
 import { IonButton, IonCard, IonCardContent, IonChip, IonIcon, IonItem, IonLabel } from '@ionic/vue';
 import { addCircleOutline, closeCircle } from 'ionicons/icons'
-import { translate } from '@hotwax/dxp-components';
+import { translate } from '@/i18n';
 </script>

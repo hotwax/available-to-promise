@@ -23,7 +23,7 @@
 
 <script setup lang="ts">
 import { IonBadge, IonButton, IonCard, IonCardHeader, IonCardTitle, IonIcon, IonItem, IonSelect, IonSelectOption, popoverController } from '@ionic/vue';
-import { translate } from '@hotwax/dxp-components';
+import { translate } from '@/i18n';
 import { ellipsisVerticalOutline, timeOutline } from 'ionicons/icons';
 import ScheduleActionsPopover from "@/components/ScheduleActionsPopover.vue";
 

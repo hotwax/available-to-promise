@@ -56,7 +56,7 @@
 <script setup lang="ts">
 import { IonBackButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
 import { saveOutline } from 'ionicons/icons'
-import { translate } from "@hotwax/dxp-components";
+import { translate } from "@/i18n";
 import ProductFilters from '@/components/ProductFilters.vue';
 </script>
 

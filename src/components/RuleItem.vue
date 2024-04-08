@@ -125,7 +125,7 @@ import { IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCh
 import { defineProps, onMounted, ref } from 'vue';
 import { archiveOutline, checkmarkDoneCircleOutline, chevronDownOutline, chevronUpOutline, closeCircleOutline, globeOutline, optionsOutline, pulseOutline, sendOutline, storefrontOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
-import { translate } from '@hotwax/dxp-components';
+import { translate } from '@/i18n';
 
 const router = useRouter();
 

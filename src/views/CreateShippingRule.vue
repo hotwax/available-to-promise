@@ -100,7 +100,7 @@
 import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonPage, IonSegment, IonSegmentButton, IonTitle, IonToggle, IonToolbar } from '@ionic/vue';
 import { ref } from 'vue';
 import { addCircleOutline, closeCircle, saveOutline, storefrontOutline } from 'ionicons/icons'
-import { translate } from "@hotwax/dxp-components";
+import { translate } from "@/i18n";
 import ProductFilters from '@/components/ProductFilters.vue';
 
 const selectedSegment = ref("facility")

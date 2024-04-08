@@ -34,7 +34,7 @@ import { IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonChip, IonIcon
 import { onMounted, ref } from 'vue';
 import { storefrontOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
-import { translate } from '@hotwax/dxp-components';
+import { translate } from '@/i18n';
 
 const router = useRouter();
 

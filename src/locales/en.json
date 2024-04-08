@@ -7,6 +7,7 @@
   "Authenticating": "Authenticating",
   "Available to Promise": "Available to Promise",
   "Blank": "Blank",
+  "Built: ": "Built: {builtDateTime}",
   "Cancel": "Cancel",
   "CANCEL": "CANCEL",
   "Canceling this job will cancel this occurrence and all following occurrences. This job will have to be re-enabled manually to run it again.": "Canceling this job will cancel this occurrence and all following occurrences. This job will have to be re-enabled manually to run it again.",
@@ -54,6 +55,7 @@
   "Failed": "Failed",
   "Failed to update some jobs": "Failed to update some jobs",
   "Failed to schedule service, hence other jobs are not updated": "Failed to schedule service, hence other jobs are not updated",
+  "Fetching time zones": "Fetching time zones",
   "Frequency": "Frequency",
   "Go to Launchpad": "Go to Launchpad",
   "Go to OMS": "Go to OMS",
@@ -205,6 +207,7 @@
   "View order count history": "View order count history",
   "virtual, ": "virtual, ",
   "variants": "variants",
+  "Version: ": "Version: {appVersion}",
   "You can also download the products, locations and safety stock you selected in a CSV to upload in other systems": "You can also download the products, locations and safety stock you selected in a CSV to upload in other systems",
   "You do not have permission to access this page": "You do not have permission to access this page",
   "You do not have permission to access the app.": "You do not have permission to access the app."

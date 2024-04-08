@@ -124,7 +124,7 @@
 import { IonBadge, IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonItemDivider, IonLabel, IonList, IonPage, IonSegment, IonSegmentButton, IonSelect, IonSelectOption, IonTitle, IonToolbar, modalController, popoverController } from '@ionic/vue';
 import { ref } from 'vue';
 import { addOutline, albumsOutline, businessOutline, ellipsisVerticalOutline, globeOutline, optionsOutline, storefrontOutline, timeOutline, timerOutline } from 'ionicons/icons';
-import { translate } from '@hotwax/dxp-components';
+import { translate } from '@/i18n';
 import ShopActionsPopover from '@/components/ShopActionsPopover.vue'
 import CreateGroupModal from '@/components/CreateGroupModal.vue'
 import LinkFacilitiesToGroupModal from '@/components/LinkFacilitiesToGroupModal.vue'

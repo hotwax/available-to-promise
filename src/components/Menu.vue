@@ -7,7 +7,7 @@
     </ion-header>
     <ion-content>
       <ion-list>
-        <ion-menu-toggle auto-hide="false" v-for="(page, index) in getValidMenuItems(appPages)" :key="index">
+        <ion-menu-toggle auto-hide="false" v-for="(page, index) in appPages" :key="index">
           <ion-item 
             button
             router-direction="root"
@@ -26,7 +26,7 @@
           <ion-label class="ion-text-wrap">
             <p class="overline">{{ instanceUrl }}</p>
           </ion-label>
-          <ion-note slot="end">{{ userProfile?.userTimeZone }}</ion-note>
+          <ion-note slot="end">{{ userProfile?.timeZone }}</ion-note>
         </ion-item>
         <ion-item v-if="userProfile?.stores?.length > 1" lines="none">
           <ion-select interface="popover" :value="eComStore.productStoreId" @ionChange="setEComStore($event)">
@@ -63,11 +63,9 @@
   import { defineComponent, computed } from "vue";
   import { mapGetters } from "vuex";
   import { useStore } from "@/store";
-  import { hasPermission } from "@/authorization";
   import { useRouter } from "vue-router";
   import { cloudUploadOutline, globeOutline, optionsOutline, settingsOutline, sendOutline, storefrontOutline, pulseOutline } from 'ionicons/icons';
-  import emitter from "@/event-bus";
-  import { translate } from "@hotwax/dxp-components";
+  import { translate } from "@/i18n";
   
   export default defineComponent({
     name: "Menu",
@@ -99,11 +97,7 @@
       async setEComStore(event: CustomEvent) {
         if(this.eComStore.productStoreId !== event.detail.value) {
           await this.store.dispatch('user/setEcomStore', { 'productStoreId': event.detail.value })
-          emitter.emit("productStoreChanged")
         }
-      },
-      getValidMenuItems(appPages: any) {
-        return appPages.filter((appPage: any) => (!appPage.meta || !appPage.meta.permissionId) || hasPermission(appPage.meta.permissionId));
       }
     },
     setup() {
@@ -161,7 +155,6 @@
         appPages,
         cloudUploadOutline,
         globeOutline,
-        hasPermission,
         optionsOutline,
         pulseOutline,
         router,

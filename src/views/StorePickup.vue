@@ -49,7 +49,7 @@ import { ref } from 'vue';
 import { addOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue'
 import FacilityItem from '@/components/FacilityItem.vue'
-import { translate } from '@hotwax/dxp-components';
+import { translate } from '@/i18n';
 import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
 import { useRouter } from 'vue-router';
 

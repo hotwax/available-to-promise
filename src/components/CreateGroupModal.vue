@@ -34,7 +34,7 @@
 <script setup lang="ts">
 import { IonButton, IonButtons, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonList, IonTextarea, IonTitle, IonToolbar, modalController } from "@ionic/vue";
 import { closeOutline, checkmarkDone } from "ionicons/icons";
-import { translate } from '@hotwax/dxp-components'
+import { translate } from "@/i18n";
 
 function closeModal() {
   modalController.dismiss();

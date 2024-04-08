@@ -48,7 +48,7 @@ import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonLabel, IonPage
 import { ref } from 'vue';
 import { addOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue'
-import { translate } from '@hotwax/dxp-components';
+import { translate } from '@/i18n';
 import FacilityItem from '@/components/FacilityItem.vue';
 import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
 import { useRouter } from 'vue-router';
