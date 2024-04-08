@@ -1,8 +1,8 @@
 <template>
-  <ion-menu side="start" menu-id="first" content-id="main" type="overlay" :disabled="!isUserAuthenticated">
+  <ion-menu content-id="main" type="overlay" :disabled="!isUserAuthenticated">
     <ion-header>
       <ion-toolbar>
-        <ion-title>{{ $t("Menu") }}</ion-title>
+        <ion-title>{{ translate("Available to Promise") }}</ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content>
@@ -64,7 +64,8 @@
   import { mapGetters } from "vuex";
   import { useStore } from "@/store";
   import { useRouter } from "vue-router";
-  import { optionsOutline, settingsOutline, pulseOutline } from 'ionicons/icons';
+  import { cloudUploadOutline, globeOutline, optionsOutline, settingsOutline, sendOutline, storefrontOutline, pulseOutline } from 'ionicons/icons';
+  import { translate } from "@/i18n";
   
   export default defineComponent({
     name: "Menu",
@@ -104,6 +105,40 @@
       const router = useRouter();
       const appPages = [
         {
+          title: "Threshold",
+          url: "/threshold",
+          childRoutes: ["/create-threshold"],
+          iosIcon: globeOutline,
+          mdIcon: globeOutline
+        },
+        {
+          title: "Safety stock",
+          url: "/safety-stock",
+          childRoutes: ["/create-safety-stock"],
+          iosIcon: pulseOutline,
+          mdIcon: pulseOutline
+        },
+        {
+          title: "Store pickup",
+          url: "/store-pickup",
+          childRoutes: ["/create-store-pickup"],
+          iosIcon: storefrontOutline,
+          mdIcon: storefrontOutline
+        },
+        {
+          title: "Shipping",
+          url: "/shipping",
+          childRoutes: ["/create-shipping"],
+          iosIcon: sendOutline,
+          mdIcon: sendOutline
+        },
+        {
+          title: "Inventory channels",
+          url: "/inventory-channels",
+          iosIcon: cloudUploadOutline,
+          mdIcon: cloudUploadOutline
+        },
+        {
           title: "Settings",
           url: "/settings",
           iosIcon: settingsOutline,
@@ -113,17 +148,22 @@
 
       const selectedIndex = computed(() => {
         const path = router.currentRoute.value.path;
-        return appPages.findIndex((screen) => screen.url === path);
+        return appPages.findIndex((screen) => screen.url === path || screen.childRoutes?.includes(path) || screen.childRoutes?.some((route: any)=> path.includes(route)));
       });
 
       return {
         appPages,
-        router,
-        pulseOutline,
+        cloudUploadOutline,
+        globeOutline,
         optionsOutline,
+        pulseOutline,
+        router,
         settingsOutline,
         selectedIndex,
+        sendOutline,
+        storefrontOutline,
         store,
+        translate
       };
     },
   });
