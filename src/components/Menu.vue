@@ -1,8 +1,8 @@
 <template>
-  <ion-menu side="start" menu-id="first" content-id="main" type="overlay" :disabled="!isUserAuthenticated">
+  <ion-menu content-id="main" type="overlay" :disabled="!isUserAuthenticated">
     <ion-header>
       <ion-toolbar>
-        <ion-title>{{ $t("Menu") }}</ion-title>
+        <ion-title>{{ translate("Available to Promise") }}</ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content>
@@ -63,18 +63,53 @@
   import { computed } from "vue";
   import { useStore } from "@/store";
   import { useRouter } from "vue-router";
-  import { settingsOutline } from 'ionicons/icons';
+  import { cloudUploadOutline, globeOutline, optionsOutline, settingsOutline, sendOutline, storefrontOutline, pulseOutline } from 'ionicons/icons';
+  import { translate } from "@/i18n";
 
   const store = useStore();
   const router = useRouter();
   const appPages = [
-    {
-      title: "Settings",
-      url: "/settings",
-      iosIcon: settingsOutline,
-      mdIcon: settingsOutline
-    }
-  ];
+        {
+          title: "Threshold",
+          url: "/threshold",
+          childRoutes: ["/create-threshold"],
+          iosIcon: globeOutline,
+          mdIcon: globeOutline
+        },
+        {
+          title: "Safety stock",
+          url: "/safety-stock",
+          childRoutes: ["/create-safety-stock"],
+          iosIcon: pulseOutline,
+          mdIcon: pulseOutline
+        },
+        {
+          title: "Store pickup",
+          url: "/store-pickup",
+          childRoutes: ["/create-store-pickup"],
+          iosIcon: storefrontOutline,
+          mdIcon: storefrontOutline
+        },
+        {
+          title: "Shipping",
+          url: "/shipping",
+          childRoutes: ["/create-shipping"],
+          iosIcon: sendOutline,
+          mdIcon: sendOutline
+        },
+        {
+          title: "Inventory channels",
+          url: "/inventory-channels",
+          iosIcon: cloudUploadOutline,
+          mdIcon: cloudUploadOutline
+        },
+        {
+          title: "Settings",
+          url: "/settings",
+          iosIcon: settingsOutline,
+          mdIcon: settingsOutline
+        }
+      ];
 
   const userProfile = computed(() => store.getters["user/getUserProfile"])
   const isUserAuthenticated = computed(() => store.getters["user/isUserAuthenticated"])
