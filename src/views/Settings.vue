@@ -72,9 +72,9 @@
       <div class="section-header">
         <h1>
           {{ translate("App") }}
-          <p class="overline" >{{ translate("Version:") + appVersion }}</p>
+          <p class="overline" >{{ translate("Version: ", { appVersion }) }}</p>
         </h1>
-        <p class="overline">{{ translate("Built:") + getDateTime(appInfo.builtTime) }}</p>
+        <p class="overline">{{ translate("Built: ", { builtDateTime: getDateTime(appInfo.builtTime) }) }}</p>
       </div>
 
       <section>
