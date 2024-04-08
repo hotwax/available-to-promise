@@ -13,6 +13,7 @@ import { options, settings, pulseOutline } from 'ionicons/icons';
 import emitter from "@/event-bus"
 import { useRouter } from 'vue-router';
 import { mapGetters, useStore } from 'vuex';
+import { Settings } from 'luxon'
 import Menu from '@/components/Menu.vue';
 
 export default defineComponent({
@@ -30,6 +31,7 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       instanceUrl: 'user/getInstanceUrl',
+      userProfile: 'user/getUserProfile',
       userToken: 'user/getUserToken',
       isAuthenticated: 'user/isAuthenticated',
     })
@@ -65,6 +67,11 @@ export default defineComponent({
     });
     emitter.on('presentLoader', this.presentLoader);
     emitter.on('dismissLoader', this.dismissLoader);
+
+    if (this.userProfile) {
+    // Luxon timezone should be set with the user's selected timezone
+    this.userProfile.timeZone && (Settings.defaultZone = this.userProfile.timeZone);
+  }
   },
   unmounted() {
     emitter.off('presentLoader', this.presentLoader);

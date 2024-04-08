@@ -2,12 +2,8 @@ import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
 import Settings from "@/views/Settings.vue"
 import store from '@/store'
-import { showToast } from '@/utils'
-import { translate } from '@/i18n'
 import Login from '@/views/Login.vue'
-
 import 'vue-router'
-import { loader } from '@/user-utils';
 
 // Defining types for the meta values
 declare module 'vue-router' {
