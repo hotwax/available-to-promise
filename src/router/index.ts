@@ -8,6 +8,15 @@ import ThresholdUpdates from '@/views/ThresholdUpdates.vue'
 import Settings from "@/views/Settings.vue"
 import store from '@/store'
 import ScheduleThreshold from '@/views/ScheduleThreshold.vue'
+import Threshold from '@/views/Threshold.vue'
+import SafetyStock from '@/views/SafetyStock.vue'
+import StorePickup from '@/views/StorePickup.vue'
+import Shipping from '@/views/Shipping.vue'
+import InventoryChannels from '@/views/InventoryChannels.vue'
+import CreateThresholdRule from '@/views/CreateThresholdRule.vue';
+import CreateSafetyStockRule from '@/views/CreateSafetyStockRule.vue'
+import CreateStorePickupRule from '@/views/CreateStorePickupRule.vue'
+import CreateShippingRule from '@/views/CreateShippingRule.vue'
 
 import { hasPermission } from '@/authorization';
 import { showToast } from '@/utils'
@@ -47,7 +56,7 @@ const loginGuard = (to: any, from: any, next: any) => {
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    redirect: '/select-product'
+    redirect: '/threshold'
   },
   {
     path: '/select-product',
@@ -59,38 +68,58 @@ const routes: Array<RouteRecordRaw> = [
     }
   },    
   {
-    path: '/select-product-csv-upload',
-    name: 'SelectProductCSVUpload',
-    component: SelectProductCSVUpload,
-    meta: {
-      permissionId: ""
-    }
+    path: '/threshold',
+    name: 'Threshold',
+    component: Threshold,
+    beforeEnter: authGuard
   },
   {
-    path: '/select-facility',
-    name: 'SelectFacility',
-    component: SelectFacility,
-    beforeEnter: authGuard,
-    meta: {
-      permissionId: ""
-    }
+    path: '/safety-stock',
+    name: 'Safety stock',
+    component: SafetyStock,
+    beforeEnter: authGuard
   },
   {
-    path: '/select-facility-csv-upload',
-    name: 'SelectFacilityCSVUpload',
-    component: SelectFacilityCSVUpload,
-    meta: {
-      permissionId: ""
-    }
+    path: '/store-pickup',
+    name: 'Store pickup',
+    component: StorePickup,
+    beforeEnter: authGuard
   },
   {
-    path: '/threshold-updates',
-    name: 'ThresholdUpdates',
-    component: ThresholdUpdates,
-    beforeEnter: authGuard,
-    meta: {
-      permissionId: "APP_THRESHOLD_UPDATES_VIEW"
-    }
+    path: '/shipping',
+    name: 'Shipping',
+    component: Shipping,
+    beforeEnter: authGuard
+  },
+  {
+    path: '/inventory-channels',
+    name: 'Inventory channels',
+    component: InventoryChannels,
+    beforeEnter: authGuard
+  },
+  {
+    path: '/create-threshold',
+    name: 'Create threshold',
+    component: CreateThresholdRule,
+    beforeEnter: authGuard
+  },
+  {
+    path: '/create-safety-stock',
+    name: 'Create safety stock',
+    component: CreateSafetyStockRule,
+    beforeEnter: authGuard
+  },
+  {
+    path: '/create-store-pickup',
+    name: 'Create store pickup',
+    component: CreateStorePickupRule,
+    beforeEnter: authGuard
+  },
+  {
+    path: '/create-shipping',
+    name: 'Create shipping',
+    component: CreateShippingRule,
+    beforeEnter: authGuard
   },
   {
     path: '/login',
@@ -103,16 +132,7 @@ const routes: Array<RouteRecordRaw> = [
     name: "Settings",
     component: Settings,
     beforeEnter: authGuard
-  },
-  {
-    path: '/schedule-threshold',
-    name: 'ScheduleThreshold',
-    component: ScheduleThreshold,
-    beforeEnter: authGuard,
-    meta: {
-      permissionId: "APP_SAVE_THRESHOLD_VIEW"
-    }
-  },
+  }
 ]
 
 const router = createRouter({

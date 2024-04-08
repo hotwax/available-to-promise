@@ -1,12 +1,14 @@
 <template>
   <ion-app>
-    <Menu />
-    <ion-router-outlet id="main" />
+    <IonSplitPane content-id="main" when="lg">
+      <Menu />
+      <ion-router-outlet id="main"></ion-router-outlet>
+    </IonSplitPane>
   </ion-app>
 </template>
 
 <script lang="ts">
-import { IonApp, IonRouterOutlet } from '@ionic/vue';
+import { IonApp, IonRouterOutlet, IonSplitPane } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { loadingController } from '@ionic/vue';
 import { options, settings, pulseOutline } from 'ionicons/icons';
@@ -22,7 +24,8 @@ export default defineComponent({
   components: {
     Menu,
     IonApp,
-    IonRouterOutlet
+    IonRouterOutlet,
+    IonSplitPane
   },
   data() {
     return {
@@ -124,3 +127,8 @@ export default defineComponent({
   }
 });
 </script>
+<style>
+  ion-split-pane {
+    --side-width: 304px;
+  }
+</style>

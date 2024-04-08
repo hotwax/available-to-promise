@@ -35,6 +35,7 @@ import permissionActions from '@/authorization/Actions';
 import { dxpComponents } from '@hotwax/dxp-components'
 import { login, logout, loader } from './user-utils';
 import { getConfig, initialise } from '@/adapter'
+import localeMessages from '@/locales';
 
 
 const app = createApp(App)
@@ -55,6 +56,7 @@ const app = createApp(App)
     defaultImgUrl: require("@/assets/images/defaultImage.png"),
     login,
     logout,
+    localeMessages,
     loader,
     appLoginUrl: process.env.VUE_APP_LOGIN_URL as string,
     getConfig,

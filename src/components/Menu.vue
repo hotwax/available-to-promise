@@ -1,8 +1,8 @@
 <template>
-  <ion-menu side="start" menu-id="first" content-id="main" type="overlay" :disabled="!isUserAuthenticated">
+  <ion-menu content-id="main" type="overlay" :disabled="!isUserAuthenticated">
     <ion-header>
       <ion-toolbar>
-        <ion-title>{{ $t("Menu") }}</ion-title>
+        <ion-title>{{ translate("Available to Promise") }}</ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content>
@@ -65,8 +65,9 @@
   import { useStore } from "@/store";
   import { hasPermission } from "@/authorization";
   import { useRouter } from "vue-router";
-  import { optionsOutline, settingsOutline, pulseOutline } from 'ionicons/icons';
+  import { cloudUploadOutline, globeOutline, optionsOutline, settingsOutline, sendOutline, storefrontOutline, pulseOutline } from 'ionicons/icons';
   import emitter from "@/event-bus";
+  import { translate } from "@hotwax/dxp-components";
   
   export default defineComponent({
     name: "Menu",
@@ -110,23 +111,38 @@
       const router = useRouter();
       const appPages = [
         {
-          title: "Create Rule",
-          url: "/select-product",
-          iosIcon: optionsOutline,
-          mdIcon: optionsOutline,
-          meta: {
-            permissionId: "APP_SELECT_PRODUCT_VIEW"
-
-          }
+          title: "Threshold",
+          url: "/threshold",
+          childRoutes: ["/create-threshold"],
+          iosIcon: globeOutline,
+          mdIcon: globeOutline
         },
         {
-          title: "Rule Pipeline",
-          url: "/threshold-updates",
+          title: "Safety stock",
+          url: "/safety-stock",
+          childRoutes: ["/create-safety-stock"],
           iosIcon: pulseOutline,
-          mdIcon: pulseOutline,
-          meta: {
-            permissionId: "APP_THRESHOLD_UPDATES_VIEW"
-          }
+          mdIcon: pulseOutline
+        },
+        {
+          title: "Store pickup",
+          url: "/store-pickup",
+          childRoutes: ["/create-store-pickup"],
+          iosIcon: storefrontOutline,
+          mdIcon: storefrontOutline
+        },
+        {
+          title: "Shipping",
+          url: "/shipping",
+          childRoutes: ["/create-shipping"],
+          iosIcon: sendOutline,
+          mdIcon: sendOutline
+        },
+        {
+          title: "Inventory channels",
+          url: "/inventory-channels",
+          iosIcon: cloudUploadOutline,
+          mdIcon: cloudUploadOutline
         },
         {
           title: "Settings",
@@ -138,18 +154,23 @@
 
       const selectedIndex = computed(() => {
         const path = router.currentRoute.value.path;
-        return appPages.findIndex((screen) => screen.url === path);
+        return appPages.findIndex((screen) => screen.url === path || screen.childRoutes?.includes(path) || screen.childRoutes?.some((route: any)=> path.includes(route)));
       });
 
       return {
         appPages,
+        cloudUploadOutline,
+        globeOutline,
         hasPermission,
-        router,
-        pulseOutline,
         optionsOutline,
+        pulseOutline,
+        router,
         settingsOutline,
         selectedIndex,
+        sendOutline,
+        storefrontOutline,
         store,
+        translate
       };
     },
   });
