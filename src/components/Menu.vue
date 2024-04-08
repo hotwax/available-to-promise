@@ -7,7 +7,7 @@
     </ion-header>
     <ion-content>
       <ion-list>
-        <ion-menu-toggle auto-hide="false" v-for="(page, index) in getValidMenuItems(appPages)" :key="index">
+        <ion-menu-toggle auto-hide="false" v-for="(page, index) in appPages" :key="index">
           <ion-item 
             button
             router-direction="root"
@@ -97,9 +97,6 @@
         if(this.eComStore.productStoreId !== event.detail.value) {
           await this.store.dispatch('user/setEcomStore', { 'productStoreId': event.detail.value })
         }
-      },
-      getValidMenuItems(appPages: any) {
-        return appPages.filter((appPage: any) => (!appPage.meta || !appPage.meta.permissionId));
       }
     },
     setup() {
