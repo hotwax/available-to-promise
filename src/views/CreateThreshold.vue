@@ -42,7 +42,7 @@
         </ion-card>
       </section>
 
-      <ProductFilterByItem />
+      <ProductFilters />
     </ion-content>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
@@ -57,7 +57,7 @@
 import { IonBackButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
 import { saveOutline } from 'ionicons/icons'
 import { translate } from "@hotwax/dxp-components";
-import ProductFilterByItem from '@/components/ProductFilterByItem.vue';
+import ProductFilters from '@/components/ProductFilters.vue';
 </script>
 
 <style scoped>

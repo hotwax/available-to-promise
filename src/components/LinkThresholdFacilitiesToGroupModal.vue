@@ -3,7 +3,7 @@
     <ion-toolbar>
       <ion-buttons slot="start">
         <ion-button>
-          <ion-icon slot="icon-only" :icon="close" />
+          <ion-icon slot="icon-only" :icon="closeOutline" />
         </ion-button>
       </ion-buttons>
       <ion-title>{{ translate("Link threshold") }}</ion-title>
@@ -50,6 +50,6 @@
 
 <script setup lang="ts">
 import { IonButton, IonButtons, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonLabel, IonRadio, IonRadioGroup, IonSearchbar, IonTitle, IonToolbar } from "@ionic/vue";
-import { close, saveOutline } from "ionicons/icons";
+import { closeOutline, saveOutline } from "ionicons/icons";
 import { translate } from '@hotwax/dxp-components'
 </script>
