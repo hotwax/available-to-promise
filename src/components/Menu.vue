@@ -43,7 +43,7 @@
   </ion-menu>
 </template>
   
-<script lang="ts">
+<script setup lang="ts">
   import {
     IonContent,
     IonFooter,
@@ -60,50 +60,15 @@
     IonTitle,
     IonToolbar,
   } from "@ionic/vue";
-  import { defineComponent, computed } from "vue";
-  import { mapGetters } from "vuex";
+  import { computed } from "vue";
   import { useStore } from "@/store";
   import { useRouter } from "vue-router";
   import { cloudUploadOutline, globeOutline, optionsOutline, settingsOutline, sendOutline, storefrontOutline, pulseOutline } from 'ionicons/icons';
   import { translate } from "@/i18n";
-  
-  export default defineComponent({
-    name: "Menu",
-    components: {
-      IonContent,
-      IonFooter,
-      IonHeader,
-      IonIcon,
-      IonItem,
-      IonLabel,
-      IonList,
-      IonMenu,
-      IonMenuToggle,
-      IonNote,
-      IonSelect,
-      IonSelectOption,
-      IonTitle,
-      IonToolbar
-    },
-    computed: {
-      ...mapGetters({
-        isUserAuthenticated: 'user/isUserAuthenticated',
-        eComStore: 'user/getCurrentEComStore',
-        instanceUrl: 'user/getInstanceUrl',
-        userProfile: 'user/getUserProfile',
-      })
-    },
-    methods: {
-      async setEComStore(event: CustomEvent) {
-        if(this.eComStore.productStoreId !== event.detail.value) {
-          await this.store.dispatch('user/setEcomStore', { 'productStoreId': event.detail.value })
-        }
-      }
-    },
-    setup() {
-      const store = useStore();
-      const router = useRouter();
-      const appPages = [
+
+  const store = useStore();
+  const router = useRouter();
+  const appPages = [
         {
           title: "Threshold",
           url: "/threshold",
@@ -146,27 +111,22 @@
         }
       ];
 
-      const selectedIndex = computed(() => {
-        const path = router.currentRoute.value.path;
-        return appPages.findIndex((screen) => screen.url === path || screen.childRoutes?.includes(path) || screen.childRoutes?.some((route: any)=> path.includes(route)));
-      });
-
-      return {
-        appPages,
-        cloudUploadOutline,
-        globeOutline,
-        optionsOutline,
-        pulseOutline,
-        router,
-        settingsOutline,
-        selectedIndex,
-        sendOutline,
-        storefrontOutline,
-        store,
-        translate
-      };
-    },
+  const userProfile = computed(() => store.getters["user/getUserProfile"])
+  const isUserAuthenticated = computed(() => store.getters["user/isUserAuthenticated"])
+  const eComStore = computed(() => store.getters["user/getCurrentEComStore"])
+  const instanceUrl = computed(() => store.getters["user/getInstanceUrl"])
+  const selectedIndex = computed(() => {
+    const path = router.currentRoute.value.path;
+    return appPages.findIndex((screen) => screen.url === path);
   });
+
+  function setEComStore(event: CustomEvent) {
+    if(userProfile.value?.stores) {
+      store.dispatch("user/setEcomStore", {
+        "productStoreId": event.detail.value
+      })
+    }
+  }
   </script>
   
   <style scoped>
