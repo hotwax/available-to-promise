@@ -55,6 +55,7 @@
   "Failed": "Failed",
   "Failed to update some jobs": "Failed to update some jobs",
   "Failed to schedule service, hence other jobs are not updated": "Failed to schedule service, hence other jobs are not updated",
+  "features": "{type} features",
   "Fetching time zones": "Fetching time zones",
   "Frequency": "Frequency",
   "Go to Launchpad": "Go to Launchpad",
