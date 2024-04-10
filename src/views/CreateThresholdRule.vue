@@ -17,10 +17,10 @@
 
             <div class="rule-inputs ion-padding">
               <ion-item>
-                <ion-input :label="translate('Name')" />
+                <ion-input :label="translate('Name')" v-model="formData.name" />
               </ion-item>
               <ion-item>
-                <ion-input :label="translate('Threshold')" />
+                <ion-input :label="translate('Threshold')" v-model="formData.threshold" />
               </ion-item>
             </div>
           </ion-card>
@@ -31,13 +31,13 @@
       </div>
 
       <section> 
-        <ion-card >
+        <ion-card v-for="facility in configFacilities" :key="facility.facilityId" @click="toggleFacilitySelection(facility.facilityId)" button>
           <ion-card-header>
             <div>
-              <ion-card-title>{{ "Facitlity Name" }}</ion-card-title>
-              <ion-card-subtitle>{{ "Facility ID" }}</ion-card-subtitle>
+              <ion-card-title>{{ facility.facilityName }}</ion-card-title>
+              <ion-card-subtitle>{{ facility.facilityId }}</ion-card-subtitle>
             </div>
-            <ion-checkbox />
+            <ion-checkbox :checked="isFacilitySelected(facility.facilityId)" />
           </ion-card-header>
         </ion-card>
       </section>
@@ -54,10 +54,54 @@
 </template>
 
 <script setup lang="ts">
-import { IonBackButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
+import {
+  IonBackButton,
+  IonCard,
+  IonCardHeader,
+  IonCardSubtitle,
+  IonCardTitle,
+  IonCheckbox,
+  IonContent,
+  IonFab,
+  IonFabButton,
+  IonHeader,
+  IonIcon,
+  IonInput,
+  IonItem,
+  IonPage,
+  IonTitle,
+  IonToolbar
+} from '@ionic/vue';
 import { saveOutline } from 'ionicons/icons'
 import { translate } from "@/i18n";
 import ProductFilters from '@/components/ProductFilters.vue';
+import { computed, onMounted, ref } from 'vue';
+import { useStore } from 'vuex';
+
+const store = useStore();
+const formData = ref({
+  name: '',
+  threshold: '',
+  selectedConfigFacilites: []
+}) as any;
+
+const configFacilities = computed(() => store.getters["util/getConfigFacilities"])
+
+onMounted(async () => {
+  await store.dispatch("util/fetchConfigFacilities");
+})
+
+function toggleFacilitySelection(facilityId: any) {
+  if(formData.value.selectedConfigFacilites.includes(facilityId)) {
+    formData.value.selectedConfigFacilites = formData.value.selectedConfigFacilites.filter((currentFacilityId: string) => currentFacilityId !== facilityId)
+  } else {
+    formData.value.selectedConfigFacilites.push(facilityId)
+  }
+}
+
+function isFacilitySelected(facilityId: any) {
+  return formData.value.selectedConfigFacilites.includes(facilityId)
+}
 </script>
 
 <style scoped>

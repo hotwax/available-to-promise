@@ -8,48 +8,30 @@ import * as types from './mutation-types'
 
 
 const actions: ActionTree<UtilState, RootState> = {
-  async fetchProductFeatures ({ commit, state }) {
-    // const features = JSON.parse(JSON.stringify())
-    const featuresByType = {} as any
+  async fetchConfigFacilities ({ commit, state }) {
+    let configFacilities = JSON.parse(JSON.stringify(state.configFacilities))
 
-    try {
-      const resp = await UtilService.fetchProductFeatures()
-
-      if(!hasError(resp)) {
-        const features = resp.data
-        
-        features.map((feature: any) => {
-          if(featuresByType[feature.featureTypeDescription]) featuresByType[feature.featureTypeDescription].push(feature)
-          else featuresByType[feature.featureTypeDescription] = [feature]
-        })
-
-        commit(types.UTIL_FEATURES_BY_TYPE_UPDATED, featuresByType)
-      } else {
-        throw resp.data
-      }
-    } catch (err: any) {
-      logger.error(err)
-    }
-  },
-
-  async fetchProductTags ({ commit, state }) {
-    const productTags = JSON.parse(JSON.stringify(state.tags))
-
-    if(productTags.length) {
+    if(configFacilities.length) {
       return;
     }
 
+    const payload = {
+      facilityTypeId: 'CONFIGURATION'
+    }
+    
     try {
-      const resp = await UtilService.fetchProductTags()
+      const resp = await UtilService.fetchConfigFacilities(payload);
 
       if(!hasError(resp)) {
-        commit(types.UTIL_PRODUCT_TAGS_UPDATED, resp.data)
+        configFacilities = resp.data;
       } else {
         throw resp.data
       }
     } catch (err: any) {
       logger.error(err)
     }
+
+    commit(types.UTIL_CONFIG_FACILITES_UPDATED, configFacilities)
   }
 }
 

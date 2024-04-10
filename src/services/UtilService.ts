@@ -1,22 +1,22 @@
 import api, {client} from '@/api';
 
-const fetchProductFeatures = async (): Promise <any>  => {
+const fetchFacets = async (payload: any): Promise<any> => {
   return api({
-    url: "products/features",
-    method: "get",
-    cache: true
+    url: "solrFacets",
+    method: "GET",
+    params: payload
   });
 }
 
-const fetchProductTags = async (): Promise <any>  => {
+const fetchConfigFacilities = async (payload: any): Promise <any>  => {
   return api({
-    url: "products/10000/tags",
-    method: "get",
-    cache: true
+    url: "facilities",
+    method: "GET",
+    params: payload
   });
 }
 
 export const UtilService = {
-  fetchProductFeatures,
-  fetchProductTags
+  fetchConfigFacilities,
+  fetchFacets
 }

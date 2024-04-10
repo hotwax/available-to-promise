@@ -3,18 +3,15 @@ import getters from './getters'
 import mutations from './mutations'
 import { Module } from 'vuex'
 import RootState from '@/store/RootState'
-import UtilState from './UtilState'
+import RuleState from './RuleState'
 
-const utilModule: Module<UtilState, RootState> = {
+const userModule: Module<RuleState, RootState> = {
     namespaced: true,
     state: {
-      configFacilities: []
     },
     getters,
     actions,
     mutations,
 }
 
-// TODO
-// store.registerModule('user', userModule);
-export default utilModule;
+export default userModule;

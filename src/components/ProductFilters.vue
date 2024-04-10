@@ -7,7 +7,7 @@
     <ion-card>
       <ion-item lines="none">
         <ion-label>{{ translate("Included") }}</ion-label>
-        <ion-button fill="clear" @click="openSelectProductTagsModal('Included')">
+        <ion-button fill="clear" @click="openProductFilterModal('tags', 'tagsFacet', 'tags', 'included')">
           {{ translate("Add") }}
           <ion-icon :icon="addCircleOutline" slot="end" />
         </ion-button>
@@ -23,7 +23,7 @@
     <ion-card>
       <ion-item lines="none"> 
         <ion-label>{{ translate("Excluded") }}</ion-label>
-        <ion-button fill="clear" @click="openSelectProductTagsModal('Excluded')">
+        <ion-button fill="clear" @click="openProductFilterModal('tags', 'tagsFacet', 'tags', 'excluded')">
           {{ translate("Add") }}
           <ion-icon :icon="addCircleOutline" slot="end" />
         </ion-button>
@@ -45,7 +45,7 @@
     <ion-card>
       <ion-item lines="none">
         <ion-label>{{ translate("Included") }}</ion-label>
-        <ion-button fill="clear" @click="openSelectProductFeaturesModal('Include')">
+        <ion-button fill="clear" @click="openProductFilterModal('productFeatures', 'productFeaturesFacet', 'productFeatures', 'included')">
           {{ translate("Add") }}
           <ion-icon :icon="addCircleOutline" slot="end" />
         </ion-button>
@@ -61,7 +61,7 @@
     <ion-card>
       <ion-item lines="none"> 
         <ion-label>{{ translate("Excluded") }}</ion-label>
-        <ion-button fill="clear" @click="openSelectProductFeaturesModal('Exclude')">
+        <ion-button fill="clear" @click="openProductFilterModal('productFeatures', 'productFeaturesFacet', 'productFeatures', 'included')">
           {{ translate("Add") }}
           <ion-icon :icon="addCircleOutline" slot="end" />
         </ion-button>
@@ -80,22 +80,17 @@
 import { IonButton, IonCard, IonCardContent, IonChip, IonIcon, IonItem, IonLabel, modalController } from '@ionic/vue';
 import { addCircleOutline, closeCircle } from 'ionicons/icons'
 import { translate } from '@/i18n';
-import SelectProductFeaturesModal from '@/components/SelectProductFeaturesModal.vue'
-import SelectProductTagsModal from '@/components/SelectProductTagsModal.vue'
+import AddProductFiltersModal from '@/components/AddProductFiltersModal.vue';
 
-async function openSelectProductFeaturesModal(type: string) {
+async function openProductFilterModal(label: string, facetToSelect: string, searchfield: string, type: string) {
   const modal = await modalController.create({
-    component: SelectProductFeaturesModal,
-    componentProps: { type }
-  })
-
-  modal.present()
-}
-
-async function openSelectProductTagsModal(type: string) {
-  const modal = await modalController.create({
-    component: SelectProductTagsModal,
-    componentProps: { type }
+    component: AddProductFiltersModal,
+    componentProps: {
+      label,
+      facetToSelect,
+      searchfield,
+      type
+    },
   })
 
   modal.present()
