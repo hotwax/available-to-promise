@@ -6,7 +6,7 @@
           <ion-icon slot="icon-only" :icon="arrowBackOutline" />
         </ion-button>
       </ion-buttons>
-      <ion-title>{{ $t(`${ type === 'included' ? `Include ${label}` : `Exclude ${label}` }`) }}</ion-title>
+      <ion-title>{{ type === "included" ? translate("Include", { label }) : translate("Exclude", { label }) }}</ion-title>
       <ion-buttons slot="end">
         <ion-button fill="clear" color="danger" @click="selectedValues = []">{{ $t("Clear All") }}</ion-button>
       </ion-buttons>
@@ -18,16 +18,17 @@
 
     <ion-list>
       <ion-item v-for="option in facetOptions" :key="option.id"  @click="updateSelectedValues(option.id)">
-        <ion-checkbox :checked="selectedValues.includes(option.id)">
+        <ion-label v-if="isAlreadyApplied(option.id)">{{ option.label }}</ion-label>
+        <ion-checkbox v-if="!isAlreadyApplied(option.id)" :checked="selectedValues.includes(option.id)">
           {{ option.label }}
         </ion-checkbox>
-        <!-- <ion-note v-else slot="end" color="danger">{{ type === 'included' ? $t("excluded") : $t("included") }}</ion-note> -->
+        <ion-note v-else slot="end" color="danger">{{ type === 'included' ? $t("excluded") : $t("included") }}</ion-note>
       </ion-item>
     </ion-list>
 
     <!-- Added padding for better visiblity of the checkboxes beside the FAB -->
     <ion-fab class="ion-padding" vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button>
+      <ion-fab-button @click="saveFilters()">
         <ion-icon :icon="checkmarkOutline" />
       </ion-fab-button>
     </ion-fab>
@@ -39,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent } from "vue";
+import { computed, defineComponent, onMounted } from "vue";
 import {
   IonButton,
   IonButtons,
@@ -73,7 +74,14 @@ const isFilterChanged = ref(false);
 const isScrollable = ref(true);
 const selectedValues = ref([]) as any;
 
-const props = defineProps(["label", "facetToSelect", "searchfield", "type"])
+const props = defineProps(["label", "facetToSelect", "searchfield", "type"]);
+const store = useStore();
+
+const appliedFilters = computed(() => store.getters["util/getAppliedFilters"]);
+
+onMounted(() => {
+  selectedValues.value = JSON.parse(JSON.stringify(appliedFilters.value[props.type][props.searchfield]))
+})
 
 function closeModal() {
   modalController.dismiss({ dismissed: true });
@@ -125,45 +133,16 @@ function updateSelectedValues(value: string) {
   selectedValues.value.includes(value) ? selectedValues.value.splice(selectedValues.value.indexOf(value), 1) : selectedValues.value.push(value);
 }
 
-// async updateFilters() {
-//   this.isFilterChanged = true;
-//   this.selectedValues.length ? await this.updateAppliedFilters() : await this.clearFilters();
-//   this.closeModal();
-// },
-// async updateAppliedFilters() {
-//   // if filters are not updated
-//   if (JSON.stringify(this.appliedFilters[this.type][this.searchfield].list) == JSON.stringify(this.selectedValues)) {
-//     this.isFilterChanged = false;
-//     return;
-//   }
+function isAlreadyApplied(value: string) {
+  const type = props.type === 'included' ? 'excluded' : 'included'
+  return appliedFilters.value[type][props.searchfield].includes(value)
+}
 
-//   const appliedFilters = JSON.parse(JSON.stringify(this.appliedFilters[this.type][this.searchfield]))
-//   appliedFilters.list = this.selectedValues
-  
-//   await this.store.dispatch('product/updateAppliedFilters', {
-//     type: this.type,
-//     id: this.searchfield,
-//     value: appliedFilters
-//   })
-// },
-// async clearFilters() {
-//   // if no filters are already not applied
-//   if (!this.appliedFilters[this.type][this.searchfield].list.length) {
-//     this.isFilterChanged = false;
-//     return;
-//   }
+async function saveFilters() {
+  const selectedFilters = JSON.parse(JSON.stringify(appliedFilters.value))
+  selectedFilters[props.type][props.searchfield] = selectedValues.value
 
-//   await this.store.dispatch('product/clearFilters', {
-//     type: this.type,
-//     id: this.searchfield,
-//     value: {
-//       list: [],
-//       operator: 'OR'
-//     }
-//   })
-// },
-// isAlreadyApplied(value: string) {
-//   const type = this.type === 'included' ? 'excluded' : 'included'
-//   return this.appliedFilters[type][this.searchfield].list.includes(value)
-// }
+  await store.dispatch('util/updateAppliedFilters', selectedFilters)
+  modalController.dismiss()
+}
 </script>

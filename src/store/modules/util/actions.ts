@@ -32,6 +32,10 @@ const actions: ActionTree<UtilState, RootState> = {
     }
 
     commit(types.UTIL_CONFIG_FACILITES_UPDATED, configFacilities)
+  },
+
+  async updateAppliedFilters ({ commit, state }, payload) {
+    commit(types.UTIL_APPLIED_FILTERS_UPDATED, payload)
   }
 }
 

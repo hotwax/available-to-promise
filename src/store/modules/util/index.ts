@@ -8,7 +8,17 @@ import UtilState from './UtilState'
 const utilModule: Module<UtilState, RootState> = {
     namespaced: true,
     state: {
-      configFacilities: []
+      configFacilities: [],
+      appliedFilters: {
+        included: {
+          tags: [],
+          productFeatures: []
+        },
+        excluded: {
+          tags: [],
+          productFeatures: []
+        }
+      },
     },
     getters,
     actions,
