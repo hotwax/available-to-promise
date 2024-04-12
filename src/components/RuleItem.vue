@@ -114,7 +114,7 @@
 
       <ion-item lines="none">
         <ion-button @click="editRuleName()" fill="clear">{{ translate("Edit name") }}</ion-button>
-        <ion-button color="medium" fill="clear" slot="end">
+        <ion-button @click="archiveRule()" color="medium" fill="clear" slot="end">
           <ion-icon :icon="archiveOutline" slot="icon-only"/>
         </ion-button>
       </ion-item>
@@ -261,6 +261,35 @@ function getRuleConditions(conditionTypeEnumId: string, fieldName?: string, oper
       return facilities.join(", ")
     }
   }
+}
+
+async function archiveRule() {
+  const alert = await alertController
+    .create({
+      header: translate('Archive rule'),
+      message: translate('Are you sure you want to archive this rule?'),
+      buttons: [{
+        text: translate('No'),
+        role: 'cancel'
+      }, {
+        text: translate('Yes'),
+        handler: async () => {
+          const rule = JSON.parse(JSON.stringify(props.rule))
+          rule.statusId = "ATP_RULE_ARCHIVED"
+
+          try {
+            await RuleService.updateRule(rule, props.rule.ruleId)
+            await store.dispatch('rule/archiveRule', { rule })
+            showToast(translate("Rule archived successfully."))
+            alertController.dismiss()
+          } catch(err: any) {
+            showToast(translate("Failed to update threhold."))
+            logger.error(err);
+          }
+        }
+      }]
+    });
+  return alert.present();
 }
 </script>
 

@@ -75,6 +75,16 @@ const actions: ActionTree<RuleState, RootState> = {
       rules.splice(index, 1, payload.rule);
     }
     commit(types.RULE_RULES_UPDATED, { list: rules, total: state.rules.total});
+  },
+
+  archiveRule({ commit, state }, { rule }) {
+    const rules = JSON.parse(JSON.stringify(state.rules.list))
+
+    const index = rules.findIndex((currRule: any) => currRule.ruleId === rule.ruleId);
+    if (index !== -1) {
+      rules.splice(index, 1);
+    }
+    commit(types.RULE_RULES_UPDATED, { list: rules, total: state.rules.total});
   }
 }
 
