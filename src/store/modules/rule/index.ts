@@ -8,7 +8,10 @@ import RuleState from './RuleState'
 const userModule: Module<RuleState, RootState> = {
   namespaced: true,
   state: {
-    rules: [],
+    rules: {
+      list: [],
+      total: ''
+    },
     ruleGroup: {}
   },
   getters,

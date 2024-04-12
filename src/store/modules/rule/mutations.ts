@@ -4,7 +4,8 @@ import * as types from './mutation-types'
 
 const mutations: MutationTree <RuleState> = {
   [types.RULE_RULES_UPDATED] (state, payload) {
-    state.rules = payload;
+    state.rules.list = payload.list;
+    state.rules.total = payload.total;
   },
   [types.RULE_GROUP_UPDATED] (state, payload) {
     state.ruleGroup = payload;

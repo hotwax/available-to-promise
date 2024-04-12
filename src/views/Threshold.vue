@@ -42,6 +42,7 @@ const rules = computed(() => store.getters["rule/getRules"]);
 
 onMounted(async() => {
   await store.dispatch('rule/fetchRules', { groupTypeEnumId: 'RG_THRESHOLD' })
+  await store.dispatch("util/fetchConfigFacilities");
 })
 
 function CreateThreshold() {

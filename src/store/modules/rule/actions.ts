@@ -14,6 +14,7 @@ const actions: ActionTree<RuleState, RootState> = {
     try {
       const resp = await RuleService.fetchRuleGroup(payload)
       if(!hasError(resp) && resp.data.length) {
+        
         ruleGroup = resp.data[0]
       } else {
         throw resp.data;
@@ -35,7 +36,11 @@ const actions: ActionTree<RuleState, RootState> = {
       if(!ruleGroup.ruleGroupId) {
         throw new Error("No rule founds")
       }
-      const resp = await RuleService.fetchRules(ruleGroup.ruleGroupId)
+      const resp = await RuleService.fetchRules({ 
+        ruleGroupId: ruleGroup.ruleGroupId,
+        "statusId": "ATP_RULE_ACTIVE",
+        "orderByField": "sequenceNum"
+      })
 
       if(!hasError(resp)) {
         const responses = await Promise.allSettled(
@@ -58,9 +63,19 @@ const actions: ActionTree<RuleState, RootState> = {
     } catch(err: any) {
       logger.error(err);
     }
-
-    commit(types.RULE_RULES_UPDATED, rules);
+    commit(types.RULE_RULES_UPDATED, { list: rules, total: rules.length});
   },
+  
+  updateRuleData({ commit, state }, payload) {
+    const rules = JSON.parse(JSON.stringify(state.rules.list))
+
+    const index = rules.findIndex((rule: any) => rule.ruleId === payload.rule.ruleId);
+    // If index is found, replace the object
+    if (index !== -1) {
+      rules.splice(index, 1, payload.rule);
+    }
+    commit(types.RULE_RULES_UPDATED, { list: rules, total: state.rules.total});
+  }
 }
 
 export default actions;

@@ -10,10 +10,11 @@ const fetchRuleGroup = async (payload: any): Promise <any>  => {
   });
 }
 
-const fetchRules = async (ruleGroupId: any): Promise <any>  => {
+const fetchRules = async (payload: any): Promise <any>  => {
   return api({
-    url: `ruleGroups/${ruleGroupId}/rules`,
-    method: "GET"
+    url: `ruleGroups/${payload.ruleGroupId}/rules`,
+    method: "GET",
+    params: payload
   });
 }
 
@@ -73,8 +74,7 @@ const updateRule = async (payload: any, ruleId: string): Promise <any>  => {
       throw resp.data
     }
   } catch(err: any) {
-    logger.error(err)
-    return Promise.reject("Failed to update rule");
+    return Promise.reject(err ? err : "Failed to update rule");
   }
 }
 

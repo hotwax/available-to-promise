@@ -91,6 +91,8 @@ const formData = ref({
 
 const configFacilities = computed(() => store.getters["util/getConfigFacilities"])
 const appliedFilters = computed(() => store.getters["util/getAppliedFilters"]);
+const rules = computed(() => store.getters["rule/getRules"]);
+const total = computed(() => store.getters["rule/getTotalRulesCount"])
 
 onMounted(async () => {
   await store.dispatch("util/fetchConfigFacilities");
@@ -163,12 +165,14 @@ async function createThresholdRule() {
         "groupTypeEnumId": "RG_THRESHOLD"
       })
     }
-    
+
     const rule = await RuleService.createRule({
       "_entity": "rule",
       "ruleId": formData.value.ruleName.trim().toUpperCase().split(' ').join('_'),
       "ruleGroupId": ruleGroup.ruleGroupId,
-      "ruleName": formData.value.ruleName
+      "ruleName": formData.value.ruleName,
+      "statusId": "ATP_RULE_ACTIVE",
+      "sequenceNum": total.value ? rules.value[total.value-1].sequenceNum + 1 : 1
     })
     
     const actions = generateRuleActions(rule.ruleId)
@@ -176,14 +180,11 @@ async function createThresholdRule() {
     
     await RuleService.updateRule({
       "_entity": "rule",
-    "ruleId": rule.ruleId,
-    "ruleGroupId": ruleGroup.ruleGroupId,
-    "ruleName": formData.value.ruleName,
-    "lastUpdatedStamp": "2024-04-12T05:05:48.770Z",
-    "ruleConditions": conditions,
-    "ruleActions": actions
-    }, rule.ruleId)
-  
+      "ruleId": rule.ruleId,
+      "ruleConditions": conditions,
+      "ruleActions": actions
+    }, rule.ruleId);
+
     showToast(translate("Rule created successfully."))
     router.push("/threshold");
   } catch(err: any) {
