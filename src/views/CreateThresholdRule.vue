@@ -46,7 +46,7 @@
     </ion-content>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button>
+      <ion-fab-button @click="createThresholdRule()">
         <ion-icon :icon="saveOutline" />
       </ion-fab-button>
     </ion-fab>
@@ -86,6 +86,7 @@ const formData = ref({
 }) as any;
 
 const configFacilities = computed(() => store.getters["util/getConfigFacilities"])
+const appliedFilters = computed(() => store.getters["util/getAppliedFilters"]);
 
 onMounted(async () => {
   await store.dispatch("util/fetchConfigFacilities");
@@ -101,6 +102,12 @@ function toggleFacilitySelection(facilityId: any) {
 
 function isFacilitySelected(facilityId: any) {
   return formData.value.selectedConfigFacilites.includes(facilityId)
+}
+
+function createThresholdRule() {
+  console.log(formData);
+  console.log(appliedFilters.value);
+  
 }
 </script>
 

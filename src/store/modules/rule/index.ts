@@ -6,12 +6,14 @@ import RootState from '@/store/RootState'
 import RuleState from './RuleState'
 
 const userModule: Module<RuleState, RootState> = {
-    namespaced: true,
-    state: {
-    },
-    getters,
-    actions,
-    mutations,
+  namespaced: true,
+  state: {
+    rules: [],
+    ruleGroup: {}
+  },
+  getters,
+  actions,
+  mutations,
 }
 
 export default userModule;

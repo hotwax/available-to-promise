@@ -32,8 +32,16 @@ import { addOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue'
 import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
 import { useRouter } from 'vue-router';
+import { onMounted } from 'vue';
+import { useStore } from 'vuex';
 
+
+const store = useStore();
 const router = useRouter()
+
+onMounted(async() => {
+  await store.dispatch('rule/fetchRules', { groupTypeEnumId: 'RG_THRESHOLD' })
+})
 
 function CreateThreshold() {
   router.replace({ path: '/create-threshold' })
