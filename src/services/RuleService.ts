@@ -1,4 +1,6 @@
 import api from '@/api';
+import logger from '@/logger';
+import { hasError } from '@/utils';
 
 const fetchRuleGroup = async (payload: any): Promise <any>  => {
   return api({
@@ -15,7 +17,90 @@ const fetchRules = async (ruleGroupId: any): Promise <any>  => {
   });
 }
 
+const createRuleGroup = async (payload: any): Promise <any>  => {
+  let ruleGroup = {}
+  try {
+    const resp = await api({
+      url: `ruleGroups/`,
+      method: "POST",
+      data: payload
+    }) as any;
+
+    if(!hasError(resp)) {
+      ruleGroup = resp.data;
+    } else {
+      throw resp.data
+    }
+  } catch(err: any) {
+    logger.error(err)
+    return Promise.reject("Failed to create rule group");
+  }
+  return Promise.resolve(ruleGroup);
+}
+
+const createRule = async (payload: any): Promise <any>  => {
+  let rule = {}
+  try {
+    const resp = await api({
+      url: `decisionRules/`,
+      method: "POST",
+      data: payload
+    }) as any;
+    
+    if(!hasError(resp)) {
+      rule = resp.data;
+    } else {
+      throw resp.data
+    }
+  } catch(err: any) {
+    logger.error(err)
+    return Promise.reject("Failed to create rule");
+  }
+  return Promise.resolve(rule);
+}
+
+const updateRule = async (payload: any, ruleId: string): Promise <any>  => {
+  try {
+    const resp = await api({
+      url: `decisionRules/${ruleId}`,
+      method: "POST",
+      data: payload
+    }) as any;
+    
+    if(!hasError(resp)) {
+      return Promise.resolve(resp.data)
+    } else {
+      throw resp.data
+    }
+  } catch(err: any) {
+    logger.error(err)
+    return Promise.reject("Failed to update rule");
+  }
+}
+
+const fetchRulesActionsAndConditions = async (ruleId: any): Promise <any>  => {
+  try {
+    const resp = await api({
+      url: `decisionRules/${ruleId}`,
+      method: "GET"
+    }) as any;
+    
+    if(!hasError(resp)) {
+      return Promise.resolve(resp.data)
+    } else {
+      throw resp.data
+    }
+  } catch(err: any) {
+    logger.error(err)
+    return Promise.reject("Failed to update rule");
+  }
+}
+
 export const RuleService = {
+  createRule,
+  createRuleGroup,
   fetchRuleGroup,
-  fetchRules
+  fetchRules,
+  fetchRulesActionsAndConditions,
+  updateRule
 }

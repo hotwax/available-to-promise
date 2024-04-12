@@ -17,7 +17,7 @@
 
             <div class="rule-inputs ion-padding">
               <ion-item>
-                <ion-input :label="translate('Name')" v-model="formData.name" />
+                <ion-input :label="translate('Name')" v-model="formData.ruleName" />
               </ion-item>
               <ion-item>
                 <ion-input :label="translate('Threshold')" v-model="formData.threshold" />
@@ -77,10 +77,14 @@ import { translate } from "@/i18n";
 import ProductFilters from '@/components/ProductFilters.vue';
 import { computed, onMounted, ref } from 'vue';
 import { useStore } from 'vuex';
+import { RuleService } from '@/services/RuleService';
+import { showToast } from '@/utils';
+import logger from '@/logger';
+import router from '@/router';
 
 const store = useStore();
 const formData = ref({
-  name: '',
+  ruleName: '',
   threshold: '',
   selectedConfigFacilites: []
 }) as any;
@@ -104,10 +108,88 @@ function isFacilitySelected(facilityId: any) {
   return formData.value.selectedConfigFacilites.includes(facilityId)
 }
 
-function createThresholdRule() {
-  console.log(formData);
-  console.log(appliedFilters.value);
+function generateRuleActions(ruleId: string) {
+  return [{
+    "_entity": "ruleAction",
+    "ruleId": ruleId,
+    "actionTypeEnumId": "ATP_THRESHOLD",
+    "fieldName": "safety_stock",
+    "fieldValue": formData.value.threshold
+  }]
+}
+
+function generateRuleConditions(ruleId: string) {
+  const conditions = [];
   
+  const selectedFacilites = formData.value.selectedConfigFacilites
+  if(selectedFacilites?.length) {
+    conditions.push({
+      "_entity": "ruleCondition",
+      "ruleId": ruleId,
+      "conditionTypeEnumId": "ENTCT_ATP_FACILITIES",
+      "fieldName": "facilities",
+      "operator": "in",
+      "fieldValue": selectedFacilites.length > 1 ? selectedFacilites.join(",") : selectedFacilites[0],
+      "multiValued": selectedFacilites.length > 1 ? "Y" : "N"
+    })
+  }
+
+  Object.entries(appliedFilters.value).map(([type, filters]: any) => {
+    Object.entries(filters as any).map(([filter, value]: any) => {
+      if(value.length) {
+        conditions.push({ 
+          "_entity": "ruleCondition",
+          "ruleId": ruleId,
+          "conditionTypeEnumId": "ENTCT_ATP_FILTER",
+          "fieldName": filter,
+          "operator": type === "included" ? "in" : "not-in",
+          "fieldValue": value.length > 1 ? value.join(",") : value[0],
+          "multiValued": value?.length > 1 ? "Y" : "N"
+        })
+      }
+    })
+  })
+
+  return conditions;
+}
+
+async function createThresholdRule() {
+  let ruleGroup =   await store.dispatch("rule/fetchRuleGroup", { groupTypeEnumId: "RG_THRESHOLD" });
+
+  try {
+    if(!ruleGroup.ruleGroupId) {
+      ruleGroup = await RuleService.createRuleGroup({
+        "_entity": "ruleGroup",
+        "groupTypeEnumId": "RG_THRESHOLD"
+      })
+    }
+    
+    const rule = await RuleService.createRule({
+      "_entity": "rule",
+      "ruleId": formData.value.ruleName.trim().toUpperCase().split(' ').join('_'),
+      "ruleGroupId": ruleGroup.ruleGroupId,
+      "ruleName": formData.value.ruleName
+    })
+    
+    const actions = generateRuleActions(rule.ruleId)
+    const conditions = generateRuleConditions(rule.ruleId)
+    
+    await RuleService.updateRule({
+      "_entity": "rule",
+    "ruleId": rule.ruleId,
+    "ruleGroupId": ruleGroup.ruleGroupId,
+    "ruleName": formData.value.ruleName,
+    "lastUpdatedStamp": "2024-04-12T05:05:48.770Z",
+    "ruleConditions": conditions,
+    "ruleActions": actions
+    }, rule.ruleId)
+  
+    showToast(translate("Rule created successfully."))
+    router.push("/threshold");
+  } catch(err: any) {
+    logger.error(err);
+    showToast(translate("Failed to create rule"))
+  }  
 }
 </script>
 

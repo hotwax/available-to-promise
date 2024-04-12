@@ -12,8 +12,7 @@
         <ScheduleRuleItem />
 
         <section>
-          <RuleItem />
-          <RuleItem />
+          <RuleItem v-for="rule in rules" :rule="rule" :key="rule.ruleId" />
         </section>
       </main>
 
@@ -32,12 +31,14 @@ import { addOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue'
 import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
 import { useRouter } from 'vue-router';
-import { onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
 
 
 const store = useStore();
 const router = useRouter()
+
+const rules = computed(() => store.getters["rule/getRules"]);
 
 onMounted(async() => {
   await store.dispatch('rule/fetchRules', { groupTypeEnumId: 'RG_THRESHOLD' })

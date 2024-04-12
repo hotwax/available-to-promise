@@ -2,8 +2,8 @@
   <ion-card>
     <ion-card-header>
       <div>
-        <ion-card-subtitle class="overline">{{ "Rule ID" }}</ion-card-subtitle>
-        <ion-card-title>{{ "Rule name" }}</ion-card-title>
+        <ion-card-subtitle class="overline">{{ rule.ruleId }}</ion-card-subtitle>
+        <ion-card-title>{{ rule.ruleName }}</ion-card-title>
         <ion-card-subtitle>{{ "1/4" }}</ion-card-subtitle>
       </div>
       <div>
@@ -19,7 +19,7 @@
     <ion-item lines="full" v-if="selectedPage.path === '/threshold'">
       <ion-icon slot="start" :icon="globeOutline"/>
       <ion-label class="ion-text-wrap">{{ translate(selectedPage.name) }}</ion-label>
-      <ion-chip slot="end" outline @click="editThreshold()">5</ion-chip>
+      <ion-chip slot="end" outline @click="editThreshold()">{{ rule.ruleActions[0].fieldValue }}</ion-chip>
     </ion-item>
     <ion-item lines="full" v-else-if="selectedPage.path === '/safety-stock'">
       <ion-icon slot="start" :icon="pulseOutline"/>
@@ -129,7 +129,7 @@ import { translate } from '@/i18n';
 
 const router = useRouter();
 
-defineProps(["selectedSegment"])
+const props = defineProps(["selectedSegment", "rule"])
 
 const selectedPage = ref({
   path: '',
@@ -139,6 +139,8 @@ const selectedPage = ref({
 onMounted(() => {
   selectedPage.value.path = router.currentRoute.value.path
   selectedPage.value.name = router.currentRoute.value.name
+  console.log(props.rule);
+  
 })
 
 async function editThreshold() {

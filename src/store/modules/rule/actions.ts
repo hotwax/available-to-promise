@@ -20,23 +20,38 @@ const actions: ActionTree<RuleState, RootState> = {
       }
     } catch(err: any) {
       logger.error("No rule group found");
-      throw new Error("No rule group found")
     }
-
+    
     commit(types.RULE_GROUP_UPDATED, ruleGroup);
     return ruleGroup
   },
 
   async fetchRules({ commit, dispatch }, payload) {
-    let rules = [] as any;
+    const rules = [] as any;
 
     try {
       const ruleGroup = await dispatch('fetchRuleGroup', payload)
 
-      const resp = await RuleService.fetchRules(ruleGroup.groupId)
+      if(!ruleGroup.ruleGroupId) {
+        throw new Error("No rule founds")
+      }
+      const resp = await RuleService.fetchRules(ruleGroup.ruleGroupId)
 
       if(!hasError(resp)) {
-        rules = resp.data;
+        const responses = await Promise.allSettled(
+          resp.data.map((rule: any) => RuleService.fetchRulesActionsAndConditions(rule.ruleId))
+        )
+
+        const hasFailedResponse = responses.some((response: any) => hasError(response.value))
+        if (hasFailedResponse) {
+          logger.error('Failed to fetch some rules')
+        }
+
+        responses.map((response: any) => {
+          if(response.status === 'fulfilled') {
+            rules.push(response.value)
+          }
+        })
       } else {
         throw resp.data
       }
