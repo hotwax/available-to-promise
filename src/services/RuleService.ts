@@ -84,7 +84,7 @@ const fetchRulesActionsAndConditions = async (ruleId: any): Promise <any>  => {
       url: `decisionRules/${ruleId}`,
       method: "GET"
     }) as any;
-    
+
     if(!hasError(resp)) {
       return Promise.resolve(resp.data)
     } else {

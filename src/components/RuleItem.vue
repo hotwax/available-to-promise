@@ -26,7 +26,7 @@
       <ion-label class="ion-text-wrap">{{ translate(selectedPage.name) }}</ion-label>
       <ion-chip slot="end" outline @click="editSafetyStock()">5</ion-chip>
     </ion-item>
-    <ion-item lines="full" v-else-if="selectedPage.path === '/store-pickup'">
+    <ion-item lines="full" v-else-if="selectedPage.path === '/store-pickup'">Fixed the positioning of the security group displayed for the loggedin user.
       <ion-icon slot="start" :icon="storefrontOutline"/>
       <ion-toggle>{{ translate(selectedPage.name) }}</ion-toggle>
     </ion-item>
@@ -53,7 +53,7 @@
       <template v-else>
         <ion-item-divider color="light">
           <ion-label>{{ translate("Facility groups") }}</ion-label>
-          <ion-button slot="end" fill="clear" color="medium">
+          <ion-button slot="end" fill="clear" color="medium" @click="openSelectConfigFacilitiesModal()" >
             <ion-icon :icon="optionsOutline" slot="icon-only" />
           </ion-button>
         </ion-item-divider>
@@ -123,15 +123,16 @@
 </template>
 
 <script setup lang="ts">
-import { IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonChip, IonIcon, IonItem, IonItemDivider, IonLabel, IonList, IonToggle, alertController, popoverController } from '@ionic/vue';
+import { IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonChip, IonIcon, IonItem, IonItemDivider, IonLabel, IonList, IonToggle, alertController, modalController } from '@ionic/vue';
 import { computed, defineProps, onMounted, ref } from 'vue';
 import { archiveOutline, checkmarkDoneCircleOutline, chevronDownOutline, chevronUpOutline, closeCircleOutline, globeOutline, optionsOutline, pulseOutline, sendOutline, storefrontOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
 import { translate } from '@/i18n';
 import { RuleService } from '@/services/RuleService';
 import { useStore } from 'vuex';
-import { hasError, showToast } from '@/utils';
+import { showToast } from '@/utils';
 import logger from '@/logger';
+import SelectConfigFacilitiesModal from '@/components/SelectConfigFacilitiesModal.vue';
 
 const router = useRouter();
 const store = useStore();
@@ -252,7 +253,8 @@ function getRuleConditions(conditionTypeEnumId: string, fieldName?: string, oper
     return condition?.fieldValue.split(",").join(", ")
   } else {
     const condition = props.rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === conditionTypeEnumId)
-    if(condition) {
+
+    if(condition && condition.fieldValue) {
       let facilities = condition?.fieldValue.split(",")
       facilities = facilities.map((id: string) => {
         let facility = configFacilities.value.find((facility: any) => facility.facilityId === id)
@@ -290,6 +292,23 @@ async function archiveRule() {
       }]
     });
   return alert.present();
+}
+
+function getSelectedFacilities() {
+  const condition = props.rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FACILITIES")
+  return condition.fieldValue ? condition.fieldValue.split(",") : []
+}
+
+async function openSelectConfigFacilitiesModal() {
+  const modal = await modalController.create({
+    component: SelectConfigFacilitiesModal,
+    componentProps: {
+      selectedFacilities: getSelectedFacilities(),
+      rule: props.rule
+    },
+  })
+
+  modal.present()
 }
 </script>
 
