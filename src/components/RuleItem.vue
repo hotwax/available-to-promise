@@ -70,7 +70,7 @@
             <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
             <ion-label class="ion-text-wrap">{{ "<Group name, Group name>" }}</ion-label>
           </ion-item>
-    
+
           <ion-item lines="none">
             <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
             <ion-label class="ion-text-wrap">{{ "<Group name, Group name>" }}</ion-label>
@@ -80,7 +80,7 @@
 
       <ion-item-divider color="light">
         <ion-label>{{ translate("Product tags") }}</ion-label>
-        <ion-button slot="end" fill="clear" color="medium">
+        <ion-button slot="end" fill="clear" color="medium" @click="openUpdateProductFiltersModal('tags', 'tagsFacet', 'tags', 'included')">
           <ion-icon :icon="optionsOutline" slot="icon-only" />
         </ion-button>
       </ion-item-divider>
@@ -133,6 +133,7 @@ import { useStore } from 'vuex';
 import { showToast } from '@/utils';
 import logger from '@/logger';
 import SelectConfigFacilitiesModal from '@/components/SelectConfigFacilitiesModal.vue';
+import UpdateProductFiltersModal from '@/components/UpdateProductFiltersModa.vue';
 
 const router = useRouter();
 const store = useStore();
@@ -304,6 +305,21 @@ async function openSelectConfigFacilitiesModal() {
     component: SelectConfigFacilitiesModal,
     componentProps: {
       selectedFacilities: getSelectedFacilities(),
+      rule: props.rule
+    },
+  })
+
+  modal.present()
+}
+
+async function openUpdateProductFiltersModal(label: string, facetToSelect: string, searchfield: string, type: string) {
+  const modal = await modalController.create({
+    component: UpdateProductFiltersModal,
+    componentProps: {
+      label,
+      facetToSelect,
+      searchfield,
+      type,
       rule: props.rule
     },
   })

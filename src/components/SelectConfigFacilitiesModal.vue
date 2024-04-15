@@ -53,6 +53,7 @@ import { useStore } from "vuex";
 import { translate } from "@/i18n";
 import { RuleService } from "@/services/RuleService";
 import { showToast } from "@/utils";
+import logger from "@/logger";
 
 const store = useStore();
 const props = defineProps(["rule", "selectedFacilities"])
@@ -92,9 +93,14 @@ async function saveFacilities() {
 
   await RuleService.updateRule(rule, rule.ruleId)
 
-  showToast(translate("Config facilities updated successfully."))
-  await store.dispatch('rule/updateRuleData', { rule })
-  modalController.dismiss();
+  try {
+    showToast(translate("Config facilities updated successfully."))
+    await store.dispatch('rule/updateRuleData', { rule })
+    modalController.dismiss();
+  } catch(err: any) {
+    showToast(translate("Failed to update config facilities."))
+    logger.error(err)
+  }
 }
 </script>
 
