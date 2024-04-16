@@ -171,13 +171,39 @@ function isSelected(value: string) {
 async function saveFilters() {
   const rule = JSON.parse(JSON.stringify(props.rule))
 
-  rule.ruleConditions.map((condition: any) => {
-    if(condition.conditionTypeEnumId === 'ENTCT_ATP_FILTER' && condition.fieldName === props.searchfield && condition.operator === 'in') {
+  if(includedFilters.value.length) {
+    const condition = rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === 'ENTCT_ATP_FILTER' && condition.fieldName === props.searchfield && condition.operator === 'in')
+    if(condition) {
       condition.fieldValue = includedFilters.value.join(",")
-    } else if(condition.conditionTypeEnumId === 'ENTCT_ATP_FILTER' && condition.fieldName === props.searchfield && condition.operator === 'not-in') {
-      condition.fieldValue = excludedFilters.value.join(",")
+    } else {
+      rule.ruleConditions.push({ 
+        "_entity": "ruleCondition",
+        "ruleId": rule.ruleId,
+        "conditionTypeEnumId": "ENTCT_ATP_FILTER",
+        "fieldName": props.searchfield,
+        "operator": selectedSegment.value === "included" ? "in" : "not-in",
+        "fieldValue": includedFilters.value?.length > 1 ? includedFilters.value.join(",") : includedFilters.value[0],
+        "multiValued": includedFilters.value?.length > 1 ? "Y" : "N"
+      })
     }
-  })
+  }
+
+  if(excludedFilters.value.length) {
+    const condition = rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === 'ENTCT_ATP_FILTER' && condition.fieldName === props.searchfield && condition.operator === 'not-in')
+    if(condition) {
+      condition.fieldValue = excludedFilters.value.join(",")
+    } else {
+      rule.ruleConditions.push({ 
+        "_entity": "ruleCondition",
+        "ruleId": rule.ruleId,
+        "conditionTypeEnumId": "ENTCT_ATP_FILTER",
+        "fieldName": props.searchfield,
+        "operator": selectedSegment.value === "included" ? "in" : "not-in",
+        "fieldValue": excludedFilters.value?.length > 1 ? excludedFilters.value.join(",") : excludedFilters.value[0],
+        "multiValued": excludedFilters.value?.length > 1 ? "Y" : "N"
+      })
+    }
+  }
 
   try {
     await RuleService.updateRule(rule, rule.ruleId)
