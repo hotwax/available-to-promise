@@ -80,7 +80,7 @@
 
       <ion-item-divider color="light">
         <ion-label>{{ translate("Product tags") }}</ion-label>
-        <ion-button slot="end" fill="clear" color="medium" @click="openUpdateProductFiltersModal('tags', 'tagsFacet', 'tags', 'included')">
+        <ion-button slot="end" fill="clear" color="medium" @click="openUpdateProductFiltersModal('tags', 'tagsFacet', 'tags')">
           <ion-icon :icon="optionsOutline" slot="icon-only" />
         </ion-button>
       </ion-item-divider>
@@ -97,7 +97,7 @@
       <template v-if="(selectedPage.path === '/threshold' || selectedPage.path === '/safety-stock')">
         <ion-item-divider color="light">
           <ion-label>{{ translate("Product features") }}</ion-label>
-          <ion-button slot="end" fill="clear" color="medium">
+          <ion-button slot="end" fill="clear" color="medium"  @click="openUpdateProductFiltersModal('product features', 'productFeaturesFacet', 'productFeatures')">
             <ion-icon :icon="optionsOutline" slot="icon-only" />
           </ion-button>
         </ion-item-divider>
@@ -251,7 +251,7 @@ async function editRuleName() {
 function getRuleConditions(conditionTypeEnumId: string, fieldName?: string, operator? : string) {
   if(fieldName && operator) {
     const condition = props.rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === conditionTypeEnumId && condition.fieldName === fieldName && condition.operator === operator)
-    return condition?.fieldValue.split(",").join(", ")
+    return condition?.fieldValue?.split(",").join(", ")
   } else {
     const condition = props.rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === conditionTypeEnumId)
 
@@ -297,7 +297,7 @@ async function archiveRule() {
 
 function getSelectedFacilities() {
   const condition = props.rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FACILITIES")
-  return condition.fieldValue ? condition.fieldValue.split(",") : []
+  return (condition && condition.fieldValue) ? condition.fieldValue.split(",") : []
 }
 
 async function openSelectConfigFacilitiesModal() {
@@ -312,14 +312,13 @@ async function openSelectConfigFacilitiesModal() {
   modal.present()
 }
 
-async function openUpdateProductFiltersModal(label: string, facetToSelect: string, searchfield: string, type: string) {
+async function openUpdateProductFiltersModal(label: string, facetToSelect: string, searchfield: string) {
   const modal = await modalController.create({
     component: UpdateProductFiltersModal,
     componentProps: {
       label,
       facetToSelect,
       searchfield,
-      type,
       rule: props.rule
     },
   })

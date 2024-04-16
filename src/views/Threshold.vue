@@ -3,7 +3,7 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-menu-button slot="start" />
-        <ion-title>{{ $t("Threshold") }}</ion-title>
+        <ion-title>{{ translate("Threshold") }}</ion-title>
       </ion-toolbar>
     </ion-header>
 
@@ -33,7 +33,7 @@ import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
 import { useRouter } from 'vue-router';
 import { computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
-
+import { translate } from '@/i18n';
 
 const store = useStore();
 const router = useRouter()

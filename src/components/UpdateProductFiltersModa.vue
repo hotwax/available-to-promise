@@ -28,19 +28,19 @@
         <ion-checkbox v-if="!isAlreadyApplied(option.id)" :checked="isSelected(option.id)">
           {{ option.label }}
         </ion-checkbox>
-        <ion-note v-else slot="end" color="danger">{{ selectedSegment === 'included' ? $t("excluded") : $t("included") }}</ion-note>
+        <ion-note v-else slot="end" color="danger">{{ selectedSegment === 'included' ? translate("excluded") : translate("included") }}</ion-note>
       </ion-item>
     </ion-list>
 
     <!-- Added padding for better visiblity of the checkboxes beside the FAB -->
     <ion-fab class="ion-padding" vertical="bottom" horizontal="end" slot="fixed">
       <ion-fab-button @click="saveFilters()">
-        <ion-icon :icon="checkmarkOutline" />
+        <ion-icon :icon="saveOutline" />
       </ion-fab-button>
     </ion-fab>
 
     <ion-infinite-scroll @ionInfinite="loadMoreTags($event)" threshold="100px" :disabled="!isScrollable">
-      <ion-infinite-scroll-content loading-spinner="crescent" :loading-text="$t('Loading')"/>
+      <ion-infinite-scroll-content loading-spinner="crescent" :loading-text="translate('Loading')"/>
     </ion-infinite-scroll>
   </ion-content>
 </template>
@@ -67,10 +67,9 @@ import {
   IonSegmentButton,
   IonTitle,
   IonToolbar,
-  alertController,
   modalController
 } from "@ionic/vue";
-import { arrowBackOutline, checkmarkOutline } from 'ionicons/icons';
+import { arrowBackOutline, saveOutline } from 'ionicons/icons';
 import { useStore } from "vuex";
 import { UtilService } from "@/services/UtilService";
 import { RuleService } from "@/services/RuleService";
@@ -86,15 +85,17 @@ const selectedSegment = ref("included")
 const includedFilters = ref([]) as any;
 const excludedFilters = ref([]) as any;
 
-const props = defineProps(["label", "facetToSelect", "searchfield", "type", "rule"]);
+const props = defineProps(["label", "facetToSelect", "searchfield", "rule"]);
 const store = useStore();
 
 onMounted(() => {
-  const includedCondition = props.rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === 'ENTCT_ATP_FILTER' && condition.fieldName === props.label && condition.operator === 'in')
+  const includedCondition = props.rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === 'ENTCT_ATP_FILTER' && condition.fieldName === props.searchfield && condition.operator === 'in')
+  console.log(includedCondition.fieldNameValue);
+  
   if(includedCondition && includedCondition.fieldValue) includedFilters.value = includedCondition.fieldValue.split(",");
 
-  const excludedCondition = props.rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === 'ENTCT_ATP_FILTER' && condition.fieldName === props.label && condition.operator === 'not-in')
-  if(excludedCondition && excludedCondition.fieldValue) includedFilters.value = excludedCondition.fieldValue.split(",");
+  const excludedCondition = props.rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === 'ENTCT_ATP_FILTER' && condition.fieldName === props.searchfield && condition.operator === 'not-in')
+  if(excludedCondition && excludedCondition.fieldValue) excludedFilters.value = excludedCondition.fieldValue.split(",");
 })
 
 function closeModal() {
@@ -171,10 +172,10 @@ async function saveFilters() {
   const rule = JSON.parse(JSON.stringify(props.rule))
 
   rule.ruleConditions.map((condition: any) => {
-    if(condition.conditionTypeEnumId === 'ENTCT_ATP_FILTER' && condition.fieldName === props.label && condition.operator === 'in') {
-      condition.fieldValue = includedFilters.value
-    } else if(condition.conditionTypeEnumId === 'ENTCT_ATP_FILTER' && condition.fieldName === props.label && condition.operator === 'not-in') {
-      condition.fieldValue = excludedFilters.value
+    if(condition.conditionTypeEnumId === 'ENTCT_ATP_FILTER' && condition.fieldName === props.searchfield && condition.operator === 'in') {
+      condition.fieldValue = includedFilters.value.join(",")
+    } else if(condition.conditionTypeEnumId === 'ENTCT_ATP_FILTER' && condition.fieldName === props.searchfield && condition.operator === 'not-in') {
+      condition.fieldValue = excludedFilters.value.join(",")
     }
   })
 
@@ -182,7 +183,7 @@ async function saveFilters() {
     await RuleService.updateRule(rule, rule.ruleId)
     await store.dispatch('rule/updateRuleData', { rule })
     showToast(translate("Product filters updated succesfully."))
-    alertController.dismiss()
+    modalController.dismiss()
   } catch(err: any) {
     showToast(translate("Failed to update product filters."))
     logger.error(err);

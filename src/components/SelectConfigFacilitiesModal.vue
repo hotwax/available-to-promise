@@ -91,11 +91,10 @@ async function saveFacilities() {
     }
   })
 
-  await RuleService.updateRule(rule, rule.ruleId)
-
   try {
-    showToast(translate("Config facilities updated successfully."))
+    await RuleService.updateRule(rule, rule.ruleId)
     await store.dispatch('rule/updateRuleData', { rule })
+    showToast(translate("Config facilities updated successfully."))
     modalController.dismiss();
   } catch(err: any) {
     showToast(translate("Failed to update config facilities."))

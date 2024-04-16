@@ -8,7 +8,7 @@
       </ion-buttons>
       <ion-title>{{ type === "included" ? translate("Include", { label }) : translate("Exclude", { label }) }}</ion-title>
       <ion-buttons slot="end">
-        <ion-button fill="clear" color="danger" @click="selectedValues = []">{{ $t("Clear All") }}</ion-button>
+        <ion-button fill="clear" color="danger" @click="selectedValues = []">{{ translate("Clear All") }}</ion-button>
       </ion-buttons>
     </ion-toolbar>
   </ion-header>
@@ -22,25 +22,25 @@
         <ion-checkbox v-if="!isAlreadyApplied(option.id)" :checked="selectedValues.includes(option.id)">
           {{ option.label }}
         </ion-checkbox>
-        <ion-note v-else slot="end" color="danger">{{ type === 'included' ? $t("excluded") : $t("included") }}</ion-note>
+        <ion-note v-else slot="end" color="danger">{{ type === 'included' ? translate("excluded") : translate("included") }}</ion-note>
       </ion-item>
     </ion-list>
 
     <!-- Added padding for better visiblity of the checkboxes beside the FAB -->
     <ion-fab class="ion-padding" vertical="bottom" horizontal="end" slot="fixed">
       <ion-fab-button @click="saveFilters()">
-        <ion-icon :icon="checkmarkOutline" />
+        <ion-icon :icon="saveOutline" />
       </ion-fab-button>
     </ion-fab>
 
     <ion-infinite-scroll @ionInfinite="loadMoreTags($event)" threshold="100px" :disabled="!isScrollable">
-      <ion-infinite-scroll-content loading-spinner="crescent" :loading-text="$t('Loading')"/>
+      <ion-infinite-scroll-content loading-spinner="crescent" :loading-text="translate('Loading')"/>
     </ion-infinite-scroll>
   </ion-content>
 </template>
 
 <script setup lang="ts">
-import { computed, defineComponent, onMounted } from "vue";
+import { computed, onMounted } from "vue";
 import {
   IonButton,
   IonButtons,
@@ -61,8 +61,8 @@ import {
   IonToolbar,
   modalController
 } from "@ionic/vue";
-import { arrowBackOutline, checkmarkOutline } from 'ionicons/icons';
-import { mapGetters, useStore } from "vuex";
+import { arrowBackOutline, saveOutline } from 'ionicons/icons';
+import { useStore } from "vuex";
 import { UtilService } from "@/services/UtilService";
 import { defineProps, ref } from "vue";
 import { translate } from "@/i18n";
@@ -70,7 +70,6 @@ import { hasError } from "@/utils";
 
 const queryString = ref('');
 const facetOptions = ref([]) as any;
-const isFilterChanged = ref(false);
 const isScrollable = ref(true);
 const selectedValues = ref([]) as any;
 
