@@ -13,8 +13,8 @@ const actions: ActionTree<RuleState, RootState> = {
 
     try {
       const resp = await RuleService.fetchRuleGroup(payload)
+
       if(!hasError(resp) && resp.data.length) {
-        
         ruleGroup = resp.data[0]
       } else {
         throw resp.data;
@@ -22,7 +22,6 @@ const actions: ActionTree<RuleState, RootState> = {
     } catch(err: any) {
       logger.error("No rule group found");
     }
-    
     commit(types.RULE_GROUP_UPDATED, ruleGroup);
     return ruleGroup
   },
@@ -36,8 +35,9 @@ const actions: ActionTree<RuleState, RootState> = {
       if(!ruleGroup.ruleGroupId) {
         throw new Error("No rule founds")
       }
+
       const resp = await RuleService.fetchRules({ 
-        ruleGroupId: ruleGroup.ruleGroupId,
+        "ruleGroupId": ruleGroup.ruleGroupId,
         "statusId": "ATP_RULE_ACTIVE",
         "orderByField": "sequenceNum"
       })

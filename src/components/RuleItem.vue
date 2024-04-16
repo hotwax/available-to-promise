@@ -213,7 +213,7 @@ async function editSafetyStock() {
 
 async function editRuleName() {
   const alert = await alertController.create({
-    header: translate("Edit rule name"),
+    header: translate("Edit name"),
     inputs: [{
       name: "safetyStock",
       placeholder: translate("Name"),

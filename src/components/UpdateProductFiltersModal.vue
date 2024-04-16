@@ -90,8 +90,6 @@ const store = useStore();
 
 onMounted(() => {
   const includedCondition = props.rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === 'ENTCT_ATP_FILTER' && condition.fieldName === props.searchfield && condition.operator === 'in')
-  console.log(includedCondition.fieldNameValue);
-  
   if(includedCondition && includedCondition.fieldValue) includedFilters.value = includedCondition.fieldValue.split(",");
 
   const excludedCondition = props.rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === 'ENTCT_ATP_FILTER' && condition.fieldName === props.searchfield && condition.operator === 'not-in')
@@ -156,16 +154,13 @@ function updateSelectedValues(value: string) {
 }
 
 function isAlreadyApplied(value: string) {
-  if(selectedSegment.value === 'included') {
-    return excludedFilters.value.includes(value);
-  } else {
-    return includedFilters.value.includes(value)
-  }
+  if(selectedSegment.value === 'included') return excludedFilters.value.includes(value);
+  else return includedFilters.value.includes(value);
 }
 
 function isSelected(value: string) {
   if(selectedSegment.value === 'included') return includedFilters.value.includes(value);
-  else return excludedFilters.value.includes(value)
+  else return excludedFilters.value.includes(value);
 }
 
 async function saveFilters() {

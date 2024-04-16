@@ -11,16 +11,10 @@ const actions: ActionTree<UtilState, RootState> = {
   async fetchConfigFacilities ({ commit, state }) {
     let configFacilities = JSON.parse(JSON.stringify(state.configFacilities))
 
-    if(configFacilities.length) {
-      return;
-    }
+    if(configFacilities.length) return;
 
-    const payload = {
-      facilityTypeId: 'CONFIGURATION'
-    }
-    
     try {
-      const resp = await UtilService.fetchConfigFacilities(payload);
+      const resp = await UtilService.fetchConfigFacilities({ facilityTypeId: 'CONFIGURATION' });
 
       if(!hasError(resp)) {
         configFacilities = resp.data;
@@ -30,7 +24,6 @@ const actions: ActionTree<UtilState, RootState> = {
     } catch (err: any) {
       logger.error(err)
     }
-
     commit(types.UTIL_CONFIG_FACILITES_UPDATED, configFacilities)
   },
 

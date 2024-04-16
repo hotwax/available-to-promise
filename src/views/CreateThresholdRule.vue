@@ -166,30 +166,28 @@ async function createThresholdRule() {
       })
     }
 
-    const rule = await RuleService.createRule({
+    const params = {
       "_entity": "rule",
       "ruleId": formData.value.ruleName.trim().toUpperCase().split(' ').join('_'),
       "ruleGroupId": ruleGroup.ruleGroupId,
       "ruleName": formData.value.ruleName,
       "statusId": "ATP_RULE_ACTIVE",
       "sequenceNum": total.value ? rules.value[total.value-1].sequenceNum + 1 : 1
-    })
-    
-    const actions = generateRuleActions(rule.ruleId)
-    const conditions = generateRuleConditions(rule.ruleId)
-    
+    }
+
+    const rule = await RuleService.createRule(params)
+
     await RuleService.updateRule({
-      "_entity": "rule",
-      "ruleId": rule.ruleId,
-      "ruleConditions": conditions,
-      "ruleActions": actions
+      ...params,
+      "ruleConditions": generateRuleConditions(rule.ruleId),
+      "ruleActions": generateRuleActions(rule.ruleId)
     }, rule.ruleId);
 
     showToast(translate("Rule created successfully."))
     router.push("/threshold");
   } catch(err: any) {
     logger.error(err);
-    showToast(translate("Failed to create rule"))
+    showToast(translate("Failed to create rule."))
   }  
 }
 </script>
