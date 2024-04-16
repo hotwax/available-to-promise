@@ -117,7 +117,7 @@
   const instanceUrl = computed(() => store.getters["user/getInstanceUrl"])
   const selectedIndex = computed(() => {
     const path = router.currentRoute.value.path;
-    return appPages.findIndex((screen) => screen.url === path);
+    return appPages.findIndex((screen) => screen.url === path || screen.childRoutes?.includes(path) || screen.childRoutes?.some((route) => path.includes(route)));
   });
 
   function setEComStore(event: CustomEvent) {
