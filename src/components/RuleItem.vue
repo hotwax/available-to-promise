@@ -133,7 +133,7 @@ import { useStore } from 'vuex';
 import { showToast } from '@/utils';
 import logger from '@/logger';
 import SelectConfigFacilitiesModal from '@/components/SelectConfigFacilitiesModal.vue';
-import UpdateProductFiltersModal from '@/components/UpdateProductFiltersModa.vue';
+import UpdateProductFiltersModal from '@/components/UpdateProductFiltersModal.vue';
 
 const router = useRouter();
 const store = useStore();
