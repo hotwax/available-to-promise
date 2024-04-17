@@ -13,7 +13,7 @@
     </ion-toolbar>
   </ion-header>
 
-  <ion-content>
+  <ion-content ref="contentRef" :scroll-events="true" @ionScroll="enableScrolling()">
     <ion-searchbar :placeholder="$t(`Search ${label}`)" v-model="queryString" @keyup.enter="queryString = $event.target.value; search($event)"/>
 
     <ion-list>
@@ -29,7 +29,7 @@
         <ion-icon :icon="checkmarkOutline" />
       </ion-fab-button>
     </ion-fab>
-    <ion-infinite-scroll @ionInfinite="loadMoreTags($event)" threshold="100px" :disabled="!isScrollable" :key="queryString">
+    <ion-infinite-scroll @ionInfinite="loadMoreTags($event)" threshold="100px" v-show="isScrollingEnabled && isScrollable" ref="infiniteScrollRef">
       <ion-infinite-scroll-content loading-spinner="crescent" :loading-text="$t('Loading')"/>
     </ion-infinite-scroll>
   </ion-content>
@@ -88,7 +88,8 @@ export default defineComponent({
       facetOptions: [] as any,
       isFilterChanged: false,
       isScrollable: true,
-      selectedValues: [] as Array<string>
+      selectedValues: [] as Array<string>,
+      isScrollingEnabled: false
     }
   },
   computed: {
@@ -99,6 +100,9 @@ export default defineComponent({
   props: ["label", "facetToSelect", "searchfield", 'type'],
   mounted() {
     this.selectedValues = JSON.parse(JSON.stringify(this.appliedFilters[this.type][this.searchfield])).list;
+  },
+  async ionViewWillEnter() {
+    this.isScrollingEnabled = false;
   },
   methods: {
     closeModal() {
@@ -134,13 +138,24 @@ export default defineComponent({
         this.isScrollable = false;
       }
     },
+    enableScrolling() {
+      const parentElement = (this as any).$refs.contentRef.$el
+      const scrollEl = parentElement.shadowRoot.querySelector("main[part='scroll']")
+      let scrollHeight = scrollEl.scrollHeight, infiniteHeight = (this as any).$refs.infiniteScrollRef.$el.offsetHeight, scrollTop = scrollEl.scrollTop, threshold = 100, height = scrollEl.offsetHeight
+      const distanceFromInfinite = scrollHeight - infiniteHeight - scrollTop - threshold - height
+      if(distanceFromInfinite < 0) {
+        this.isScrollingEnabled = false;
+      } else {
+        this.isScrollingEnabled = true;
+      }
+    },
     async loadMoreTags(event: any){
       this.getTags(
         undefined,
         Math.ceil(this.facetOptions.length / process.env.VUE_APP_VIEW_SIZE).toString() 
-      ).then(() => {
-        event.target.complete();
-      })
+      ).then(async () => {
+        await event.target.complete();
+      });
     },
     updateSelectedValues(value: string) {
       this.selectedValues.includes(value) ? this.selectedValues.splice(this.selectedValues.indexOf(value), 1) : this.selectedValues.push(value);
