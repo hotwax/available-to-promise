@@ -41,6 +41,7 @@ const actions: ActionTree<RuleState, RootState> = {
 
       if(!ruleGroup.ruleGroupId) {
         throw new Error("No rule founds")
+        return;
       }
 
       const resp = await RuleService.fetchRules({ 
