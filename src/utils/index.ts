@@ -22,4 +22,17 @@ function getDateAndTime(time: any) {
   return time ? DateTime.fromMillis(time).toLocaleString(DateTime.DATETIME_MED) : "-";
 }
 
-export { getDateAndTime, hasError, showToast }
+const getTime = (time: any) => {
+  return time ? DateTime.fromMillis(time).toLocaleString(DateTime.TIME_SIMPLE) : "-";
+}
+
+function getDate(runTime: any) {
+  return DateTime.fromMillis(runTime).toLocaleString(DateTime.DATE_MED);
+}
+
+function timeTillRun(endTime: any) {
+  const timeDiff = DateTime.fromMillis(endTime).diff(DateTime.local());
+  return DateTime.local().plus(timeDiff).toRelative();
+}
+
+export { getDate, getDateAndTime, getTime, hasError, showToast, timeTillRun }
