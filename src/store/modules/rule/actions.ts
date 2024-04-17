@@ -10,18 +10,25 @@ import logger from '@/logger'
 const actions: ActionTree<RuleState, RootState> = {
   async fetchRuleGroup({ commit }, payload) {
     let ruleGroup = {} as any;
+    let resp;
 
     try {
-      const resp = await RuleService.fetchRuleGroup(payload)
+      resp = await RuleService.fetchRuleGroup(payload)
 
       if(!hasError(resp) && resp.data.length) {
         ruleGroup = resp.data[0]
+
+        resp = await RuleService.fetchRuleScheduleInformation(ruleGroup.ruleGroupId)
+        if(!hasError(resp) && resp.data?.schedule) {
+          ruleGroup.schedule = resp.data.schedule
+        }
       } else {
         throw resp.data;
       }
     } catch(err: any) {
       logger.error("No rule group found");
     }
+
     commit(types.RULE_GROUP_UPDATED, ruleGroup);
     return ruleGroup
   },
@@ -75,6 +82,10 @@ const actions: ActionTree<RuleState, RootState> = {
       rules.splice(index, 1, payload.rule);
     }
     commit(types.RULE_RULES_UPDATED, { list: rules, total: state.rules.total});
+  },
+
+  updateRuleGroup({ commit }, payload) {
+    commit(types.RULE_GROUP_UPDATED, payload);
   },
 
   archiveRule({ commit, state }, { rule }) {

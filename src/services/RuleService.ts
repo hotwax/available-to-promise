@@ -96,11 +96,28 @@ const fetchRulesActionsAndConditions = async (ruleId: any): Promise <any>  => {
   }
 }
 
+const fetchRuleScheduleInformation = async (ruleGroupId: string): Promise<any> => {
+  return api({
+    url: `ruleGroups/${ruleGroupId}/schedule`,
+    method: "GET"
+  });
+}
+
+const scheduleRule = async (payload: any): Promise<any> => {
+  return api({
+    url: `ruleGroups/${payload.ruleGroupId}/schedule`,
+    method: "POST",
+    data: payload
+  });
+}
+
 export const RuleService = {
   createRule,
   createRuleGroup,
   fetchRuleGroup,
   fetchRules,
   fetchRulesActionsAndConditions,
+  fetchRuleScheduleInformation,
+  scheduleRule,
   updateRule
 }
