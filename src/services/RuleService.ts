@@ -6,7 +6,7 @@ const fetchRuleGroup = async (payload: any): Promise <any>  => {
   return api({
     url: "ruleGroups",
     method: "GET",
-    data: payload
+    params: payload
   });
 }
 

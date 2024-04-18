@@ -9,7 +9,7 @@
 
     <ion-content>
       <main>
-        <ScheduleRuleItem />
+        <ScheduleRuleItem v-if="rules.length"/>
 
         <section>
           <RuleItem v-for="(rule, ruleIndex) in rules" :rule="rule" :ruleIndex="ruleIndex" :key="rule.ruleId" />
@@ -39,9 +39,10 @@ const store = useStore();
 const router = useRouter()
 
 const rules = computed(() => store.getters["rule/getRules"]);
+const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
 
 onMounted(async() => {
-  await store.dispatch('rule/fetchRules', { groupTypeEnumId: 'RG_THRESHOLD' })
+  await store.dispatch('rule/fetchRules', { groupTypeEnumId: 'RG_THRESHOLD', "productStoreId": currentEComStore.value.productStoreId })
   await store.dispatch("util/fetchConfigFacilities");
 })
 
