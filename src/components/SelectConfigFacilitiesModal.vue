@@ -85,11 +85,19 @@ function isSelected(currentFacilityId: any) {
 async function saveFacilities() {  
   const rule = JSON.parse(JSON.stringify(props.rule))
 
-  rule.ruleConditions.map((condition: any) => {
-    if(condition.conditionTypeEnumId === "ENTCT_ATP_FACILITIES") {
-      condition.fieldValue = selectedFacilityValues.join(",")
-    }
-  })
+  const condition = rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FACILITIES")
+  if(condition) {
+    condition.fieldValue = selectedFacilityValues.join(",")
+  } else {
+    rule.ruleConditions.push({
+      "ruleId": rule.ruleId,
+      "conditionTypeEnumId": "ENTCT_ATP_FACILITIES",
+      "fieldName": "facilities",
+      "operator": "in",
+      "fieldValue": selectedFacilityValues.length > 1 ? selectedFacilityValues.join(",") : selectedFacilityValues[0],
+      "multiValued": selectedFacilityValues.length > 1 ? "Y" : "N"
+    })
+  }
 
   try {
     await RuleService.updateRule(rule, rule.ruleId)

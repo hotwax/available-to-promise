@@ -93,6 +93,7 @@ const configFacilities = computed(() => store.getters["util/getConfigFacilities"
 const appliedFilters = computed(() => store.getters["util/getAppliedFilters"]);
 const rules = computed(() => store.getters["rule/getRules"]);
 const total = computed(() => store.getters["rule/getTotalRulesCount"])
+const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
 
 onMounted(async () => {
   await store.dispatch("util/fetchConfigFacilities");
@@ -158,7 +159,9 @@ async function createThresholdRule() {
   try {
     if(!ruleGroup.ruleGroupId) {
       ruleGroup = await RuleService.createRuleGroup({
-        "groupTypeEnumId": "RG_THRESHOLD"
+        "groupTypeEnumId": "RG_THRESHOLD",
+        "productStoreId": currentEComStore.value.productStoreId,
+        "statusId": "ATP_RG_ACTIVE"
       })
     }
 

@@ -5,6 +5,7 @@ import { hasError } from '@/utils'
 import logger from '@/logger'
 import UtilState from './UtilState'
 import * as types from './mutation-types'
+import store from "@/store"
 
 
 const actions: ActionTree<UtilState, RootState> = {
@@ -14,7 +15,7 @@ const actions: ActionTree<UtilState, RootState> = {
     if(configFacilities.length) return;
 
     try {
-      const resp = await UtilService.fetchConfigFacilities({ facilityTypeId: 'CONFIGURATION' });
+      const resp = await UtilService.fetchConfigFacilities({ facilityTypeId: 'CONFIGURATION', productStoreId: store.state.user.currentEComStore.productStoreId });
 
       if(!hasError(resp)) {
         configFacilities = resp.data;

@@ -10,7 +10,7 @@ const fetchFacets = async (payload: any): Promise<any> => {
 
 const fetchConfigFacilities = async (payload: any): Promise <any>  => {
   return api({
-    url: "facilities",
+    url: `productStores/${payload.productStoreId}/facilities`,
     method: "GET",
     params: payload
   });
