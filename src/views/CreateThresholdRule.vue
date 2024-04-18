@@ -112,7 +112,6 @@ function isFacilitySelected(facilityId: any) {
 
 function generateRuleActions(ruleId: string) {
   return [{
-    "_entity": "ruleAction",
     "ruleId": ruleId,
     "actionTypeEnumId": "ATP_THRESHOLD",
     "fieldName": "safety_stock",
@@ -126,7 +125,6 @@ function generateRuleConditions(ruleId: string) {
   const selectedFacilites = formData.value.selectedConfigFacilites
   if(selectedFacilites?.length) {
     conditions.push({
-      "_entity": "ruleCondition",
       "ruleId": ruleId,
       "conditionTypeEnumId": "ENTCT_ATP_FACILITIES",
       "fieldName": "facilities",
@@ -139,8 +137,7 @@ function generateRuleConditions(ruleId: string) {
   Object.entries(appliedFilters.value).map(([type, filters]: any) => {
     Object.entries(filters as any).map(([filter, value]: any) => {
       if(value.length) {
-        conditions.push({ 
-          "_entity": "ruleCondition",
+        conditions.push({
           "ruleId": ruleId,
           "conditionTypeEnumId": "ENTCT_ATP_FILTER",
           "fieldName": filter,
@@ -161,13 +158,11 @@ async function createThresholdRule() {
   try {
     if(!ruleGroup.ruleGroupId) {
       ruleGroup = await RuleService.createRuleGroup({
-        "_entity": "ruleGroup",
         "groupTypeEnumId": "RG_THRESHOLD"
       })
     }
 
     const params = {
-      "_entity": "rule",
       "ruleId": formData.value.ruleName.trim().toUpperCase().split(' ').join('_'),
       "ruleGroupId": ruleGroup.ruleGroupId,
       "ruleName": formData.value.ruleName,

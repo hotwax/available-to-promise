@@ -171,7 +171,6 @@ async function saveFilters() {
     includeCondition.fieldValue = includedFilters.value.join(",")
   } else {
     rule.ruleConditions.push({
-      "_entity": "ruleCondition",
       "ruleId": rule.ruleId,
       "conditionTypeEnumId": "ENTCT_ATP_FILTER",
       "fieldName": props.searchfield,
@@ -186,7 +185,6 @@ async function saveFilters() {
     excludeCondition.fieldValue = excludedFilters.value.join(",")
   } else {
     rule.ruleConditions.push({
-      "_entity": "ruleCondition",
       "ruleId": rule.ruleId,
       "conditionTypeEnumId": "ENTCT_ATP_FILTER",
       "fieldName": props.searchfield,

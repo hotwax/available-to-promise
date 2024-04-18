@@ -41,7 +41,7 @@ async function disableRuleGroup() {
   }
 
   try {
-    const resp = await RuleService.scheduleRule(payload)
+    const resp = await RuleService.scheduleRuleGroup(payload)
     if(!hasError(resp)){
       const ruleGroupValue = JSON.parse(JSON.stringify(ruleGroup.value))
       ruleGroupValue.schedule.paused = "Y"
@@ -88,7 +88,7 @@ async function runNow() {
               }
 
               try {
-                const resp = await RuleService.scheduleRule(payload)
+                const resp = await RuleService.scheduleRuleGroup(payload)
                 if(hasError(resp)) {
                   throw resp.data
                 }
