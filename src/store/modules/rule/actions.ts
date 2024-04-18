@@ -5,15 +5,17 @@ import RuleState from './RuleState'
 import { RuleService } from '@/services/RuleService'
 import { hasError } from '@/utils'
 import logger from '@/logger'
+import { useStore } from 'vuex'
 
 
 const actions: ActionTree<RuleState, RootState> = {
   async fetchRuleGroup({ commit }, payload) {
+    const store = useStore();
     let ruleGroup = {} as any;
     let resp;
 
     try {
-      resp = await RuleService.fetchRuleGroup(payload)
+      resp = await RuleService.fetchRuleGroup({ ...payload, productStoreId: store.getters['user/getCurrentEComStore']?.productStoreId })
 
       if(!hasError(resp) && resp.data.length) {
         ruleGroup = resp.data[0]

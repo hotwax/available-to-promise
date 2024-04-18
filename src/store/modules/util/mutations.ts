@@ -22,5 +22,17 @@ const mutations: MutationTree <UtilState> = {
       }
     }
   },
+  [types.UTIL_APPLIED_FILTERS_CLEARED](state) {
+    state.appliedFilters = {
+      included: {
+        tags: [],
+        productFeatures: []
+      },
+      excluded: {
+        tags: [],
+        productFeatures: []
+      }
+    }
+  },
 }
 export default mutations;

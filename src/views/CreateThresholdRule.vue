@@ -181,6 +181,8 @@ async function createThresholdRule() {
     }, rule.ruleId);
 
     showToast(translate("Rule created successfully."))
+    store.dispatch("rule/clearRuleState")
+    store.dispatch("util/clearAppliedFilters")
     router.push("/threshold");
   } catch(err: any) {
     logger.error(err);

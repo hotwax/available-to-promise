@@ -44,10 +44,9 @@ const router = useRouter()
 
 const rules = computed(() => store.getters["rule/getRules"]);
 const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
-const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
 
 onMounted(async() => {
-  await store.dispatch('rule/fetchRules', { groupTypeEnumId: 'RG_THRESHOLD', "productStoreId": currentEComStore.value.productStoreId })
+  await store.dispatch('rule/fetchRules', { groupTypeEnumId: 'RG_THRESHOLD' })
   await store.dispatch("util/fetchConfigFacilities");
 })
 
