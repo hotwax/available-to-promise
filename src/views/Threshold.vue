@@ -12,7 +12,7 @@
         <ScheduleRuleItem />
 
         <section>
-          <RuleItem v-for="rule in rules" :rule="rule" :key="rule.ruleId" />
+          <RuleItem v-for="(rule, index) in rules" :rule="rule" :index="index" :key="rule.ruleId" />
         </section>
       </main>
 
