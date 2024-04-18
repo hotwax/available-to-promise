@@ -22,8 +22,8 @@
       </ion-item>
     </ion-list>
 
-    <ion-fab @click="saveFacilities()" vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button>
+    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+      <ion-fab-button @click="saveFacilities()">
         <ion-icon :icon="saveOutline" />  
       </ion-fab-button>
     </ion-fab>

@@ -6,23 +6,23 @@ import RootState from '@/store/RootState'
 import UtilState from './UtilState'
 
 const utilModule: Module<UtilState, RootState> = {
-    namespaced: true,
-    state: {
-      configFacilities: [],
-      appliedFilters: {
-        included: {
-          tags: [],
-          productFeatures: []
-        },
-        excluded: {
-          tags: [],
-          productFeatures: []
-        }
+  namespaced: true,
+  state: {
+    configFacilities: [],
+    appliedFilters: {
+      included: {
+        tags: [],
+        productFeatures: []
       },
+      excluded: {
+        tags: [],
+        productFeatures: []
+      }
     },
-    getters,
-    actions,
-    mutations,
+  },
+  getters,
+  actions,
+  mutations,
 }
 
 // TODO
