@@ -146,7 +146,7 @@ function generateRuleConditions(ruleId: string) {
           "fieldName": filter,
           "operator": type === "included" ? "in" : "not-in",
           "fieldValue": value.length > 1 ? value.join(",") : value[0],
-          "multiValued": value?.length > 1 ? "Y" : "N"
+          "multiValued": value.length > 1 ? "Y" : "N"
         })
       }
     })
@@ -156,7 +156,7 @@ function generateRuleConditions(ruleId: string) {
 }
 
 async function createThresholdRule() {
-  let ruleGroup =   await store.dispatch("rule/fetchRuleGroup", { groupTypeEnumId: "RG_THRESHOLD" });
+  let ruleGroup = await store.dispatch("rule/fetchRuleGroup", { groupTypeEnumId: "RG_THRESHOLD" });
 
   try {
     if(!ruleGroup.ruleGroupId) {

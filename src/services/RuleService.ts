@@ -4,7 +4,7 @@ import { hasError } from '@/utils';
 
 const fetchRuleGroup = async (payload: any): Promise <any>  => {
   return api({
-    url: `ruleGroups`,
+    url: "ruleGroups",
     method: "GET",
     data: payload
   });
@@ -22,7 +22,7 @@ const createRuleGroup = async (payload: any): Promise <any>  => {
   let ruleGroup = {}
   try {
     const resp = await api({
-      url: `ruleGroups/`,
+      url: "ruleGroups",
       method: "POST",
       data: payload
     }) as any;
@@ -43,7 +43,7 @@ const createRule = async (payload: any): Promise <any>  => {
   let rule = {}
   try {
     const resp = await api({
-      url: `decisionRules/`,
+      url: "decisionRules",
       method: "POST",
       data: payload
     }) as any;
@@ -92,7 +92,7 @@ const fetchRulesActionsAndConditions = async (ruleId: any): Promise <any>  => {
     }
   } catch(err: any) {
     logger.error(err)
-    return Promise.reject("Failed to update rule");
+    return Promise.reject("Failed to fetch rule information.");
   }
 }
 

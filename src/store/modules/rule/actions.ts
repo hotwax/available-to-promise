@@ -97,7 +97,11 @@ const actions: ActionTree<RuleState, RootState> = {
       rules.splice(index, 1);
     }
     commit(types.RULE_RULES_UPDATED, { list: rules, total: state.rules.total});
-  }
+  },
+
+  async clearRuleState({ commit }) {
+    commit(types.RULE_CLEARED)
+  },
 }
 
 export default actions;

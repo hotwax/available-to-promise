@@ -33,7 +33,7 @@
       </ion-fab-button>
     </ion-fab>
 
-    <ion-infinite-scroll @ionInfinite="loadMoreTags($event)" threshold="100px" :disabled="!isScrollable">
+    <ion-infinite-scroll @ionInfinite="loadMoreFilters($event)" threshold="100px" :disabled="!isScrollable">
       <ion-infinite-scroll-content loading-spinner="crescent" :loading-text="translate('Loading')"/>
     </ion-infinite-scroll>
   </ion-content>
@@ -87,10 +87,10 @@ function closeModal() {
 }
 
 function search() {
-  getTags();
+  getFilters();
 }
 
-async function getTags(vSize?: any, vIndex?: any) {
+async function getFilters(vSize?: any, vIndex?: any) {
   const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
   const viewIndex = vIndex ? vIndex : 0;
 
@@ -119,8 +119,8 @@ async function getTags(vSize?: any, vIndex?: any) {
   }
 }
 
-async function loadMoreTags(event: any){
-  getTags(
+async function loadMoreFilters(event: any){
+  getFilters(
     undefined,
     Math.ceil(facetOptions.value.length / process.env.VUE_APP_VIEW_SIZE).toString() 
   ).then(() => {

@@ -10,5 +10,12 @@ const mutations: MutationTree <RuleState> = {
   [types.RULE_GROUP_UPDATED] (state, payload) {
     state.ruleGroup = payload;
   },
+  [types.RULE_CLEARED](state) {
+    state.rules = {
+      list: [],
+      total: ''
+    },
+    state.ruleGroup = {}
+  },
 }
 export default mutations;

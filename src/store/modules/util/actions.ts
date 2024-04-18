@@ -29,7 +29,11 @@ const actions: ActionTree<UtilState, RootState> = {
 
   async updateAppliedFilters ({ commit, state }, payload) {
     commit(types.UTIL_APPLIED_FILTERS_UPDATED, payload)
-  }
+  },
+
+  async clearUtilState({ commit }) {
+    commit(types.UTIL_CLEARED)
+  },
 }
 
 export default actions;

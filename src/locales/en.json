@@ -56,6 +56,7 @@
   "Failed": "Failed",
   "Failed to create rule.": "Failed to create rule.",
   "Failed to disable rule group.": "Failed to disable rule group.",
+  "Failed to fetch rule information.": "Failed to fetch rule information.",
   "Failed to update config facilities.": "Failed to update config facilities.",
   "Failed to update product filters.": "Failed to update product filters.",
   "Failed to update some jobs": "Failed to update some jobs",
