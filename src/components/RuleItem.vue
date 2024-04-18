@@ -4,7 +4,7 @@
       <div>
         <ion-card-subtitle class="overline">{{ rule.ruleId }}</ion-card-subtitle>
         <ion-card-title>{{ rule.ruleName }}</ion-card-title>
-        <ion-card-subtitle>{{ index+1 }}/{{ total }}</ion-card-subtitle>
+        <ion-card-subtitle>{{ ruleIndex+1 }}/{{ total }}</ion-card-subtitle>
       </div>
       <div>
         <ion-button fill="clear" color="medium" class="ion-no-padding">
@@ -138,7 +138,7 @@ import UpdateProductFiltersModal from '@/components/UpdateProductFiltersModal.vu
 const router = useRouter();
 const store = useStore();
 
-const props = defineProps(["selectedSegment", "rule", "index"])
+const props = defineProps(["selectedSegment", "rule", "ruleIndex"])
 const total = computed(() => store.getters["rule/getTotalRulesCount"])
 const configFacilities = computed(() => store.getters["util/getConfigFacilities"])
 
