@@ -1,4 +1,5 @@
 import { toastController } from '@ionic/vue';
+import { DateTime } from 'luxon';
 
 // TODO Use separate files for specific utilities
 
@@ -12,9 +13,26 @@ const showToast = async (message: string) => {
     .create({
       message,
       duration: 3000,
-      position: "top",
+      position: "bottom",
     })
   return toast.present();
 }
 
-export { showToast, hasError }
+function getDateAndTime(time: any) {
+  return time ? DateTime.fromMillis(time).toLocaleString(DateTime.DATETIME_MED) : "-";
+}
+
+const getTime = (time: any) => {
+  return time ? DateTime.fromMillis(time).toLocaleString(DateTime.TIME_SIMPLE) : "-";
+}
+
+function getDate(runTime: any) {
+  return DateTime.fromMillis(runTime).toLocaleString(DateTime.DATE_MED);
+}
+
+function timeTillRun(endTime: any) {
+  const timeDiff = DateTime.fromMillis(endTime).diff(DateTime.local());
+  return DateTime.local().plus(timeDiff).toRelative();
+}
+
+export { getDate, getDateAndTime, getTime, hasError, showToast, timeTillRun }

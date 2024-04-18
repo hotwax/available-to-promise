@@ -5,6 +5,8 @@ import actions from './actions'
 import RootState from './RootState'
 import createPersistedState from "vuex-persistedstate";
 import userModule from './modules/user';
+import utilModule from './modules/util';
+import ruleModule from './modules/rule';
 
 
 // TODO check how to register it from the components only
@@ -17,7 +19,7 @@ const state: any = {
 }
 
 const persistState = createPersistedState({
-    paths: ['user'],
+    paths: ['user', 'util'],
     fetchBeforeUse: true
 })
 
@@ -29,7 +31,9 @@ const store = createStore<RootState>({
     getters,
     plugins: [ persistState ],
     modules: { 
-        'user': userModule
+        'user': userModule,
+        'util': utilModule,
+        'rule': ruleModule
     },
 })
 

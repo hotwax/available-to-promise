@@ -3,19 +3,22 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-menu-button slot="start" />
-        <ion-title>{{ $t("Threshold") }}</ion-title>
+        <ion-title>{{ translate("Threshold") }}</ion-title>
       </ion-toolbar>
     </ion-header>
 
     <ion-content>
-      <main>
+      <main v-if="ruleGroup.ruleGroupId">
         <ScheduleRuleItem />
 
         <section>
-          <RuleItem />
-          <RuleItem />
+          <RuleItem v-for="(rule, ruleIndex) in rules" :rule="rule" :ruleIndex="ruleIndex" :key="rule.ruleId" />
         </section>
       </main>
+
+      <div class="empty-state" v-else>
+       <p>{{ translate("No threshold rules found") }}</p>
+      </div>
 
       <ion-fab vertical="bottom" horizontal="end" slot="fixed">
         <ion-fab-button @click="CreateThreshold()">
@@ -32,8 +35,21 @@ import { addOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue'
 import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
 import { useRouter } from 'vue-router';
+import { computed, onMounted } from 'vue';
+import { useStore } from 'vuex';
+import { translate } from '@/i18n';
 
+const store = useStore();
 const router = useRouter()
+
+const rules = computed(() => store.getters["rule/getRules"]);
+const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
+const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
+
+onMounted(async() => {
+  await store.dispatch('rule/fetchRules', { groupTypeEnumId: 'RG_THRESHOLD', "productStoreId": currentEComStore.value.productStoreId })
+  await store.dispatch("util/fetchConfigFacilities");
+})
 
 function CreateThreshold() {
   router.replace({ path: '/create-threshold' })

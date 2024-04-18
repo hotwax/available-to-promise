@@ -6,16 +6,13 @@
           <Logo />
 
           <ion-item lines="full">
-            <ion-label position="fixed">{{ translate("OMS") }}</ion-label>
-            <ion-input name="instanceUrl" v-model="instanceUrl" id="instanceUrl" type="text" required />
+            <ion-input :label="translate('OMS')" label-placement="fixed" name="instanceUrl" v-model="instanceUrl" id="instanceUrl" type="text" required />
           </ion-item>
           <ion-item lines="full">
-            <ion-label position="fixed">{{ translate("Username") }}</ion-label>
-            <ion-input name="username" v-model="username" id="username" type="text" required />
+            <ion-input :label="translate('Username')" label-placement="fixed" name="username" v-model="username" id="username" type="text" required />
           </ion-item>
           <ion-item lines="none">
-            <ion-label position="fixed">{{ translate("Password") }}</ion-label>
-            <ion-input name="password" v-model="password" id="password" type="password" required />
+            <ion-input :label="translate('Password')" label-placement="fixed" name="password" v-model="password" id="password" type="password" required />
           </ion-item>
 
           <div class="ion-padding">
@@ -33,7 +30,6 @@ import {
   IonContent,
   IonInput,
   IonItem,
-  IonLabel,
   IonPage
 } from "@ionic/vue";
 import { computed, onMounted, ref } from "vue";
