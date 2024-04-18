@@ -100,7 +100,7 @@ onMounted(async () => {
 })
 
 function toggleFacilitySelection(facilityId: any) {
-  if(formData.value.selectedConfigFacilites.includes(facilityId)) {
+  if(isFacilitySelected(facilityId)) {
     formData.value.selectedConfigFacilites = formData.value.selectedConfigFacilites.filter((currentFacilityId: string) => currentFacilityId !== facilityId)
   } else {
     formData.value.selectedConfigFacilites.push(facilityId)
@@ -166,7 +166,6 @@ async function createThresholdRule() {
     }
 
     const params = {
-      "ruleId": formData.value.ruleName.trim().toUpperCase().split(' ').join('_'),
       "ruleGroupId": ruleGroup.ruleGroupId,
       "ruleName": formData.value.ruleName,
       "statusId": "ATP_RULE_ACTIVE",
