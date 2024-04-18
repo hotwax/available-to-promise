@@ -8,13 +8,17 @@
     </ion-header>
 
     <ion-content>
-      <main>
-        <ScheduleRuleItem v-if="rules.length"/>
+      <main v-if="ruleGroup.ruleGroupId">
+        <ScheduleRuleItem />
 
         <section>
           <RuleItem v-for="(rule, ruleIndex) in rules" :rule="rule" :ruleIndex="ruleIndex" :key="rule.ruleId" />
         </section>
       </main>
+
+      <div class="empty-state" v-else>
+       <p>{{ translate("No threshold rules found") }}</p>
+      </div>
 
       <ion-fab vertical="bottom" horizontal="end" slot="fixed">
         <ion-fab-button @click="CreateThreshold()">
@@ -39,6 +43,7 @@ const store = useStore();
 const router = useRouter()
 
 const rules = computed(() => store.getters["rule/getRules"]);
+const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
 const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
 
 onMounted(async() => {
