@@ -115,7 +115,7 @@ function generateRuleActions(ruleId: string) {
   return [{
     "ruleId": ruleId,
     "actionTypeEnumId": "ATP_THRESHOLD",
-    "fieldName": "safety_stock",
+    "fieldName": "facility-safety-stock",
     "fieldValue": formData.value.threshold
   }]
 }
