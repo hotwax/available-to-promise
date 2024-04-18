@@ -8,14 +8,17 @@
     </ion-header>
 
     <ion-content>
-      <main>
+      <main v-if="ruleGroup.ruleGroupId">
         <ScheduleRuleItem />
 
         <section>
-          <RuleItem />
-          <RuleItem />
+          <RuleItem v-for="(rule, ruleIndex) in rules" :rule="rule" :ruleIndex="ruleIndex" :key="rule.ruleId" />
         </section>
       </main>
+
+      <div class="empty-state" v-else>
+       <p>{{ translate("No threshold rules found") }}</p>
+      </div>
     </ion-content>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
@@ -32,8 +35,20 @@ import { addOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue';
 import { useRouter } from "vue-router";
 import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
+import { useStore } from 'vuex';
+import { computed, onMounted } from 'vue';
+import { translate } from '@/i18n';
 
+const store = useStore();
 const router = useRouter()
+
+const rules = computed(() => store.getters["rule/getRules"]);
+const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
+
+onMounted(async() => {
+  await store.dispatch('rule/fetchRules', { groupTypeEnumId: 'RG_THRESHOLD' })
+  await store.dispatch("util/fetchConfigFacilities");
+})
 
 function createRule() {
   router.replace({ path: '/create-safety-stock' })
