@@ -89,10 +89,10 @@ const props = defineProps(["label", "facetToSelect", "searchfield", "rule"]);
 const store = useStore();
 
 onMounted(() => {
-  const includedCondition = props.rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === 'ENTCT_ATP_FILTER' && condition.fieldName === props.searchfield && condition.operator === 'in')
+  const includedCondition = props.rule.ruleConditions?.find((condition: any) => condition.conditionTypeEnumId === 'ENTCT_ATP_FILTER' && condition.fieldName === props.searchfield && condition.operator === 'in')
   if(includedCondition && includedCondition.fieldValue) includedFilters.value = includedCondition.fieldValue.split(",");
 
-  const excludedCondition = props.rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === 'ENTCT_ATP_FILTER' && condition.fieldName === props.searchfield && condition.operator === 'not-in')
+  const excludedCondition = props.rule.ruleConditions?.find((condition: any) => condition.conditionTypeEnumId === 'ENTCT_ATP_FILTER' && condition.fieldName === props.searchfield && condition.operator === 'not-in')
   if(excludedCondition && excludedCondition.fieldValue) excludedFilters.value = excludedCondition.fieldValue.split(",");
 })
 
@@ -165,6 +165,8 @@ function isSelected(value: string) {
 
 async function saveFilters() {
   const rule = JSON.parse(JSON.stringify(props.rule))
+
+  if(!rule.ruleConditions) rule.ruleConditions = []
 
   const includeCondition = rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === 'ENTCT_ATP_FILTER' && condition.fieldName === props.searchfield && condition.operator === 'in')
   if(includeCondition) {

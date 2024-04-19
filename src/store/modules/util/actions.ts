@@ -28,6 +28,27 @@ const actions: ActionTree<UtilState, RootState> = {
     commit(types.UTIL_CONFIG_FACILITES_UPDATED, configFacilities)
   },
 
+  async fetchFacilityGroups ({ commit, state }) {
+    // let facilityGroups = JSON.parse(JSON.stringify(state.facilityGroups))
+
+    // if(facilityGroups.length) return;
+
+    let facilityGroups = {} as any;
+
+    try {
+      const resp = await UtilService.fetchFacilityGroups({ productStoreId: store.state.user.currentEComStore.productStoreId });
+
+      if(!hasError(resp)) {
+        facilityGroups = resp.data;
+      } else {
+        throw resp.data
+      }
+    } catch (err: any) {
+      logger.error(err)
+    }
+    commit(types.UTIL_FACILITY_GROUPS_UPDATED, facilityGroups)
+  },
+
   async updateAppliedFilters ({ commit, state }, payload) {
     commit(types.UTIL_APPLIED_FILTERS_UPDATED, payload)
   },
