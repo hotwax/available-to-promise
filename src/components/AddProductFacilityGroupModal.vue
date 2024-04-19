@@ -6,7 +6,7 @@
           <ion-icon slot="icon-only" :icon="arrowBackOutline" />
         </ion-button>
       </ion-buttons>
-      <ion-title>{{ type === "included" ? translate("Include facility group") : translate("Exclude facility group") }}</ion-title>
+      <ion-title>{{ type === "included" ? translate("Include facility groups") : translate("Exclude facility groups") }}</ion-title>
     </ion-toolbar>
   </ion-header>
 

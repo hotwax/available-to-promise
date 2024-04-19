@@ -69,7 +69,7 @@ const updateRule = async (payload: any, ruleId: string): Promise <any>  => {
     }) as any;
     
     if(!hasError(resp)) {
-      return Promise.resolve(resp.data)
+      return Promise.resolve(resp)
     } else {
       throw resp.data
     }
