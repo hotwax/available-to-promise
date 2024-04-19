@@ -205,8 +205,6 @@ async function editSafetyStock() {
     {
       text: translate('Update'),
       handler: async (data) => {
-        console.log(data);
-        
         if(data.safetyStock) {
           const rule = JSON.parse(JSON.stringify(props.rule))
 

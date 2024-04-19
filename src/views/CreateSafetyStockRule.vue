@@ -203,9 +203,6 @@ async function createRule() {
     }
 
     const rule = await RuleService.createRule(params)
-    console.log('update');
-    
-    
     await RuleService.updateRule({
       ...params,
       "ruleConditions": generateRuleConditions(rule.ruleId) ? generateRuleConditions(rule.ruleId): [],

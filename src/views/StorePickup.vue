@@ -8,10 +8,10 @@
 
       <ion-toolbar>
         <ion-segment v-model="selectedSegment" @ionChange="updateRuleGroup()">
-          <ion-segment-button value="productAndFacility">
+          <ion-segment-button value="RG_PICKUP_FACILITY">
             <ion-label>{{ translate("Product and facility") }}</ion-label>
           </ion-segment-button>
-          <ion-segment-button value="productAndChannel">
+          <ion-segment-button value="RG_PICKUP_CHANNEL">
             <ion-label>{{ translate("Product and channel") }}</ion-label>
           </ion-segment-button>
           <ion-segment-button value="facility">
@@ -59,12 +59,13 @@ import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import { computed, onMounted } from 'vue';
 
-const selectedSegment = ref("productAndFacility")
 const store = useStore();
 const router = useRouter()
 
 const rules = computed(() => store.getters["rule/getRules"]);
 const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
+
+const selectedSegment = ref(router.currentRoute.value.query.groupTypeEnumId ? router.currentRoute.value.query.groupTypeEnumId : "RG_PICKUP_FACILITY")
 
 onMounted(async() => {
   await store.dispatch('rule/fetchRules', { groupTypeEnumId: 'RG_PICKUP_FACILITY' })
@@ -72,14 +73,10 @@ onMounted(async() => {
 })
 
 async function updateRuleGroup() {
-  if(selectedSegment.value === 'productAndChannel') {
-    await store.dispatch('rule/fetchRules', { groupTypeEnumId: 'RG_PICKUP_CHANNEL'})
-  } else {
-    await store.dispatch('rule/fetchRules', { groupTypeEnumId: 'RG_PICKUP_FACILITY'})
-  }
+  await store.dispatch('rule/fetchRules', { groupTypeEnumId: selectedSegment.value})
 }
 
 function createStorePickup() {
-  router.replace({ path: '/create-store-pickup' })
+  router.replace({ path: '/create-store-pickup', query: { groupTypeEnumId: selectedSegment.value } })
 }
 </script>
