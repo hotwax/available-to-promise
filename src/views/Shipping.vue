@@ -8,10 +8,10 @@
 
       <ion-toolbar>
         <ion-segment v-model="selectedSegment" @ionChange="updateRuleGroup()">
-          <ion-segment-button value="productAndFacility">
+          <ion-segment-button value="RG_SHIPPING_FACILITY">
             <ion-label>{{ translate("Product and facility") }}</ion-label>
           </ion-segment-button>
-          <ion-segment-button value="productAndChannel">
+          <ion-segment-button value="RG_SHIPPING_CHANNEL">
             <ion-label>{{ translate("Product and channel") }}</ion-label>
           </ion-segment-button>
           <ion-segment-button value="facility">
@@ -25,7 +25,7 @@
       <main v-if="ruleGroup.ruleGroupId">
         <ScheduleRuleItem v-if="selectedSegment !== 'facility'" />
 
-        <section v-if="selectedSegment === 'productAndFacility' || selectedSegment === 'productAndChannel'">
+        <section v-if="selectedSegment !== 'facility'">
           <RuleItem :selectedSegment="selectedSegment" v-for="(rule, ruleIndex) in rules" :rule="rule" :ruleIndex="ruleIndex" :key="rule.ruleId" />
         </section>
         <section v-else>
@@ -35,7 +35,7 @@
       </main>
 
       <div class="empty-state" v-else>
-        <p>{{ translate("No store pickup rules found") }}</p>
+        <p>{{ translate("No shipping rules found") }}</p>
       </div>
     </ion-content>
 
@@ -59,28 +59,27 @@ import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import { computed, onMounted } from 'vue';
 
-const selectedSegment = ref("productAndFacility")
-
 const store = useStore();
 const router = useRouter()
 
 const rules = computed(() => store.getters["rule/getRules"]);
 const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
 
+console.log(router.currentRoute.value);
+
+
+const selectedSegment = ref(router.currentRoute.value.query.groupTypeEnumId ? router.currentRoute.value.query.groupTypeEnumId : "RG_SHIPPING_FACILITY")
+
 onMounted(async() => {
-  await store.dispatch('rule/fetchRules', { groupTypeEnumId: 'RG_SHIPPING_FACILITY' })
+  await store.dispatch('rule/fetchRules', { groupTypeEnumId: router.currentRoute.value.query.groupTypeEnumId ? router.currentRoute.value.query.groupTypeEnumId : "RG_SHIPPING_FACILITY" })
   await store.dispatch("util/fetchConfigFacilities");
 })
 
 async function updateRuleGroup() {
-  if(selectedSegment.value === 'productAndChannel') {
-    await store.dispatch('rule/fetchRules', { groupTypeEnumId: 'RG_PICKUP_CHANNEL'})
-  } else {
-    await store.dispatch('rule/fetchRules', { groupTypeEnumId: 'RG_PICKUP_FACILITY'})
-  }
+  await store.dispatch('rule/fetchRules', { groupTypeEnumId: selectedSegment.value})
 }
 
 function createShipping() {
-  router.replace({ path: '/create-shipping' })
+  router.replace({ path: '/create-shipping', query: { groupTypeEnumId: selectedSegment.value } })
 }
 </script>

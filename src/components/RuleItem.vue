@@ -32,11 +32,11 @@
     </ion-item>
     <ion-item lines="full" v-else-if="selectedPage.path === '/shipping'">
       <ion-icon slot="start" :icon="sendOutline"/>
-      <ion-toggle>{{ translate(selectedPage.name) }}</ion-toggle>
+      <ion-toggle :checked="props.rule.ruleActions[0].fieldValue" @click.prevent="updateRuleShipping($event)">{{ translate(selectedPage.name) }}</ion-toggle>
     </ion-item>
 
     <ion-list>
-      <template v-if="selectedPage.path === '/threshold' || selectedSegment === 'RG_PICKUP_CHANNEL'">
+      <template v-if="selectedPage.path === '/threshold' || selectedSegment === 'RG_PICKUP_CHANNEL' || selectedSegment === 'RG_SHIPPING_CHANNEL'">
         <ion-item-divider color="light">
           <ion-label>{{ translate("Channels") }}</ion-label>
           <ion-button slot="end" fill="clear" color="medium" @click="openSelectConfigFacilitiesModal()">
@@ -364,8 +364,8 @@ async function openUpdateFacilityGroupModal() {
 }
 
 function isRuleConditionAvailable(conditionTypeEnumId: string, fieldName?: string, operator? : string) {
-  if(fieldName) return props.rule.ruleConditions?.some((condition: any) => condition.conditionTypeEnumId === conditionTypeEnumId && condition.fieldName === fieldName && condition.operator === operator)
-  else return props.rule.ruleConditions?.some((condition: any) => condition.conditionTypeEnumId === conditionTypeEnumId) 
+  if(fieldName) return props.rule.ruleConditions?.find((condition: any) => condition.conditionTypeEnumId === conditionTypeEnumId && condition.fieldName === fieldName && condition.operator === operator)?.fieldValue
+  else return props.rule.ruleConditions?.find((condition: any) => condition.conditionTypeEnumId === conditionTypeEnumId)?.fieldValue
 }
 
 async function openUpdateProductFiltersModal(label: string, facetToSelect: string, searchfield: string) {
@@ -384,8 +384,7 @@ async function openUpdateProductFiltersModal(label: string, facetToSelect: strin
 
 async function updateRulePickup(event: any) {
   event.stopImmediatePropagation();
-  const isChecked = !event.target.checked
-  console.log(isChecked);
+  const isChecked = !event.target.checked;
   
   try {
     const rule = JSON.parse(JSON.stringify(props.rule))
@@ -400,6 +399,26 @@ async function updateRulePickup(event: any) {
   } catch(err) {
     logger.error(err)
     showToast(translate("Failed to update rule pickup."))
+  }
+}
+
+async function updateRuleShipping(event: any) {
+  event.stopImmediatePropagation();
+  const isChecked = !event.target.checked;
+
+  try {
+    const rule = JSON.parse(JSON.stringify(props.rule))
+    rule.ruleActions.map((action: any) => {
+      if(action.actionTypeEnumId === "ATP_ALLOW_BROKERING") action.fieldValue = isChecked
+    })
+
+    await RuleService.updateRule(rule, props.rule.ruleId)
+    showToast(translate("Rule shipping updated successfully."))
+    await store.dispatch('rule/updateRuleData', { rule })
+    event.target.checked = isChecked
+  } catch(err) {
+    logger.error(err)
+    showToast(translate("Failed to update rule brokering."))
   }
 }
 </script>
