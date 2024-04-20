@@ -29,7 +29,7 @@
         <ion-icon :icon="checkmarkOutline" />
       </ion-fab-button>
     </ion-fab>
-    <ion-infinite-scroll @ionInfinite="loadMoreTags($event)" threshold="100px" v-show="isScrollingEnabled && isScrollable" ref="infiniteScrollRef">
+    <ion-infinite-scroll @ionInfinite="loadMoreTags($event)" threshold="100px" v-show="isScrollable" ref="infiniteScrollRef">
       <ion-infinite-scroll-content loading-spinner="crescent" :loading-text="$t('Loading')"/>
     </ion-infinite-scroll>
   </ion-content>
@@ -150,6 +150,10 @@ export default defineComponent({
       }
     },
     async loadMoreTags(event: any){
+       // Added this check here as if added on infinite-scroll component the Loading content does not gets displayed
+       if(!(this.isScrollingEnabled && this.isScrollable)) {
+        await event.target.complete();
+      }
       this.getTags(
         undefined,
         Math.ceil(this.facetOptions.length / process.env.VUE_APP_VIEW_SIZE).toString() 
