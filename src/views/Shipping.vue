@@ -65,9 +65,6 @@ const router = useRouter()
 const rules = computed(() => store.getters["rule/getRules"]);
 const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
 
-console.log(router.currentRoute.value);
-
-
 const selectedSegment = ref(router.currentRoute.value.query.groupTypeEnumId ? router.currentRoute.value.query.groupTypeEnumId : "RG_SHIPPING_FACILITY")
 
 onMounted(async() => {

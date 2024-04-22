@@ -208,8 +208,7 @@ async function createRule() {
       "ruleConditions": generateRuleConditions(rule.ruleId) ? generateRuleConditions(rule.ruleId): [],
       "ruleActions": generateRuleActions(rule.ruleId) ? generateRuleActions(rule.ruleId) : []
     }, rule.ruleId);
-    
-    console.log('updated');
+
     showToast(translate("Rule created successfully."))
     store.dispatch("rule/clearRuleState")
     store.dispatch("util/clearAppliedFilters")

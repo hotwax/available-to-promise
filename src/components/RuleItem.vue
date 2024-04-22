@@ -60,7 +60,11 @@
         
         <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FAC_GROUPS')" lines="none">
           <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
-          <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FAC_GROUPS") }}</ion-label>
+          <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FAC_GROUPS", "facilityGroups", "in") }}</ion-label>
+        </ion-item>
+        <ion-item lines="none" v-if="isRuleConditionAvailable('ENTCT_ATP_FAC_GROUPS')">
+          <ion-icon slot="start" :icon="closeCircleOutline"/>
+          <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FAC_GROUPS", "facilityGroups", "not-in") }}</ion-label>
         </ion-item>
       </template>
 
@@ -276,26 +280,26 @@ function getRuleConditions(conditionTypeEnumId: string, fieldName?: string, oper
 
   if(fieldName && operator) {
     const condition = props.rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === conditionTypeEnumId && condition.fieldName === fieldName && condition.operator === operator)
-    return condition?.fieldValue?.split(",").join(", ")
-  } else {
-    const condition = props.rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === conditionTypeEnumId)
-
-    if(condition && condition.fieldValue) {
-      if(conditionTypeEnumId === 'ENTCT_ATP_FACILITIES') {
-        let facilities = condition?.fieldValue.split(",")
-        facilities = facilities.map((id: string) => {
-          let facility = configFacilities.value.find((facility: any) => facility.facilityId === id)
-          return facility ? facility.facilityName : null
-        })
-        return facilities.join(", ")
-      } else {
-        let facilityGroupIds = condition?.fieldValue.split(",")
+    if(condition && conditionTypeEnumId === 'ENTCT_ATP_FAC_GROUPS') {
+      let facilityGroupIds = condition?.fieldValue.split(",")
         facilityGroupIds = facilityGroupIds.map((id: string) => {
           let group = facilityGroups.value.find((group: any) => group.facilityGroupId === id)
           return group ? group.facilityGroupName : null
         })
         return facilityGroupIds.join(", ")
-      }
+    } else {
+      return condition?.fieldValue?.split(",").join(", ")
+    }
+  } else {
+    const condition = props.rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === conditionTypeEnumId)
+
+    if(condition && condition.fieldValue) {
+      let facilities = condition?.fieldValue.split(",")
+      facilities = facilities.map((id: string) => {
+        let facility = configFacilities.value.find((facility: any) => facility.facilityId === id)
+        return facility ? facility.facilityName : null
+      })
+      return facilities.join(", ")
     }
   }
 }
