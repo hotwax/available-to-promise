@@ -12,7 +12,7 @@ const actions: ActionTree<UtilState, RootState> = {
   async fetchConfigFacilities ({ commit, state }) {
     let configFacilities = JSON.parse(JSON.stringify(state.configFacilities))
 
-    if(configFacilities.length) return;
+    if(configFacilities.length && configFacilities[0].productStoreId === store.state.user.currentEComStore.productStoreId) return;
 
     try {
       const resp = await UtilService.fetchConfigFacilities({ facilityTypeId: 'CONFIGURATION', productStoreId: store.state.user.currentEComStore.productStoreId });
@@ -29,12 +29,9 @@ const actions: ActionTree<UtilState, RootState> = {
   },
 
   async fetchFacilityGroups ({ commit, state }) {
-    // let facilityGroups = JSON.parse(JSON.stringify(state.facilityGroups))
+    let facilityGroups = JSON.parse(JSON.stringify(state.facilityGroups))
 
-    // if(facilityGroups.length) return;
-
-    let facilityGroups = {} as any;
-
+    if(facilityGroups.length && facilityGroups[0].productStoreId === store.state.user.currentEComStore.productStoreId) return;
     try {
       const resp = await UtilService.fetchFacilityGroups({ productStoreId: store.state.user.currentEComStore.productStoreId });
 

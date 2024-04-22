@@ -70,6 +70,7 @@ const selectedSegment = ref(router.currentRoute.value.query.groupTypeEnumId ? ro
 onMounted(async() => {
   await store.dispatch('rule/fetchRules', { groupTypeEnumId: router.currentRoute.value.query.groupTypeEnumId ? router.currentRoute.value.query.groupTypeEnumId : "RG_SHIPPING_FACILITY" })
   await store.dispatch("util/fetchConfigFacilities");
+  await store.dispatch("util/fetchFacilityGroups");
 })
 
 async function updateRuleGroup() {

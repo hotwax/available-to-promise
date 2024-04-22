@@ -78,8 +78,6 @@ const store = useStore();
 const facilityGroups = computed(() => store.getters["util/getFacilityGroups"])
 
 onMounted(async () => {
-  console.log('enterd');
-  
   await store.dispatch("util/fetchFacilityGroups");
   const includedCondition = props.rule.ruleConditions?.find((condition: any) => condition.conditionTypeEnumId === 'ENTCT_ATP_FAC_GROUPS' && condition.fieldName === 'facilityGroups' && condition.operator === 'in')
   if(includedCondition && includedCondition.fieldValue) includedFilters.value = includedCondition.fieldValue.split(",");
