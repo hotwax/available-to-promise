@@ -17,7 +17,9 @@
 
             <div class="rule-inputs ion-padding">
               <ion-item>
-                <ion-input :label="translate('Name')" v-model="formData.ruleName" />
+                <ion-input v-model="formData.ruleName">
+                  <div slot="label">{{ translate("Name") }} <ion-text color="danger">*</ion-text></div>
+                </ion-input>
               </ion-item>
               <ion-item>
                 <ion-icon slot="start" :icon="storefrontOutline"/>
@@ -42,7 +44,7 @@
       <section v-if="selectedSegment === 'RG_PICKUP_FACILITY'">
         <ion-card>
           <ion-item lines="none">
-            <ion-label>{{ translate("Included") }}</ion-label>
+            <ion-label>{{ translate("Included") }} <ion-text color="danger">*</ion-text></ion-label>
             <ion-button fill="clear" @click="openProductFacilityGroupModal('included')">
               {{ translate("Add") }}
               <ion-icon :icon="addCircleOutline" slot="end" />
@@ -97,7 +99,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonPage, IonSegment, IonSegmentButton, IonTitle, IonToggle, IonToolbar, modalController } from '@ionic/vue';
+import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonPage, IonSegment, IonSegmentButton, IonText, IonTitle, IonToggle, IonToolbar, modalController } from '@ionic/vue';
 import { addCircleOutline, closeCircle, saveOutline, storefrontOutline } from 'ionicons/icons'
 import { translate } from "@/i18n";
 import { computed, onMounted, ref } from 'vue';
@@ -167,6 +169,19 @@ function isFacilitySelected(facilityId: any) {
 }
 
 async function createRule() {
+  if(!formData.value.ruleName) {
+    showToast(translate("Please fill in all the required fields."))
+    return;
+  }
+
+  if( selectedSegment.value === 'RG_PICKUP_FACILITY' && !formData.value.selectedFacilityGroups.included.length) {
+    showToast(translate("Please fill in all the required fields."))
+    return;
+  } else if(!formData.value.selectedConfigFacilites.length) {
+    showToast(translate("Please select atleast one config facility."))
+    return;
+  }
+
   let ruleGroup = await store.dispatch("rule/fetchRuleGroup", { groupTypeEnumId: selectedSegment.value });
 
   try {

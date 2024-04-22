@@ -115,6 +115,8 @@
   "Paused": "Paused",
   "Pending": "Pending",
   "Please enter a threshold value to set for these products before proceeding.": "Please enter a threshold value to set for these products before proceeding.",
+  "Please fill in all the required fields.": "Please fill in all the required fields.",
+  "Please select atleast one config facility.": "Please select atleast one config facility.",
   "Product and facility": "Product and facility",
   "Product and channel": "Product and channel",
   "Product list": "Product list",

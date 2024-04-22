@@ -17,10 +17,14 @@
 
             <div class="rule-inputs ion-padding">
               <ion-item>
-                <ion-input :label="translate('Name')" v-model="formData.ruleName" />
+                <ion-input v-model="formData.ruleName">
+                  <div slot="label">{{ translate("Name") }} <ion-text color="danger">*</ion-text></div>
+                </ion-input>
               </ion-item>
               <ion-item>
-                <ion-input :label="translate('Safety stock')" v-model="formData.safetyStock" />
+                <ion-input v-model="formData.safetyStock">
+                  <div slot="label">{{ translate("Safety stock") }} <ion-text color="danger">*</ion-text></div>
+                </ion-input>
               </ion-item>
             </div>
           </ion-card>
@@ -34,7 +38,7 @@
       <section>
         <ion-card>
           <ion-item lines="none">
-            <ion-label>{{ translate("Included") }}</ion-label>
+            <ion-label>{{ translate("Included") }} <ion-text color="danger">*</ion-text></ion-label>
             <ion-button fill="clear" @click="openProductFacilityGroupModal('included')">
               {{ translate("Add") }}
               <ion-icon :icon="addCircleOutline" slot="end" />
@@ -77,7 +81,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonPage, IonTitle, IonToolbar, modalController } from '@ionic/vue';
+import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonPage, IonText, IonTitle, IonToolbar, modalController } from '@ionic/vue';
 import { addCircleOutline, closeCircle, saveOutline } from 'ionicons/icons'
 import { translate } from "@/i18n";
 import ProductFilters from '@/components/ProductFilters.vue';
@@ -183,6 +187,11 @@ function generateRuleConditions(ruleId: string) {
 }
 
 async function createRule() {
+  if(!formData.value.ruleName || !formData.value.safetyStock || !formData.value.selectedFacilityGroups.included.length) {
+    showToast(translate("Please fill in all the required fields."))
+    return;
+  }
+
   let ruleGroup = await store.dispatch("rule/fetchRuleGroup", { groupTypeEnumId: "RG_SAFETY_STOCK" });
 
   try {
