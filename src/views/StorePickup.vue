@@ -49,7 +49,7 @@
 
 <script setup lang="ts">
 import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonLabel, IonMenuButton, IonPage, IonSegment, IonSegmentButton, IonTitle, IonToolbar } from '@ionic/vue';
-import { ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { addOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue'
 import FacilityItem from '@/components/FacilityItem.vue'
@@ -57,7 +57,6 @@ import { translate } from '@/i18n';
 import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
-import { computed, onMounted } from 'vue';
 
 const store = useStore();
 const router = useRouter()
@@ -68,9 +67,7 @@ const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
 const selectedSegment = ref(router.currentRoute.value.query.groupTypeEnumId ? router.currentRoute.value.query.groupTypeEnumId : "RG_PICKUP_FACILITY")
 
 onMounted(async() => {
-  await store.dispatch('rule/fetchRules', { groupTypeEnumId: 'RG_PICKUP_FACILITY' })
-  await store.dispatch("util/fetchConfigFacilities");
-  await store.dispatch("util/fetchFacilityGroups");
+  await Promise.allSettled([store.dispatch('rule/fetchRules', { groupTypeEnumId: 'RG_PICKUP_FACILITY' }), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilityGroups")])
 })
 
 async function updateRuleGroup() {

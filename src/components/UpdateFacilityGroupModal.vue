@@ -30,8 +30,7 @@
       </ion-item>
     </ion-list>
 
-    <!-- Added padding for better visiblity of the checkboxes beside the FAB -->
-    <ion-fab class="ion-padding" vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
       <ion-fab-button @click="saveFacilityGroups()">
         <ion-icon :icon="saveOutline" />
       </ion-fab-button>
@@ -40,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
+import { computed, defineProps, onMounted, ref } from "vue";
 import {
   IonButton,
   IonButtons,
@@ -63,7 +62,6 @@ import {
 import { arrowBackOutline, saveOutline } from 'ionicons/icons';
 import { useStore } from "vuex";
 import { RuleService } from "@/services/RuleService";
-import { defineProps, ref } from "vue";
 import { translate } from "@/i18n";
 import { showToast } from "@/utils";
 import logger from "@/logger";
@@ -155,3 +153,9 @@ async function saveFacilityGroups() {
   }
 }
 </script>
+
+<style scoped>
+  ion-content {
+    --padding-bottom: 80px;
+  }
+</style>

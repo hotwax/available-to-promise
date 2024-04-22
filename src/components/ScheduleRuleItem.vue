@@ -29,11 +29,11 @@
 </template>
 
 <script setup lang="ts">
-import { IonBadge, IonButton, IonCard, IonCardHeader, IonCardTitle, IonIcon, IonItem, IonLabel, IonSelect, IonSelectOption, onIonViewDidEnter, popoverController } from '@ionic/vue';
+import { IonBadge, IonButton, IonCard, IonCardHeader, IonCardTitle, IonIcon, IonItem, IonLabel, IonSelect, IonSelectOption, popoverController } from '@ionic/vue';
 import { translate } from '@/i18n';
 import { ellipsisVerticalOutline, timeOutline, timerOutline } from 'ionicons/icons';
 import ScheduleActionsPopover from "@/components/ScheduleActionsPopover.vue";
-import { computed, ref, onMounted } from 'vue';
+import { computed } from 'vue';
 import { getDateAndTime, hasError, showToast } from '@/utils'
 import { useStore } from 'vuex';
 import logger from '@/logger';

@@ -94,7 +94,7 @@ const store = useStore();
 
 const formData = ref({
   ruleName: '',
-  SafetyStock: '',
+  safetyStock: '',
   selectedFacilityGroups: {
     included: [],
     excluded: []
@@ -107,8 +107,7 @@ const total = computed(() => store.getters["rule/getTotalRulesCount"])
 const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
 
 onMounted(async () => {
-  store.dispatch("util/clearAppliedFilters")
-  await store.dispatch("util/fetchFacilityGroups");
+  await Promise.allSettled([store.dispatch("util/clearAppliedFilters"), store.dispatch("util/fetchFacilityGroups")])
 })
 
 async function openProductFacilityGroupModal(type: string) {

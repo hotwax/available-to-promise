@@ -12,7 +12,7 @@
 
   <ion-content>
     <ion-list>
-      <ion-item v-for="group in facilityGroups" :key="group.facilityGroupId"  @click="updateselectedGroups(group)">
+      <ion-item v-for="group in facilityGroups" :key="group.facilityGroupId"  @click="updateSelectedGroups(group)">
         <ion-label v-if="isAlreadyApplied(group.facilityGroupId)">{{ group.facilityGroupName }}</ion-label>
         <ion-checkbox v-if="!isAlreadyApplied(group.facilityGroupId)" :checked="isAlreadySelected(group.facilityGroupId)">
           {{ group.facilityGroupName }}
@@ -21,8 +21,7 @@
       </ion-item>
     </ion-list>
 
-    <!-- Added padding for better visiblity of the checkboxes beside the FAB -->
-    <ion-fab class="ion-padding" vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
       <ion-fab-button @click="saveFacilityGroups()">
         <ion-icon :icon="saveOutline" />
       </ion-fab-button>
@@ -31,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
+import { computed, defineProps, onMounted, ref } from "vue";
 import {
   IonButton,
   IonButtons,
@@ -51,7 +50,6 @@ import {
 } from "@ionic/vue";
 import { arrowBackOutline, saveOutline } from 'ionicons/icons';
 import { useStore } from "vuex";
-import { defineProps, ref } from "vue";
 import { translate } from "@/i18n";
 
 const selectedGroups = ref([]) as any;
@@ -66,14 +64,14 @@ onMounted(() => {
 })
 
 function closeModal() {
-  modalController.dismiss({ dismissed: true, selectedGroups });
+  modalController.dismiss({ dismissed: true, selectedGroups: selectedGroups.value });
 }
 
 function isAlreadySelected(id: any) {
   return selectedGroups.value.some((group: any) => group.facilityGroupId === id)
 }
 
-function updateselectedGroups(selectedGroup: any) {
+function updateSelectedGroups(selectedGroup: any) {
   const currentGroup = selectedGroups.value.find((group: any) => group.facilityGroupId === selectedGroup.facilityGroupId)
 
   if(currentGroup?.facilityGroupId) {
@@ -93,3 +91,9 @@ function saveFacilityGroups() {
 }
 
 </script>
+
+<style scoped>
+  ion-content {
+    --padding-bottom: 80px;
+  }
+</style>

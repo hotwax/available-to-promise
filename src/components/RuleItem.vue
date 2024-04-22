@@ -118,7 +118,7 @@ import { useRouter } from 'vue-router';
 import { translate } from '@/i18n';
 import { RuleService } from '@/services/RuleService';
 import { useStore } from 'vuex';
-import { hasError, showToast } from '@/utils';
+import { showToast } from '@/utils';
 import logger from '@/logger';
 import SelectConfigFacilitiesModal from '@/components/SelectConfigFacilitiesModal.vue';
 import UpdateProductFiltersModal from '@/components/UpdateProductFiltersModal.vue';
