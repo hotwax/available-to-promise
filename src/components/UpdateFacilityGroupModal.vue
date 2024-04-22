@@ -32,7 +32,7 @@
 
     <!-- Added padding for better visiblity of the checkboxes beside the FAB -->
     <ion-fab class="ion-padding" vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button @click="saveFilters()">
+      <ion-fab-button @click="saveFacilityGroups()">
         <ion-icon :icon="saveOutline" />
       </ion-fab-button>
     </ion-fab>
@@ -69,8 +69,8 @@ import { showToast } from "@/utils";
 import logger from "@/logger";
 
 const selectedSegment = ref("included")
-const includedFilters = ref([]) as any;
-const excludedFilters = ref([]) as any;
+const includedGroups = ref([]) as any;
+const excludedGroups = ref([]) as any;
 
 const props = defineProps(["rule"]);
 const store = useStore();
@@ -80,10 +80,10 @@ const facilityGroups = computed(() => store.getters["util/getFacilityGroups"])
 onMounted(async () => {
   await store.dispatch("util/fetchFacilityGroups");
   const includedCondition = props.rule.ruleConditions?.find((condition: any) => condition.conditionTypeEnumId === 'ENTCT_ATP_FAC_GROUPS' && condition.fieldName === 'facilityGroups' && condition.operator === 'in')
-  if(includedCondition && includedCondition.fieldValue) includedFilters.value = includedCondition.fieldValue.split(",");
+  if(includedCondition && includedCondition.fieldValue) includedGroups.value = includedCondition.fieldValue.split(",");
 
   const excludedCondition = props.rule.ruleConditions?.find((condition: any) => condition.conditionTypeEnumId === 'ENTCT_ATP_FAC_GROUPS' && condition.fieldName === 'facilityGroups' && condition.operator === 'not-in')
-  if(excludedCondition && excludedCondition.fieldValue) excludedFilters.value = excludedCondition.fieldValue.split(",");
+  if(excludedCondition && excludedCondition.fieldValue) excludedGroups.value = excludedCondition.fieldValue.split(",");
 })
 
 function closeModal() {
@@ -92,55 +92,55 @@ function closeModal() {
 
 function updateSelectedValues(value: string) {
   if(selectedSegment.value === 'included') {
-    if(includedFilters.value.includes(value)) includedFilters.value.splice(includedFilters.value.indexOf(value), 1)
-    else includedFilters.value.push(value)
+    if(includedGroups.value.includes(value)) includedGroups.value.splice(includedGroups.value.indexOf(value), 1)
+    else includedGroups.value.push(value)
   } 
   else {
-    if(excludedFilters.value.includes(value)) excludedFilters.value.splice(excludedFilters.value.indexOf(value), 1)
-    else excludedFilters.value.push(value) 
+    if(excludedGroups.value.includes(value)) excludedGroups.value.splice(excludedGroups.value.indexOf(value), 1)
+    else excludedGroups.value.push(value) 
   }
 }
 
 function isAlreadyApplied(value: string) {
-  if(selectedSegment.value === 'included') return excludedFilters.value.includes(value);
-  else return includedFilters.value.includes(value);
+  if(selectedSegment.value === 'included') return excludedGroups.value.includes(value);
+  else return includedGroups.value.includes(value);
 }
 
 function isSelected(value: string) {
-  if(selectedSegment.value === 'included') return includedFilters.value.includes(value);
-  else return excludedFilters.value.includes(value);
+  if(selectedSegment.value === 'included') return includedGroups.value.includes(value);
+  else return excludedGroups.value.includes(value);
 }
 
-async function saveFilters() {
+async function saveFacilityGroups() {
   const rule = JSON.parse(JSON.stringify(props.rule))
 
   if(!rule.ruleConditions) rule.ruleConditions = []
 
   const includeCondition = rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === 'ENTCT_ATP_FAC_GROUPS' && condition.fieldName === 'facilityGroups' && condition.operator === 'in')
   if(includeCondition) {
-    includeCondition.fieldValue = includedFilters.value.join(",")
+    includeCondition.fieldValue = includedGroups.value.join(",")
   } else {
     rule.ruleConditions.push({
       "ruleId": rule.ruleId,
       "conditionTypeEnumId": "ENTCT_ATP_FAC_GROUPS",
       "fieldName": "facilityGroups",
       "operator": selectedSegment.value === "included" ? "in" : "not-in",
-      "fieldValue": includedFilters.value?.length > 1 ? includedFilters.value.join(",") : includedFilters.value[0],
-      "multiValued": includedFilters.value?.length > 1 ? "Y" : "N"
+      "fieldValue": includedGroups.value?.length > 1 ? includedGroups.value.join(",") : includedGroups.value[0],
+      "multiValued": includedGroups.value?.length > 1 ? "Y" : "N"
     })
   }
 
   const excludeCondition = rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === 'ENTCT_ATP_FAC_GROUPS' && condition.fieldName === 'facilityGroups' && condition.operator === 'not-in')
   if(excludeCondition) {
-    excludeCondition.fieldValue = excludedFilters.value.join(",")
+    excludeCondition.fieldValue = excludedGroups.value.join(",")
   } else {
     rule.ruleConditions.push({
       "ruleId": rule.ruleId,
       "conditionTypeEnumId": "ENTCT_ATP_FAC_GROUPS",
       "fieldName": "facilityGroups",
       "operator": selectedSegment.value === "included" ? "in" : "not-in",
-      "fieldValue": excludedFilters.value?.length > 1 ? excludedFilters.value.join(",") : excludedFilters.value[0],
-      "multiValued": excludedFilters.value?.length > 1 ? "Y" : "N"
+      "fieldValue": excludedGroups.value?.length > 1 ? excludedGroups.value.join(",") : excludedGroups.value[0],
+      "multiValued": excludedGroups.value?.length > 1 ? "Y" : "N"
     })
   }
 
