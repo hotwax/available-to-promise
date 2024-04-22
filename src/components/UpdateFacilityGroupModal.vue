@@ -20,7 +20,7 @@
       </ion-segment-button>
     </ion-segment>
 
-    <ion-list>
+    <ion-list v-if="facilityGroups.length">
       <ion-item v-for="group in facilityGroups" :key="group.facilityGroupId" @click="!isAlreadyApplied(group.facilityGroupId) ? updateSelectedValues(group.facilityGroupId): ''">
         <ion-label v-if="isAlreadyApplied(group.facilityGroupId)">{{ group.facilityGroupName }}</ion-label>
         <ion-checkbox v-if="!isAlreadyApplied(group.facilityGroupId)" :checked="isSelected(group.facilityGroupId)">
@@ -29,6 +29,10 @@
         <ion-note v-else slot="end" color="danger">{{ selectedSegment === 'included' ? translate("excluded") : translate("included") }}</ion-note>
       </ion-item>
     </ion-list>
+
+    <div class="empty-state" v-else>
+      <p>{{ translate("No record found") }}</p>
+    </div>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
       <ion-fab-button @click="saveFacilityGroups()">
