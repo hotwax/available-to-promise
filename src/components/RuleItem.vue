@@ -359,8 +359,7 @@ async function openUpdateFacilityGroupModal() {
   const modal = await modalController.create({
     component: UpdateFacilityGroupModal,
     componentProps: {
-      rule: props.rule,
-      selectedFacilityGroupIds: getSelectedFacilityGroups()
+      rule: props.rule
     },
   })
 
