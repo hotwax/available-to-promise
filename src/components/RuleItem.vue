@@ -58,11 +58,11 @@
           </ion-button>
         </ion-item-divider>
         
-        <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FAC_GROUPS')" lines="none">
+        <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FAC_GROUPS', 'facilityGroups', 'in')" lines="none">
           <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
           <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FAC_GROUPS", "facilityGroups", "in") }}</ion-label>
         </ion-item>
-        <ion-item lines="none" v-if="isRuleConditionAvailable('ENTCT_ATP_FAC_GROUPS')">
+        <ion-item lines="none" v-if="isRuleConditionAvailable('ENTCT_ATP_FAC_GROUPS', 'facilityGroups', 'not-in')">
           <ion-icon slot="start" :icon="closeCircleOutline"/>
           <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FAC_GROUPS", "facilityGroups", "not-in") }}</ion-label>
         </ion-item>

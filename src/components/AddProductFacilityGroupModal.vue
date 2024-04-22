@@ -80,7 +80,6 @@ function updateselectedGroups(selectedGroup: any) {
     selectedGroups.value = selectedGroups.value.filter((group: any) => group.facilityGroupId !== selectedGroup.facilityGroupId)
   } else {
     selectedGroups.value.push(selectedGroup)
-    
   }
 }
 
