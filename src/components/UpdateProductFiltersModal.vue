@@ -174,7 +174,7 @@ async function saveFilters() {
       "ruleId": rule.ruleId,
       "conditionTypeEnumId": "ENTCT_ATP_FILTER",
       "fieldName": props.searchfield,
-      "operator": selectedSegment.value === "included" ? "in" : "not-in",
+      "operator": "in",
       "fieldValue": includedFilters.value?.length > 1 ? includedFilters.value.join(",") : includedFilters.value[0],
       "multiValued": includedFilters.value?.length > 1 ? "Y" : "N"
     })
@@ -188,7 +188,7 @@ async function saveFilters() {
       "ruleId": rule.ruleId,
       "conditionTypeEnumId": "ENTCT_ATP_FILTER",
       "fieldName": props.searchfield,
-      "operator": selectedSegment.value === "included" ? "in" : "not-in",
+      "operator": "not-in",
       "fieldValue": excludedFilters.value?.length > 1 ? excludedFilters.value.join(",") : excludedFilters.value[0],
       "multiValued": excludedFilters.value?.length > 1 ? "Y" : "N"
     })

@@ -122,7 +122,7 @@ async function saveFacilityGroups() {
       "ruleId": rule.ruleId,
       "conditionTypeEnumId": "ENTCT_ATP_FAC_GROUPS",
       "fieldName": "facilityGroups",
-      "operator": selectedSegment.value === "included" ? "in" : "not-in",
+      "operator": "in",
       "fieldValue": includedGroups.value?.length > 1 ? includedGroups.value.join(",") : includedGroups.value[0],
       "multiValued": includedGroups.value?.length > 1 ? "Y" : "N"
     })
@@ -136,7 +136,7 @@ async function saveFacilityGroups() {
       "ruleId": rule.ruleId,
       "conditionTypeEnumId": "ENTCT_ATP_FAC_GROUPS",
       "fieldName": "facilityGroups",
-      "operator": selectedSegment.value === "included" ? "in" : "not-in",
+      "operator": "not-in",
       "fieldValue": excludedGroups.value?.length > 1 ? excludedGroups.value.join(",") : excludedGroups.value[0],
       "multiValued": excludedGroups.value?.length > 1 ? "Y" : "N"
     })
