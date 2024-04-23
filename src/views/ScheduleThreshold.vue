@@ -21,8 +21,7 @@
               <ion-label>{{ threshold }} {{ $t('threshold') }}</ion-label>
             </ion-item>
             <ion-item>
-              <ion-label color="medium">{{ $t("Name") }}</ion-label>
-              <ion-input :placeholder="$t('rule name')" v-model="jobName"/>
+              <ion-input :label="$t('Name')" :placeholder="$t('rule name')" v-model="jobName"/>
             </ion-item>
 
             <ion-item>
@@ -47,8 +46,10 @@
               <ion-label>{{ $t('Channels') }}</ion-label>
             </ion-item-divider>
             <ion-item v-for="channel in channels" :key="channel.facilityGroupId">
-              <ion-label>{{ channel?.facilityGroupName }}</ion-label>
-              <ion-toggle :checked="isChannelChecked(channel.facilityGroupId)" :disabled="isChannelDisabled(channel.facilityGroupId)" slot="end" @ionChange="updateChannels($event, channel.facilityGroupId)"/>
+              <!-- <ion-label>{{ channel?.facilityGroupName }}</ion-label> -->
+              <ion-toggle :checked="isChannelChecked(channel.facilityGroupId)" :disabled="isChannelDisabled(channel.facilityGroupId)" @ionChange="updateChannels($event, channel.facilityGroupId)">
+                {{ channel?.facilityGroupName }}
+              </ion-toggle>
             </ion-item>
           </ion-list>
         </aside>
@@ -574,11 +575,7 @@ export default defineComponent({
 
       emitter.emit('dismissLoader');
     },
-    updateChannels(event: CustomEvent, facilityGroupId: string) {
-      if (event.detail.checked && this.selectedChannels?.some((channel: any) => channel === facilityGroupId)) {
-        return;
-      }
-
+    updateChannels(facilityGroupId: string) {
       if (this.selectedChannels?.some((channel:any) => channel === facilityGroupId)) {
         this.selectedChannels.splice(this.selectedChannels?.indexOf(facilityGroupId), 1);
       } else {
@@ -673,6 +670,9 @@ export default defineComponent({
 <style scoped>
 ion-card-header {
   display: flex;
+  /* From ionic v7.x.x the direction of flex has been changed to column, hence changing it to row as per our use case */
+  /* https://github.com/ionic-team/ionic-framework/blob/main/core/src/components/card-header/card-header.scss#L13C26-L13C26 */
+  flex-direction: row;
   justify-content: space-between;
 }
 

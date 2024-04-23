@@ -12,8 +12,7 @@
 
   <ion-content>
     <ion-item>
-      <ion-label>{{ $t("Safety stock") }}</ion-label>
-      <ion-input placeholder="new safety stock" />
+      <ion-input :label="$t('Safety stock')" placeholder="new safety stock" />
     </ion-item>
     
     <ion-list>

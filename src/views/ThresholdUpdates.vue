@@ -636,6 +636,9 @@ export default defineComponent({
 <style scoped>
 ion-card-header {
   display: flex;
+  /* From ionic v7.x.x the direction of flex has been changed to column, hence changing it to row as per our use case */
+  /* https://github.com/ionic-team/ionic-framework/blob/main/core/src/components/card-header/card-header.scss#L13C26-L13C26 */
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
   padding-bottom: 0px;
