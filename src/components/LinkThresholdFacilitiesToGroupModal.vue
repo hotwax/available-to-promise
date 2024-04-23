@@ -11,30 +11,12 @@
   </ion-header>
 
   <ion-content>
-    <ion-searchbar />
-
-    <ion-radio-group>
-      <ion-item>
+    <ion-radio-group v-if="configFacilities.length">
+      <ion-item v-for="facility in configFacilities" :key="facility.facilityId">
         <ion-radio>
           <ion-label>
-            {{ "Facility name" }}
-            <p>{{ "Facility ID" }}</p>
-          </ion-label>
-        </ion-radio>
-      </ion-item>
-      <ion-item>
-        <ion-radio>
-          <ion-label>
-            {{ "Facility name" }}
-            <p>{{ "Facility ID" }}</p>
-          </ion-label>
-        </ion-radio>
-      </ion-item>
-      <ion-item>
-        <ion-radio>
-          <ion-label>
-            {{ "Facility name" }}
-            <p>{{ "Facility ID" }}</p>
+            {{ facility.facilityName }}
+            <p>{{ facility.facilityId }}</p>
           </ion-label>
         </ion-radio>
       </ion-item>
@@ -52,4 +34,9 @@
 import { IonButton, IonButtons, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonLabel, IonRadio, IonRadioGroup, IonSearchbar, IonTitle, IonToolbar } from "@ionic/vue";
 import { closeOutline, saveOutline } from "ionicons/icons";
 import { translate } from '@/i18n'
+import { useStore } from "vuex";
+import { computed } from "vue";
+
+const store = useStore();
+const configFacilities = computed(() => store.getters["util/getConfigFacilities"])
 </script>

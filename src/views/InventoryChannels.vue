@@ -21,12 +21,12 @@
     <ion-content>
       <main>
         <section v-if="selectedSegment === 'channels'">
-          <ion-card>
+          <ion-card v-for="channel in inventoryChannels" :key="channel.facilityGroupId">
             <ion-card-header>
               <div>
-                <ion-card-subtitle class="overline">{{ "Group ID" }}</ion-card-subtitle>
-                <ion-card-title>{{ "Group name" }}</ion-card-title>
-                <ion-card-subtitle>{{ "Group desc" }}</ion-card-subtitle>
+                <ion-card-subtitle class="overline">{{ channel.facilityGroupId }}</ion-card-subtitle>
+                <ion-card-title>{{ channel.facilityGroupName }}</ion-card-title>
+                <ion-card-subtitle>{{ channel.description }}</ion-card-subtitle>
               </div>
             </ion-card-header>
 
@@ -123,15 +123,27 @@
 
 <script setup lang="ts">
 import { IonBadge, IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonItemDivider, IonLabel, IonList, IonMenuButton, IonPage, IonSegment, IonSegmentButton, IonSelect, IonSelectOption, IonTitle, IonToolbar, modalController, popoverController } from '@ionic/vue';
-import { ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { addOutline, albumsOutline, businessOutline, ellipsisVerticalOutline, globeOutline, optionsOutline, storefrontOutline, timeOutline, timerOutline } from 'ionicons/icons';
 import { translate } from '@/i18n';
 import ShopActionsPopover from '@/components/ShopActionsPopover.vue'
 import CreateGroupModal from '@/components/CreateGroupModal.vue'
 import LinkFacilitiesToGroupModal from '@/components/LinkFacilitiesToGroupModal.vue'
 import LinkThresholdFacilitiesToGroupModal from '@/components/LinkThresholdFacilitiesToGroupModal.vue'
+import { useStore } from 'vuex';
+
+const store = useStore();
 
 const selectedSegment = ref("channels")
+
+const inventoryChannels = computed(() => store.getters["channel/getInventoryChannels"])
+const configFacilities = computed(() => store.getters["util/fetchConfigFacilities"])
+
+onMounted(async () => {
+  await store.dispatch("channel/fetchInventoryChannels");
+  await store.dispatch("util/fetchConfigFacilities");
+})
+
 
 async function openShopActionsPopover(event: Event) {
   const popover = await popoverController.create({
