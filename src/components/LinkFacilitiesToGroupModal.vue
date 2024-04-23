@@ -11,30 +11,14 @@
   </ion-header>
 
   <ion-content>
-    <ion-searchbar />
+    <ion-searchbar v-model="queryString" @keyup.enter="getFilteredFacilities()" />
 
     <ion-list>
-      <ion-item lines="none">
+      <ion-item lines="none" v-for="facility in filteredFacilities" :key="facility.facilityId">
         <ion-checkbox>
           <ion-label>
-            {{ "facilityName" }}
-            <p>{{ "facilityId" }}</p>
-          </ion-label>
-        </ion-checkbox>
-      </ion-item>
-      <ion-item lines="none">
-        <ion-checkbox>
-          <ion-label>
-            {{ "facilityName" }}
-            <p>{{ "facilityId" }}</p>
-          </ion-label>
-        </ion-checkbox>
-      </ion-item>
-      <ion-item lines="none">
-        <ion-checkbox>
-          <ion-label>
-            {{ "facilityName" }}
-            <p>{{ "facilityId" }}</p>
+            {{ facility.facilityName }}
+            <p>{{ facility.facilityId }}</p>
           </ion-label>
         </ion-checkbox>
       </ion-item> 
@@ -52,4 +36,20 @@
 import { IonButton, IonButtons, IonCheckbox, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonSearchbar, IonTitle, IonToolbar } from "@ionic/vue";
 import { closeOutline, saveOutline } from "ionicons/icons";
 import { translate } from '@/i18n'
+import { computed, onMounted, ref } from "vue";
+import { useStore } from "vuex";
+
+const store = useStore();
+const filteredFacilities = ref([]);
+const queryString = ref('');
+
+const facilities = computed(() => store.getters["util/getFacilities"])
+
+onMounted(() => {
+  filteredFacilities.value = JSON.parse(JSON.stringify(facilities.value));
+})
+
+function getFilteredFacilities() {
+  filteredFacilities.value = JSON.parse(JSON.stringify(facilities.value.filter((facility: any) => facility.facilityName.toLowerCase().includes(queryString.value.toLowerCase()))))
+}
 </script>

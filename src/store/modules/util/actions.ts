@@ -15,7 +15,7 @@ const actions: ActionTree<UtilState, RootState> = {
     if(configFacilities.length) return;
 
     try {
-      const resp = await UtilService.fetchConfigFacilities({ facilityTypeId: 'CONFIGURATION', productStoreId: store.state.user.currentEComStore.productStoreId });
+      const resp = await UtilService.fetchFacilities({ facilityTypeId: 'CONFIGURATION', productStoreId: store.state.user.currentEComStore.productStoreId });
 
       if(!hasError(resp)) {
         configFacilities = resp.data;
@@ -26,6 +26,25 @@ const actions: ActionTree<UtilState, RootState> = {
       logger.error(err)
     }
     commit(types.UTIL_CONFIG_FACILITES_UPDATED, configFacilities)
+  },
+
+  async fetchFacilities ({ commit, state }) {
+    let facilities = JSON.parse(JSON.stringify(state.facilities))
+
+    if(facilities.length) return;
+
+    try {
+      const resp = await UtilService.fetchFacilities({ productStoreId: store.state.user.currentEComStore.productStoreId });
+
+      if(!hasError(resp)) {
+        facilities = resp.data;
+      } else {
+        throw resp.data
+      }
+    } catch (err: any) {
+      logger.error(err)
+    }
+    commit(types.UTIL_FACILITES_UPDATED, facilities)
   },
 
   async updateAppliedFilters ({ commit, state }, payload) {

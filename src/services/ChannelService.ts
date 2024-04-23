@@ -17,6 +17,6 @@ const fetchGroupConfigFacilities = async (payload: any): Promise <any>  => {
 }
 
 export const ChannelService = {
-  fetchInventoryChannels,
-  fetchGroupConfigFacilities
+  fetchGroupConfigFacilities,
+  fetchInventoryChannels
 }

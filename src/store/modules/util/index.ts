@@ -9,6 +9,7 @@ const utilModule: Module<UtilState, RootState> = {
   namespaced: true,
   state: {
     configFacilities: [],
+    facilities: [],
     appliedFilters: {
       included: {
         tags: [],

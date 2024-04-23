@@ -142,6 +142,7 @@ const configFacilities = computed(() => store.getters["util/fetchConfigFacilitie
 onMounted(async () => {
   await store.dispatch("channel/fetchInventoryChannels");
   await store.dispatch("util/fetchConfigFacilities");
+  await store.dispatch("util/fetchFacilities");
 })
 
 

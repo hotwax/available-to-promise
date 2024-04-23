@@ -5,7 +5,7 @@ import ChannelState from './ChannelState'
 import { ChannelService } from '@/services/ChannelService'
 import { hasError } from '@/utils'
 import logger from '@/logger'
-
+import store from "@/store"
 
 const actions: ActionTree<ChannelState, RootState> = {
 
@@ -23,7 +23,6 @@ const actions: ActionTree<ChannelState, RootState> = {
 
         inventoryChannels.map(async (channel: any) => {
           const facilities = await dispatch('fetchGroupConfigFacilities', channel.facilityGroupId)
-          console.log('ok', facilities);
         })
       } else {
         throw resp.data
