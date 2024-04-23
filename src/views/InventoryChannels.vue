@@ -60,7 +60,7 @@
               </ion-item>
   
               <ion-item lines="none">
-                <ion-button fill="clear">{{ translate("View details") }}</ion-button>
+                <ion-button fill="clear" @click="openEditGroupModal(channel)">{{ translate("Edit group") }}</ion-button>
                 <ion-button color="medium" fill="clear" slot="end">
                   <ion-icon :icon="ellipsisVerticalOutline" slot="icon-only"/>
                 </ion-button>
@@ -131,6 +131,7 @@ import CreateGroupModal from '@/components/CreateGroupModal.vue'
 import LinkFacilitiesToGroupModal from '@/components/LinkFacilitiesToGroupModal.vue'
 import LinkThresholdFacilitiesToGroupModal from '@/components/LinkThresholdFacilitiesToGroupModal.vue'
 import { useStore } from 'vuex';
+import EditGroupModal from '@/components/EditGroupModal.vue';
 
 const store = useStore();
 
@@ -154,6 +155,17 @@ async function openShopActionsPopover(event: Event) {
   });
 
   return popover.present();
+}
+
+async function openEditGroupModal(group: any) {
+  const modal = await modalController.create({
+    component: EditGroupModal,
+    componentProps: {
+      group
+    },
+  })
+
+  modal.present()
 }
 
 async function openCreateGroupModal() {

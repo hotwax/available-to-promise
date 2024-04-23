@@ -50,6 +50,16 @@ const actions: ActionTree<ChannelState, RootState> = {
     return groupConfigFacilities
   },
 
+  async updateGroup ({ commit, state }, payload) {
+    const groups = JSON.parse(JSON.stringify(state.inventoryChannels))
+
+    const selectedGroup = groups.find((group: any) => group.facilityGroupId === payload.facilityGroupId)
+    selectedGroup.facilityGroupName = payload.facilityGroupName
+    selectedGroup.description = payload.description
+
+    commit(types.CHANNEL_INVENTORY_CHANNELS_UPDATED, groups);
+  },
+
   async clearChannelState({ commit }) {
     commit(types.CHANNEL_CLEARED)
   },

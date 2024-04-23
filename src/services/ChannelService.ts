@@ -16,7 +16,16 @@ const fetchGroupConfigFacilities = async (payload: any): Promise <any>  => {
   });
 }
 
+const updateGroup = async (payload: any): Promise <any>  => {
+  return api({
+    url: `facilityGroups/${payload.facilityGroupId}`,
+    method: "PUT",
+    params: payload
+  });
+}
+
 export const ChannelService = {
   fetchGroupConfigFacilities,
-  fetchInventoryChannels
+  fetchInventoryChannels,
+  updateGroup
 }
