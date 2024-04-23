@@ -20,12 +20,6 @@
               <ion-icon :icon="optionsOutline" slot="start" />
               <ion-label>{{ threshold }} {{ $t('threshold') }}</ion-label>
             </ion-item>
-            <ion-item-divider color="light">
-              <ion-label>{{ $t('Channels') }}</ion-label>
-            </ion-item-divider>
-            <ion-item v-for="channel in channels" :key="channel.facilityGroupId">
-              <ion-toggle :checked="isChannelChecked(channel.facilityGroupId)" :disabled="isChannelDisabled(channel.facilityGroupId)" @ionChange="updateChannels(channel.facilityGroupId)">{{ channel?.facilityGroupName }}</ion-toggle>
-            </ion-item>
             <ion-item>
               <ion-input :label="$t('Name')" :placeholder="$t('rule name')" v-model="jobName"/>
             </ion-item>
@@ -52,8 +46,10 @@
               <ion-label>{{ $t('Channels') }}</ion-label>
             </ion-item-divider>
             <ion-item v-for="channel in channels" :key="channel.facilityGroupId">
-              <ion-label>{{ channel?.facilityGroupName }}</ion-label>
-              <ion-toggle :checked="isChannelChecked(channel.facilityGroupId)" :disabled="isChannelDisabled(channel.facilityGroupId)" slot="end" @ionChange="updateChannels($event, channel.facilityGroupId)"/>
+              <!-- <ion-label>{{ channel?.facilityGroupName }}</ion-label> -->
+              <ion-toggle :checked="isChannelChecked(channel.facilityGroupId)" :disabled="isChannelDisabled(channel.facilityGroupId)" @ionChange="updateChannels($event, channel.facilityGroupId)">
+                {{ channel?.facilityGroupName }}
+              </ion-toggle>
             </ion-item>
           </ion-list>
         </aside>
