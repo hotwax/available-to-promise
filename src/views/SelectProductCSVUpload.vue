@@ -10,8 +10,7 @@
     <ion-content>
       <main>
         <ion-item>
-          <ion-label>{{ $t("Product list") }}</ion-label>
-          <ion-input :placeholder="$t('Select CSV')" />
+          <ion-input :label="$t('Product list')" :placeholder="$t('Select CSV')" />
           <ion-button fill="outline">{{ $t("Upload") }}</ion-button>
         </ion-item>
 
@@ -19,8 +18,7 @@
           <ion-label>{{ $t("Select the column index for the following information in the uploaded CSV") }}</ion-label>
         </ion-item>
         <ion-item>
-          <ion-label>{{ $t("Product SKU column") }}</ion-label>
-          <ion-select :placeholder="$t('Select')">
+          <ion-select :label="$t('Product SKU column')" :placeholder="$t('Select')">
             <ion-select-option>1234</ion-select-option>
             <ion-select-option>5678</ion-select-option>
             <ion-select-option>9012</ion-select-option>

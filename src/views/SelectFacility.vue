@@ -26,14 +26,12 @@
           <ion-list>
             <ion-list-header>{{ $t("Filter stores") }}</ion-list-header>
             <ion-item>
-              <ion-label>{{ $t("State") }}</ion-label>
-              <ion-select value="all">
+              <ion-select :label="$t('State')" value="all">
                 <ion-select-option value="all">All</ion-select-option>
               </ion-select>
             </ion-item>
             <ion-item>
-              <ion-label>{{ $t("Type") }}</ion-label>
-              <ion-select value="any">
+              <ion-select :label="$t('Type')" value="any">
                 <ion-select-option value="any">Any</ion-select-option>
               </ion-select>
             </ion-item>
