@@ -117,7 +117,7 @@
             <section class="section-grid">
               <div v-for="variant in product.variants" :key="variant">
                 <ion-card>
-                  <ShopifyImg :src="variant.mainImageUrl" />
+                  <DxpShopifyImg :src="variant.mainImageUrl" />
                   <ion-item lines="none">
                     <ion-label class="ion-text-wrap">
                       {{ variant.productName }}
@@ -160,7 +160,7 @@
 </template>
 
 <script lang="ts">
-import { ShopifyImg } from '@hotwax/dxp-components'; 
+import { DxpShopifyImg } from '@hotwax/dxp-components'; 
 import {
   alertController,
   IonBackButton,
@@ -231,7 +231,7 @@ export default defineComponent({
     IonSelectOption,
     IonTitle,
     IonToolbar,
-    ShopifyImg
+    DxpShopifyImg
   },
   computed: {
     ...mapGetters({

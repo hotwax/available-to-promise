@@ -48,6 +48,13 @@
                 </ion-content>
               </ion-modal>
             </ion-item>
+            <ion-item-divider v-if="channels.length" color="light">
+              <ion-label>{{ $t('Channels') }}</ion-label>
+            </ion-item-divider>
+            <ion-item v-for="channel in channels" :key="channel.facilityGroupId">
+              <ion-label>{{ channel?.facilityGroupName }}</ion-label>
+              <ion-toggle :checked="isChannelChecked(channel.facilityGroupId)" :disabled="isChannelDisabled(channel.facilityGroupId)" slot="end" @ionChange="updateChannels($event, channel.facilityGroupId)"/>
+            </ion-item>
           </ion-list>
         </aside>
 

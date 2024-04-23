@@ -1,7 +1,6 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router';
-import './registerServiceWorker'
 import { DateTime } from 'luxon';
 import logger from './logger';
 
@@ -35,7 +34,8 @@ import permissionRules from '@/authorization/Rules';
 import permissionActions from '@/authorization/Actions';
 import { dxpComponents } from '@hotwax/dxp-components'
 import { login, logout, loader } from './user-utils';
-import { getConfig, initialise } from '@/adapter'
+import { getConfig, initialise, setUserLocale } from '@/adapter'
+import localeMessages from './locales';
 
 
 const app = createApp(App)
@@ -59,7 +59,9 @@ const app = createApp(App)
     loader,
     appLoginUrl: process.env.VUE_APP_LOGIN_URL as string,
     getConfig,
-    initialise
+    initialise,
+    localeMessages,
+    setUserLocale
   });
 
 // Filters are removed in Vue 3 and global filter introduced https://v3.vuejs.org/guide/migration/filters.html#global-filters
