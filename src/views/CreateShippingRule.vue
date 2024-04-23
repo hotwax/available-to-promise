@@ -203,8 +203,8 @@ async function createRule() {
     const rule = await RuleService.createRule(params)
     await RuleService.updateRule({
       ...params,
-      "ruleConditions": generateRuleConditions(rule.ruleId) ? generateRuleConditions(rule.ruleId): [],
-      "ruleActions": generateRuleActions(rule.ruleId) ? generateRuleActions(rule.ruleId) : []
+      "ruleConditions": generateRuleConditions(rule.ruleId),
+      "ruleActions": generateRuleActions(rule.ruleId)
     }, rule.ruleId);
 
     showToast(translate("Rule created successfully."))
