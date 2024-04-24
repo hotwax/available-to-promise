@@ -160,6 +160,11 @@ async function editThreshold() {
       text: translate('Update'),
       handler: async(data) => {
         if(data.threshold) {
+          if(data.threshold < 0) {
+            showToast(translate("Threshold should be greater then 0."));
+            return false;
+          }
+
           const rule = JSON.parse(JSON.stringify(props.rule))
 
           if(!rule.ruleActions?.length) {
@@ -206,8 +211,12 @@ async function editSafetyStock() {
     },
     {
       text: translate('Update'),
-      handler: async (data) => {
+      handler: async (data: any) => {
         if(data.safetyStock) {
+          if(data.safetyStock < 0) {
+            showToast(translate("Safety stock should be greater then 0."));
+            return false;
+          }
           const rule = JSON.parse(JSON.stringify(props.rule))
 
           if(!rule.ruleActions?.length) {

@@ -162,6 +162,11 @@ async function createThresholdRule() {
     return;
   }
 
+  if(formData.value.threshold < 0){
+    showToast(translate("Threshold should be greater then 0."))
+    return;
+  }
+
   if(!formData.value.selectedConfigFacilites.length) {
     showToast(translate("Please select atleast one config facility."))
     return;

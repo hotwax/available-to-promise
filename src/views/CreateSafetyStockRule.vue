@@ -192,6 +192,11 @@ async function createRule() {
     return;
   }
 
+  if(formData.value.safety < 0) {
+    showToast(translate("Safety stock should be greater then 0."));
+    return;
+  }
+
   let ruleGroup = await store.dispatch("rule/fetchRuleGroup", { groupTypeEnumId: "RG_SAFETY_STOCK" });
 
   try {
