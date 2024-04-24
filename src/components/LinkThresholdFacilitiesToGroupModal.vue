@@ -64,7 +64,8 @@ async function saveFacility() {
       resp = await ChannelService.updateFacilityAssociationWithGroup({
         facilityGroupId: props.group.facilityGroupId,
         facilityId: props.selectedConfigFacilityId.facilityId,
-        fromDate: props.selectedConfigFacilityId.fromDate
+        fromDate: props.selectedConfigFacilityId.fromDate,
+        thruDate: DateTime.now().toMillis()
       });
       if(hasError(resp)) {
         throw resp.data;

@@ -28,13 +28,49 @@ const updateFacilityAssociationWithGroup = async (payload: any): Promise <any>  
   return api({
     url: `facilityGroups/${payload.facilityGroupId}/facilities/${payload.facilityId}/association`,
     method: "POST",
-    params: payload
+    data: payload
+  });
+}
+
+const updateFacilityAssociationWithProductStore = async (payload: any): Promise <any>  => {
+  return api({
+    url: `/productStores/${payload.productStoreId}/facilities/${payload.facilityId}/association`,
+    method: "POST",
+    data: payload
+  });
+}
+
+const updateGroupAssociationWithProductStore = async (payload: any): Promise <any>  => {
+  return api({
+    url: `/productStores/${payload.productStoreId}/facilityGroups/${payload.facilityGroupId}/association`,
+    method: "POST",
+    data: payload
+  });
+}
+
+const createFacilityGroup = async (payload: any): Promise <any>  => {
+  return api({
+    url: "facilityGroups",
+    method: "POST",
+    data: payload
+  });
+}
+
+const createFacility = async (payload: any): Promise <any>  => {
+  return api({
+    url: "facilities",
+    method: "POST",
+    data: payload
   });
 }
 
 export const ChannelService = {
-  updateFacilityAssociationWithGroup,
+  createFacility,
+  createFacilityGroup,
   fetchGroupFacilities,
   fetchInventoryChannels,
+  updateFacilityAssociationWithGroup,
+  updateFacilityAssociationWithProductStore,
+  updateGroupAssociationWithProductStore,
   updateGroup
 }
