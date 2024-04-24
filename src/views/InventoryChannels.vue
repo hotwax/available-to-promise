@@ -33,10 +33,10 @@
             <ion-item lines="full">
               <ion-icon slot="start" :icon="globeOutline"/>
               <ion-label>
-                {{ "<threshold facility name>" }}
-                <p>{{ "<facilityId>" }}</p>
+                {{ channel.selectedConfigFacility?.facilityName }}
+                <p>{{ channel.selectedConfigFacility?.facilityId }}</p>
               </ion-label>
-              <ion-button slot="end" fill="clear" color="medium" @click="openLinkThresholdFacilitiesToGroupModal()">
+              <ion-button slot="end" fill="clear" color="medium" @click="openLinkThresholdFacilitiesToGroupModal(channel)">
                 <ion-icon :icon="optionsOutline" slot="icon-only" />
               </ion-button>
             </ion-item>
@@ -51,12 +51,12 @@
 
               <ion-item>
                 <ion-icon slot="start" :icon="storefrontOutline"/>
-                <ion-label>{{ "15 retail facilities" }}</ion-label>
+                <ion-label>{{ translate("retail facilities", { count: getFacilityCount(channel, "RETAIL_STORE") })}}</ion-label>
               </ion-item>
-
+              
               <ion-item lines="full">
                 <ion-icon slot="start" :icon="businessOutline"/>
-                <ion-label>{{ "1 warehouse" }}</ion-label>
+                <ion-label>{{ translate("warehouse", { count: getFacilityCount(channel, "WAREHOUSE") })}}</ion-label>
               </ion-item>
   
               <ion-item lines="none">
@@ -138,7 +138,6 @@ const store = useStore();
 const selectedSegment = ref("channels")
 
 const inventoryChannels = computed(() => store.getters["channel/getInventoryChannels"])
-const configFacilities = computed(() => store.getters["util/fetchConfigFacilities"])
 
 onMounted(async () => {
   await store.dispatch("channel/fetchInventoryChannels");
@@ -184,13 +183,22 @@ async function openLinkFacilitiesToGroupModal() {
   return popover.present();
 }
 
-async function openLinkThresholdFacilitiesToGroupModal() {
+async function openLinkThresholdFacilitiesToGroupModal(channel: any) {
   const popover = await modalController.create({
-    component: LinkThresholdFacilitiesToGroupModal
+    component: LinkThresholdFacilitiesToGroupModal,
+    componentProps: {
+      group: channel,
+      selectedConfigFacilityId: channel.selectedConfigFacility
+    }
   });
 
   return popover.present();
 }
+
+function getFacilityCount(group: any, facilityTypeId: string) {
+  return group.selectedFacilities?.length ? group.selectedFacilities.filter((facility: any) => facility.facilityTypeId === facilityTypeId).length : 0;
+}
+
 </script>
 
 <style scoped>

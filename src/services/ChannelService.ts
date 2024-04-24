@@ -8,7 +8,7 @@ const fetchInventoryChannels = async (payload: any): Promise <any>  => {
   });
 }
 
-const fetchGroupConfigFacilities = async (payload: any): Promise <any>  => {
+const fetchGroupFacilities = async (payload: any): Promise <any>  => {
   return api({
     url: `facilityGroups/${payload.facilityGroupId}/facilities`,
     method: "GET",
@@ -24,8 +24,17 @@ const updateGroup = async (payload: any): Promise <any>  => {
   });
 }
 
+const updateFacilityAssociationWithGroup = async (payload: any): Promise <any>  => {
+  return api({
+    url: `facilityGroups/${payload.facilityGroupId}/facilities/${payload.facilityId}/association`,
+    method: "POST",
+    params: payload
+  });
+}
+
 export const ChannelService = {
-  fetchGroupConfigFacilities,
+  updateFacilityAssociationWithGroup,
+  fetchGroupFacilities,
   fetchInventoryChannels,
   updateGroup
 }

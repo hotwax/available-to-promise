@@ -137,6 +137,7 @@
   "Ready to create an app?": "Ready to create an app?",
   "Reorder export jobs": "Reorder export jobs",
   "reset": "reset",
+  "retail facilities": "{count} retail facilities",
   "retry": "retry",
   "Rule Configuration": "Rule Configuration",
   "Rule created successfully.": "Rule created successfully.",
@@ -224,6 +225,7 @@
   "virtual, ": "virtual, ",
   "variants": "variants",
   "Version: ": "Version: {appVersion}",
+  "warehouse": "{count} warehouse",
   "You can also download the products, locations and safety stock you selected in a CSV to upload in other systems": "You can also download the products, locations and safety stock you selected in a CSV to upload in other systems",
   "You do not have permission to access this page": "You do not have permission to access this page",
   "You do not have permission to access the app.": "You do not have permission to access the app."
