@@ -14,8 +14,8 @@
     <ion-searchbar v-model="queryString" @keyup.enter="getFilteredFacilities()" />
 
     <ion-list>
-      <ion-item lines="none" v-for="facility in filteredFacilities" :key="facility.facilityId">
-        <ion-checkbox>
+      <ion-item lines="none" v-for="facility in filteredFacilities" :key="facility.facilityId" @click="updateSelectedFacilities(facility.facilityId)">
+        <ion-checkbox :checked="isFacilitySelected(facility.facilityId)">
           <ion-label>
             {{ facility.facilityName }}
             <p>{{ facility.facilityId }}</p>
@@ -25,7 +25,7 @@
     </ion-list>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button>
+      <ion-fab-button :disabled="!areFacilitiesUpdated()" @click="saveFacilities()">
         <ion-icon :icon="saveOutline" />
       </ion-fab-button>
     </ion-fab>
@@ -33,23 +33,80 @@
 </template>
 
 <script setup lang="ts">
-import { IonButton, IonButtons, IonCheckbox, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonSearchbar, IonTitle, IonToolbar } from "@ionic/vue";
+import { IonButton, IonButtons, IonCheckbox, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonSearchbar, IonTitle, IonToolbar, modalController } from "@ionic/vue";
 import { closeOutline, saveOutline } from "ionicons/icons";
 import { translate } from '@/i18n'
-import { computed, onMounted, ref } from "vue";
+import { computed, defineProps, onMounted, ref } from "vue";
 import { useStore } from "vuex";
+import { DateTime } from "luxon";
+import { ChannelService } from "@/services/ChannelService";
+import { showToast } from "@/utils";
 
 const store = useStore();
 const filteredFacilities = ref([]);
 const queryString = ref('');
+const selectedFacilityValues = ref([]) as any;
 
+const props = defineProps(["group", "selectedFacilities"]);
 const facilities = computed(() => store.getters["util/getFacilities"])
 
 onMounted(() => {
   filteredFacilities.value = JSON.parse(JSON.stringify(facilities.value));
+  selectedFacilityValues.value = JSON.parse(JSON.stringify(props.selectedFacilities));
 })
 
 function getFilteredFacilities() {
   filteredFacilities.value = JSON.parse(JSON.stringify(facilities.value.filter((facility: any) => facility.facilityName.toLowerCase().includes(queryString.value.toLowerCase()))))
+}
+
+function isFacilitySelected(facilityId: any) {
+  return selectedFacilityValues.value.some((facility: any) => facility.facilityId === facilityId)
+}
+
+function updateSelectedFacilities(id: string) {
+  const facility = isFacilitySelected(id)
+
+  if (facility) {
+    selectedFacilityValues.value = selectedFacilityValues.value.filter((facility: any) => facility.facilityId !== id)
+  } else {
+    selectedFacilityValues.value.push(filteredFacilities.value.find((facility: any) => facility.facilityId == id))
+  }
+}
+
+function areFacilitiesUpdated() {
+  if(props.selectedFacilities.length !== selectedFacilityValues.value.length) return true;
+
+  return selectedFacilityValues.value.some((selectedFacility: any) => !props.selectedFacilities.find((facility: any) => facility.facilityId === selectedFacility.facilityId))
+}
+
+function saveFacilities() {
+  const facilitiesToAdd = selectedFacilityValues.value.filter((selectedFacility: any) => !props.selectedFacilities.some((facility: any) => facility.facilityId === selectedFacility.facilityId))
+    const facilitiesToRemove = props.selectedFacilities.filter((facility: any) => !selectedFacilityValues.value.some((selectedFacility: any) => facility.facilityId === selectedFacility.facilityId))
+
+    const removeResponses = await Promise.allSettled(facilitiesToRemove
+      .map(async (facility: any) => await ChannelService.updateFacilityAssociationWithGroup({
+        "facilityId": facility.facilityId,
+        "facilityGroupId": props.group.facilityGroupId,
+        "fromDate": facility.fromDate,
+        "thruDate": DateTime.now().toMillis()
+      }))
+    )
+
+    const addResponses = await Promise.allSettled(facilitiesToAdd
+      .map(async (facility: any) => await ChannelService.updateFacilityAssociationWithGroup({
+        "facilityId": facility.facilityId,
+        "facilityGroupId": props.group.facilityGroupId,
+        "fromDate": DateTime.now().toMillis()
+      }))
+    )
+
+    const hasFailedResponse = [...removeResponses, ...addResponses].some((response: any) => response.status === 'rejected')
+    if (hasFailedResponse) {
+      showToast(translate("Failed to associate some facilites to group."))
+    } else {
+      showToast(translate("Facilities associated to group successfully."))
+    }
+    await store.dispatch("channel/fetchInventoryChannels");
+    modalController.dismiss()  
 }
 </script>

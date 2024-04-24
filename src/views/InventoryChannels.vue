@@ -44,7 +44,7 @@
             <ion-list>
               <ion-item-divider color="light">
                 <ion-label>{{ translate("Facilities") }}</ion-label>
-                <ion-button slot="end" fill="clear" color="medium" @click="openLinkFacilitiesToGroupModal()">
+                <ion-button slot="end" fill="clear" color="medium" @click="openLinkFacilitiesToGroupModal(channel)">
                   <ion-icon :icon="optionsOutline" slot="icon-only" />
                 </ion-button>
               </ion-item-divider>
@@ -175,9 +175,13 @@ async function openCreateGroupModal() {
   return popover.present();
 }
 
-async function openLinkFacilitiesToGroupModal() {
+async function openLinkFacilitiesToGroupModal(group: any) {
   const popover = await modalController.create({
-    component: LinkFacilitiesToGroupModal
+    component: LinkFacilitiesToGroupModal,
+    componentProps: {
+      group,
+      selectedFacilties: group.selectedFacilities
+    }
   });
 
   return popover.present();

@@ -86,5 +86,6 @@ async function saveFacility() {
     logger.error(err)
     showToast(translate("Failed to update threshold facility."))
   }
+  await store.dispatch("channel/fetchInventoryChannels");
 }
 </script>
