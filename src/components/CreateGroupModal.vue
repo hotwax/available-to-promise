@@ -14,7 +14,7 @@
     <ion-list>
       <ion-item>
         <ion-input labelPlacement="floating" v-model="formData.facilityGroupName" @ionBlur="formData.facilityGroupId ? null : setFacilityGroupId($event)">
-          <div slot="label">{{ translate('Name') }} <ion-text color="danger">*</ion-text></div>
+          <div slot="label">{{ translate("Name") }} <ion-text color="danger">*</ion-text></div>
         </ion-input>
       </ion-item>
       <ion-item lines="none">
@@ -23,11 +23,11 @@
       <ion-item>
         <ion-textarea :label="translate('Description')" v-model="formData.description" labelPlacement="floating" />
       </ion-item>
-      <ion-item lines="none">
+      <ion-item>
         <ion-label>{{ translate("Product store") }}</ion-label>
         <ion-label slot="end">{{ eComStore.storeName }}</ion-label>
       </ion-item>
-      <ion-item lines="none">
+      <ion-item>
         <ion-select :label="translate('Group level configurations')" v-model="selectedConfigFacilityId" interface="popover">
           <ion-select-option value="new">{{ translate("Create new") }}</ion-select-option>
           <ion-select-option v-for="facility in configFacilities" :key="facility.facilityId" :value="facility.facilityId" >{{ facility.facilityName }}</ion-select-option>
@@ -73,12 +73,12 @@ function closeModal() {
 
 async function createGroup() {
   if (!formData.value.facilityGroupName?.trim()) {
-    showToast(translate('Please fill all the required fields'))
+    showToast(translate("Please fill all the required fields"))
     return;
   }
 
   if (formData.value.facilityGroupId.length > 20) {
-    showToast(translate('Internal ID cannot be more than 20 characters.'))
+    showToast(translate("Internal ID cannot be more than 20 characters."))
     return
   }
 
@@ -91,7 +91,7 @@ async function createGroup() {
   let resp = {} as any;
   try {
     // Creating a new inventory channel group.
-    resp = await ChannelService.createFacilityGroup({ ...formData.value, "facilityGroupTypeId" : "CHANNEL_FAC_GROUP" });
+    resp = await ChannelService.createFacilityGroup({ ...formData.value, facilityGroupTypeId : "CHANNEL_FAC_GROUP" });
     if(hasError(resp)) {
       throw resp.data;
     }
@@ -119,34 +119,18 @@ async function createGroup() {
     }
 
     // Associating the config facility with the product store.
-    resp = await ChannelService.updateFacilityAssociationWithProductStore({
-      productStoreId: eComStore.value.productStoreId,
-      facilityId: selectedConfigFacility.facilityId
-    })
-    if(hasError(resp)) {
-      throw resp.data
-    }
+    resp = await ChannelService.updateFacilityAssociationWithProductStore({productStoreId: eComStore.value.productStoreId, facilityId: selectedConfigFacility.facilityId})
+    if(hasError(resp)) throw resp.data;
 
     // Associating the facility group with the product store.
-    resp = await ChannelService.updateGroupAssociationWithProductStore({
-      productStoreId: eComStore.value.productStoreId,
-      facilityGroupId: formData.value.facilityGroupId
-    })
-    if(hasError(resp)) {
-      throw resp.data
-    }
-
+    resp = await ChannelService.updateGroupAssociationWithProductStore({productStoreId: eComStore.value.productStoreId, facilityGroupId: formData.value.facilityGroupId})
+    if(hasError(resp)) throw resp.data;
 
     // Associating the config facility with the group.
-    resp = await ChannelService.updateFacilityAssociationWithGroup({
-      facilityGroupId: formData.value.facilityGroupId,
-      facilityId: selectedConfigFacility.facilityId
-    })
-    if(hasError(resp)) {
-      throw resp.data
-    }
+    resp = await ChannelService.updateFacilityAssociationWithGroup({facilityGroupId: formData.value.facilityGroupId, facilityId: selectedConfigFacility.facilityId})
+    if(hasError(resp)) throw resp.data;
 
-    showToast(translate("Created inventory channel successfully."));
+    showToast(translate("Group has been created successfully."));
     await store.dispatch("channel/fetchInventoryChannels");
     await store.dispatch("util/fetchConfigFacilities");
     modalController.dismiss();

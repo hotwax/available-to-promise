@@ -11,7 +11,7 @@
   </ion-header>
 
   <ion-content>
-    <ion-radio-group v-if="configFacilities.length" v-model="selectedValue">
+    <ion-radio-group v-if="configFacilities.length" v-model="selectedFacilityId">
       <ion-item v-for="facility in configFacilities" :key="facility.facilityId">
         <ion-radio :value="facility.facilityId">
           <ion-label>
@@ -22,6 +22,10 @@
       </ion-item>
     </ion-radio-group>
 
+    <div v-else class="empty-state">
+      <p>{{ translate("No facility found.") }}</p>
+    </div> 
+
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
       <ion-fab-button @click="saveFacility()">
         <ion-icon :icon="saveOutline" />
@@ -31,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonButton, IonButtons, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonLabel, IonRadio, IonRadioGroup, IonSearchbar, IonTitle, IonToolbar } from "@ionic/vue";
+import { IonButton, IonButtons, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonLabel, IonRadio, IonRadioGroup, IonTitle, IonToolbar, modalController } from "@ionic/vue";
 import { closeOutline, saveOutline } from "ionicons/icons";
 import { translate } from '@/i18n'
 import { useStore } from "vuex";
@@ -40,20 +44,19 @@ import { hasError, showToast } from "@/utils";
 import { ChannelService } from '@/services/ChannelService';
 import logger from "@/logger";
 import { DateTime } from "luxon";
-import { modalController } from "@ionic/core";
 
 const store = useStore();
+const selectedFacilityId = ref("");
+const props = defineProps(["group", "selectedConfigFacilityId"]);
+
 const configFacilities = computed(() => store.getters["util/getConfigFacilities"])
 
-const props = defineProps(["group", "selectedConfigFacilityId"]);
-const selectedValue = ref("");
-
 onMounted(() => {
-  selectedValue.value = props.selectedConfigFacilityId?.facilityId ? JSON.parse(JSON.stringify(props.selectedConfigFacilityId.facilityId)) : '';
+  selectedFacilityId.value = props.selectedConfigFacilityId?.facilityId ? JSON.parse(JSON.stringify(props.selectedConfigFacilityId.facilityId)) : '';
 })
 
 async function saveFacility() {
-  if(!selectedValue.value) {
+  if(!selectedFacilityId.value) {
     showToast(translate("Please select a facility to update."))
     return;
   }
@@ -74,7 +77,7 @@ async function saveFacility() {
 
     resp = await ChannelService.updateFacilityAssociationWithGroup({
       facilityGroupId: props.group.facilityGroupId,
-      facilityId: selectedValue.value,
+      facilityId: selectedFacilityId.value,
       fromDate: DateTime.now().toMillis()
     });
     if(!hasError(resp)) {

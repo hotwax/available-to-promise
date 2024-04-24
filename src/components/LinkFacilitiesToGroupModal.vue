@@ -13,7 +13,7 @@
   <ion-content>
     <ion-searchbar v-model="queryString" @keyup.enter="getFilteredFacilities()" />
 
-    <ion-list>
+    <ion-list v-if="filteredFacilities.length">
       <ion-item lines="none" v-for="facility in filteredFacilities" :key="facility.facilityId" @click="updateSelectedFacilities(facility.facilityId)">
         <ion-checkbox :checked="isFacilitySelected(facility.facilityId)">
           <ion-label>
@@ -23,6 +23,9 @@
         </ion-checkbox>
       </ion-item> 
     </ion-list>
+    <div v-else class="empty-state">
+      <p>{{ translate("No facility found.") }}</p>
+    </div> 
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
       <ion-fab-button :disabled="!areFacilitiesUpdated()" @click="saveFacilities()">
@@ -66,7 +69,7 @@ function isFacilitySelected(facilityId: any) {
 function updateSelectedFacilities(id: string) {
   const facility = isFacilitySelected(id)
 
-  if (facility) {
+  if(facility) {
     selectedFacilityValues.value = selectedFacilityValues.value.filter((facility: any) => facility.facilityId !== id)
   } else {
     selectedFacilityValues.value.push(filteredFacilities.value.find((facility: any) => facility.facilityId == id))
@@ -81,32 +84,32 @@ function areFacilitiesUpdated() {
 
 async function saveFacilities() {
   const facilitiesToAdd = selectedFacilityValues.value.filter((selectedFacility: any) => !props.selectedFacilities.some((facility: any) => facility.facilityId === selectedFacility.facilityId))
-    const facilitiesToRemove = props.selectedFacilities.filter((facility: any) => !selectedFacilityValues.value.some((selectedFacility: any) => facility.facilityId === selectedFacility.facilityId))
+  const facilitiesToRemove = props.selectedFacilities.filter((facility: any) => !selectedFacilityValues.value.some((selectedFacility: any) => facility.facilityId === selectedFacility.facilityId))
 
-    const removeResponses = await Promise.allSettled(facilitiesToRemove
-      .map(async (facility: any) => await ChannelService.updateFacilityAssociationWithGroup({
-        "facilityId": facility.facilityId,
-        "facilityGroupId": props.group.facilityGroupId,
-        "fromDate": facility.fromDate,
-        "thruDate": DateTime.now().toMillis()
-      }))
-    )
+  const removeResponses = await Promise.allSettled(facilitiesToRemove
+    .map(async (facility: any) => await ChannelService.updateFacilityAssociationWithGroup({
+      facilityId: facility.facilityId,
+      facilityGroupId: props.group.facilityGroupId,
+      fromDate: facility.fromDate,
+      thruDate: DateTime.now().toMillis()
+    }))
+  )
 
-    const addResponses = await Promise.allSettled(facilitiesToAdd
-      .map(async (facility: any) => await ChannelService.updateFacilityAssociationWithGroup({
-        "facilityId": facility.facilityId,
-        "facilityGroupId": props.group.facilityGroupId,
-        "fromDate": DateTime.now().toMillis()
-      }))
-    )
+  const addResponses = await Promise.allSettled(facilitiesToAdd
+    .map(async (facility: any) => await ChannelService.updateFacilityAssociationWithGroup({
+      facilityId: facility.facilityId,
+      facilityGroupId: props.group.facilityGroupId,
+      fromDate: DateTime.now().toMillis()
+    }))
+  )
 
-    const hasFailedResponse = [...removeResponses, ...addResponses].some((response: any) => response.status === 'rejected')
-    if (hasFailedResponse) {
-      showToast(translate("Failed to associate some facilites to group."))
-    } else {
-      showToast(translate("Facilities associated to group successfully."))
-    }
-    await store.dispatch("channel/fetchInventoryChannels");
-    modalController.dismiss()  
+  const hasFailedResponse = [...removeResponses, ...addResponses].some((response: any) => response.status === 'rejected')
+  if(hasFailedResponse) {
+    showToast(translate("Failed to associate some facilites to group."))
+  } else {
+    showToast(translate("Facilities associated to group successfully."))
+  }
+  await store.dispatch("channel/fetchInventoryChannels");
+  modalController.dismiss()  
 }
 </script>

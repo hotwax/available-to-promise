@@ -13,7 +13,7 @@
   <ion-content>
     <ion-list>
       <ion-item>
-        <ion-input :label="translate('Name')" labelPlacement="floating" v-model="formData.name"/>
+        <ion-input :label="translate('Name')" labelPlacement="floating" v-model="formData.facilityGroupName"/>
       </ion-item>
       <ion-item>
         <ion-textarea :label="translate('Description')" labelPlacement="floating" v-model="formData.description" />
@@ -38,38 +38,34 @@ import { hasError, showToast } from "@/utils";
 import { ChannelService } from '@/services/ChannelService'
 import store from "@/store";
 
-const props = defineProps(["group"])
+const props = defineProps(["group"]);
 const formData = ref({
-  name: "",
+  facilityGroupName: "",
   description: ""
 })
 
 onMounted(() => {
-  formData.value.name = props.group.facilityGroupName
+  formData.value.facilityGroupName = props.group.facilityGroupName
   formData.value.description = props.group.description
 })
 
 function isGroupUpdated() {
-  return formData.value.name !== props.group.facilityGroupName || formData.value.description !== props.group.description
+  return formData.value.facilityGroupName !== props.group.facilityGroupName || formData.value.description !== props.group.description
 }
 
 async function updateGroup() {
   try {
-    const resp = await ChannelService.updateGroup({
-      facilityGroupId: props.group.facilityGroupId,
-      facilityGroupName: formData.value.name,
-      description: formData.value.description
-    })
+    const resp = await ChannelService.updateGroup({...formData.value, facilityGroupId: props.group.facilityGroupId})
 
     if(!hasError(resp)) {
-      store.dispatch("channel/updateGroup", { facilityGroupId: props.group.facilityGroupId, facilityGroupName: formData.value.name, description: formData.value.description })
+      store.dispatch("channel/updateGroup", { facilityGroupId: props.group.facilityGroupId, ...formData.value })
       showToast(translate("Group updated successfully."))
       modalController.dismiss();
     } else {
       throw resp.data;
     }
   } catch(err) {
-    showToast(translate("Failed to edit group."))
+    showToast(translate("Failed to update group."))
     logger.error(err);
   }
 }

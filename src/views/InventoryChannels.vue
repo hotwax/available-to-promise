@@ -53,7 +53,7 @@
                 <ion-icon slot="start" :icon="storefrontOutline"/>
                 <ion-label>{{ translate("retail facilities", { count: getFacilityCount(channel, "RETAIL_STORE") })}}</ion-label>
               </ion-item>
-              
+
               <ion-item lines="full">
                 <ion-icon slot="start" :icon="businessOutline"/>
                 <ion-label>{{ translate("warehouse", { count: getFacilityCount(channel, "WAREHOUSE") })}}</ion-label>
@@ -159,9 +159,7 @@ async function openShopActionsPopover(event: Event) {
 async function openEditGroupModal(group: any) {
   const modal = await modalController.create({
     component: EditGroupModal,
-    componentProps: {
-      group
-    },
+    componentProps: { group }
   })
 
   modal.present()
@@ -178,22 +176,16 @@ async function openCreateGroupModal() {
 async function openLinkFacilitiesToGroupModal(group: any) {
   const popover = await modalController.create({
     component: LinkFacilitiesToGroupModal,
-    componentProps: {
-      group,
-      selectedFacilties: group.selectedFacilities
-    }
+    componentProps: { group, selectedFacilties: group.selectedFacilities }
   });
 
   return popover.present();
 }
 
-async function openLinkThresholdFacilitiesToGroupModal(channel: any) {
+async function openLinkThresholdFacilitiesToGroupModal(group: any) {
   const popover = await modalController.create({
     component: LinkThresholdFacilitiesToGroupModal,
-    componentProps: {
-      group: channel,
-      selectedConfigFacilityId: channel.selectedConfigFacility
-    }
+    componentProps: { group: group, selectedConfigFacilityId: group.selectedConfigFacility }
   });
 
   return popover.present();

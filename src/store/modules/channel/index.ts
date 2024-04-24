@@ -8,8 +8,7 @@ import ChannelState from './ChannelState'
 const channelModule: Module<ChannelState, RootState> = {
   namespaced: true,
   state: {
-    inventoryChannels: [],
-    groupConfigFacilities: []
+    inventoryChannels: []
   },
   getters,
   actions,
