@@ -79,7 +79,7 @@ function areFacilitiesUpdated() {
   return selectedFacilityValues.value.some((selectedFacility: any) => !props.selectedFacilities.find((facility: any) => facility.facilityId === selectedFacility.facilityId))
 }
 
-function saveFacilities() {
+async function saveFacilities() {
   const facilitiesToAdd = selectedFacilityValues.value.filter((selectedFacility: any) => !props.selectedFacilities.some((facility: any) => facility.facilityId === selectedFacility.facilityId))
     const facilitiesToRemove = props.selectedFacilities.filter((facility: any) => !selectedFacilityValues.value.some((selectedFacility: any) => facility.facilityId === selectedFacility.facilityId))
 
