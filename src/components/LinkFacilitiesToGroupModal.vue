@@ -13,7 +13,7 @@
   <ion-content>
     <ion-searchbar v-model="queryString" @keyup.enter="getFilteredFacilities()" />
 
-    <ion-list v-if="filteredFacilities.length">
+    <ion-list v-if="filteredFacilities?.length">
       <ion-item lines="none" v-for="facility in filteredFacilities" :key="facility.facilityId" @click="updateSelectedFacilities(facility.facilityId)">
         <ion-checkbox :checked="isFacilitySelected(facility.facilityId)">
           <ion-label>
@@ -109,7 +109,7 @@ async function saveFacilities() {
   } else {
     showToast(translate("Facilities associated to group successfully."))
   }
-  await store.dispatch("channel/fetchInventoryChannels");
+  await store.dispatch("channel/fetchGroupFacilities", props.group.facilityGroupId);
   modalController.dismiss()  
 }
 </script>

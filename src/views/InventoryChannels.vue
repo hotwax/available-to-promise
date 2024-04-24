@@ -140,11 +140,8 @@ const selectedSegment = ref("channels")
 const inventoryChannels = computed(() => store.getters["channel/getInventoryChannels"])
 
 onMounted(async () => {
-  await store.dispatch("channel/fetchInventoryChannels");
-  await store.dispatch("util/fetchConfigFacilities");
-  await store.dispatch("util/fetchFacilities");
+  await Promise.allSettled([store.dispatch("channel/fetchInventoryChannels"), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilities")]);
 })
-
 
 async function openShopActionsPopover(event: Event) {
   const popover = await popoverController.create({
@@ -176,7 +173,7 @@ async function openCreateGroupModal() {
 async function openLinkFacilitiesToGroupModal(group: any) {
   const popover = await modalController.create({
     component: LinkFacilitiesToGroupModal,
-    componentProps: { group, selectedFacilties: group.selectedFacilities }
+    componentProps: { group, selectedFacilities: group.selectedFacilities }
   });
 
   return popover.present();
@@ -185,7 +182,7 @@ async function openLinkFacilitiesToGroupModal(group: any) {
 async function openLinkThresholdFacilitiesToGroupModal(group: any) {
   const popover = await modalController.create({
     component: LinkThresholdFacilitiesToGroupModal,
-    componentProps: { group: group, selectedConfigFacilityId: group.selectedConfigFacility }
+    componentProps: { group, selectedConfigFacilityId: group.selectedConfigFacility }
   });
 
   return popover.present();

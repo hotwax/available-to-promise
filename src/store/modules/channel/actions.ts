@@ -29,24 +29,35 @@ const actions: ActionTree<ChannelState, RootState> = {
     await dispatch('fetchGroupFacilities')
   },
   
-  async fetchGroupFacilities ({ commit, state }) {
+  async fetchGroupFacilities ({ commit, state }, facilityGroupId) {
     const groups = JSON.parse(JSON.stringify(state.inventoryChannels))
 
-    await Promise.allSettled(groups.map(async (group: any) => {
-      try {
-        const resp = await ChannelService.fetchGroupFacilities({ facilityGroupId: group.facilityGroupId });
-  
-        if(!hasError(resp)) {
-           group.selectedConfigFacility = await resp.data.find((facility: any) => facility.facilityTypeId === "CONFIGURATION")
-           group.selectedFacilities = await resp.data.filter((facility: any) => facility.facilityTypeId === "RETAIL_STORE" || facility.facilityTypeId === "WAREHOUSE")
-        } else {
-          throw resp.data
-        }
-      } catch (err: any) {
-        logger.error(err)
-      }
-    }))
+    if(facilityGroupId) {
+      const resp = await ChannelService.fetchGroupFacilities({ facilityGroupId })
 
+      if(!hasError(resp)) {
+        const currentGroup = groups.find((group: any) => group.facilityGroupId === facilityGroupId)
+        currentGroup.selectedConfigFacility = await resp.data.find((facility: any) => facility.facilityTypeId === "CONFIGURATION")
+        currentGroup.selectedFacilities = await resp.data.filter((facility: any) => facility.facilityTypeId === "RETAIL_STORE" || facility.facilityTypeId === "WAREHOUSE")
+      } else {
+        throw resp.data
+      }
+    } else {
+      await Promise.allSettled(groups.map(async (group: any) => {
+        try {
+          const resp = await ChannelService.fetchGroupFacilities({ facilityGroupId: group.facilityGroupId });
+
+          if(!hasError(resp)) {
+             group.selectedConfigFacility = await resp.data.find((facility: any) => facility.facilityTypeId === "CONFIGURATION")
+             group.selectedFacilities = await resp.data.filter((facility: any) => facility.facilityTypeId === "RETAIL_STORE" || facility.facilityTypeId === "WAREHOUSE")
+          } else {
+            throw resp.data
+          }
+        } catch (err: any) {
+          logger.error(err)
+        }
+      }))
+    }
     commit(types.CHANNEL_INVENTORY_CHANNELS_UPDATED, groups)
   },
 

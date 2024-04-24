@@ -90,6 +90,6 @@ async function saveFacility() {
     logger.error(err)
     showToast(translate("Failed to update threshold facility."))
   }
-  await store.dispatch("channel/fetchInventoryChannels");
+  await store.dispatch("channel/fetchGroupFacilities", props.group.facilityGroupId);
 }
 </script>
