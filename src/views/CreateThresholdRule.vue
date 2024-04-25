@@ -163,7 +163,7 @@ async function createThresholdRule() {
   }
 
   if(formData.value.threshold < 0){
-    showToast(translate("Threshold should be greater then 0."))
+    showToast(translate("Threshold should be greater than or equal to 0."))
     return;
   }
 
