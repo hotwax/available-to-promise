@@ -7,10 +7,10 @@
         <ion-card-subtitle>{{ ruleIndex+1 }}/{{ total }}</ion-card-subtitle>
       </div>
       <div>
-        <ion-button fill="clear" color="medium" class="ion-no-padding" :disabled="!isReorderPossible('prev', ruleIndex)" @click="updateRuleOrder('prev')">
+        <ion-button fill="clear" color="medium" class="ion-no-padding" :disabled="ruleIndex === 0" @click="updateRuleOrder('prev')">
           <ion-icon :icon="chevronUpOutline" slot="icon-only" />
         </ion-button>
-        <ion-button fill="clear" color="medium" class="ion-no-padding" :disabled="!isReorderPossible('next', ruleIndex)" @click="updateRuleOrder('next')">
+        <ion-button fill="clear" color="medium" class="ion-no-padding" :disabled="ruleIndex === rules.length - 1" @click="updateRuleOrder('next')">
           <ion-icon :icon="chevronDownOutline" slot="icon-only" />
         </ion-button>
       </div>
@@ -432,13 +432,6 @@ async function updateRuleShipping(event: any) {
   }
 }
 
-function isReorderPossible(ruleDir: string, ruleIndex: any) {
-  if(ruleDir === 'prev' && ruleIndex === 0) return false;
-  if(ruleDir === 'next' && ruleIndex === rules.value.length - 1) return false;
-
-  return true;
-}
-
 async function updateRuleOrder(ruleDir: string) {
   const prevSeq = JSON.parse(JSON.stringify(rules.value));
   const updatedSeq = JSON.parse(JSON.stringify(rules.value));
@@ -472,7 +465,7 @@ async function updateRuleOrder(ruleDir: string) {
 
 function findRulesDiff(previousSeq: any, updatedSeq: any) {
   const diffSeq: any = Object.keys(previousSeq).reduce((diff, key) => {
-    if (updatedSeq[key].routingRuleId === previousSeq[key].routingRuleId && updatedSeq[key].statusId === previousSeq[key].statusId && updatedSeq[key].assignmentEnumId === previousSeq[key].assignmentEnumId && updatedSeq[key].ruleName === previousSeq[key].ruleName) return diff
+    if (updatedSeq[key].ruleId === previousSeq[key].ruleId) return diff
     return {
       ...diff,
       [key]: updatedSeq[key]
