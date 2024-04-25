@@ -225,7 +225,7 @@ async function editSafetyStock() {
             "fieldValue": data.safetyStock
           }]
         } else {
-          rule.ruleActions[0].fieldValue = data.threshold
+          rule.ruleActions[0].fieldValue = data.safetyStock
         }
 
         try {
