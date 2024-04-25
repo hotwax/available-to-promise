@@ -449,19 +449,18 @@ async function updateRuleOrder(ruleDir: string) {
 
   if(ruleDir === 'prev') alternateRuleIndex = props.ruleIndex - 1
   else alternateRuleIndex = props.ruleIndex + 1;
-  
+
   [updatedSeq[props.ruleIndex], updatedSeq[alternateRuleIndex]] = [updatedSeq[alternateRuleIndex], updatedSeq[props.ruleIndex]]
 
   let diffSeq = findRulesDiff(prevSeq, updatedSeq)
-  
+
   const updatedSeqenceNum = prevSeq.map((rule: any) => rule.sequenceNum)
   Object.keys(diffSeq).map((key: any) => {
     diffSeq[key].sequenceNum = updatedSeqenceNum[key]
   })
-  
+
   diffSeq = Object.keys(diffSeq).map((key) => diffSeq[key])
-  
-  
+
   try {
     diffSeq.map(async (rule: any) => {
       await RuleService.updateRule(rule, rule.ruleId);
