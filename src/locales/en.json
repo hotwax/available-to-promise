@@ -61,6 +61,7 @@
   "Failed to update config facilities.": "Failed to update config facilities.",
   "Failed to update product filters.": "Failed to update product filters.",
   "Failed to update some jobs": "Failed to update some jobs",
+  "Failed to update threshold.": "Failed to update threshold.",
   "Failed to schedule service": "Failed to schedule service",
   "Failed to schedule service, hence other jobs are not updated": "Failed to schedule service, hence other jobs are not updated",
   "features": "{type} features",

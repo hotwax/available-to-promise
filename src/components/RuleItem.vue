@@ -160,7 +160,7 @@ async function editThreshold() {
     {
       text: translate('Update'),
       handler: async(data) => {
-        if(!data.threhold || data.threshold < 0) {
+        if(!data.threshold || data.threshold < 0) {
           showToast(translate("Threshold should be greater than or equal to 0."));
           return false;
         }
@@ -184,7 +184,7 @@ async function editThreshold() {
           showToast(translate("Threshold updated successfully."))
           alertController.dismiss()
         } catch(err: any) {
-          showToast(translate("Failed to update threhold."))
+          showToast(translate("Failed to update threshold."))
           logger.error(err);
         }
       }
@@ -456,7 +456,7 @@ async function updateRuleOrder(ruleDir: string) {
       await RuleService.updateRule(rule, rule.ruleId);
     })
     await store.dispatch('rule/updateRules', { rules: updatedSeq })
-    showToast("Rules order has been updated successfully.")
+    showToast(translate("Rules order has been updated successfully."))
   } catch(err: any) {
     logger.error(err);
     showToast(translate("Failed to update rules order."))
