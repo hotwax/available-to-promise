@@ -32,8 +32,7 @@
       </ion-item>
     </ion-list>
 
-    <!-- Added padding for better visiblity of the checkboxes beside the FAB -->
-    <ion-fab class="ion-padding" vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
       <ion-fab-button @click="saveFilters()">
         <ion-icon :icon="saveOutline" />
       </ion-fab-button>
@@ -46,7 +45,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
+import { defineProps, onMounted, ref } from "vue";
 import {
   IonButton,
   IonButtons,
@@ -73,7 +72,6 @@ import { arrowBackOutline, saveOutline } from 'ionicons/icons';
 import { useStore } from "vuex";
 import { UtilService } from "@/services/UtilService";
 import { RuleService } from "@/services/RuleService";
-import { defineProps, ref } from "vue";
 import { translate } from "@/i18n";
 import { hasError, showToast } from "@/utils";
 import logger from "@/logger";
@@ -89,10 +87,10 @@ const props = defineProps(["label", "facetToSelect", "searchfield", "rule"]);
 const store = useStore();
 
 onMounted(() => {
-  const includedCondition = props.rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === 'ENTCT_ATP_FILTER' && condition.fieldName === props.searchfield && condition.operator === 'in')
+  const includedCondition = props.rule.ruleConditions?.find((condition: any) => condition.conditionTypeEnumId === 'ENTCT_ATP_FILTER' && condition.fieldName === props.searchfield && condition.operator === 'in')
   if(includedCondition && includedCondition.fieldValue) includedFilters.value = includedCondition.fieldValue.split(",");
 
-  const excludedCondition = props.rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === 'ENTCT_ATP_FILTER' && condition.fieldName === props.searchfield && condition.operator === 'not-in')
+  const excludedCondition = props.rule.ruleConditions?.find((condition: any) => condition.conditionTypeEnumId === 'ENTCT_ATP_FILTER' && condition.fieldName === props.searchfield && condition.operator === 'not-in')
   if(excludedCondition && excludedCondition.fieldValue) excludedFilters.value = excludedCondition.fieldValue.split(",");
 })
 
@@ -166,6 +164,8 @@ function isSelected(value: string) {
 async function saveFilters() {
   const rule = JSON.parse(JSON.stringify(props.rule))
 
+  if(!rule.ruleConditions) rule.ruleConditions = []
+
   const includeCondition = rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === 'ENTCT_ATP_FILTER' && condition.fieldName === props.searchfield && condition.operator === 'in')
   if(includeCondition) {
     includeCondition.fieldValue = includedFilters.value.join(",")
@@ -174,7 +174,7 @@ async function saveFilters() {
       "ruleId": rule.ruleId,
       "conditionTypeEnumId": "ENTCT_ATP_FILTER",
       "fieldName": props.searchfield,
-      "operator": selectedSegment.value === "included" ? "in" : "not-in",
+      "operator": "in",
       "fieldValue": includedFilters.value?.length > 1 ? includedFilters.value.join(",") : includedFilters.value[0],
       "multiValued": includedFilters.value?.length > 1 ? "Y" : "N"
     })
@@ -188,7 +188,7 @@ async function saveFilters() {
       "ruleId": rule.ruleId,
       "conditionTypeEnumId": "ENTCT_ATP_FILTER",
       "fieldName": props.searchfield,
-      "operator": selectedSegment.value === "included" ? "in" : "not-in",
+      "operator": "not-in",
       "fieldValue": excludedFilters.value?.length > 1 ? excludedFilters.value.join(",") : excludedFilters.value[0],
       "multiValued": excludedFilters.value?.length > 1 ? "Y" : "N"
     })
@@ -205,3 +205,9 @@ async function saveFilters() {
   }
 }
 </script>
+
+<style scoped>
+  ion-content {
+    --padding-bottom: 80px;
+  }
+</style>

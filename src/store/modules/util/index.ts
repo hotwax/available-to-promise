@@ -10,6 +10,7 @@ const utilModule: Module<UtilState, RootState> = {
   state: {
     configFacilities: [],
     facilities: [],
+    facilityGroups: [],
     appliedFilters: {
       included: {
         tags: [],

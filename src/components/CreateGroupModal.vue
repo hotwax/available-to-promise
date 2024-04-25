@@ -73,7 +73,7 @@ function closeModal() {
 
 async function createGroup() {
   if (!formData.value.facilityGroupName?.trim()) {
-    showToast(translate("Please fill all the required fields"))
+    showToast(translate("Please fill in all the required fields"))
     return;
   }
 

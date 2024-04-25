@@ -16,7 +16,15 @@ const fetchFacilities = async (payload: any): Promise <any>  => {
   });
 }
 
+const fetchFacilityGroups = async (payload: any): Promise <any>  => {
+  return api({
+    url: `productStores/${payload.productStoreId}/facilityGroups`,
+    method: "GET"
+  });
+}
+
 export const UtilService = {
   fetchFacilities,
+  fetchFacilityGroups,
   fetchFacets
 }

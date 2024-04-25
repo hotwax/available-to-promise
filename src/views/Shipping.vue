@@ -7,11 +7,11 @@
       </ion-toolbar>
 
       <ion-toolbar>
-        <ion-segment v-model="selectedSegment">
-          <ion-segment-button value="productAndFacility">
+        <ion-segment v-model="selectedSegment" @ionChange="updateRuleGroup()">
+          <ion-segment-button value="RG_SHIPPING_FACILITY">
             <ion-label>{{ translate("Product and facility") }}</ion-label>
           </ion-segment-button>
-          <ion-segment-button value="productAndChannel">
+          <ion-segment-button value="RG_SHIPPING_CHANNEL">
             <ion-label>{{ translate("Product and channel") }}</ion-label>
           </ion-segment-button>
           <ion-segment-button value="facility">
@@ -22,18 +22,21 @@
     </ion-header>
 
     <ion-content>
-      <main>
+      <main v-if="ruleGroup.ruleGroupId">
         <ScheduleRuleItem v-if="selectedSegment !== 'facility'" />
 
-        <section v-if="selectedSegment === 'productAndFacility' || selectedSegment === 'productAndChannel'">
-          <RuleItem :selectedSegment="selectedSegment" />
-          <RuleItem :selectedSegment="selectedSegment" />
+        <section v-if="selectedSegment !== 'facility'">
+          <RuleItem :selectedSegment="selectedSegment" v-for="(rule, ruleIndex) in rules" :rule="rule" :ruleIndex="ruleIndex" :key="rule.ruleId" />
         </section>
         <section v-else>
           <FacilityItem />
           <FacilityItem />
         </section>
       </main>
+
+      <div class="empty-state" v-else>
+        <p>{{ translate("No shipping rules found") }}</p>
+      </div>
     </ion-content>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
@@ -45,20 +48,33 @@
 </template>
 
 <script setup lang="ts">
-import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonLabel, IonMenuButton, IonPage, IonSegment, IonSegmentButton, IonTitle, IonToolbar } from '@ionic/vue';
-import { ref } from 'vue';
+import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonLabel, IonMenuButton, IonPage, IonSegment, IonSegmentButton, IonTitle, IonToolbar, onIonViewWillEnter } from '@ionic/vue';
+import { computed, ref } from 'vue';
 import { addOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue'
 import { translate } from '@/i18n';
 import FacilityItem from '@/components/FacilityItem.vue';
 import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
 import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
-const selectedSegment = ref("productAndFacility")
-
+const store = useStore();
 const router = useRouter()
 
+const rules = computed(() => store.getters["rule/getRules"]);
+const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
+
+const selectedSegment = ref(router.currentRoute.value.query.groupTypeEnumId ? router.currentRoute.value.query.groupTypeEnumId : "RG_SHIPPING_FACILITY")
+
+onIonViewWillEnter(async() => {
+  await Promise.allSettled([store.dispatch('rule/fetchRules', { groupTypeEnumId: router.currentRoute.value.query.groupTypeEnumId ? router.currentRoute.value.query.groupTypeEnumId : "RG_SHIPPING_FACILITY" }), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilityGroups")])
+})
+
+async function updateRuleGroup() {
+  await store.dispatch('rule/fetchRules', { groupTypeEnumId: selectedSegment.value})
+}
+
 function createShipping() {
-  router.replace({ path: '/create-shipping' })
+  router.push({ path: '/create-shipping', query: { groupTypeEnumId: selectedSegment.value } })
 }
 </script>

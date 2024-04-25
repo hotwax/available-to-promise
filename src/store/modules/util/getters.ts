@@ -12,6 +12,9 @@ const getters: GetterTree<UtilState, RootState> = {
   getAppliedFilters(state) {
     return state.appliedFilters;
   },
+  getFacilityGroups(state) {
+    return state.facilityGroups;
+  },
 }
 
 export default getters;

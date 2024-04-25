@@ -5,15 +5,17 @@ import RuleState from './RuleState'
 import { RuleService } from '@/services/RuleService'
 import { hasError } from '@/utils'
 import logger from '@/logger'
+import store from '@/store'
 
 
 const actions: ActionTree<RuleState, RootState> = {
   async fetchRuleGroup({ commit }, payload) {
+    const productStore = await store.getters['user/getCurrentEComStore']
     let ruleGroup = {} as any;
     let resp;
 
     try {
-      resp = await RuleService.fetchRuleGroup(payload)
+      resp = await RuleService.fetchRuleGroup({ ...payload, productStoreId: productStore.productStoreId })
 
       if(!hasError(resp) && resp.data.length) {
         ruleGroup = resp.data[0]
