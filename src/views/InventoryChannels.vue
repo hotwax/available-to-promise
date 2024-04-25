@@ -140,7 +140,7 @@ const selectedSegment = ref("channels")
 const inventoryChannels = computed(() => store.getters["channel/getInventoryChannels"])
 
 onMounted(async () => {
-  await Promise.allSettled([store.dispatch("channel/fetchInventoryChannels"), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilities")]);
+  await Promise.allSettled([store.dispatch("channel/fetchInventoryChannels"), store.dispatch("util/fetchConfigFacilities")]);
 })
 
 async function openShopActionsPopover(event: Event) {

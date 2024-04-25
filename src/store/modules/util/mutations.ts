@@ -9,9 +9,6 @@ const mutations: MutationTree <UtilState> = {
   [types.UTIL_APPLIED_FILTERS_UPDATED] (state, payload) {
     state.appliedFilters = payload
   },
-  [types.UTIL_FACILITES_UPDATED] (state, payload) {
-    state.facilities = payload
-  },
   [types.UTIL_FACILITY_GROUPS_UPDATED] (state, payload) {
     state.facilityGroups = payload
   },

@@ -11,10 +11,10 @@
   </ion-header>
 
   <ion-content>
-    <ion-searchbar v-model="queryString" @keyup.enter="getFilteredFacilities()" />
+    <ion-searchbar v-model="queryString" @keyup.enter="fetchFacilities()" />
 
-    <ion-list v-if="filteredFacilities?.length">
-      <ion-item lines="none" v-for="facility in filteredFacilities" :key="facility.facilityId" @click="updateSelectedFacilities(facility.facilityId)">
+    <ion-list v-if="facilities?.length">
+      <ion-item lines="none" v-for="facility in facilities" :key="facility.facilityId" @click="updateSelectedFacilities(facility.facilityId)">
         <ion-checkbox :checked="isFacilitySelected(facility.facilityId)">
           <ion-label>
             {{ facility.facilityName }}
@@ -39,27 +39,48 @@
 import { IonButton, IonButtons, IonCheckbox, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonSearchbar, IonTitle, IonToolbar, modalController } from "@ionic/vue";
 import { closeOutline, saveOutline } from "ionicons/icons";
 import { translate } from '@/i18n'
-import { computed, defineProps, onMounted, ref } from "vue";
+import { defineProps, onMounted, ref } from "vue";
 import { useStore } from "vuex";
 import { DateTime } from "luxon";
 import { ChannelService } from "@/services/ChannelService";
+import { UtilService } from "@/services/UtilService";
 import { showToast } from "@/utils";
+import { hasError } from "@/utils";
+import logger from "@/logger";
 
 const store = useStore();
-const filteredFacilities = ref([]);
 const queryString = ref('');
 const selectedFacilityValues = ref([]) as any;
 
 const props = defineProps(["group", "selectedFacilities"]);
-const facilities = computed(() => store.getters["util/getFacilities"])
+const facilities = ref([]) as any;
 
 onMounted(() => {
-  filteredFacilities.value = JSON.parse(JSON.stringify(facilities.value));
+  fetchFacilities()
   selectedFacilityValues.value = JSON.parse(JSON.stringify(props.selectedFacilities));
 })
 
-function getFilteredFacilities() {
-  filteredFacilities.value = JSON.parse(JSON.stringify(facilities.value.filter((facility: any) => facility.facilityName.toLowerCase().includes(queryString.value.toLowerCase()))))
+async function fetchFacilities () {
+  facilities.value = []
+
+  try {
+    const params = {
+      productStoreId: store.state.user.currentEComStore.productStoreId,
+      facilityName: queryString.value,
+      facilityName_op: "contains",
+      pageSize: 20
+    }
+
+    const resp = await UtilService.fetchFacilities(params);
+
+    if(!hasError(resp)) {
+      facilities.value = resp.data;
+    } else {
+      throw resp.data
+    }
+  } catch (err: any) {
+    logger.error(err)
+  }
 }
 
 function isFacilitySelected(facilityId: any) {
@@ -72,7 +93,7 @@ function updateSelectedFacilities(id: string) {
   if(facility) {
     selectedFacilityValues.value = selectedFacilityValues.value.filter((facility: any) => facility.facilityId !== id)
   } else {
-    selectedFacilityValues.value.push(filteredFacilities.value.find((facility: any) => facility.facilityId == id))
+    selectedFacilityValues.value.push(facilities.value.find((facility: any) => facility.facilityId == id))
   }
 }
 
