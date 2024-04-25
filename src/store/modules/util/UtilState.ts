@@ -1,4 +1,5 @@
 export default interface UtilState {
   configFacilities: any;
-  appliedFilters: any; 
+  appliedFilters: any;
+  facilityGroups: any;
 }

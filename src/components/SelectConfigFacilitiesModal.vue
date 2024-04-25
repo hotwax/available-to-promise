@@ -11,7 +11,7 @@
   </ion-header>
 
   <ion-content>
-    <ion-list>
+    <ion-list v-if="configFacilities.length">
       <ion-item v-for="facility in configFacilities" :key="facility.facilityId">
         <ion-checkbox :checked="isSelected(facility.facilityId)" @ionChange="toggleFacilitySelection(facility)">
           <ion-label>
@@ -21,6 +21,10 @@
         </ion-checkbox>
       </ion-item>
     </ion-list>
+
+    <div class="empty-state" v-else>
+      <p>{{ translate("No record found") }}</p>
+    </div>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
       <ion-fab-button @click="saveFacilities()">

@@ -127,6 +127,7 @@ function setEComStore(event: CustomEvent) {
     store.dispatch("user/setEcomStore", {
       "productStoreId": event.detail.value
     })
+    store.dispatch("rule/clearRuleState")
   }
 }
 

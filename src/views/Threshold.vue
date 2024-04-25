@@ -30,12 +30,12 @@
 </template>
 
 <script setup lang="ts">
-import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonMenuButton, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
+import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonMenuButton, IonPage, IonTitle, IonToolbar, onIonViewWillEnter } from '@ionic/vue';
 import { addOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue'
 import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
 import { useRouter } from 'vue-router';
-import { computed, onMounted } from 'vue';
+import { computed } from 'vue';
 import { useStore } from 'vuex';
 import { translate } from '@/i18n';
 
@@ -44,14 +44,12 @@ const router = useRouter()
 
 const rules = computed(() => store.getters["rule/getRules"]);
 const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
-const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
 
-onMounted(async() => {
-  await store.dispatch('rule/fetchRules', { groupTypeEnumId: 'RG_THRESHOLD', "productStoreId": currentEComStore.value.productStoreId })
-  await store.dispatch("util/fetchConfigFacilities");
+onIonViewWillEnter(async() => {
+  await Promise.allSettled([store.dispatch('rule/fetchRules', { groupTypeEnumId: 'RG_THRESHOLD' }), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilityGroups")])
 })
 
 function CreateThreshold() {
-  router.replace({ path: '/create-threshold' })
+  router.push({ path: '/create-threshold' })
 }
 </script>

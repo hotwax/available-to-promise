@@ -19,63 +19,53 @@
     <ion-item lines="full" v-if="selectedPage.path === '/threshold'">
       <ion-icon slot="start" :icon="globeOutline"/>
       <ion-label class="ion-text-wrap">{{ translate(selectedPage.name) }}</ion-label>
-      <ion-chip slot="end" outline @click="editThreshold()">{{ rule.ruleActions[0]?.fieldValue }}</ion-chip>
+      <ion-chip slot="end" outline @click="editThreshold()">{{ rule.ruleActions?.length ? rule.ruleActions[0]?.fieldValue : '-' }}</ion-chip>
     </ion-item>
     <ion-item lines="full" v-else-if="selectedPage.path === '/safety-stock'">
       <ion-icon slot="start" :icon="pulseOutline"/>
       <ion-label class="ion-text-wrap">{{ translate(selectedPage.name) }}</ion-label>
-      <ion-chip slot="end" outline @click="editSafetyStock()">5</ion-chip>
+      <ion-chip slot="end" outline @click="editSafetyStock()">{{ rule.ruleActions?.length ? rule.ruleActions[0].fieldValue : '-' }}</ion-chip>
     </ion-item>
-    <ion-item lines="full" v-else-if="selectedPage.path === '/store-pickup'">Fixed the positioning of the security group displayed for the loggedin user.
+    <ion-item lines="full" v-else-if="selectedPage.path === '/store-pickup'">
       <ion-icon slot="start" :icon="storefrontOutline"/>
-      <ion-toggle>{{ translate(selectedPage.name) }}</ion-toggle>
+      <ion-toggle :checked="props.rule.ruleActions ? props.rule.ruleActions[0].fieldValue : false" @click.prevent="updateRulePickup($event)">{{ translate(selectedPage.name) }}</ion-toggle>
     </ion-item>
     <ion-item lines="full" v-else-if="selectedPage.path === '/shipping'">
       <ion-icon slot="start" :icon="sendOutline"/>
-      <ion-toggle>{{ translate(selectedPage.name) }}</ion-toggle>
+      <ion-toggle :checked="props.rule.ruleActions ? props.rule.ruleActions[0].fieldValue : false" @click.prevent="updateRuleShipping($event)">{{ translate(selectedPage.name) }}</ion-toggle>
     </ion-item>
 
     <ion-list>
-      <template v-if="selectedSegment === 'productAndChannel'">
+      <template v-if="selectedPage.path === '/threshold' || selectedSegment === 'RG_PICKUP_CHANNEL' || selectedSegment === 'RG_SHIPPING_CHANNEL'">
         <ion-item-divider color="light">
           <ion-label>{{ translate("Channels") }}</ion-label>
-          <ion-button slot="end" fill="clear" color="medium">
+          <ion-button slot="end" fill="clear" color="medium" @click="openSelectConfigFacilitiesModal()">
             <ion-icon :icon="optionsOutline" slot="icon-only" />
           </ion-button>
         </ion-item-divider>
 
-        <ion-item lines="none">
+        <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FACILITIES')" lines="none">
           <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
-          <ion-label class="ion-text-wrap">{{ "<Config facility Id>, <Config facility Id>" }}</ion-label>
+          <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FACILITIES") }}</ion-label>
         </ion-item>
       </template>
-
+      
       <template v-else>
         <ion-item-divider color="light">
           <ion-label>{{ translate("Facility groups") }}</ion-label>
-          <ion-button slot="end" fill="clear" color="medium" @click="openSelectConfigFacilitiesModal()" >
+          <ion-button slot="end" fill="clear" color="medium" @click="openUpdateFacilityGroupModal()">
             <ion-icon :icon="optionsOutline" slot="icon-only" />
           </ion-button>
         </ion-item-divider>
-
-        <template v-if="selectedPage.path === '/threshold'">
-          <ion-item v-if="getRuleConditions('ENTCT_ATP_FACILITIES')" lines="none">
-            <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
-            <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FACILITIES") }}</ion-label>
-          </ion-item>
-        </template>
-
-        <template v-else>
-          <ion-item>
-            <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
-            <ion-label class="ion-text-wrap">{{ "<Group name, Group name>" }}</ion-label>
-          </ion-item>
-
-          <ion-item lines="none">
-            <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
-            <ion-label class="ion-text-wrap">{{ "<Group name, Group name>" }}</ion-label>
-          </ion-item>
-        </template>
+        
+        <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FAC_GROUPS', 'facilityGroups', 'in')" lines="none">
+          <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
+          <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FAC_GROUPS", "facilityGroups", "in") }}</ion-label>
+        </ion-item>
+        <ion-item lines="none" v-if="isRuleConditionAvailable('ENTCT_ATP_FAC_GROUPS', 'facilityGroups', 'not-in')">
+          <ion-icon slot="start" :icon="closeCircleOutline"/>
+          <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FAC_GROUPS", "facilityGroups", "not-in") }}</ion-label>
+        </ion-item>
       </template>
 
       <ion-item-divider color="light">
@@ -85,32 +75,30 @@
         </ion-button>
       </ion-item-divider>
 
-      <ion-item v-if="getRuleConditions('ENTCT_ATP_FILTER', 'tags', 'in')">
+      <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'tags', 'in')">
         <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
         <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FILTER", "tags", "in") }}</ion-label>
       </ion-item>
-      <ion-item lines="none" v-if="getRuleConditions('ENTCT_ATP_FILTER', 'tags', 'not-in')">
+      <ion-item lines="none" v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'tags', 'not-in')">
         <ion-icon slot="start" :icon="closeCircleOutline"/>
         <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FILTER", "tags", "not-in") }}</ion-label>
       </ion-item>
 
-      <template v-if="(selectedPage.path === '/threshold' || selectedPage.path === '/safety-stock')">
-        <ion-item-divider color="light">
-          <ion-label>{{ translate("Product features") }}</ion-label>
-          <ion-button slot="end" fill="clear" color="medium"  @click="openUpdateProductFiltersModal('product features', 'productFeaturesFacet', 'productFeatures')">
-            <ion-icon :icon="optionsOutline" slot="icon-only" />
-          </ion-button>
-        </ion-item-divider>
+      <ion-item-divider color="light">
+        <ion-label>{{ translate("Product features") }}</ion-label>
+        <ion-button slot="end" fill="clear" color="medium"  @click="openUpdateProductFiltersModal('product features', 'productFeaturesFacet', 'productFeatures')">
+          <ion-icon :icon="optionsOutline" slot="icon-only" />
+        </ion-button>
+      </ion-item-divider>
 
-        <ion-item v-if="getRuleConditions('ENTCT_ATP_FILTER', 'productFeatures', 'in')">
-          <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
-          <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FILTER", "productFeatures", "in") }}</ion-label>
-        </ion-item>
-        <ion-item lines="full" v-if="getRuleConditions('ENTCT_ATP_FILTER', 'productFeatures', 'not-in')">
-          <ion-icon slot="start" :icon="closeCircleOutline"/>
-          <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FILTER", "productFeatures", "not-in") }}</ion-label>
-        </ion-item>
-      </template>
+      <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'productFeatures', 'in')">
+        <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
+        <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FILTER", "productFeatures", "in") }}</ion-label>
+      </ion-item>
+      <ion-item lines="full" v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'productFeatures', 'not-in')">
+        <ion-icon slot="start" :icon="closeCircleOutline"/>
+        <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FILTER", "productFeatures", "not-in") }}</ion-label>
+      </ion-item>
 
       <ion-item lines="none">
         <ion-button @click="editRuleName()" fill="clear">{{ translate("Edit name") }}</ion-button>
@@ -134,6 +122,7 @@ import { showToast } from '@/utils';
 import logger from '@/logger';
 import SelectConfigFacilitiesModal from '@/components/SelectConfigFacilitiesModal.vue';
 import UpdateProductFiltersModal from '@/components/UpdateProductFiltersModal.vue';
+import UpdateFacilityGroupModal from '@/components/UpdateFacilityGroupModal.vue';
 
 const router = useRouter();
 const store = useStore();
@@ -141,6 +130,7 @@ const store = useStore();
 const props = defineProps(["selectedSegment", "rule", "ruleIndex"])
 const total = computed(() => store.getters["rule/getTotalRulesCount"])
 const configFacilities = computed(() => store.getters["util/getConfigFacilities"])
+const facilityGroups = computed(() => store.getters["util/getFacilityGroups"])
 
 const selectedPage = ref({
   path: '',
@@ -159,7 +149,7 @@ async function editThreshold() {
       name: "threshold",
       placeholder: translate("Threshold"),
       type: "number",
-      value: props.rule.ruleActions[0].fieldValue,
+      value: props.rule.ruleActions?.length ? props.rule.ruleActions[0].fieldValue : 0,
       min: 0
     }],
     buttons: [{
@@ -169,19 +159,32 @@ async function editThreshold() {
     {
       text: translate('Update'),
       handler: async(data) => {
-        if(data.threshold) {
-          const rule = JSON.parse(JSON.stringify(props.rule))
-          rule.ruleActions[0].fieldValue = data.threshold
+        if(!data.threhold || data.threshold < 0) {
+          showToast(translate("Threshold should be greater than or equal to 0."));
+          return false;
+        }
 
-          try {
-            await RuleService.updateRule(rule, props.rule.ruleId)
-            await store.dispatch('rule/updateRuleData', { rule })
-            showToast(translate("Threshold updated successfully."))
-            alertController.dismiss()
-          } catch(err: any) {
-            showToast(translate("Failed to update threhold."))
-            logger.error(err);
-          }
+        const rule = JSON.parse(JSON.stringify(props.rule))
+
+        if(!rule.ruleActions?.length) {
+          rule.ruleActions = [{
+            "ruleId": props.rule.ruleId,
+            "actionTypeEnumId": "ATP_SAFETY_STOCK",
+            "fieldName": "facility-safety-stock",
+            "fieldValue": data.threshold
+          }]
+        } else {
+          rule.ruleActions[0].fieldValue = data.threshold
+        }
+
+        try {
+          await RuleService.updateRule(rule, props.rule.ruleId)
+          await store.dispatch('rule/updateRuleData', { rule })
+          showToast(translate("Threshold updated successfully."))
+          alertController.dismiss()
+        } catch(err: any) {
+          showToast(translate("Failed to update threhold."))
+          logger.error(err);
         }
       }
     }]
@@ -194,9 +197,10 @@ async function editSafetyStock() {
   const alert = await alertController.create({
     header: translate("Edit safety stock"),
     inputs: [{
-      name: "safety-stock",
+      name: "safetyStock",
       placeholder: translate("Safety stock"),
       type: "number",
+      value: props.rule.ruleActions?.length ? props.rule.ruleActions[0].fieldValue : 0,
       min: 0
     }],
     buttons: [{
@@ -205,6 +209,35 @@ async function editSafetyStock() {
     },
     {
       text: translate('Update'),
+      handler: async (data: any) => {
+        if(!data.safetyStock || data.safetyStock < 0) {
+          showToast(translate("Safety stock should be greater than or equal to 0."));
+          return false;
+        }
+
+        const rule = JSON.parse(JSON.stringify(props.rule))
+
+        if(!rule.ruleActions?.length) {
+          rule.ruleActions = [{
+            "ruleId": props.rule.ruleId,
+            "actionTypeEnumId": "ATP_SAFETY_STOCK",
+            "fieldName": "facility-safety-stock",
+            "fieldValue": data.safetyStock
+          }]
+        } else {
+          rule.ruleActions[0].fieldValue = data.safetyStock
+        }
+
+        try {
+          await RuleService.updateRule(rule, props.rule.ruleId)
+          await store.dispatch('rule/updateRuleData', { rule })
+          showToast(translate("Safety stock updated successfully."))
+          alertController.dismiss()
+        } catch(err: any) {
+          showToast(translate("Failed to update safety stock."))
+          logger.error(err);
+        }
+      }
     }]
   })
 
@@ -215,7 +248,7 @@ async function editRuleName() {
   const alert = await alertController.create({
     header: translate("Edit name"),
     inputs: [{
-      name: "safetyStock",
+      name: "name",
       placeholder: translate("Name"),
       type: "text",
       value: props.rule.ruleName
@@ -227,9 +260,9 @@ async function editRuleName() {
     {
       text: translate('Update'),
       handler: async(data) => {
-        if(data.safetyStock) {
+        if(data.name) {
           const rule = JSON.parse(JSON.stringify(props.rule))
-          rule.ruleName = data.safetyStock
+          rule.ruleName = data.name
 
           try {
             await RuleService.updateRule(rule, props.rule.ruleId)
@@ -249,9 +282,20 @@ async function editRuleName() {
 }
 
 function getRuleConditions(conditionTypeEnumId: string, fieldName?: string, operator? : string) {
+  if(!props.rule.ruleConditions) return;
+
   if(fieldName && operator) {
     const condition = props.rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === conditionTypeEnumId && condition.fieldName === fieldName && condition.operator === operator)
-    return condition?.fieldValue?.split(",").join(", ")
+    if(condition && conditionTypeEnumId === 'ENTCT_ATP_FAC_GROUPS') {
+      let facilityGroupIds = condition?.fieldValue.split(",")
+        facilityGroupIds = facilityGroupIds.map((id: string) => {
+          let group = facilityGroups.value.find((group: any) => group.facilityGroupId === id)
+          return group ? group.facilityGroupName : null
+        })
+        return facilityGroupIds.join(", ")
+    } else {
+      return condition?.fieldValue?.split(",").join(", ")
+    }
   } else {
     const condition = props.rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === conditionTypeEnumId)
 
@@ -296,7 +340,12 @@ async function archiveRule() {
 }
 
 function getSelectedFacilities() {
-  const condition = props.rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FACILITIES")
+  const condition = props.rule.ruleConditions?.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FACILITIES")
+  return (condition && condition.fieldValue) ? condition.fieldValue.split(",") : []
+}
+
+function getSelectedFacilityGroups() {
+  const condition = props.rule.ruleConditions?.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS")
   return (condition && condition.fieldValue) ? condition.fieldValue.split(",") : []
 }
 
@@ -312,6 +361,22 @@ async function openSelectConfigFacilitiesModal() {
   modal.present()
 }
 
+async function openUpdateFacilityGroupModal() {
+  const modal = await modalController.create({
+    component: UpdateFacilityGroupModal,
+    componentProps: {
+      rule: props.rule
+    },
+  })
+
+  modal.present()
+}
+
+function isRuleConditionAvailable(conditionTypeEnumId: string, fieldName?: string, operator? : string) {
+  if(fieldName) return props.rule.ruleConditions?.find((condition: any) => condition.conditionTypeEnumId === conditionTypeEnumId && condition.fieldName === fieldName && condition.operator === operator)?.fieldValue
+  else return props.rule.ruleConditions?.find((condition: any) => condition.conditionTypeEnumId === conditionTypeEnumId)?.fieldValue
+}
+
 async function openUpdateProductFiltersModal(label: string, facetToSelect: string, searchfield: string) {
   const modal = await modalController.create({
     component: UpdateProductFiltersModal,
@@ -324,6 +389,46 @@ async function openUpdateProductFiltersModal(label: string, facetToSelect: strin
   })
 
   modal.present()
+}
+
+async function updateRulePickup(event: any) {
+  event.stopImmediatePropagation();
+  const isChecked = !event.target.checked;
+  
+  try {
+    const rule = JSON.parse(JSON.stringify(props.rule))
+    rule.ruleActions.map((action: any) => {
+      if(action.actionTypeEnumId === "ATP_ALLOW_PICKUP") action.fieldValue = isChecked
+    })
+
+    await RuleService.updateRule(rule, props.rule.ruleId)
+    showToast(translate("Rule pickup updated successfully."))
+    await store.dispatch('rule/updateRuleData', { rule })
+    event.target.checked = isChecked
+  } catch(err) {
+    logger.error(err)
+    showToast(translate("Failed to update rule pickup."))
+  }
+}
+
+async function updateRuleShipping(event: any) {
+  event.stopImmediatePropagation();
+  const isChecked = !event.target.checked;
+
+  try {
+    const rule = JSON.parse(JSON.stringify(props.rule))
+    rule.ruleActions.map((action: any) => {
+      if(action.actionTypeEnumId === "ATP_ALLOW_BROKERING") action.fieldValue = isChecked
+    })
+
+    await RuleService.updateRule(rule, props.rule.ruleId)
+    showToast(translate("Rule shipping updated successfully."))
+    await store.dispatch('rule/updateRuleData', { rule })
+    event.target.checked = isChecked
+  } catch(err) {
+    logger.error(err)
+    showToast(translate("Failed to update rule brokering."))
+  }
 }
 </script>
 

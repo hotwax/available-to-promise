@@ -38,7 +38,6 @@ import {
   IonTitle,
   IonToolbar,
   modalController,
-  onIonViewWillEnter,
 } from "@ionic/vue";
 import { closeOutline } from "ionicons/icons";
 import { computed, onMounted, ref } from "vue";

@@ -17,7 +17,9 @@
 
             <div class="rule-inputs ion-padding">
               <ion-item>
-                <ion-input :label="translate('Name')" v-model="formData.ruleName" />
+                <ion-input v-model="formData.ruleName">
+                  <div slot="label">{{ translate("Name") }} <ion-text color="danger">*</ion-text></div>
+                </ion-input>
               </ion-item>
               <ion-item>
                 <ion-input :label="translate('Threshold')" v-model="formData.threshold" />
@@ -69,6 +71,7 @@ import {
   IonInput,
   IonItem,
   IonPage,
+  IonText,
   IonTitle,
   IonToolbar
 } from '@ionic/vue';
@@ -154,6 +157,21 @@ function generateRuleConditions(ruleId: string) {
 }
 
 async function createThresholdRule() {
+  if(!formData.value.ruleName) {
+    showToast(translate("Please fill in all the required fields."))
+    return;
+  }
+
+  if(formData.value.threshold < 0){
+    showToast(translate("Threshold should be greater than or equal to 0."))
+    return;
+  }
+
+  if(!formData.value.selectedConfigFacilites.length) {
+    showToast(translate("Please select atleast one config facility."))
+    return;
+  }
+
   let ruleGroup = await store.dispatch("rule/fetchRuleGroup", { groupTypeEnumId: "RG_THRESHOLD" });
 
   try {
@@ -181,6 +199,8 @@ async function createThresholdRule() {
     }, rule.ruleId);
 
     showToast(translate("Rule created successfully."))
+    store.dispatch("rule/clearRuleState")
+    store.dispatch("util/clearAppliedFilters")
     router.push("/threshold");
   } catch(err: any) {
     logger.error(err);
