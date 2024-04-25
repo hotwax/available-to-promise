@@ -10,7 +10,7 @@
         <ion-icon slot="start" :icon="flashOutline" />
         <ion-label>{{ translate("Run now") }}</ion-label>
       </ion-item>
-      <ion-item button lines="none" @click="disableRuleGroup()">
+      <ion-item button lines="none" :disabled="!ruleGroup.schedule || (ruleGroup.schedule?.paused === 'Y')" @click="disableRuleGroup()">
         <ion-icon slot="start" :icon="stopCircleOutline" color="danger" />
         <ion-label color="danger">{{ translate("Disable") }}</ion-label>
       </ion-item>
