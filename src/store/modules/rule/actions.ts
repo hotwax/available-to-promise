@@ -78,7 +78,7 @@ const actions: ActionTree<RuleState, RootState> = {
   
   updateRuleData({ commit, state }, payload) {
     const rules = JSON.parse(JSON.stringify(state.rules.list))
-    
+
     const index = rules.findIndex((rule: any) => rule.ruleId === payload.rule.ruleId);
     // If index is found, replace the object
     if (index !== -1) {
@@ -86,7 +86,7 @@ const actions: ActionTree<RuleState, RootState> = {
     }
     commit(types.RULE_RULES_UPDATED, { list: rules, total: state.rules.total});
   },
-  
+
   updateRuleGroup({ commit }, payload) {
     commit(types.RULE_GROUP_UPDATED, payload);
   },
