@@ -159,34 +159,32 @@ async function editThreshold() {
     {
       text: translate('Update'),
       handler: async(data) => {
-        if(data.threshold) {
-          if(data.threshold < 0) {
-            showToast(translate("Threshold should be greater then 0."));
-            return false;
-          }
+        if(!data.threhold || data.threshold < 0) {
+          showToast(translate("Threshold should be greater than or equal to 0."));
+          return false;
+        }
 
-          const rule = JSON.parse(JSON.stringify(props.rule))
+        const rule = JSON.parse(JSON.stringify(props.rule))
 
-          if(!rule.ruleActions?.length) {
-            rule.ruleActions = [{
-              "ruleId": props.rule.ruleId,
-              "actionTypeEnumId": "ATP_SAFETY_STOCK",
-              "fieldName": "facility-safety-stock",
-              "fieldValue": data.threshold
-            }]
-          } else {
-            rule.ruleActions[0].fieldValue = data.threshold
-          }
+        if(!rule.ruleActions?.length) {
+          rule.ruleActions = [{
+            "ruleId": props.rule.ruleId,
+            "actionTypeEnumId": "ATP_SAFETY_STOCK",
+            "fieldName": "facility-safety-stock",
+            "fieldValue": data.threshold
+          }]
+        } else {
+          rule.ruleActions[0].fieldValue = data.threshold
+        }
 
-          try {
-            await RuleService.updateRule(rule, props.rule.ruleId)
-            await store.dispatch('rule/updateRuleData', { rule })
-            showToast(translate("Threshold updated successfully."))
-            alertController.dismiss()
-          } catch(err: any) {
-            showToast(translate("Failed to update threhold."))
-            logger.error(err);
-          }
+        try {
+          await RuleService.updateRule(rule, props.rule.ruleId)
+          await store.dispatch('rule/updateRuleData', { rule })
+          showToast(translate("Threshold updated successfully."))
+          alertController.dismiss()
+        } catch(err: any) {
+          showToast(translate("Failed to update threhold."))
+          logger.error(err);
         }
       }
     }]
@@ -212,33 +210,32 @@ async function editSafetyStock() {
     {
       text: translate('Update'),
       handler: async (data: any) => {
-        if(data.safetyStock) {
-          if(data.safetyStock < 0) {
-            showToast(translate("Safety stock should be greater then 0."));
-            return false;
-          }
-          const rule = JSON.parse(JSON.stringify(props.rule))
+        if(!data.safetyStock || data.safetyStock < 0) {
+          showToast(translate("Safety stock should be greater than or equal to 0."));
+          return false;
+        }
 
-          if(!rule.ruleActions?.length) {
-            rule.ruleActions = [{
-              "ruleId": props.rule.ruleId,
-              "actionTypeEnumId": "ATP_SAFETY_STOCK",
-              "fieldName": "facility-safety-stock",
-              "fieldValue": data.safetyStock
-            }]
-          } else {
-            rule.ruleActions[0].fieldValue = data.threshold
-          }
+        const rule = JSON.parse(JSON.stringify(props.rule))
 
-          try {
-            await RuleService.updateRule(rule, props.rule.ruleId)
-            await store.dispatch('rule/updateRuleData', { rule })
-            showToast(translate("Safety stock updated successfully."))
-            alertController.dismiss()
-          } catch(err: any) {
-            showToast(translate("Failed to update safety stock."))
-            logger.error(err);
-          }
+        if(!rule.ruleActions?.length) {
+          rule.ruleActions = [{
+            "ruleId": props.rule.ruleId,
+            "actionTypeEnumId": "ATP_SAFETY_STOCK",
+            "fieldName": "facility-safety-stock",
+            "fieldValue": data.safetyStock
+          }]
+        } else {
+          rule.ruleActions[0].fieldValue = data.threshold
+        }
+
+        try {
+          await RuleService.updateRule(rule, props.rule.ruleId)
+          await store.dispatch('rule/updateRuleData', { rule })
+          showToast(translate("Safety stock updated successfully."))
+          alertController.dismiss()
+        } catch(err: any) {
+          showToast(translate("Failed to update safety stock."))
+          logger.error(err);
         }
       }
     }]

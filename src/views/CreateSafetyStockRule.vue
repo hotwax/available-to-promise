@@ -193,7 +193,7 @@ async function createRule() {
   }
 
   if(formData.value.safety < 0) {
-    showToast(translate("Safety stock should be greater then 0."));
+    showToast(translate("Safety stock should be greater than or equal to 0."));
     return;
   }
 
