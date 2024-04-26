@@ -109,6 +109,7 @@
   "New safety stock rule": "New safety stock rule",
   "No Capacity": "No Capacity",
   "No capacity sets the fulfillment capacity to 0, preventing any new orders from being allocated to this facility. To add a fulfillment capacity to this facility, use the custom option.": "No capacity sets the fulfillment capacity to 0, preventing any new orders from being allocated to this facility.{space} To add a fulfillment capacity to this facility, use the custom option.",
+  "No facility found.": "No facility found.",
   "No fulfillment capacity": "No fulfillment capacity",
   "No job found.": "No job found.",
   "No jobs have run yet": "No jobs have run yet",

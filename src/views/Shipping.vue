@@ -37,7 +37,7 @@
           <FacilityItem v-for="facility in facilities" :facility="facility" :key="facility.facilityId" />
         </section>
         <div v-else class="empty-state">
-          <p>{{ translate("No facility found") }}</p>
+          <p>{{ translate("No facility found.") }}</p>
         </div>
       </main>
       <ion-infinite-scroll
