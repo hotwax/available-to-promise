@@ -28,15 +28,17 @@
         <section v-if="selectedSegment !== 'facility'">
           <RuleItem :selectedSegment="selectedSegment" v-for="(rule, ruleIndex) in rules" :rule="rule" :ruleIndex="ruleIndex" :key="rule.ruleId" />
         </section>
-        <div class="empty-state" v-else>
+        <div v-else class="empty-state">
           <p>{{ translate("No shipping rules found") }}</p>
         </div>
       </main>
       <main v-else>
-        <section>
+        <section v-if="facilities.length">
           <FacilityItem v-for="facility in facilities" :facility="facility" :key="facility.facilityId" />
         </section>
-
+        <div v-else class="empty-state">
+          <p>{{ translate("No facility found") }}</p>
+        </div>
       </main>
       <ion-infinite-scroll
         @ionInfinite="loadMoreFacilities($event)"
