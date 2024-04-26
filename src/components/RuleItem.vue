@@ -7,10 +7,10 @@
         <ion-card-subtitle>{{ ruleIndex+1 }}/{{ total }}</ion-card-subtitle>
       </div>
       <div>
-        <ion-button fill="clear" color="medium" class="ion-no-padding">
+        <ion-button fill="clear" color="medium" class="ion-no-padding" :disabled="ruleIndex === 0" @click="updateRuleOrder('prev')">
           <ion-icon :icon="chevronUpOutline" slot="icon-only" />
         </ion-button>
-        <ion-button fill="clear" color="medium" class="ion-no-padding">
+        <ion-button fill="clear" color="medium" class="ion-no-padding" :disabled="ruleIndex === rules.length - 1" @click="updateRuleOrder('next')">
           <ion-icon :icon="chevronDownOutline" slot="icon-only" />
         </ion-button>
       </div>
@@ -131,6 +131,7 @@ const props = defineProps(["selectedSegment", "rule", "ruleIndex"])
 const total = computed(() => store.getters["rule/getTotalRulesCount"])
 const configFacilities = computed(() => store.getters["util/getConfigFacilities"])
 const facilityGroups = computed(() => store.getters["util/getFacilityGroups"])
+const rules = computed(() => store.getters["rule/getRules"]);
 
 const selectedPage = ref({
   path: '',
@@ -159,7 +160,7 @@ async function editThreshold() {
     {
       text: translate('Update'),
       handler: async(data) => {
-        if(!data.threhold || data.threshold < 0) {
+        if(!data.threshold || data.threshold < 0) {
           showToast(translate("Threshold should be greater than or equal to 0."));
           return false;
         }
@@ -183,7 +184,7 @@ async function editThreshold() {
           showToast(translate("Threshold updated successfully."))
           alertController.dismiss()
         } catch(err: any) {
-          showToast(translate("Failed to update threhold."))
+          showToast(translate("Failed to update threshold."))
           logger.error(err);
         }
       }
@@ -429,6 +430,48 @@ async function updateRuleShipping(event: any) {
     logger.error(err)
     showToast(translate("Failed to update rule brokering."))
   }
+}
+
+async function updateRuleOrder(ruleDir: string) {
+  const prevSeq = JSON.parse(JSON.stringify(rules.value));
+  const updatedSeq = JSON.parse(JSON.stringify(rules.value));
+  let alternateRuleIndex = '' as any;
+
+  if(ruleDir === 'prev') alternateRuleIndex = props.ruleIndex - 1
+  else alternateRuleIndex = props.ruleIndex + 1;
+
+  [updatedSeq[props.ruleIndex], updatedSeq[alternateRuleIndex]] = [updatedSeq[alternateRuleIndex], updatedSeq[props.ruleIndex]]
+
+  let diffSeq = findRulesDiff(prevSeq, updatedSeq)
+
+  const updatedSeqenceNum = prevSeq.map((rule: any) => rule.sequenceNum)
+  Object.keys(diffSeq).map((key: any) => {
+    diffSeq[key].sequenceNum = updatedSeqenceNum[key]
+  })
+
+  diffSeq = Object.keys(diffSeq).map((key) => diffSeq[key])
+
+  try {
+    diffSeq.map(async (rule: any) => {
+      await RuleService.updateRule(rule, rule.ruleId);
+    })
+    await store.dispatch('rule/updateRules', { rules: updatedSeq })
+    showToast(translate("Rules order has been updated successfully."))
+  } catch(err: any) {
+    logger.error(err);
+    showToast(translate("Failed to update rules order."))
+  }
+}
+
+function findRulesDiff(previousSeq: any, updatedSeq: any) {
+  const diffSeq: any = Object.keys(previousSeq).reduce((diff, key) => {
+    if (updatedSeq[key].ruleId === previousSeq[key].ruleId) return diff
+    return {
+      ...diff,
+      [key]: updatedSeq[key]
+    }
+  }, {})
+  return diffSeq;
 }
 </script>
 
