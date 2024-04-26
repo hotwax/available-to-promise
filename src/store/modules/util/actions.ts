@@ -57,6 +57,46 @@ const actions: ActionTree<UtilState, RootState> = {
   async clearAppliedFilters({ commit }) {
     commit(types.UTIL_APPLIED_FILTERS_CLEARED)
   },
+
+  async fetchFacilities({ commit, state }, payload) {
+    const params = {
+      parentFacilityTypeId: 'VIRTUAL_FACILITY',
+      parentFacilityTypeId_not: 'Y',
+      facilityTypeId: 'VIRTUAL_FACILITY',
+      facilityTypeId_not: 'Y',
+      productStoreId: store.state.user.currentEComStore.productStoreId,
+      pageSize: 20,
+      ...payload
+    }
+
+    const facilities = state.facilities.list ? JSON.parse(JSON.stringify(state.facilities.list)) : [];
+    let isScrollable = true, facilityList = [];
+
+    try {
+      const resp = await UtilService.fetchFacilities(params)
+
+      if(!hasError(resp)) {
+        if(payload.pageIndex && payload.pageIndex > 0) {
+          facilityList = facilities.concat(resp.data)
+        } else {
+          facilityList = resp.data
+        }
+
+        if(resp.data.length == payload.pageSize) isScrollable = true
+        else isScrollable = false
+      } else {
+        throw resp.data
+      }
+    } catch(error) {
+      logger.error(error)
+    }
+    
+    commit(types.UTIL_FACILITY_LIST_UPDATED , { facilities: facilityList.length ? facilityList : facilities, isScrollable });
+  },
+
+  async updateFacilities({ commit, state }, payload) {
+    commit(types.UTIL_FACILITY_LIST_UPDATED , { facilities: payload.facilities, isScrollable: state.facilities.isScrollable });
+  }
 }
 
 export default actions;

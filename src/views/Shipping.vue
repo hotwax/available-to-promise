@@ -21,22 +21,34 @@
       </ion-toolbar>
     </ion-header>
 
-    <ion-content>
-      <main v-if="ruleGroup.ruleGroupId">
-        <ScheduleRuleItem v-if="selectedSegment !== 'facility'" />
+    <ion-content ref="contentRef" :scroll-events="true" @ionScroll="enableScrolling()">
+      <main v-if="selectedSegment !== 'facility'">
+        <ScheduleRuleItem  v-if="ruleGroup.ruleGroupId" />
 
         <section v-if="selectedSegment !== 'facility'">
           <RuleItem :selectedSegment="selectedSegment" v-for="(rule, ruleIndex) in rules" :rule="rule" :ruleIndex="ruleIndex" :key="rule.ruleId" />
         </section>
-        <section v-else>
-          <FacilityItem />
-          <FacilityItem />
-        </section>
+        <div class="empty-state" v-else>
+          <p>{{ translate("No shipping rules found") }}</p>
+        </div>
       </main>
+      <main v-else>
+        <section>
+          <FacilityItem v-for="facility in facilities" :facility="facility" :key="facility.facilityId" />
+        </section>
 
-      <div class="empty-state" v-else>
-        <p>{{ translate("No shipping rules found") }}</p>
-      </div>
+      </main>
+      <ion-infinite-scroll
+        @ionInfinite="loadMoreFacilities($event)"
+        threshold="100px"
+        v-show="isScrollable"
+        ref="infiniteScrollRef"
+      >
+        <ion-infinite-scroll-content
+          loading-spinner="crescent"
+          :loading-text="translate('Loading')"
+        />
+      </ion-infinite-scroll>
     </ion-content>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
@@ -48,7 +60,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonLabel, IonMenuButton, IonPage, IonSegment, IonSegmentButton, IonTitle, IonToolbar, onIonViewWillEnter } from '@ionic/vue';
+import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, IonLabel, IonMenuButton, IonPage, IonSegment, IonSegmentButton, IonTitle, IonToolbar, onIonViewWillEnter } from '@ionic/vue';
 import { computed, ref } from 'vue';
 import { addOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue'
@@ -63,14 +75,60 @@ const router = useRouter()
 
 const rules = computed(() => store.getters["rule/getRules"]);
 const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
+const isScrollable = computed(() => store.getters["util/isFacilitiesScrollable"]);
+const facilities = computed(() => store.getters["util/getFacilities"]);
 
 const selectedSegment = ref(router.currentRoute.value.query.groupTypeEnumId ? router.currentRoute.value.query.groupTypeEnumId : "RG_SHIPPING_FACILITY")
+const isScrollingEnabled = ref(false);
+const contentRef = ref({}) as any;
+const infiniteScrollRef = ref({}) as any;
 
 onIonViewWillEnter(async() => {
   await Promise.allSettled([store.dispatch('rule/fetchRules', { groupTypeEnumId: router.currentRoute.value.query.groupTypeEnumId ? router.currentRoute.value.query.groupTypeEnumId : "RG_SHIPPING_FACILITY" }), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilityGroups")])
 })
 
+async function fetchFacilities(vSize?: any, vIndex?: any) {
+  const pageSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
+  const pageIndex = vIndex ? vIndex : 0;
+  const payload = {
+    pageSize,
+    pageIndex
+  };
+  await store.dispatch('util/fetchFacilities', payload)
+}
+
+function enableScrolling() {
+  const parentElement = contentRef.value.$el
+  const scrollEl = parentElement.shadowRoot.querySelector("main[part='scroll']")
+  let scrollHeight = scrollEl.scrollHeight, infiniteHeight = infiniteScrollRef.value.$el.offsetHeight, scrollTop = scrollEl.scrollTop, threshold = 100, height = scrollEl.offsetHeight
+  const distanceFromInfinite = scrollHeight - infiniteHeight - scrollTop - threshold - height
+  if(distanceFromInfinite < 0) {
+    isScrollingEnabled.value = false;
+  } else {
+    isScrollingEnabled.value = true;
+  }
+}
+
+async function loadMoreFacilities(event: any) {
+  // Added this check here as if added on infinite-scroll component the Loading content does not gets displayed
+  if(!(isScrollingEnabled.value && isScrollable.value)) {
+    await event.target.complete();
+  }
+  fetchFacilities(
+    undefined,
+    Math.ceil(
+      facilities.value?.length / (process.env.VUE_APP_VIEW_SIZE as any)
+    ).toString()
+  ).then(async () => {
+    await event.target.complete();
+  });
+}
+
 async function updateRuleGroup() {
+  if(selectedSegment.value === 'facility') {
+    isScrollingEnabled.value = false;
+    await fetchFacilities();
+  }
   await store.dispatch('rule/fetchRules', { groupTypeEnumId: selectedSegment.value})
 }
 

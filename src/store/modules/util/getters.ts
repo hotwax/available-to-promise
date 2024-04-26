@@ -12,6 +12,12 @@ const getters: GetterTree<UtilState, RootState> = {
   getFacilityGroups(state) {
     return state.facilityGroups;
   },
+  getFacilities(state) {
+    return state.facilities.list ? JSON.parse(JSON.stringify(state.facilities.list)) : []
+  },
+  isFacilitiesScrollable(state) {
+    return state.facilities.isScrollable
+  },
 }
 
 export default getters;
