@@ -91,14 +91,14 @@ async function updateFacility(maximumOrderLimit: number | string) {
       const currentFacility = updatedFacilities.find((facility: any) => facility.facilityId === props.facility.facilityId)
       currentFacility.maximumOrderLimit = maximumOrderLimit;
 
-      showToast(translate('Order fulfillment capacity updated successfully'))
-      await store.dispatch('util/updateFacilities', { facilities: updatedFacilities })
+      showToast(translate("Order fulfillment capacity updated successfully"))
+      await store.dispatch("util/updateFacilities", { facilities: updatedFacilities })
     } else {
       throw resp.data
     }
   } catch(err) {
-    showToast(translate('Failed to update facility'))
-    logger.error('Failed to update facility', err)
+    showToast(translate("Failed to update facility"))
+    logger.error("Failed to update facility", err)
   }
 }
 </script>
