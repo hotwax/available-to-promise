@@ -49,7 +49,7 @@ async function updateOrderLimitType(orderLimitType: string) {
   } else if (orderLimitType === 'no-capacity') {
     setLimit.value = 0
     header = "No fulfillment capacity"
-    message = "No capacity sets the fulfillment capacity to 0, preventing any new orders from being allocated to this facility. Use the \"Reject all orders\" option in the fulfillment pages to clear your facilities fulfillment queue. To add a fulfillment capacity to this facility, use the custom option."
+    message = "No capacity sets the fulfillment capacity to 0, preventing any new orders from being allocated to this facility. To add a fulfillment capacity to this facility, use the custom option."
   } else if (orderLimitType === 'unlimited') {
     setLimit.value = ""
   }

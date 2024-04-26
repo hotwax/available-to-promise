@@ -72,8 +72,6 @@ async function changeOrderLimitPopover(ev: Event) {
 
   const result = await popover.onDidDismiss();
   // Note: here result.data returns 0 in some cases that's why it is compared with 'undefined'.
-  console.log(result);
-  
   if(result.data != undefined && result.data !== props.facility.maximumOrderLimit){
     await updateFacility(result.data)
   }
