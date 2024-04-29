@@ -22,7 +22,9 @@
                 </ion-input>
               </ion-item>
               <ion-item>
-                <ion-input :label="translate('Threshold')" v-model="formData.threshold" />
+                <ion-input v-model="formData.threshold">
+                  <div slot="label">{{ translate("Threshold") }} <ion-text color="danger">*</ion-text></div>
+                </ion-input>
               </ion-item>
             </div>
           </ion-card>
@@ -157,7 +159,7 @@ function generateRuleConditions(ruleId: string) {
 }
 
 async function createThresholdRule() {
-  if(!formData.value.ruleName) {
+  if(!formData.value.ruleName || !formData.value.threshold) {
     showToast(translate("Please fill in all the required fields."))
     return;
   }
