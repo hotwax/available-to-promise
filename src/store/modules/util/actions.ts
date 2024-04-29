@@ -77,20 +77,20 @@ const actions: ActionTree<UtilState, RootState> = {
       const resp = await UtilService.fetchFacilities(params)
 
       if(!hasError(resp)) {
-        if(payload.pageIndex && payload.pageIndex > 0) {
-          facilityList = facilities.concat(resp.data)
-        } else {
-          facilityList = resp.data
-        }
-
         if(payload.isOrderCountRequired) {
           const facilityIds = resp.data.map((facility: any) => facility.facilityId)
           const facilityCounts = await dispatch("fetchFacilitiesOrderCount", { facilityIds })
 
-          facilityList.map((facility: any) => {
+          resp.data.map((facility: any) => {
             if(facilityCounts[facility.facilityId]) facility.orderCount = facilityCounts[facility.facilityId]
             else facility.orderCount = 0;
           })
+        }
+
+        if(payload.pageIndex && payload.pageIndex > 0) {
+          facilityList = facilities.concat(resp.data)
+        } else {
+          facilityList = resp.data
         }
 
         if(resp.data.length == payload.pageSize) isScrollable = true
