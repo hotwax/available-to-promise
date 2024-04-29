@@ -39,10 +39,19 @@ const fetchFacilityGroups = async (payload: any): Promise <any>  => {
   });
 }
 
+const fetchFacilitiesOrderCount = async (payload: any): Promise <any>  => {
+  return api({
+    url: `facilities/orderCount`,
+    method: "GET",
+    params: payload
+  });
+}
+
 export const UtilService = {
   fetchConfigFacilities,
   fetchFacilities,
+  fetchFacilitiesOrderCount,
   updateFacility,
   fetchFacilityGroups,
-  fetchFacets
+  fetchFacets,
 }

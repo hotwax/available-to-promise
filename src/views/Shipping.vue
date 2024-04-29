@@ -130,8 +130,9 @@ async function updateRuleGroup() {
   if(selectedSegment.value === 'facility') {
     isScrollingEnabled.value = false;
     await fetchFacilities();
+  } else {
+    await store.dispatch('rule/fetchRules', { groupTypeEnumId: selectedSegment.value})
   }
-  await store.dispatch('rule/fetchRules', { groupTypeEnumId: selectedSegment.value})
 }
 
 function createShipping() {

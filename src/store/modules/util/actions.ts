@@ -58,7 +58,7 @@ const actions: ActionTree<UtilState, RootState> = {
     commit(types.UTIL_APPLIED_FILTERS_CLEARED)
   },
 
-  async fetchFacilities({ commit, state }, payload) {
+  async fetchFacilities({ commit, dispatch, state }, payload) {
     const params = {
       parentFacilityTypeId: 'VIRTUAL_FACILITY',
       parentFacilityTypeId_not: 'Y',
@@ -82,6 +82,13 @@ const actions: ActionTree<UtilState, RootState> = {
           facilityList = resp.data
         }
 
+        const facilityIds = resp.data.map((facility: any) => facility.facilityId)
+        const facilityCounts = await dispatch("fetchFacilitiesOrderCount", facilityIds)
+
+        facilityList.map((facility: any) => {
+          if(facilityCounts[facility.facilityId]) facility.orderCount = facilityCounts[facility.facilityId].orderCount;
+        })
+
         if(resp.data.length == payload.pageSize) isScrollable = true
         else isScrollable = false
       } else {
@@ -92,6 +99,23 @@ const actions: ActionTree<UtilState, RootState> = {
     }
     
     commit(types.UTIL_FACILITY_LIST_UPDATED , { facilities: facilityList.length ? facilityList : facilities, isScrollable });
+  },
+
+  async fetchFacilitiesOrderCount({ commit, state }, payload) {
+    let facilitiesData = {} as any;
+
+    try {
+      const resp = await UtilService.fetchFacilitiesOrderCount({facilityIds: payload.facilityIds})
+
+      if(!hasError(resp)) {
+        facilitiesData = resp.data
+      } else {
+        throw resp.data
+      }
+    } catch(error) {
+      logger.error(error)
+    }
+    return facilitiesData;
   },
 
   async updateFacilities({ commit, state }, payload) {
