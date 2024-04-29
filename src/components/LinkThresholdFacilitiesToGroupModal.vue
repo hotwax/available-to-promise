@@ -2,7 +2,7 @@
   <ion-header>
     <ion-toolbar>
       <ion-buttons slot="start">
-        <ion-button>
+        <ion-button @click="closeModal">
           <ion-icon slot="icon-only" :icon="closeOutline" />
         </ion-button>
       </ion-buttons>
@@ -54,6 +54,10 @@ const configFacilities = computed(() => store.getters["util/getConfigFacilities"
 onMounted(() => {
   selectedFacilityId.value = props.selectedConfigFacilityId?.facilityId ? JSON.parse(JSON.stringify(props.selectedConfigFacilityId.facilityId)) : '';
 })
+
+function closeModal() {
+  modalController.dismiss({ dismissed: true });
+}
 
 async function saveFacility() {
   if(!selectedFacilityId.value) {
