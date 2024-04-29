@@ -52,7 +52,6 @@ import { computed, ref } from "vue";
 import { generateInternalId, hasError, showToast } from "@/utils";
 import logger from "@/logger";
 import { ChannelService } from "@/services/ChannelService";
-import { DateTime } from "luxon";
 
 const store = useStore();
 

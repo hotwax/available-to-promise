@@ -63,7 +63,7 @@
   import { computed } from "vue";
   import { useStore } from "@/store";
   import { useRouter } from "vue-router";
-  import { cloudUploadOutline, globeOutline, optionsOutline, settingsOutline, sendOutline, storefrontOutline, pulseOutline } from 'ionicons/icons';
+  import { cloudUploadOutline, globeOutline, settingsOutline, sendOutline, storefrontOutline, pulseOutline } from 'ionicons/icons';
   import { translate } from "@/i18n";
 
   const store = useStore();
