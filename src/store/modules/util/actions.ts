@@ -6,6 +6,7 @@ import logger from '@/logger'
 import UtilState from './UtilState'
 import * as types from './mutation-types'
 import store from "@/store"
+import { DateTime } from 'luxon'
 
 
 const actions: ActionTree<UtilState, RootState> = {
@@ -65,8 +66,8 @@ const actions: ActionTree<UtilState, RootState> = {
       facilityTypeId: 'VIRTUAL_FACILITY',
       facilityTypeId_not: 'Y',
       productStoreId: store.state.user.currentEComStore.productStoreId,
-      pageSize: 20,
-      ...payload
+      pageSize: payload.pageSize,
+      pageIndex: payload.pageIndex
     }
 
     const facilities = state.facilities.list ? JSON.parse(JSON.stringify(state.facilities.list)) : [];
@@ -82,12 +83,15 @@ const actions: ActionTree<UtilState, RootState> = {
           facilityList = resp.data
         }
 
-        const facilityIds = resp.data.map((facility: any) => facility.facilityId)
-        const facilityCounts = await dispatch("fetchFacilitiesOrderCount", facilityIds)
+        if(payload.isOrderCountRequired) {
+          const facilityIds = resp.data.map((facility: any) => facility.facilityId)
+          const facilityCounts = await dispatch("fetchFacilitiesOrderCount", { facilityIds })
 
-        facilityList.map((facility: any) => {
-          if(facilityCounts[facility.facilityId]) facility.orderCount = facilityCounts[facility.facilityId].orderCount;
-        })
+          facilityList.map((facility: any) => {
+            if(facilityCounts[facility.facilityId]) facility.orderCount = facilityCounts[facility.facilityId]
+            else facility.orderCount = 0;
+          })
+        }
 
         if(resp.data.length == payload.pageSize) isScrollable = true
         else isScrollable = false
@@ -97,18 +101,24 @@ const actions: ActionTree<UtilState, RootState> = {
     } catch(error) {
       logger.error(error)
     }
-    
+
     commit(types.UTIL_FACILITY_LIST_UPDATED , { facilities: facilityList.length ? facilityList : facilities, isScrollable });
   },
 
-  async fetchFacilitiesOrderCount({ commit, state }, payload) {
-    let facilitiesData = {} as any;
+  async fetchFacilitiesOrderCount({ commit }, payload) {
+    const facilitiesData = {} as any;
 
     try {
-      const resp = await UtilService.fetchFacilitiesOrderCount({facilityIds: payload.facilityIds})
+      const resp = await UtilService.fetchFacilitiesOrderCount({
+        facilityId: payload.facilityIds.join(","),
+        facilityId_op: "in",
+        entryDate: DateTime.now().toFormat('yyyy-MM-dd')
+      })
 
       if(!hasError(resp)) {
-        facilitiesData = resp.data
+        resp.data.map((facility: any) => {
+          facilitiesData[facility.facilityId] = facility.lastOrderCount
+        })
       } else {
         throw resp.data
       }

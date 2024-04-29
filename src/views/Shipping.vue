@@ -94,7 +94,8 @@ async function fetchFacilities(vSize?: any, vIndex?: any) {
   const pageIndex = vIndex ? vIndex : 0;
   const payload = {
     pageSize,
-    pageIndex
+    pageIndex,
+    isOrderCountRequired: true
   };
   await store.dispatch('util/fetchFacilities', payload)
 }

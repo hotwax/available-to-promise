@@ -18,16 +18,16 @@
     </ion-card-header>
 
     <ion-item lines="none" v-if="facility.maximumOrderLimit === 0">
-      <ion-label>{{ translate("orders in fulfillment queue", {orderCount: 0}) }}</ion-label>
+      <ion-label>{{ translate("orders in fulfillment queue", {orderCount: facility.orderCount}) }}</ion-label>
       <ion-chip :outline="true" @click="changeOrderLimitPopover" color="danger" fill="outline">{{ facility.maximumOrderLimit }}</ion-chip>
     </ion-item>
     <ion-item lines="none" v-else-if="facility.maximumOrderLimit">
-      <ion-text slot="start">{{ 0 }}</ion-text>
+      <ion-text slot="start">{{ facility.orderCount }}</ion-text>
       <ion-progress-bar :value="0 / facility.maximumOrderLimit"></ion-progress-bar>
       <ion-chip slot="end" :outline="true" @click="changeOrderLimitPopover">{{facility.maximumOrderLimit}}</ion-chip>
     </ion-item>
     <ion-item lines="none" v-else>
-      <ion-label>{{ translate("orders allocated today", {orderCount: 0}) }}</ion-label>
+      <ion-label>{{ translate("orders allocated today", {orderCount: facility.orderCount}) }}</ion-label>
       <ion-chip :outline="true" @click="changeOrderLimitPopover">{{ translate("Unlimited") }}</ion-chip>
     </ion-item>      
   </ion-card>
