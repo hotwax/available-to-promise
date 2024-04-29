@@ -23,7 +23,7 @@
     </ion-item>
     <ion-item lines="none" v-else-if="facility.maximumOrderLimit">
       <ion-text slot="start">{{ facility.orderCount }}</ion-text>
-      <ion-progress-bar :value="0 / facility.maximumOrderLimit"></ion-progress-bar>
+      <ion-progress-bar :value="facility.orderCount / facility.maximumOrderLimit"></ion-progress-bar>
       <ion-chip slot="end" :outline="true" @click="changeOrderLimitPopover">{{facility.maximumOrderLimit}}</ion-chip>
     </ion-item>
     <ion-item lines="none" v-else>

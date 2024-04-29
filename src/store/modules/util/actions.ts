@@ -102,7 +102,7 @@ const actions: ActionTree<UtilState, RootState> = {
       logger.error(error)
     }
 
-    commit(types.UTIL_FACILITY_LIST_UPDATED , { facilities: facilityList.length ? facilityList : facilities, isScrollable });
+    commit(types.UTIL_FACILITY_LIST_UPDATED , { facilities: facilityList, isScrollable });
   },
 
   async fetchFacilitiesOrderCount({ commit }, payload) {
