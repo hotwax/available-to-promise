@@ -36,6 +36,9 @@ const actions: ActionTree<ChannelState, RootState> = {
       const resp = await ChannelService.fetchGroupFacilities({ facilityGroupId })
 
       if(!hasError(resp)) {
+        // Currently expired records are coming also while fetching, hence filtering records with thruDate for now.
+        resp.data = resp.data.filter((facility: any) => !facility.thruDate)
+
         const currentGroup = groups.find((group: any) => group.facilityGroupId === facilityGroupId)
         currentGroup.selectedConfigFacility = await resp.data.find((facility: any) => facility.facilityTypeId === "CONFIGURATION")
         currentGroup.selectedFacilities = await resp.data.filter((facility: any) => facility.facilityTypeId === "RETAIL_STORE" || facility.facilityTypeId === "WAREHOUSE")
@@ -48,8 +51,11 @@ const actions: ActionTree<ChannelState, RootState> = {
           const resp = await ChannelService.fetchGroupFacilities({ facilityGroupId: group.facilityGroupId });
 
           if(!hasError(resp)) {
-             group.selectedConfigFacility = await resp.data.find((facility: any) => facility.facilityTypeId === "CONFIGURATION")
-             group.selectedFacilities = await resp.data.filter((facility: any) => facility.facilityTypeId === "RETAIL_STORE" || facility.facilityTypeId === "WAREHOUSE")
+            // Currently expired records are coming also while fetching, hence filtering records with thruDate for now.
+            resp.data = resp.data.filter((facility: any) => !facility.thruDate)
+
+            group.selectedConfigFacility = await resp.data.find((facility: any) => facility.facilityTypeId === "CONFIGURATION")
+            group.selectedFacilities = await resp.data.filter((facility: any) => facility.facilityTypeId === "RETAIL_STORE" || facility.facilityTypeId === "WAREHOUSE")
           } else {
             throw resp.data
           }
