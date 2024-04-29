@@ -20,6 +20,10 @@ const utilModule: Module<UtilState, RootState> = {
         productFeatures: []
       }
     },
+    facilities: {
+      list: [],
+      isScrollable: true
+    },
   },
   getters,
   actions,

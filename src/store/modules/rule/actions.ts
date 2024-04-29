@@ -91,6 +91,10 @@ const actions: ActionTree<RuleState, RootState> = {
     commit(types.RULE_GROUP_UPDATED, payload);
   },
 
+  updateRules({commit}, payload) {
+    commit(types.RULE_RULES_UPDATED, { list: payload.rules, total: payload.rules.length});
+  },
+
   archiveRule({ commit, state }, { rule }) {
     const rules = JSON.parse(JSON.stringify(state.rules.list))
 
