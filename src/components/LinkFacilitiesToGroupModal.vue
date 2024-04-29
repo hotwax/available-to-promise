@@ -138,3 +138,9 @@ async function saveFacilities() {
   modalController.dismiss()  
 }
 </script>
+
+<style scoped>
+  ion-content {
+    --padding-bottom: 80px;
+  }
+</style>

@@ -97,3 +97,9 @@ async function saveFacility() {
   await store.dispatch("channel/fetchGroupFacilities", props.group.facilityGroupId);
 }
 </script>
+
+<style scoped>
+  ion-content {
+    --padding-bottom: 80px;
+  }
+</style>

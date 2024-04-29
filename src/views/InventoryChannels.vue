@@ -60,7 +60,7 @@
               </ion-item>
   
               <ion-item lines="none">
-                <ion-button fill="clear" @click="openEditGroupModal(channel)">{{ translate("Edit group") }}</ion-button>
+                <ion-button fill="clear" size="default" @click="openEditGroupModal(channel)">{{ translate("Edit group") }}</ion-button>
                 <!-- Functionality is not defined for this button hence commented it for now. -->
                 <!-- <ion-button color="medium" fill="clear" slot="end">
                   <ion-icon :icon="ellipsisVerticalOutline" slot="icon-only"/>
