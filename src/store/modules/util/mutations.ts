@@ -37,5 +37,9 @@ const mutations: MutationTree <UtilState> = {
       }
     }
   },
+  [types.UTIL_FACILITY_LIST_UPDATED](state, payload) {
+    state.facilities.list = payload.facilities
+    state.facilities.isScrollable = payload.isScrollable
+  },
 }
 export default mutations;
