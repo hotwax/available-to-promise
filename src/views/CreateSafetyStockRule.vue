@@ -198,9 +198,9 @@ async function createRule() {
     return;
   }
 
-  let ruleGroup = await store.dispatch("rule/fetchRuleGroup", { groupTypeEnumId: "RG_SAFETY_STOCK" });
-
   emitter.emit("presentLoader");
+
+  let ruleGroup = await store.dispatch("rule/fetchRuleGroup", { groupTypeEnumId: "RG_SAFETY_STOCK" });
 
   try {
     if(!ruleGroup.ruleGroupId) {

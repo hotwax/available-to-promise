@@ -183,9 +183,9 @@ async function createRule() {
     return;
   }
 
-  let ruleGroup = await store.dispatch("rule/fetchRuleGroup", { groupTypeEnumId: selectedSegment.value });
-
   emitter.emit("presentLoader");
+
+  let ruleGroup = await store.dispatch("rule/fetchRuleGroup", { groupTypeEnumId: selectedSegment.value });
 
   try {
     if(!ruleGroup.ruleGroupId) {

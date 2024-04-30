@@ -175,9 +175,9 @@ async function createThresholdRule() {
     return;
   }
 
-  let ruleGroup = await store.dispatch("rule/fetchRuleGroup", { groupTypeEnumId: "RG_THRESHOLD" });
-
   emitter.emit("presentLoader");
+
+  let ruleGroup = await store.dispatch("rule/fetchRuleGroup", { groupTypeEnumId: "RG_THRESHOLD" });
 
   try {
     if(!ruleGroup.ruleGroupId) {
