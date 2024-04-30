@@ -77,7 +77,6 @@ const store = useStore();
 const router = useRouter()
 
 const rules = computed(() => store.getters["rule/getRules"]);
-const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
 const isScrollable = computed(() => store.getters["util/isFacilitiesScrollable"]);
 const facilities = computed(() => store.getters["util/getFacilities"]);
 

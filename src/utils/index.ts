@@ -35,4 +35,8 @@ function timeTillRun(endTime: any) {
   return DateTime.local().plus(timeDiff).toRelative();
 }
 
-export { getDate, getDateAndTime, getTime, hasError, showToast, timeTillRun }
+const generateInternalId = (name: string) => {
+  return name.trim().toUpperCase().split(' ').join('_');
+}
+
+export { generateInternalId, getDate, getDateAndTime, getTime, hasError, showToast, timeTillRun }

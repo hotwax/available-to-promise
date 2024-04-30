@@ -7,6 +7,7 @@ import createPersistedState from "vuex-persistedstate";
 import userModule from './modules/user';
 import utilModule from './modules/util';
 import ruleModule from './modules/rule';
+import channelModule from "./modules/channel"
 
 
 // TODO check how to register it from the components only
@@ -33,7 +34,8 @@ const store = createStore<RootState>({
     modules: { 
         'user': userModule,
         'util': utilModule,
-        'rule': ruleModule
+        'rule': ruleModule,
+        'channel': channelModule
     },
 })
 

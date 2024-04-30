@@ -8,14 +8,6 @@ const fetchFacets = async (payload: any): Promise<any> => {
   });
 }
 
-const fetchConfigFacilities = async (payload: any): Promise <any>  => {
-  return api({
-    url: `productStores/${payload.productStoreId}/facilities`,
-    method: "GET",
-    params: payload
-  });
-}
-
 const fetchFacilities = async (payload: any): Promise <any>  => {
   return api({
     url: `productStores/${payload.productStoreId}/facilities`,
@@ -48,7 +40,6 @@ const fetchFacilitiesOrderCount = async (payload: any): Promise <any>  => {
 }
 
 export const UtilService = {
-  fetchConfigFacilities,
   fetchFacilities,
   fetchFacilitiesOrderCount,
   updateFacility,

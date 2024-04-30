@@ -21,22 +21,22 @@
     <ion-content>
       <main>
         <section v-if="selectedSegment === 'channels'">
-          <ion-card>
+          <ion-card v-for="channel in inventoryChannels" :key="channel.facilityGroupId">
             <ion-card-header>
               <div>
-                <ion-card-subtitle class="overline">{{ "Group ID" }}</ion-card-subtitle>
-                <ion-card-title>{{ "Group name" }}</ion-card-title>
-                <ion-card-subtitle>{{ "Group desc" }}</ion-card-subtitle>
+                <ion-card-subtitle class="overline">{{ channel.facilityGroupId }}</ion-card-subtitle>
+                <ion-card-title>{{ channel.facilityGroupName }}</ion-card-title>
+                <ion-card-subtitle>{{ channel.description }}</ion-card-subtitle>
               </div>
             </ion-card-header>
 
             <ion-item lines="full">
               <ion-icon slot="start" :icon="globeOutline"/>
               <ion-label>
-                {{ "<threshold facility name>" }}
-                <p>{{ "<facilityId>" }}</p>
+                {{ channel.selectedConfigFacility?.facilityName }}
+                <p>{{ channel.selectedConfigFacility?.facilityId }}</p>
               </ion-label>
-              <ion-button slot="end" fill="clear" color="medium" @click="openLinkThresholdFacilitiesToGroupModal()">
+              <ion-button slot="end" fill="clear" color="medium" @click="openLinkThresholdFacilitiesToGroupModal(channel)">
                 <ion-icon :icon="optionsOutline" slot="icon-only" />
               </ion-button>
             </ion-item>
@@ -44,26 +44,27 @@
             <ion-list>
               <ion-item-divider color="light">
                 <ion-label>{{ translate("Facilities") }}</ion-label>
-                <ion-button slot="end" fill="clear" color="medium" @click="openLinkFacilitiesToGroupModal()">
+                <ion-button slot="end" fill="clear" color="medium" @click="openLinkFacilitiesToGroupModal(channel)">
                   <ion-icon :icon="optionsOutline" slot="icon-only" />
                 </ion-button>
               </ion-item-divider>
 
               <ion-item>
                 <ion-icon slot="start" :icon="storefrontOutline"/>
-                <ion-label>{{ "15 retail facilities" }}</ion-label>
+                <ion-label>{{ translate("retail facilities", { count: getFacilityCount(channel, "RETAIL_STORE") })}}</ion-label>
               </ion-item>
 
               <ion-item lines="full">
                 <ion-icon slot="start" :icon="businessOutline"/>
-                <ion-label>{{ "1 warehouse" }}</ion-label>
+                <ion-label>{{ translate("warehouse", { count: getFacilityCount(channel, "WAREHOUSE") })}}</ion-label>
               </ion-item>
   
               <ion-item lines="none">
-                <ion-button fill="clear">{{ translate("View details") }}</ion-button>
-                <ion-button color="medium" fill="clear" slot="end">
+                <ion-button fill="clear" size="default" @click="openEditGroupModal(channel)">{{ translate("Edit group") }}</ion-button>
+                <!-- Functionality is not defined for this button hence commented it for now. -->
+                <!-- <ion-button color="medium" fill="clear" slot="end">
                   <ion-icon :icon="ellipsisVerticalOutline" slot="icon-only"/>
-                </ion-button>
+                </ion-button> -->
               </ion-item>
             </ion-list>
           </ion-card>
@@ -123,15 +124,25 @@
 
 <script setup lang="ts">
 import { IonBadge, IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonItemDivider, IonLabel, IonList, IonMenuButton, IonPage, IonSegment, IonSegmentButton, IonSelect, IonSelectOption, IonTitle, IonToolbar, modalController, popoverController } from '@ionic/vue';
-import { ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { addOutline, albumsOutline, businessOutline, ellipsisVerticalOutline, globeOutline, optionsOutline, storefrontOutline, timeOutline, timerOutline } from 'ionicons/icons';
 import { translate } from '@/i18n';
 import ShopActionsPopover from '@/components/ShopActionsPopover.vue'
 import CreateGroupModal from '@/components/CreateGroupModal.vue'
 import LinkFacilitiesToGroupModal from '@/components/LinkFacilitiesToGroupModal.vue'
 import LinkThresholdFacilitiesToGroupModal from '@/components/LinkThresholdFacilitiesToGroupModal.vue'
+import { useStore } from 'vuex';
+import EditGroupModal from '@/components/EditGroupModal.vue';
+
+const store = useStore();
 
 const selectedSegment = ref("channels")
+
+const inventoryChannels = computed(() => store.getters["channel/getInventoryChannels"])
+
+onMounted(async () => {
+  await Promise.allSettled([store.dispatch("channel/fetchInventoryChannels"), store.dispatch("util/fetchConfigFacilities")]);
+})
 
 async function openShopActionsPopover(event: Event) {
   const popover = await popoverController.create({
@@ -143,6 +154,15 @@ async function openShopActionsPopover(event: Event) {
   return popover.present();
 }
 
+async function openEditGroupModal(group: any) {
+  const modal = await modalController.create({
+    component: EditGroupModal,
+    componentProps: { group }
+  })
+
+  modal.present()
+}
+
 async function openCreateGroupModal() {
   const popover = await modalController.create({
     component: CreateGroupModal
@@ -151,21 +171,28 @@ async function openCreateGroupModal() {
   return popover.present();
 }
 
-async function openLinkFacilitiesToGroupModal() {
+async function openLinkFacilitiesToGroupModal(group: any) {
   const popover = await modalController.create({
-    component: LinkFacilitiesToGroupModal
+    component: LinkFacilitiesToGroupModal,
+    componentProps: { group, selectedFacilities: group.selectedFacilities }
   });
 
   return popover.present();
 }
 
-async function openLinkThresholdFacilitiesToGroupModal() {
+async function openLinkThresholdFacilitiesToGroupModal(group: any) {
   const popover = await modalController.create({
-    component: LinkThresholdFacilitiesToGroupModal
+    component: LinkThresholdFacilitiesToGroupModal,
+    componentProps: { group, selectedConfigFacilityId: group.selectedConfigFacility }
   });
 
   return popover.present();
 }
+
+function getFacilityCount(group: any, facilityTypeId: string) {
+  return group.selectedFacilities?.length ? group.selectedFacilities.filter((facility: any) => facility.facilityTypeId === facilityTypeId).length : 0;
+}
+
 </script>
 
 <style scoped>

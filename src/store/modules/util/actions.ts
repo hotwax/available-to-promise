@@ -16,7 +16,7 @@ const actions: ActionTree<UtilState, RootState> = {
     if(configFacilities.length && configFacilities[0].productStoreId === store.state.user.currentEComStore.productStoreId) return;
 
     try {
-      const resp = await UtilService.fetchConfigFacilities({ facilityTypeId: 'CONFIGURATION', productStoreId: store.state.user.currentEComStore.productStoreId });
+      const resp = await UtilService.fetchFacilities({ facilityTypeId: 'CONFIGURATION', productStoreId: store.state.user.currentEComStore.productStoreId });
 
       if(!hasError(resp)) {
         configFacilities = resp.data;
