@@ -3,7 +3,7 @@
     <ion-toolbar>
       <ion-buttons slot="start">
         <ion-button @click="closeModal">
-          <ion-icon slot="icon-only" :icon="arrowBackOutline" />
+          <ion-icon slot="icon-only" :icon="closeOutline" />
         </ion-button>
       </ion-buttons>
       <ion-title>{{ type === "included" ? translate("Include facility groups") : translate("Exclude facility groups") }}</ion-title>
@@ -52,7 +52,7 @@ import {
   IonToolbar,
   modalController
 } from "@ionic/vue";
-import { arrowBackOutline, saveOutline } from 'ionicons/icons';
+import { closeOutline, saveOutline } from 'ionicons/icons';
 import { useStore } from "vuex";
 import { translate } from "@/i18n";
 
