@@ -25,7 +25,7 @@
       </ion-item>
       <ion-item>
         <ion-label>{{ translate("Product store") }}</ion-label>
-        <ion-label slot="end">{{ eComStore.storeName }}</ion-label>
+        <ion-label slot="end">{{ eComStore.storeName ? eComStore.storeName : eComStore.productStoreId }}</ion-label>
       </ion-item>
       <ion-item>
         <ion-select :label="translate('Group level configurations')" v-model="selectedConfigFacilityId" interface="popover">

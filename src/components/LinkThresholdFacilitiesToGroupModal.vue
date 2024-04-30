@@ -27,7 +27,7 @@
     </div> 
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button @click="saveFacility()">
+      <ion-fab-button :disabled="!isFacilityUpdated()" @click="saveFacility()">
         <ion-icon :icon="saveOutline" />
       </ion-fab-button>
     </ion-fab>
@@ -95,6 +95,10 @@ async function saveFacility() {
     showToast(translate("Failed to update threshold facility."))
   }
   await store.dispatch("channel/fetchGroupFacilities", props.group.facilityGroupId);
+}
+
+function isFacilityUpdated() {
+  return props.selectedConfigFacilityId.facilityId !== selectedFacilityId.value
 }
 </script>
 
