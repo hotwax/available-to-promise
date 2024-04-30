@@ -38,6 +38,7 @@ import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
 import { useStore } from 'vuex';
 import { computed } from 'vue';
 import { translate } from '@/i18n';
+import emitter from '@/event-bus';
 
 const store = useStore();
 const router = useRouter()
@@ -46,7 +47,9 @@ const rules = computed(() => store.getters["rule/getRules"]);
 const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
 
 onIonViewWillEnter(async() => {
+  emitter.emit("presentLoader");
   await Promise.allSettled([store.dispatch('rule/fetchRules', { groupTypeEnumId: 'RG_SAFETY_STOCK' }), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilityGroups")]);
+  emitter.emit("dismissLoader");
 })
 
 function createRule() {

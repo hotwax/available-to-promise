@@ -92,6 +92,7 @@ import { RuleService } from '@/services/RuleService';
 import { useRouter } from 'vue-router';
 import logger from '@/logger';
 import { showToast } from '@/utils';
+import emitter from '@/event-bus';
 
 const router = useRouter();
 const store = useStore();
@@ -199,6 +200,8 @@ async function createRule() {
 
   let ruleGroup = await store.dispatch("rule/fetchRuleGroup", { groupTypeEnumId: "RG_SAFETY_STOCK" });
 
+  emitter.emit("presentLoader");
+
   try {
     if(!ruleGroup.ruleGroupId) {
       ruleGroup = await RuleService.createRuleGroup({
@@ -229,6 +232,7 @@ async function createRule() {
   } catch(err: any) {
     logger.error(err);
     showToast(translate("Failed to create rule."))
-  }  
+  }
+  emitter.emit("dismissLoader");
 }
 </script>

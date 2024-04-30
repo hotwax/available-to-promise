@@ -44,6 +44,7 @@ import { hasError, showToast } from "@/utils";
 import { ChannelService } from '@/services/ChannelService';
 import logger from "@/logger";
 import { DateTime } from "luxon";
+import emitter from "@/event-bus";
 
 const store = useStore();
 const selectedFacilityId = ref("");
@@ -66,6 +67,8 @@ async function saveFacility() {
   }
   let resp = {} as any;
   
+  emitter.emit("presentLoader");
+
   try {
     if(props.selectedConfigFacilityId?.facilityId) {
       resp = await ChannelService.updateFacilityAssociationWithGroup({
@@ -95,6 +98,7 @@ async function saveFacility() {
     showToast(translate("Failed to update threshold facility."))
   }
   await store.dispatch("channel/fetchGroupFacilities", props.group.facilityGroupId);
+  emitter.emit("dismissLoader");
 }
 
 function isFacilityUpdated() {

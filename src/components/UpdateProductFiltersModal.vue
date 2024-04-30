@@ -75,6 +75,7 @@ import { RuleService } from "@/services/RuleService";
 import { translate } from "@/i18n";
 import { hasError, showToast } from "@/utils";
 import logger from "@/logger";
+import emitter from "@/event-bus";
 
 const queryString = ref('');
 const facetOptions = ref([]) as any;
@@ -162,6 +163,7 @@ function isSelected(value: string) {
 }
 
 async function saveFilters() {
+  emitter.emit("presentLoader");
   const rule = JSON.parse(JSON.stringify(props.rule))
 
   if(!rule.ruleConditions) rule.ruleConditions = []
@@ -203,6 +205,7 @@ async function saveFilters() {
     showToast(translate("Failed to update product filters."))
     logger.error(err);
   }
+  emitter.emit("dismissLoader");
 }
 </script>
 

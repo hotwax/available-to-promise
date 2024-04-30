@@ -110,6 +110,7 @@ import { useStore } from 'vuex';
 import { RuleService } from '@/services/RuleService';
 import { showToast } from '@/utils';
 import logger from '@/logger';
+import emitter from '@/event-bus';
 
 const store = useStore();
 const router = useRouter();
@@ -184,6 +185,8 @@ async function createRule() {
 
   let ruleGroup = await store.dispatch("rule/fetchRuleGroup", { groupTypeEnumId: selectedSegment.value });
 
+  emitter.emit("presentLoader");
+
   try {
     if(!ruleGroup.ruleGroupId) {
       ruleGroup = await RuleService.createRuleGroup({
@@ -215,6 +218,7 @@ async function createRule() {
     logger.error(err);
     showToast(translate("Failed to create rule."))
   }
+  emitter.emit("dismissLoader");
 }
 
 function generateRuleActions(ruleId: string) {

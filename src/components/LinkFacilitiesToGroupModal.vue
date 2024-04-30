@@ -46,6 +46,7 @@ import { ChannelService } from "@/services/ChannelService";
 import { UtilService } from "@/services/UtilService";
 import { hasError, showToast } from "@/utils";
 import logger from "@/logger";
+import emitter from "@/event-bus";
 
 const store = useStore();
 const queryString = ref('');
@@ -111,9 +112,10 @@ function areFacilitiesUpdated() {
 }
 
 async function saveFacilities() {
+  emitter.emit("presentLoader");
   const facilitiesToAdd = selectedFacilityValues.value.filter((selectedFacility: any) => !props.selectedFacilities.some((facility: any) => facility.facilityId === selectedFacility.facilityId))
   const facilitiesToRemove = props.selectedFacilities.filter((facility: any) => !selectedFacilityValues.value.some((selectedFacility: any) => facility.facilityId === selectedFacility.facilityId))
-
+  
   const removeResponses = await Promise.allSettled(facilitiesToRemove
     .map(async (facility: any) => await ChannelService.updateFacilityAssociationWithGroup({
       facilityId: facility.facilityId,
@@ -122,7 +124,7 @@ async function saveFacilities() {
       thruDate: DateTime.now().toMillis()
     }))
   )
-
+  
   const addResponses = await Promise.allSettled(facilitiesToAdd
     .map(async (facility: any) => await ChannelService.updateFacilityAssociationWithGroup({
       facilityId: facility.facilityId,
@@ -130,7 +132,7 @@ async function saveFacilities() {
       fromDate: DateTime.now().toMillis()
     }))
   )
-
+  
   const hasFailedResponse = [...removeResponses, ...addResponses].some((response: any) => response.status === 'rejected')
   if(hasFailedResponse) {
     showToast(translate("Failed to associate some facilites to group."))
@@ -139,6 +141,7 @@ async function saveFacilities() {
   }
   await store.dispatch("channel/fetchGroupFacilities", props.group.facilityGroupId);
   modalController.dismiss()  
+  emitter.emit("dismissLoader");
 }
 </script>
 

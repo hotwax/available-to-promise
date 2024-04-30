@@ -71,6 +71,7 @@ import FacilityItem from '@/components/FacilityItem.vue';
 import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
+import emitter from '@/event-bus';
 
 const store = useStore();
 const router = useRouter()
@@ -86,7 +87,9 @@ const contentRef = ref({}) as any;
 const infiniteScrollRef = ref({}) as any;
 
 onIonViewWillEnter(async() => {
+  emitter.emit("presentLoader");
   await Promise.allSettled([store.dispatch('rule/fetchRules', { groupTypeEnumId: router.currentRoute.value.query.groupTypeEnumId ? router.currentRoute.value.query.groupTypeEnumId : "RG_SHIPPING_FACILITY" }), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilityGroups")])
+  emitter.emit("dismissLoader");
 })
 
 async function fetchFacilities(vSize?: any, vIndex?: any) {
@@ -128,12 +131,14 @@ async function loadMoreFacilities(event: any) {
 }
 
 async function updateRuleGroup() {
+  emitter.emit("presentLoader");
   if(selectedSegment.value === 'facility') {
     isScrollingEnabled.value = false;
     await fetchFacilities();
   } else {
     await store.dispatch('rule/fetchRules', { groupTypeEnumId: selectedSegment.value})
   }
+  emitter.emit("dismissLoader");
 }
 
 function createShipping() {

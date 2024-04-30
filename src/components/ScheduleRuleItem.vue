@@ -39,6 +39,7 @@ import { useStore } from 'vuex';
 import logger from '@/logger';
 import { RuleService } from '@/services/RuleService';
 import { DateTime } from 'luxon';
+import emitter from '@/event-bus';
 
 const store = useStore();
 const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
@@ -65,6 +66,7 @@ async function saveSchedule() {
     systemMessageRemoteId: "RemoteSftp"
   }
 
+  emitter.emit("presentLoader");
   try {
     const resp = await RuleService.scheduleRuleGroup(payload)
     if(!hasError(resp)) {
@@ -77,6 +79,7 @@ async function saveSchedule() {
     showToast(translate("Failed to schedule service"))
     logger.error(err)
   }
+  emitter.emit("dismissLoader");
 }
 
 function timeTillJob(time: any) {

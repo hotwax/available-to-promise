@@ -52,6 +52,7 @@ import { computed, ref } from "vue";
 import { generateInternalId, hasError, showToast } from "@/utils";
 import logger from "@/logger";
 import { ChannelService } from "@/services/ChannelService";
+import emitter from "@/event-bus";
 
 const store = useStore();
 
@@ -86,6 +87,8 @@ async function createGroup() {
     showToast(translate("Internal ID cannot be more than 20 characters."))
     return
   }
+
+  emitter.emit("presentLoader");
 
   let resp = {} as any;
   try {
@@ -138,6 +141,7 @@ async function createGroup() {
     showToast(translate("Something went wrong."))
   }
   modalController.dismiss()
+  emitter.emit("dismissLoader");
 }
 
 function setFacilityGroupId(event: any) {

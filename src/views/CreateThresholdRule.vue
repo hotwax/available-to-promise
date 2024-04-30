@@ -86,6 +86,7 @@ import { RuleService } from '@/services/RuleService';
 import { showToast } from '@/utils';
 import logger from '@/logger';
 import router from '@/router';
+import emitter from '@/event-bus';
 
 const store = useStore();
 const formData = ref({
@@ -176,6 +177,8 @@ async function createThresholdRule() {
 
   let ruleGroup = await store.dispatch("rule/fetchRuleGroup", { groupTypeEnumId: "RG_THRESHOLD" });
 
+  emitter.emit("presentLoader");
+
   try {
     if(!ruleGroup.ruleGroupId) {
       ruleGroup = await RuleService.createRuleGroup({
@@ -207,7 +210,8 @@ async function createThresholdRule() {
   } catch(err: any) {
     logger.error(err);
     showToast(translate("Failed to create rule."))
-  }  
+  }
+  emitter.emit("dismissLoader");
 }
 </script>
 

@@ -29,6 +29,7 @@ import { hasError, showToast } from "@/utils";
 import logger from "@/logger";
 import RuleGroupHistoryModal from '@/components/RuleGroupHistoryModal.vue';
 import { popoverController } from "@ionic/core";
+import emitter from "@/event-bus";
 
 const store = useStore();
 const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
@@ -40,6 +41,7 @@ async function disableRuleGroup() {
     systemMessageRemoteId: "RemoteSftp"
   }
 
+  emitter.emit("presentLoader");
   try {
     const resp = await RuleService.scheduleRuleGroup(payload)
     if(!hasError(resp)){
@@ -55,6 +57,7 @@ async function disableRuleGroup() {
     showToast(translate("Failed to disable rule group."))
     logger.error(err)
   }
+  emitter.emit("dismissLoader");
 }
 
 async function openRuleGroupHistoryModal() {
@@ -79,6 +82,7 @@ async function runNow() {
         {
           text: translate("Run now"),
           handler: async () => {
+            emitter.emit("presentLoader");
             // Checking that if we already have the job schedule before calling runNow, because if the job scheduler is not present then runNow action can't be performed
             // If the scheduler for the job is available then we will have jobName, if not then first scheduling the job in draft status just to create a routing schedule and then calling runNow action
             if(!ruleGroup.value.jobName) {
@@ -94,6 +98,7 @@ async function runNow() {
                 }
               } catch(err) {
                 logger.error(err)
+                emitter.emit("dismissLoader");
                 return;
               }
             }
@@ -110,6 +115,7 @@ async function runNow() {
               showToast(translate("Failed to schedule service"))
               logger.error(err)
             }
+            emitter.emit("dismissLoader");
           }
         }
       ]
