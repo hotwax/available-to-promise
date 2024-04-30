@@ -76,15 +76,15 @@ async function createGroup() {
     return;
   }
 
-  if (formData.value.facilityGroupId.length > 20) {
-    showToast(translate("Internal ID cannot be more than 20 characters."))
-    return
-  }
-
   // In case the user does not lose focus from the facility name input
   // and click on create the button, we need to set the internal id manually
   if (!formData.value.facilityGroupId) {
     formData.value.facilityGroupId = generateInternalId(formData.value.facilityGroupName)
+  }
+
+  if (formData.value.facilityGroupId.length > 20) {
+    showToast(translate("Internal ID cannot be more than 20 characters."))
+    return
   }
 
   let resp = {} as any;
