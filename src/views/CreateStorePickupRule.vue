@@ -174,10 +174,10 @@ async function createRule() {
     return;
   }
 
-  if( selectedSegment.value === 'RG_PICKUP_FACILITY' && !formData.value.selectedFacilityGroups.included.length) {
-    showToast(translate("Please fill in all the required fields."))
+  if(selectedSegment.value === 'RG_PICKUP_FACILITY' && !formData.value.selectedFacilityGroups.included.length) {
+    showToast(translate("Please include atleast one facility group."))
     return;
-  } else if(!formData.value.selectedConfigFacilites.length) {
+  } else if(selectedSegment.value === 'RG_PICKUP_CHANNEL' && !formData.value.selectedConfigFacilites.length) {
     showToast(translate("Please select atleast one config facility."))
     return;
   }
