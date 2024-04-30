@@ -102,7 +102,7 @@ const actions: ActionTree<RuleState, RootState> = {
     if (index !== -1) {
       rules.splice(index, 1);
     }
-    commit(types.RULE_RULES_UPDATED, { list: rules, total: state.rules.total});
+    commit(types.RULE_RULES_UPDATED, { list: rules, total: state.rules.total - 1 });
   },
 
   async clearRuleState({ commit }) {

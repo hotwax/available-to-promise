@@ -31,7 +31,7 @@
         </div>
       </section>
       <div class="section-header">
-        <h1>{{ translate("Channels") }}</h1>
+        <h1>{{ translate("Channels") }} <ion-text color="danger">*</ion-text></h1>
       </div>
 
       <section> 
