@@ -44,8 +44,7 @@ import { useStore } from "vuex";
 import { DateTime } from "luxon";
 import { ChannelService } from "@/services/ChannelService";
 import { UtilService } from "@/services/UtilService";
-import { showToast } from "@/utils";
-import { hasError } from "@/utils";
+import { hasError, showToast } from "@/utils";
 import logger from "@/logger";
 
 const store = useStore();
@@ -68,11 +67,17 @@ async function fetchFacilities () {
   facilities.value = []
 
   try {
-    const params = {
+    let params = {
       productStoreId: store.state.user.currentEComStore.productStoreId,
-      facilityName: queryString.value,
-      facilityName_op: "contains",
       pageSize: 20
+    } as any;
+
+    if(queryString.value) {
+      params = {
+        ...params,
+        facilityName: queryString.value,
+        facilityName_op: "contains"
+      }
     }
 
     const resp = await UtilService.fetchFacilities(params);
@@ -87,14 +92,12 @@ async function fetchFacilities () {
   }
 }
 
-function isFacilitySelected(facilityId: any) {
+function isFacilitySelected(facilityId: string) {
   return selectedFacilityValues.value.some((facility: any) => facility.facilityId === facilityId)
 }
 
 function updateSelectedFacilities(id: string) {
-  const facility = isFacilitySelected(id)
-
-  if(facility) {
+  if(isFacilitySelected(id)) {
     selectedFacilityValues.value = selectedFacilityValues.value.filter((facility: any) => facility.facilityId !== id)
   } else {
     selectedFacilityValues.value.push(facilities.value.find((facility: any) => facility.facilityId == id))
