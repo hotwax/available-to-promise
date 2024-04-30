@@ -116,7 +116,7 @@ async function getFilters(vSize?: any, vIndex?: any) {
     limit: viewSize,
     q: queryString.value,
     term: queryString.value,
-    offset: 0,
+    offset: viewSize * viewIndex,
   }
 
   const resp = await UtilService.fetchFacets(payload);
