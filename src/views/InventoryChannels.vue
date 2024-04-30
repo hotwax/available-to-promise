@@ -133,6 +133,7 @@ import LinkFacilitiesToGroupModal from '@/components/LinkFacilitiesToGroupModal.
 import LinkThresholdFacilitiesToGroupModal from '@/components/LinkThresholdFacilitiesToGroupModal.vue'
 import { useStore } from 'vuex';
 import EditGroupModal from '@/components/EditGroupModal.vue';
+import emitter from '@/event-bus';
 
 const store = useStore();
 
@@ -141,7 +142,9 @@ const selectedSegment = ref("channels")
 const inventoryChannels = computed(() => store.getters["channel/getInventoryChannels"])
 
 onMounted(async () => {
+  emitter.emit("presentLoader");
   await Promise.allSettled([store.dispatch("channel/fetchInventoryChannels"), store.dispatch("util/fetchConfigFacilities")]);
+  emitter.emit("dismissLoader");
 })
 
 async function openShopActionsPopover(event: Event) {

@@ -44,6 +44,7 @@ import { UtilService } from '@/services/UtilService';
 import { hasError, showToast } from '@/utils';
 import logger from '@/logger';
 import { useStore } from 'vuex';
+import emitter from '@/event-bus';
 
 const router = useRouter();
 const store = useStore();
@@ -80,6 +81,8 @@ async function changeOrderLimitPopover(ev: Event) {
 async function updateFacility(maximumOrderLimit: number | string) {
   let resp;
 
+  emitter.emit("presentLoader");
+  
   try {
     resp = await UtilService.updateFacility({
       ...props.facility,
@@ -100,5 +103,6 @@ async function updateFacility(maximumOrderLimit: number | string) {
     showToast(translate("Failed to update facility"))
     logger.error("Failed to update facility", err)
   }
+  emitter.emit("dismissLoader");
 }
 </script>

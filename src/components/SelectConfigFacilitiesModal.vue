@@ -58,6 +58,7 @@ import { translate } from "@/i18n";
 import { RuleService } from "@/services/RuleService";
 import { showToast } from "@/utils";
 import logger from "@/logger";
+import emitter from "@/event-bus";
 
 const store = useStore();
 const props = defineProps(["rule", "selectedFacilities"])
@@ -87,6 +88,7 @@ function isSelected(currentFacilityId: any) {
 }
 
 async function saveFacilities() {  
+  emitter.emit("presentLoader");
   const rule = JSON.parse(JSON.stringify(props.rule))
 
   const condition = rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FACILITIES")
@@ -112,6 +114,7 @@ async function saveFacilities() {
     showToast(translate("Failed to update config facilities."))
     logger.error(err)
   }
+  emitter.emit("dismissLoader");
 }
 </script>
 

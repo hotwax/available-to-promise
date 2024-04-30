@@ -37,6 +37,7 @@ import logger from "@/logger";
 import { hasError, showToast } from "@/utils";
 import { ChannelService } from '@/services/ChannelService'
 import store from "@/store";
+import emitter from "@/event-bus";
 
 const props = defineProps(["group"]);
 const formData = ref({
@@ -54,6 +55,7 @@ function isGroupUpdated() {
 }
 
 async function updateGroup() {
+  emitter.emit("presentLoader");
   try {
     const resp = await ChannelService.updateGroup({...formData.value, facilityGroupId: props.group.facilityGroupId})
 
@@ -68,6 +70,7 @@ async function updateGroup() {
     showToast(translate("Failed to update group."))
     logger.error(err);
   }
+  emitter.emit("dismissLoader");
 }
 
 function closeModal() {

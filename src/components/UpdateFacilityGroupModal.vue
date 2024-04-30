@@ -69,6 +69,7 @@ import { RuleService } from "@/services/RuleService";
 import { translate } from "@/i18n";
 import { showToast } from "@/utils";
 import logger from "@/logger";
+import emitter from "@/event-bus";
 
 const selectedSegment = ref("included")
 const includedGroups = ref([]) as any;
@@ -114,6 +115,7 @@ function isSelected(value: string) {
 }
 
 async function saveFacilityGroups() {
+  emitter.emit("presentLoader");
   const rule = JSON.parse(JSON.stringify(props.rule))
 
   if(!rule.ruleConditions) rule.ruleConditions = []
@@ -155,6 +157,7 @@ async function saveFacilityGroups() {
     showToast(translate("Failed to update facility groups."))
     logger.error(err);
   }
+  emitter.emit("dismissLoader");
 }
 </script>
 

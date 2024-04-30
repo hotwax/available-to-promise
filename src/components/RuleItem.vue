@@ -123,6 +123,7 @@ import logger from '@/logger';
 import SelectConfigFacilitiesModal from '@/components/SelectConfigFacilitiesModal.vue';
 import UpdateProductFiltersModal from '@/components/UpdateProductFiltersModal.vue';
 import UpdateFacilityGroupModal from '@/components/UpdateFacilityGroupModal.vue';
+import emitter from '@/event-bus';
 
 const router = useRouter();
 const store = useStore();
@@ -165,6 +166,8 @@ async function editThreshold() {
           return false;
         }
 
+        emitter.emit("presentLoader");
+
         const rule = JSON.parse(JSON.stringify(props.rule))
 
         if(!rule.ruleActions?.length) {
@@ -187,6 +190,7 @@ async function editThreshold() {
           showToast(translate("Failed to update threshold."))
           logger.error(err);
         }
+        emitter.emit("dismissLoader");
       }
     }]
   })
@@ -216,6 +220,8 @@ async function editSafetyStock() {
           return false;
         }
 
+        emitter.emit("presentLoader");
+
         const rule = JSON.parse(JSON.stringify(props.rule))
 
         if(!rule.ruleActions?.length) {
@@ -238,6 +244,7 @@ async function editSafetyStock() {
           showToast(translate("Failed to update safety stock."))
           logger.error(err);
         }
+        emitter.emit("dismissLoader");
       }
     }]
   })
@@ -262,6 +269,7 @@ async function editRuleName() {
       text: translate('Update'),
       handler: async(data) => {
         if(data.name) {
+          emitter.emit("presentLoader");
           const rule = JSON.parse(JSON.stringify(props.rule))
           rule.ruleName = data.name
 
@@ -274,6 +282,7 @@ async function editRuleName() {
             logger.error(err)
             showToast(translate("Failed to update rule name."))
           }
+          emitter.emit("dismissLoader");
         }
       }
     }]
@@ -322,6 +331,7 @@ async function archiveRule() {
       }, {
         text: translate('Yes'),
         handler: async () => {
+          emitter.emit("presentLoader");
           const rule = JSON.parse(JSON.stringify(props.rule))
           rule.statusId = "ATP_RULE_ARCHIVED"
 
@@ -334,6 +344,7 @@ async function archiveRule() {
             showToast(translate("Failed to update threhold."))
             logger.error(err);
           }
+          emitter.emit("dismissLoader");
         }
       }]
     });
@@ -396,6 +407,7 @@ async function updateRulePickup(event: any) {
   event.stopImmediatePropagation();
   const isChecked = !event.target.checked;
   
+  emitter.emit("presentLoader");
   try {
     const rule = JSON.parse(JSON.stringify(props.rule))
     rule.ruleActions.map((action: any) => {
@@ -410,12 +422,14 @@ async function updateRulePickup(event: any) {
     logger.error(err)
     showToast(translate("Failed to update rule pickup."))
   }
+  emitter.emit("dismissLoader");
 }
 
 async function updateRuleShipping(event: any) {
   event.stopImmediatePropagation();
   const isChecked = !event.target.checked;
 
+  emitter.emit("presentLoader");
   try {
     const rule = JSON.parse(JSON.stringify(props.rule))
     rule.ruleActions.map((action: any) => {
@@ -430,6 +444,7 @@ async function updateRuleShipping(event: any) {
     logger.error(err)
     showToast(translate("Failed to update rule brokering."))
   }
+  emitter.emit("dismissLoader");
 }
 
 async function updateRuleOrder(ruleDir: string) {

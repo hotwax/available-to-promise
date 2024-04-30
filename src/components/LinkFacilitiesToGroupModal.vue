@@ -46,6 +46,7 @@ import { ChannelService } from "@/services/ChannelService";
 import { UtilService } from "@/services/UtilService";
 import { hasError, showToast } from "@/utils";
 import logger from "@/logger";
+import emitter from "@/event-bus";
 
 const store = useStore();
 const queryString = ref('');
@@ -111,6 +112,7 @@ function areFacilitiesUpdated() {
 }
 
 async function saveFacilities() {
+  emitter.emit("presentLoader");
   const facilitiesToAdd = selectedFacilityValues.value.filter((selectedFacility: any) => !props.selectedFacilities.some((facility: any) => facility.facilityId === selectedFacility.facilityId))
   const facilitiesToRemove = props.selectedFacilities.filter((facility: any) => !selectedFacilityValues.value.some((selectedFacility: any) => facility.facilityId === selectedFacility.facilityId))
 
@@ -139,6 +141,7 @@ async function saveFacilities() {
   }
   await store.dispatch("channel/fetchGroupFacilities", props.group.facilityGroupId);
   modalController.dismiss()  
+  emitter.emit("dismissLoader");
 }
 </script>
 
