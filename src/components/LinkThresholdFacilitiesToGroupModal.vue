@@ -98,7 +98,7 @@ async function saveFacility() {
 }
 
 function isFacilityUpdated() {
-  return props.selectedConfigFacilityId.facilityId !== selectedFacilityId.value
+  return props.selectedConfigFacilityId?.facilityId !== selectedFacilityId.value
 }
 </script>
 
