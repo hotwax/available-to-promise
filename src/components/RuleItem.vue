@@ -334,7 +334,7 @@ async function archiveRule() {
           emitter.emit("presentLoader");
           const rule = JSON.parse(JSON.stringify(props.rule))
           rule.statusId = "ATP_RULE_ARCHIVED"
-          
+
           try {
             await RuleService.updateRule(rule, props.rule.ruleId)
             await store.dispatch('rule/archiveRule', { rule })
@@ -413,7 +413,7 @@ async function updateRulePickup(event: any) {
     rule.ruleActions.map((action: any) => {
       if(action.actionTypeEnumId === "ATP_ALLOW_PICKUP") action.fieldValue = isChecked
     })
-    
+
     await RuleService.updateRule(rule, props.rule.ruleId)
     showToast(translate("Rule pickup updated successfully."))
     await store.dispatch('rule/updateRuleData', { rule })

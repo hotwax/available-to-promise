@@ -88,12 +88,12 @@ async function updateFacility(maximumOrderLimit: number | string) {
       ...props.facility,
       maximumOrderLimit
     })
-    
+
     if(!hasError(resp)) {
       const updatedFacilities = JSON.parse(JSON.stringify(facilities.value))
       const currentFacility = updatedFacilities.find((facility: any) => facility.facilityId === props.facility.facilityId)
       currentFacility.maximumOrderLimit = maximumOrderLimit;
-      
+
       showToast(translate("Order fulfillment capacity updated successfully"))
       await store.dispatch("util/updateFacilities", { facilities: updatedFacilities })
     } else {

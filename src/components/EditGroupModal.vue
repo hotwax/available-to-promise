@@ -58,7 +58,7 @@ async function updateGroup() {
   emitter.emit("presentLoader");
   try {
     const resp = await ChannelService.updateGroup({...formData.value, facilityGroupId: props.group.facilityGroupId})
-    
+
     if(!hasError(resp)) {
       store.dispatch("channel/updateGroup", { facilityGroupId: props.group.facilityGroupId, ...formData.value })
       showToast(translate("Group updated successfully."))
