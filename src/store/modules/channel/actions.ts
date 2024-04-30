@@ -78,7 +78,7 @@ const actions: ActionTree<ChannelState, RootState> = {
   },
 
   async clearChannelState({ commit }) {
-    commit(types.CHANNEL_CLEARED)
+    commit(types.CHANNEL_INVENTORY_CHANNELS_UPDATED, [])
   },
 }
 
