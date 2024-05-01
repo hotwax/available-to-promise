@@ -76,15 +76,20 @@
       </section>
 
       <section v-else>
-        <ion-card v-for="facility in configFacilities" :key="facility.facilityId" @click="toggleFacilitySelection(facility.facilityId)" button>
-          <ion-card-header>
-            <div>
-              <ion-card-title>{{ facility.facilityName }}</ion-card-title>
-              <ion-card-subtitle>{{ facility.facilityId }}</ion-card-subtitle>
-            </div>
-            <ion-checkbox :checked="isFacilitySelected(facility.facilityId)" />
-          </ion-card-header>
-        </ion-card>
+        <template v-if="configFacilities.length">
+          <ion-card v-for="facility in configFacilities" :key="facility.facilityId" @click="toggleFacilitySelection(facility.facilityId)" button>
+            <ion-card-header>
+              <div>
+                <ion-card-title>{{ facility.facilityName }}</ion-card-title>
+                <ion-card-subtitle>{{ facility.facilityId }}</ion-card-subtitle>
+              </div>
+              <ion-checkbox :checked="isFacilitySelected(facility.facilityId)" />
+            </ion-card-header>
+          </ion-card>
+        </template>
+        <div v-else class="empty-state">
+          <ion-note>{{ translate("No channel found for current product store.") }}</ion-note>
+        </div>
       </section>
 
       <ProductFilters />
@@ -99,7 +104,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonPage, IonSegment, IonSegmentButton, IonText, IonTitle, IonToggle, IonToolbar, modalController } from '@ionic/vue';
+import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonNote, IonPage, IonSegment, IonSegmentButton, IonText, IonTitle, IonToggle, IonToolbar, modalController } from '@ionic/vue';
 import { addCircleOutline, closeCircle, saveOutline, storefrontOutline } from 'ionicons/icons'
 import { translate } from "@/i18n";
 import { computed, onMounted, ref } from 'vue';
@@ -301,5 +306,9 @@ ion-card-header {
 
 ion-card-header > ion-checkbox {
   flex-shrink: 0;
+}
+
+.empty-state {
+  align-items: start;
 }
 </style>
