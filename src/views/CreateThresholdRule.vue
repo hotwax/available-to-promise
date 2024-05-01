@@ -34,7 +34,7 @@
         <h1>{{ translate("Channels") }} <ion-text color="danger">*</ion-text></h1>
       </div>
 
-      <section> 
+      <section v-if="configFacilities.length">
         <ion-card v-for="facility in configFacilities" :key="facility.facilityId" @click="toggleFacilitySelection(facility.facilityId)" button>
           <ion-card-header>
             <div>
@@ -45,6 +45,9 @@
           </ion-card-header>
         </ion-card>
       </section>
+      <div v-else class="empty-state">
+        <ion-note>{{ translate("No channel found for current product store.") }}</ion-note>
+      </div>
 
       <ProductFilters />
     </ion-content>
@@ -73,6 +76,7 @@ import {
   IonInput,
   IonItem,
   IonPage,
+  IonNote,
   IonText,
   IonTitle,
   IonToolbar
@@ -225,5 +229,9 @@ ion-card-header {
 
 ion-card-header > ion-checkbox {
   flex-shrink: 0;
+}
+
+.empty-state {
+  align-items: start;
 }
 </style>
