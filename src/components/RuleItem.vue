@@ -5,7 +5,7 @@
         <!-- <ion-item slot="header" color="light">
           <ion-label>First Accordion</ion-label>
         </ion-item> -->
-        <ion-card-header slot="header">
+        <ion-card-header slot="header" @click="$event.stopImmediatePropagation()">
           <div>
             <ion-card-subtitle class="overline">{{ rule.ruleId }}</ion-card-subtitle>
             <ion-card-title>{{ rule.ruleName }}</ion-card-title>
