@@ -108,6 +108,10 @@ const actions: ActionTree<RuleState, RootState> = {
   async clearRuleState({ commit }) {
     commit(types.RULE_CLEARED)
   },
+
+  async updateIsReorderActive({ commit }, payload) {
+    commit(types.RULE_IS_REORDER_ACTIVE_UPDATED, payload)
+  },
 }
 
 export default actions;

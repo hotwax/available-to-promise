@@ -4,6 +4,11 @@
       <ion-toolbar>
         <ion-menu-button slot="start" />
         <ion-title>{{ $t("Safety stock") }}</ion-title>
+        <ion-buttons slot="end">
+          <ion-button @click="updateReorderStatus()">
+            <ion-icon slot="icon-only" :icon="reorderTwoOutline" />
+          </ion-button>
+        </ion-buttons>
       </ion-toolbar>
     </ion-header>
 
@@ -30,13 +35,13 @@
 </template>
 
 <script setup lang="ts">
-import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonMenuButton, IonPage, IonTitle, IonToolbar, onIonViewWillEnter } from '@ionic/vue';
-import { addOutline } from 'ionicons/icons';
+import { IonButton, IonButtons, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonMenuButton, IonPage, IonTitle, IonToolbar, onIonViewWillEnter } from '@ionic/vue';
+import { addOutline, reorderTwoOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue';
 import { useRouter } from "vue-router";
 import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
 import { useStore } from 'vuex';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { translate } from '@/i18n';
 import emitter from '@/event-bus';
 
@@ -45,12 +50,21 @@ const router = useRouter()
 
 const rules = computed(() => store.getters["rule/getRules"]);
 const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
+const isReorderActive = computed(() => store.getters["rule/getIsReorderActive"]);
 
 onIonViewWillEnter(async() => {
   emitter.emit("presentLoader");
   await Promise.allSettled([store.dispatch('rule/fetchRules', { groupTypeEnumId: 'RG_SAFETY_STOCK' }), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilityGroups")]);
   emitter.emit("dismissLoader");
 })
+
+function updateReorderStatus() {
+  if(isReorderActive.value === false) {
+    store.dispatch("rule/updateIsReorderActive", true);
+  } else {
+    store.dispatch("rule/updateIsReorderActive", false);
+  }
+}
 
 function createRule() {
   router.push({ path: '/create-safety-stock' })
