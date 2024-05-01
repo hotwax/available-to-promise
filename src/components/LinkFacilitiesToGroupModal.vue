@@ -70,7 +70,11 @@ async function fetchFacilities () {
   try {
     let params = {
       productStoreId: store.state.user.currentEComStore.productStoreId,
-      pageSize: 20
+      pageSize: 20,
+      parentFacilityTypeId: 'VIRTUAL_FACILITY',
+      parentFacilityTypeId_not: 'Y',
+      facilityTypeId: 'VIRTUAL_FACILITY',
+      facilityTypeId_not: 'Y',
     } as any;
 
     if(queryString.value) {
