@@ -4,11 +4,6 @@
       <ion-toolbar>
         <ion-menu-button slot="start" />
         <ion-title>{{ $t("Safety stock") }}</ion-title>
-        <ion-buttons slot="end">
-          <ion-button @click="updateReorderStatus()">
-            <ion-icon slot="icon-only" :icon="reorderTwoOutline" />
-          </ion-button>
-        </ion-buttons>
       </ion-toolbar>
     </ion-header>
 
@@ -17,7 +12,9 @@
         <ScheduleRuleItem />
 
         <section>
-          <RuleItem v-for="(rule, ruleIndex) in rules" :rule="rule" :ruleIndex="ruleIndex" :key="rule.ruleId" />
+          <ion-reorder-group :disabled="false" @ionItemReorder="handleReorder($event)">
+            <RuleItem v-for="(rule, ruleIndex) in rules" :rule="rule" :ruleIndex="ruleIndex" :key="rule.ruleId" />
+          </ion-reorder-group>
         </section>
       </main>
 
@@ -26,8 +23,11 @@
       </div>
     </ion-content>
 
-    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button @click="createRule()">
+    <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="ion-margin">
+      <ion-fab-button class="ion-margin-bottom" color="light" @click="updateReorderStatus()">
+        <ion-icon :icon="isReorderActive ? saveOutline : balloonOutline" />
+      </ion-fab-button>
+      <ion-fab-button :disabled="isReorderActive" @click="createRule()">
         <ion-icon :icon="addOutline" />
       </ion-fab-button>
     </ion-fab>
@@ -35,8 +35,8 @@
 </template>
 
 <script setup lang="ts">
-import { IonButton, IonButtons, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonMenuButton, IonPage, IonTitle, IonToolbar, onIonViewWillEnter } from '@ionic/vue';
-import { addOutline, reorderTwoOutline } from 'ionicons/icons';
+import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonMenuButton, IonPage, IonReorderGroup, IonTitle, IonToolbar, onIonViewWillEnter } from '@ionic/vue';
+import { addOutline, saveOutline, balloonOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue';
 import { useRouter } from "vue-router";
 import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
@@ -62,8 +62,17 @@ function updateReorderStatus() {
   if(isReorderActive.value === false) {
     store.dispatch("rule/updateIsReorderActive", true);
   } else {
+    emitter.emit("presentLoader", { message: "Saving order..." });
+  
+    setTimeout(() => {
+      emitter.emit("dismissLoader");
+    }, 3000)
     store.dispatch("rule/updateIsReorderActive", false);
   }
+}
+
+function handleReorder(event: CustomEvent) {
+  console.log(event.detail.complete(rules.value)); 
 }
 
 function createRule() {

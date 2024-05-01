@@ -11,14 +11,17 @@
             <ion-card-title>{{ rule.ruleName }}</ion-card-title>
             <ion-card-subtitle>{{ ruleIndex+1 }}/{{ total }}</ion-card-subtitle>
           </div>
-          <div>
+          <ion-item lines=none>
+            <ion-reorder slot="end"></ion-reorder>
+          </ion-item>
+          <!-- <div>
             <ion-button fill="clear" color="medium" class="ion-no-padding" :disabled="ruleIndex === 0" @click="updateRuleOrder('prev')">
               <ion-icon :icon="chevronUpOutline" slot="icon-only" />
             </ion-button>
             <ion-button fill="clear" color="medium" class="ion-no-padding" :disabled="ruleIndex === rules.length - 1" @click="updateRuleOrder('next')">
               <ion-icon :icon="chevronDownOutline" slot="icon-only" />
             </ion-button>
-          </div>
+          </div> -->
         </ion-card-header>
         <div slot="content">
           <ion-item lines="full" v-if="selectedPage.path === '/threshold'">
@@ -120,7 +123,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonAccordion, IonAccordionGroup, IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonChip, IonIcon, IonItem, IonItemDivider, IonLabel, IonList, IonToggle, alertController, modalController } from '@ionic/vue';
+import { IonAccordion, IonAccordionGroup, IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonChip, IonIcon, IonItem, IonItemDivider, IonLabel, IonList, IonReorder, IonToggle, alertController, modalController } from '@ionic/vue';
 import { computed, defineProps, onMounted, ref } from 'vue';
 import { archiveOutline, checkmarkDoneCircleOutline, chevronDownOutline, chevronUpOutline, closeCircleOutline, globeOutline, optionsOutline, pulseOutline, sendOutline, storefrontOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
