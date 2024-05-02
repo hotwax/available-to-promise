@@ -140,7 +140,6 @@ const selectedPage = ref({
   path: '',
   name: ''
 }) as any;
-const cardStatus = ref(props.cardStatus);
 
 onMounted(() => {
   selectedPage.value.path = router.currentRoute.value.path
