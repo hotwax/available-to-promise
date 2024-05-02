@@ -39,4 +39,32 @@ const generateInternalId = (name: string) => {
   return name.trim().toUpperCase().split(' ').join('_');
 }
 
-export { generateInternalId, getDate, getDateAndTime, getTime, hasError, showToast, timeTillRun }
+const doReorder = (event: CustomEvent, rules: any) => {
+  const previousSeq = JSON.parse(JSON.stringify(rules))
+
+  // returns the updated sequence after reordering
+  const updatedSeq = event.detail.complete(JSON.parse(JSON.stringify(rules)));
+
+  let diffSeq = findRulesDiff(previousSeq, updatedSeq)
+
+  const updatedSeqenceNum = previousSeq.map((rejectionReason: any) => rejectionReason.sequenceNum)
+  Object.keys(diffSeq).map((key: any) => {
+    diffSeq[key].sequenceNum = updatedSeqenceNum[key]
+  })
+
+  diffSeq = Object.keys(diffSeq).map((key) => diffSeq[key])
+  return updatedSeq
+}
+
+const findRulesDiff = (previousSeq: any, updatedSeq: any) => {
+  const diffSeq: any = Object.keys(previousSeq).reduce((diff, key) => {
+    if (updatedSeq[key].ruleId === previousSeq[key].ruleId && updatedSeq[key].sequenceNum === previousSeq[key].sequenceNum) return diff
+    return {
+      ...diff,
+      [key]: updatedSeq[key]
+    }
+  }, {})
+  return diffSeq;
+}
+
+export { doReorder, generateInternalId, getDate, getDateAndTime, getTime, hasError, showToast, timeTillRun }

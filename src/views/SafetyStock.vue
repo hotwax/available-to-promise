@@ -12,7 +12,7 @@
         <ScheduleRuleItem />
 
         <section>
-          <ion-reorder-group :disabled="false" @ionItemReorder="doReorder($event)">
+          <ion-reorder-group :disabled="false" @ionItemReorder="reorderingRules = doReorder($event, reorderingRules)">
             <RuleItem v-for="(rule, ruleIndex) in (isReorderActive ? reorderingRules : rules)" :rule="rule" :ruleIndex="ruleIndex" :key="rule.ruleId" />
           </ion-reorder-group>
         </section>
@@ -45,7 +45,7 @@ import { computed, ref } from 'vue';
 import { translate } from '@/i18n';
 import emitter from '@/event-bus';
 import { RuleService } from '@/services/RuleService';
-import { showToast } from '@/utils';
+import { doReorder, showToast } from '@/utils';
 
 const store = useStore();
 const router = useRouter()
@@ -61,42 +61,20 @@ onIonViewWillEnter(async() => {
   emitter.emit("dismissLoader");
 })
 
-async function doReorder(event: CustomEvent) {
-  const previousSeq = JSON.parse(JSON.stringify(reorderingRules.value))
-
-  // returns the updated sequence after reordering
-  const updatedSeq = event.detail.complete(JSON.parse(JSON.stringify(reorderingRules.value)));
-
-  let diffSeq = findReasonsDiff(previousSeq, updatedSeq)
-
-  const updatedSeqenceNum = previousSeq.map((rejectionReason: any) => rejectionReason.sequenceNum)
-  Object.keys(diffSeq).map((key: any) => {
-    diffSeq[key].sequenceNum = updatedSeqenceNum[key]
-  })
-
-  diffSeq = Object.keys(diffSeq).map((key) => diffSeq[key])
-  reorderingRules.value = updatedSeq
-}
-
-function findReasonsDiff(previousSeq: any, updatedSeq: any) {
-  const diffSeq: any = Object.keys(previousSeq).reduce((diff, key) => {
-    if (updatedSeq[key].ruleId === previousSeq[key].ruleId && updatedSeq[key].sequenceNum === previousSeq[key].sequenceNum) return diff
-    return {
-      ...diff,
-      [key]: updatedSeq[key]
-    }
-  }, {})
-  return diffSeq;
-}
-
 function activateReordering() {
   store.dispatch("rule/updateIsReorderActive", true)
   reorderingRules.value = rules.value;
 }
 
 async function saveReorder() {
-  emitter.emit("presentLoader", { messgae: "Saving changes.." })
   const diffRules = reorderingRules.value.filter((reorderRule: any) => rules.value.some((rule: any) => rule.ruleId === reorderRule.ruleId && rule.sequenceNum !== reorderRule.sequenceNum))
+  if(!diffRules.length) {
+    store.dispatch("rule/updateIsReorderActive", false)
+    showToast(translate("No sequence has been changed."))
+    return;
+  }
+
+  emitter.emit("presentLoader", { messgae: "Saving changes.." })
   const responses = await Promise.allSettled(diffRules.map(async (rule: any) => {
     await RuleService.updateRule(rule, rule.ruleId)
   }))
