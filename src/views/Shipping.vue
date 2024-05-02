@@ -26,7 +26,9 @@
         <ScheduleRuleItem  v-if="ruleGroup.ruleGroupId" />
 
         <section v-if="selectedSegment !== 'facility'">
-          <RuleItem :selectedSegment="selectedSegment" v-for="(rule, ruleIndex) in rules" :rule="rule" :ruleIndex="ruleIndex" :key="rule.ruleId" />
+          <ion-reorder-group :disabled="false" @ionItemReorder="reorderingRules = doReorder($event, reorderingRules)">
+            <RuleItem v-for="(rule, ruleIndex) in (isReorderActive ? reorderingRules : rules)" :rule="rule" :ruleIndex="ruleIndex" :key="rule.ruleId" />
+          </ion-reorder-group>
         </section>
         <div v-else class="empty-state">
           <p>{{ translate("No shipping rules found") }}</p>
@@ -53,8 +55,11 @@
       </ion-infinite-scroll>
     </ion-content>
 
-    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button @click="createShipping()">
+    <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="ion-margin">
+      <ion-fab-button :disabled="!rules.length" class="ion-margin-bottom" color="light" @click="isReorderActive ? saveReorder() : activateReordering()">
+        <ion-icon :icon="isReorderActive ? saveOutline : balloonOutline" />
+      </ion-fab-button>
+      <ion-fab-button :disabled="isReorderActive" @click="createShipping()">
         <ion-icon :icon="addOutline" />
       </ion-fab-button>
     </ion-fab>
@@ -62,9 +67,9 @@
 </template>
 
 <script setup lang="ts">
-import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, IonLabel, IonMenuButton, IonPage, IonSegment, IonSegmentButton, IonTitle, IonToolbar, onIonViewWillEnter } from '@ionic/vue';
+import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, IonLabel, IonMenuButton, IonPage, IonReorderGroup, IonSegment, IonSegmentButton, IonTitle, IonToolbar, onIonViewWillEnter } from '@ionic/vue';
 import { computed, ref } from 'vue';
-import { addOutline } from 'ionicons/icons';
+import { addOutline, balloonOutline, saveOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue'
 import { translate } from '@/i18n';
 import FacilityItem from '@/components/FacilityItem.vue';
@@ -72,6 +77,8 @@ import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import emitter from '@/event-bus';
+import { RuleService } from '@/services/RuleService';
+import { doReorder, showToast } from '@/utils';
 
 const store = useStore();
 const router = useRouter()
@@ -80,6 +87,8 @@ const rules = computed(() => store.getters["rule/getRules"]);
 const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
 const isScrollable = computed(() => store.getters["util/isFacilitiesScrollable"]);
 const facilities = computed(() => store.getters["util/getFacilities"]);
+const isReorderActive = computed(() => store.getters["rule/getIsReorderActive"]);
+const reorderingRules = ref([]);
 
 const selectedSegment = ref(router.currentRoute.value.query.groupTypeEnumId ? router.currentRoute.value.query.groupTypeEnumId : "RG_SHIPPING_FACILITY")
 const isScrollingEnabled = ref(false);
@@ -135,10 +144,43 @@ async function updateRuleGroup() {
   if(selectedSegment.value === 'facility') {
     isScrollingEnabled.value = false;
     await fetchFacilities();
+    store.dispatch("rule/updateIsReorderActive", false)
   } else {
+    store.dispatch("rule/updateIsReorderActive", false)
+    reorderingRules.value = []
     await store.dispatch('rule/fetchRules', { groupTypeEnumId: selectedSegment.value})
   }
   emitter.emit("dismissLoader");
+}
+
+
+function activateReordering() {
+  store.dispatch("rule/updateIsReorderActive", true)
+  reorderingRules.value = rules.value;
+}
+
+async function saveReorder() {
+  const diffRules = reorderingRules.value.filter((reorderRule: any) => rules.value.some((rule: any) => rule.ruleId === reorderRule.ruleId && rule.sequenceNum !== reorderRule.sequenceNum))
+  if(!diffRules.length) {
+    store.dispatch("rule/updateIsReorderActive", false)
+    showToast(translate("No sequence has been changed."))
+    return;
+  }
+
+  emitter.emit("presentLoader", { messgae: "Saving changes.." })
+  const responses = await Promise.allSettled(diffRules.map(async (rule: any) => {
+    await RuleService.updateRule(rule, rule.ruleId)
+  }))
+
+  const isFailedToUpdateSomeRUle = responses.some((response) => response.status === 'rejected')
+  if(isFailedToUpdateSomeRUle) {
+    showToast(translate("Failed to update sequence for some rules."))
+  } else {
+    showToast(translate("Sequence for rules updated successfully."))
+  }
+  emitter.emit("dismissLoader");
+  await store.dispatch('rule/updateRules', { rules: reorderingRules.value })
+  store.dispatch("rule/updateIsReorderActive", false)
 }
 
 function createShipping() {
