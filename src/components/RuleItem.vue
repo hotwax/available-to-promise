@@ -2,26 +2,15 @@
   <ion-card>
     <ion-accordion-group :value="isReorderActive">
       <ion-accordion value="false">
-        <!-- <ion-item slot="header" color="light">
-          <ion-label>First Accordion</ion-label>
-        </ion-item> -->
         <ion-card-header slot="header" @click="$event.stopImmediatePropagation()">
           <div>
             <ion-card-subtitle class="overline">{{ rule.ruleId }}</ion-card-subtitle>
             <ion-card-title>{{ rule.ruleName }}</ion-card-title>
             <ion-card-subtitle>{{ ruleIndex+1 }}/{{ total }}</ion-card-subtitle>
           </div>
-          <ion-item lines=none>
+          <ion-item v-if="isReorderActive" lines=none>
             <ion-reorder slot="end"></ion-reorder>
           </ion-item>
-          <!-- <div>
-            <ion-button fill="clear" color="medium" class="ion-no-padding" :disabled="ruleIndex === 0" @click="updateRuleOrder('prev')">
-              <ion-icon :icon="chevronUpOutline" slot="icon-only" />
-            </ion-button>
-            <ion-button fill="clear" color="medium" class="ion-no-padding" :disabled="ruleIndex === rules.length - 1" @click="updateRuleOrder('next')">
-              <ion-icon :icon="chevronDownOutline" slot="icon-only" />
-            </ion-button>
-          </div> -->
         </ion-card-header>
         <div slot="content">
           <ion-item lines="full" v-if="selectedPage.path === '/threshold'">
@@ -125,7 +114,7 @@
 <script setup lang="ts">
 import { IonAccordion, IonAccordionGroup, IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonChip, IonIcon, IonItem, IonItemDivider, IonLabel, IonList, IonReorder, IonToggle, alertController, modalController } from '@ionic/vue';
 import { computed, defineProps, onMounted, ref } from 'vue';
-import { archiveOutline, checkmarkDoneCircleOutline, chevronDownOutline, chevronUpOutline, closeCircleOutline, globeOutline, optionsOutline, pulseOutline, sendOutline, storefrontOutline } from 'ionicons/icons';
+import { archiveOutline, checkmarkDoneCircleOutline, closeCircleOutline, globeOutline, optionsOutline, pulseOutline, sendOutline, storefrontOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
 import { translate } from '@/i18n';
 import { RuleService } from '@/services/RuleService';
@@ -370,11 +359,6 @@ function getSelectedFacilities() {
   return (condition && condition.fieldValue) ? condition.fieldValue.split(",") : []
 }
 
-function getSelectedFacilityGroups() {
-  const condition = props.rule.ruleConditions?.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS")
-  return (condition && condition.fieldValue) ? condition.fieldValue.split(",") : []
-}
-
 async function openSelectConfigFacilitiesModal() {
   const modal = await modalController.create({
     component: SelectConfigFacilitiesModal,
@@ -459,48 +443,6 @@ async function updateRuleShipping(event: any) {
     showToast(translate("Failed to update rule brokering."))
   }
   emitter.emit("dismissLoader");
-}
-
-async function updateRuleOrder(ruleDir: string) {
-  const prevSeq = JSON.parse(JSON.stringify(rules.value));
-  const updatedSeq = JSON.parse(JSON.stringify(rules.value));
-  let alternateRuleIndex = '' as any;
-
-  if(ruleDir === 'prev') alternateRuleIndex = props.ruleIndex - 1
-  else alternateRuleIndex = props.ruleIndex + 1;
-
-  [updatedSeq[props.ruleIndex], updatedSeq[alternateRuleIndex]] = [updatedSeq[alternateRuleIndex], updatedSeq[props.ruleIndex]]
-
-  let diffSeq = findRulesDiff(prevSeq, updatedSeq)
-
-  const updatedSeqenceNum = prevSeq.map((rule: any) => rule.sequenceNum)
-  Object.keys(diffSeq).map((key: any) => {
-    diffSeq[key].sequenceNum = updatedSeqenceNum[key]
-  })
-
-  diffSeq = Object.keys(diffSeq).map((key) => diffSeq[key])
-
-  try {
-    diffSeq.map(async (rule: any) => {
-      await RuleService.updateRule(rule, rule.ruleId);
-    })
-    await store.dispatch('rule/updateRules', { rules: updatedSeq })
-    showToast(translate("Rules order has been updated successfully."))
-  } catch(err: any) {
-    logger.error(err);
-    showToast(translate("Failed to update rules order."))
-  }
-}
-
-function findRulesDiff(previousSeq: any, updatedSeq: any) {
-  const diffSeq: any = Object.keys(previousSeq).reduce((diff, key) => {
-    if (updatedSeq[key].ruleId === previousSeq[key].ruleId) return diff
-    return {
-      ...diff,
-      [key]: updatedSeq[key]
-    }
-  }, {})
-  return diffSeq;
 }
 </script>
 

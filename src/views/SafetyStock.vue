@@ -12,8 +12,8 @@
         <ScheduleRuleItem />
 
         <section>
-          <ion-reorder-group :disabled="false" @ionItemReorder="handleReorder($event)">
-            <RuleItem v-for="(rule, ruleIndex) in rules" :rule="rule" :ruleIndex="ruleIndex" :key="rule.ruleId" />
+          <ion-reorder-group :disabled="false" @ionItemReorder="doReorder($event)">
+            <RuleItem v-for="(rule, ruleIndex) in (isReorderActive ? reorderingRules : rules)" :rule="rule" :ruleIndex="ruleIndex" :key="rule.ruleId" />
           </ion-reorder-group>
         </section>
       </main>
@@ -24,7 +24,7 @@
     </ion-content>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="ion-margin">
-      <ion-fab-button class="ion-margin-bottom" color="light" @click="updateReorderStatus()">
+      <ion-fab-button :disabled="!rules.length" class="ion-margin-bottom" color="light" @click="isReorderActive ? saveReorder() : activateReordering()">
         <ion-icon :icon="isReorderActive ? saveOutline : balloonOutline" />
       </ion-fab-button>
       <ion-fab-button :disabled="isReorderActive" @click="createRule()">
@@ -44,6 +44,8 @@ import { useStore } from 'vuex';
 import { computed, ref } from 'vue';
 import { translate } from '@/i18n';
 import emitter from '@/event-bus';
+import { RuleService } from '@/services/RuleService';
+import { showToast } from '@/utils';
 
 const store = useStore();
 const router = useRouter()
@@ -51,6 +53,7 @@ const router = useRouter()
 const rules = computed(() => store.getters["rule/getRules"]);
 const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
 const isReorderActive = computed(() => store.getters["rule/getIsReorderActive"]);
+const reorderingRules = ref([]);
 
 onIonViewWillEnter(async() => {
   emitter.emit("presentLoader");
@@ -58,21 +61,55 @@ onIonViewWillEnter(async() => {
   emitter.emit("dismissLoader");
 })
 
-function updateReorderStatus() {
-  if(isReorderActive.value === false) {
-    store.dispatch("rule/updateIsReorderActive", true);
-  } else {
-    emitter.emit("presentLoader", { message: "Saving order..." });
-  
-    setTimeout(() => {
-      emitter.emit("dismissLoader");
-    }, 3000)
-    store.dispatch("rule/updateIsReorderActive", false);
-  }
+async function doReorder(event: CustomEvent) {
+  const previousSeq = JSON.parse(JSON.stringify(reorderingRules.value))
+
+  // returns the updated sequence after reordering
+  const updatedSeq = event.detail.complete(JSON.parse(JSON.stringify(reorderingRules.value)));
+
+  let diffSeq = findReasonsDiff(previousSeq, updatedSeq)
+
+  const updatedSeqenceNum = previousSeq.map((rejectionReason: any) => rejectionReason.sequenceNum)
+  Object.keys(diffSeq).map((key: any) => {
+    diffSeq[key].sequenceNum = updatedSeqenceNum[key]
+  })
+
+  diffSeq = Object.keys(diffSeq).map((key) => diffSeq[key])
+  reorderingRules.value = updatedSeq
 }
 
-function handleReorder(event: CustomEvent) {
-  console.log(event.detail.complete(rules.value)); 
+function findReasonsDiff(previousSeq: any, updatedSeq: any) {
+  const diffSeq: any = Object.keys(previousSeq).reduce((diff, key) => {
+    if (updatedSeq[key].ruleId === previousSeq[key].ruleId && updatedSeq[key].sequenceNum === previousSeq[key].sequenceNum) return diff
+    return {
+      ...diff,
+      [key]: updatedSeq[key]
+    }
+  }, {})
+  return diffSeq;
+}
+
+function activateReordering() {
+  store.dispatch("rule/updateIsReorderActive", true)
+  reorderingRules.value = rules.value;
+}
+
+async function saveReorder() {
+  emitter.emit("presentLoader", { messgae: "Saving changes.." })
+  const diffRules = reorderingRules.value.filter((reorderRule: any) => rules.value.some((rule: any) => rule.ruleId === reorderRule.ruleId && rule.sequenceNum !== reorderRule.sequenceNum))
+  const responses = await Promise.allSettled(diffRules.map(async (rule: any) => {
+    await RuleService.updateRule(rule, rule.ruleId)
+  }))
+
+  const isFailedToUpdateSomeRUle = responses.some((response) => response.status === 'rejected')
+  if(isFailedToUpdateSomeRUle) {
+    showToast(translate("Failed to update sequence for some rules."))
+  } else {
+    showToast(translate("Sequence for rules updated successfully."))
+  }
+  emitter.emit("dismissLoader");
+  await store.dispatch('rule/updateRules', { rules: reorderingRules.value })
+  store.dispatch("rule/updateIsReorderActive", false)
 }
 
 function createRule() {
