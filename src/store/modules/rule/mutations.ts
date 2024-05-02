@@ -18,7 +18,8 @@ const mutations: MutationTree <RuleState> = {
       list: [],
       total: ''
     },
-    state.ruleGroup = {}
+    state.ruleGroup = {},
+    state.isReorderActive= false
   },
 }
 export default mutations;
