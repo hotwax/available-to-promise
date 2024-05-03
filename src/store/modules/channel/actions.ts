@@ -33,12 +33,9 @@ const actions: ActionTree<ChannelState, RootState> = {
     const groups = JSON.parse(JSON.stringify(state.inventoryChannels))
 
     if(facilityGroupId) {
-      const resp = await ChannelService.fetchGroupFacilities({ facilityGroupId })
+      const resp = await ChannelService.fetchGroupFacilities({ facilityGroupId, pageSize: 100 })
 
       if(!hasError(resp)) {
-        // Currently expired records are coming also while fetching, hence filtering records with thruDate for now.
-        resp.data = resp.data.filter((facility: any) => !facility.thruDate)
-
         const currentGroup = groups.find((group: any) => group.facilityGroupId === facilityGroupId)
         currentGroup.selectedConfigFacility = await resp.data.find((facility: any) => facility.facilityTypeId === "CONFIGURATION")
         currentGroup.selectedFacilities = await resp.data.filter((facility: any) => facility.facilityTypeId === "RETAIL_STORE" || facility.facilityTypeId === "WAREHOUSE")
@@ -48,12 +45,9 @@ const actions: ActionTree<ChannelState, RootState> = {
     } else {
       await Promise.allSettled(groups.map(async (group: any) => {
         try {
-          const resp = await ChannelService.fetchGroupFacilities({ facilityGroupId: group.facilityGroupId });
+          const resp = await ChannelService.fetchGroupFacilities({ facilityGroupId: group.facilityGroupId, pageSize: 100 });
 
           if(!hasError(resp)) {
-            // Currently expired records are coming also while fetching, hence filtering records with thruDate for now.
-            resp.data = resp.data.filter((facility: any) => !facility.thruDate)
-
             group.selectedConfigFacility = await resp.data.find((facility: any) => facility.facilityTypeId === "CONFIGURATION")
             group.selectedFacilities = await resp.data.filter((facility: any) => facility.facilityTypeId === "RETAIL_STORE" || facility.facilityTypeId === "WAREHOUSE")
           } else {

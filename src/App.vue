@@ -9,7 +9,7 @@
 
 <script setup lang="ts">
 import { IonApp, IonRouterOutlet, IonSplitPane, loadingController } from '@ionic/vue';
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed, onBeforeMount, onMounted, onUnmounted, ref } from 'vue';
 import emitter from "@/event-bus"
 import { Settings } from 'luxon'
 import Menu from '@/components/Menu.vue';
@@ -42,16 +42,12 @@ function dismissLoader() {
   }
 }
 
-onMounted(async () => {
-  loader.value = await loadingController
-    .create({
-      message: translate("Click the backdrop to dismiss."),
-      translucent: true,
-      backdropDismiss: true
-    });
+onBeforeMount(() => {
   emitter.on('presentLoader', presentLoader);
   emitter.on('dismissLoader', dismissLoader);
+})
 
+onMounted(async () => {
   // Handles case when user resumes or reloads the app
   // Luxon timezzone should be set with the user's selected timezone
   if (userProfile.value && userProfile.value.timeZone) {
