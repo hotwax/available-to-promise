@@ -66,7 +66,7 @@ import {
 import { closeOutline, saveOutline } from 'ionicons/icons';
 import { useStore } from "vuex";
 import { RuleService } from "@/services/RuleService";
-import { translate } from "@/i18n";
+import { translate } from '@hotwax/dxp-components';
 import { showToast } from "@/utils";
 import logger from "@/logger";
 import emitter from "@/event-bus";

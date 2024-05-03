@@ -107,7 +107,7 @@
 import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonNote, IonPage, IonSegment, IonSegmentButton, IonText, IonTitle, IonToggle, IonToolbar, modalController } from '@ionic/vue';
 import { computed, onMounted, ref } from 'vue';
 import { addCircleOutline, closeCircle, saveOutline, storefrontOutline } from 'ionicons/icons'
-import { translate } from "@/i18n";
+import { translate } from '@hotwax/dxp-components';
 import ProductFilters from '@/components/ProductFilters.vue';
 import AddProductFacilityGroupModal from '@/components/AddProductFacilityGroupModal.vue';
 import { useStore } from 'vuex';

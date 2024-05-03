@@ -64,7 +64,7 @@
   import { useStore } from "@/store";
   import { useRouter } from "vue-router";
   import { cloudUploadOutline, globeOutline, settingsOutline, sendOutline, storefrontOutline, pulseOutline } from 'ionicons/icons';
-  import { translate } from "@/i18n";
+import { translate } from '@hotwax/dxp-components';
 
   const store = useStore();
   const router = useRouter();

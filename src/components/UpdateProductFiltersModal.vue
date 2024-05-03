@@ -72,7 +72,7 @@ import { closeOutline, saveOutline } from 'ionicons/icons';
 import { useStore } from "vuex";
 import { UtilService } from "@/services/UtilService";
 import { RuleService } from "@/services/RuleService";
-import { translate } from "@/i18n";
+import { translate } from '@hotwax/dxp-components';
 import { hasError, showToast } from "@/utils";
 import logger from "@/logger";
 import emitter from "@/event-bus";

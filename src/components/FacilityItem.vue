@@ -38,7 +38,7 @@ import { IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonChip, IonIcon
 import { computed, defineProps, onMounted, ref } from 'vue';
 import { storefrontOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
-import { translate } from '@/i18n';
+import { translate } from '@hotwax/dxp-components';
 import OrderLimitPopover from '@/components/OrderLimitPopover.vue';
 import { UtilService } from '@/services/UtilService';
 import { hasError, showToast } from '@/utils';

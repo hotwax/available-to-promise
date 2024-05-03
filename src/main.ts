@@ -3,6 +3,8 @@ import App from './App.vue'
 import router from './router';
 import { DateTime } from 'luxon';
 import logger from './logger';
+import { dxpComponents } from '@hotwax/dxp-components';
+import localeMessages from '@/locales';
 
 
 import { IonicVue } from '@ionic/vue';
@@ -27,7 +29,6 @@ import '@ionic/vue/css/display.css';
 /* Theme variables */
 import './theme/variables.css';
 
-import i18n from './i18n'
 import store from './store'
 
 
@@ -40,8 +41,8 @@ const app = createApp(App)
     level: process.env.VUE_APP_DEFAULT_LOG_LEVEL
   })
   .use(router)
-  .use(i18n)
-  .use(store);
+  .use(store)
+  .use(dxpComponents, { localeMessages });
 
 // Filters are removed in Vue 3 and global filter introduced https://v3.vuejs.org/guide/migration/filters.html#global-filters
 app.config.globalProperties.$filters = {

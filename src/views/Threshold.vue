@@ -37,7 +37,7 @@ import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
 import { useRouter } from 'vue-router';
 import { computed } from 'vue';
 import { useStore } from 'vuex';
-import { translate } from '@/i18n';
+import { translate } from '@hotwax/dxp-components';
 import emitter from '@/event-bus';
 
 const store = useStore();

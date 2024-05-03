@@ -63,7 +63,7 @@ import {
 import { closeOutline, saveOutline } from 'ionicons/icons';
 import { useStore } from "vuex";
 import { UtilService } from "@/services/UtilService";
-import { translate } from "@/i18n";
+import { translate } from '@hotwax/dxp-components';
 import { hasError } from "@/utils";
 
 const queryString = ref('');

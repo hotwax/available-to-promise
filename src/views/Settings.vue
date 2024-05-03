@@ -105,7 +105,7 @@ import { useRouter } from 'vue-router';
 import TimeZoneModal from '@/views/TimezoneModal.vue';
 import Image from '@/components/Image.vue'
 import { DateTime } from "luxon";
-import { translate } from '@/i18n';
+import { translate } from '@hotwax/dxp-components';
 
 
 const store = useStore()

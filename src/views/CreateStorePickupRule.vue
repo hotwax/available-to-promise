@@ -106,7 +106,7 @@
 <script setup lang="ts">
 import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonNote, IonPage, IonSegment, IonSegmentButton, IonText, IonTitle, IonToggle, IonToolbar, modalController } from '@ionic/vue';
 import { addCircleOutline, closeCircle, saveOutline, storefrontOutline } from 'ionicons/icons'
-import { translate } from "@/i18n";
+import { translate } from '@hotwax/dxp-components';
 import { computed, onMounted, ref } from 'vue';
 import ProductFilters from '@/components/ProductFilters.vue';
 import { useRouter } from 'vue-router';

@@ -115,7 +115,7 @@ import { IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCh
 import { computed, defineProps, onMounted, ref } from 'vue';
 import { archiveOutline, checkmarkDoneCircleOutline, chevronDownOutline, chevronUpOutline, closeCircleOutline, globeOutline, optionsOutline, pulseOutline, sendOutline, storefrontOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
-import { translate } from '@/i18n';
+import { translate } from '@hotwax/dxp-components';
 import { RuleService } from '@/services/RuleService';
 import { useStore } from 'vuex';
 import { showToast } from '@/utils';

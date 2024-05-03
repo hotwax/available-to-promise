@@ -31,7 +31,7 @@
 <script setup lang="ts">
 import { IonButton, IonButtons, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonList, IonTextarea, IonTitle, IonToolbar, modalController } from "@ionic/vue";
 import { closeOutline, saveOutline } from "ionicons/icons";
-import { translate } from "@/i18n";
+import { translate } from '@hotwax/dxp-components';
 import { defineProps, onMounted, ref } from "vue";
 import logger from "@/logger";
 import { hasError, showToast } from "@/utils";

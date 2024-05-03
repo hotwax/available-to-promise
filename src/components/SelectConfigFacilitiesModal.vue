@@ -54,7 +54,7 @@ import {
 import { computed, defineProps, onMounted } from "vue";
 import { closeOutline, saveOutline } from "ionicons/icons";
 import { useStore } from "vuex";
-import { translate } from "@/i18n";
+import { translate } from '@hotwax/dxp-components';
 import { RuleService } from "@/services/RuleService";
 import { showToast } from "@/utils";
 import logger from "@/logger";

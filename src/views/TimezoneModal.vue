@@ -70,7 +70,7 @@ import { useStore } from "@/store";
 import { UserService } from "@/services/UserService";
 import { hasError } from "@/utils"
 import { DateTime } from "luxon";
-import { translate } from "@/i18n"
+import { translate } from '@hotwax/dxp-components';
 
 const store = useStore();
 let queryString = ref("")

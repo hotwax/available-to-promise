@@ -36,7 +36,7 @@ import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import store from "@/store";
 import Logo from "@/components/Logo.vue";
-import { translate } from "@/i18n"
+import { translate } from '@hotwax/dxp-components';
 
 const username = ref("")
 const password = ref("")
