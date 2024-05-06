@@ -271,7 +271,7 @@ async function editRuleName() {
       name: "name",
       placeholder: translate("Name"),
       type: "text",
-      value: props.rule.ruleName
+      value: props.rule.ruleName.trim()
     }],
     buttons: [{
       text: translate('Cancel'),
@@ -295,6 +295,9 @@ async function editRuleName() {
             showToast(translate("Failed to update rule name."))
           }
           emitter.emit("dismissLoader");
+        } else {
+          showToast(translate("Rule name can't be empty."))
+          return false;
         }
       }
     }]

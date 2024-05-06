@@ -188,7 +188,7 @@ function generateRuleConditions(ruleId: string) {
 }
 
 async function createRule() {
-  if(!formData.value.ruleName || !formData.value.safetyStock || !formData.value.selectedFacilityGroups.included.length) {
+  if(!formData.value.ruleName.trim() || !formData.value.safetyStock || !formData.value.selectedFacilityGroups.included.length) {
     showToast(translate("Please fill in all the required fields."))
     return;
   }

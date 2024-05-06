@@ -164,7 +164,7 @@ function generateRuleConditions(ruleId: string) {
 }
 
 async function createThresholdRule() {
-  if(!formData.value.ruleName || !formData.value.threshold) {
+  if(!formData.value.ruleName.trim() || !formData.value.threshold) {
     showToast(translate("Please fill in all the required fields."))
     return;
   }
