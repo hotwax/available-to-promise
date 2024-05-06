@@ -22,7 +22,7 @@
                 </ion-input>
               </ion-item>
               <ion-item>
-                <ion-input v-model="formData.safetyStock">
+                <ion-input v-model="formData.safetyStock" type="number" @keydown="validateSafetyStock($event)">
                   <div slot="label">{{ translate("Safety stock") }} <ion-text color="danger">*</ion-text></div>
                 </ion-input>
               </ion-item>
@@ -234,5 +234,9 @@ async function createRule() {
     showToast(translate("Failed to create rule."))
   }
   emitter.emit("dismissLoader");
+}
+
+function validateSafetyStock(event: any) {
+  if(/[`!@#$%^&*()_+\-=\\|,.<>?~]/.test(event.key)) event.preventDefault();
 }
 </script>

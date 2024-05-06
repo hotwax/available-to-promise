@@ -152,7 +152,13 @@ async function editThreshold() {
       placeholder: translate("Threshold"),
       type: "number",
       value: props.rule.ruleActions?.length ? props.rule.ruleActions[0].fieldValue : 0,
-      min: 0
+      min: 0,
+      attributes: {
+        // Added check to not allow mainly .(period) and other special characters to be entered in the alert input
+        onkeydown: ($event: any) => {
+          if(/[`!@#$%^&*()_+\-=\\|,.<>?~]/.test($event.key)) $event.preventDefault();
+        }
+      }
     }],
     buttons: [{
       text: translate('Cancel'),
@@ -206,7 +212,13 @@ async function editSafetyStock() {
       placeholder: translate("Safety stock"),
       type: "number",
       value: props.rule.ruleActions?.length ? props.rule.ruleActions[0].fieldValue : 0,
-      min: 0
+      min: 0,
+      attributes: {
+        // Added check to not allow mainly .(period) and other special characters to be entered in the alert input
+        onkeydown: ($event: any) => {
+          if(/[`!@#$%^&*()_+\-=\\|,.<>?~]/.test($event.key)) $event.preventDefault();
+        }
+      }
     }],
     buttons: [{
       text: translate('Cancel'),
