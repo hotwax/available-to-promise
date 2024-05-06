@@ -111,10 +111,11 @@ const scheduleRuleGroup = async (payload: any): Promise<any> => {
   });
 }
 
-const fetchRuleGroupHistory = async (jobName: string): Promise<any> => {
+const fetchRuleGroupHistory = async (payload: any): Promise<any> => {
   return api({
-    url: `serviceJobRuns/${jobName}`,
-    method: "GET"
+    url: `serviceJobRuns/${payload.jobName}`,
+    method: "GET",
+    params: payload
   });
 }
 
