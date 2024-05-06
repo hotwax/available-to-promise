@@ -9,7 +9,7 @@
 
     <ion-content>
       <main v-if="ruleGroup.ruleGroupId">
-        <ScheduleRuleItem />
+        <ScheduleRuleItem v-if="rules.length" />
 
         <section>
           <RuleItem v-for="(rule, ruleIndex) in rules" :rule="rule" :ruleIndex="ruleIndex" :key="rule.ruleId" />

@@ -24,7 +24,7 @@
     <ion-content ref="contentRef" :scroll-events="true" @ionScroll="enableScrolling()">
       <main v-if="selectedSegment !== 'facility'">
         <template v-if="ruleGroup.ruleGroupId">
-          <ScheduleRuleItem />
+          <ScheduleRuleItem v-if="rules.length" />
 
           <section>
             <RuleItem :selectedSegment="selectedSegment" v-for="(rule, ruleIndex) in rules" :rule="rule" :ruleIndex="ruleIndex" :key="rule.ruleId" />
