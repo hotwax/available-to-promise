@@ -23,11 +23,13 @@
 
     <ion-content ref="contentRef" :scroll-events="true" @ionScroll="enableScrolling()">
       <main v-if="selectedSegment !== 'facility'">
-        <ScheduleRuleItem  v-if="ruleGroup.ruleGroupId" />
+        <template v-if="ruleGroup.ruleGroupId">
+          <ScheduleRuleItem />
 
-        <section v-if="selectedSegment !== 'facility'">
-          <RuleItem :selectedSegment="selectedSegment" v-for="(rule, ruleIndex) in rules" :rule="rule" :ruleIndex="ruleIndex" :key="rule.ruleId" />
-        </section>
+          <section>
+            <RuleItem :selectedSegment="selectedSegment" v-for="(rule, ruleIndex) in rules" :rule="rule" :ruleIndex="ruleIndex" :key="rule.ruleId" />
+          </section>
+        </template>
         <div v-else class="empty-state">
           <p>{{ translate("No shipping rules found") }}</p>
         </div>

@@ -17,7 +17,7 @@
       </main>
 
       <div class="empty-state" v-else>
-       <p>{{ translate("No threshold rules found") }}</p>
+       <p>{{ translate("No safety stock rules found") }}</p>
       </div>
     </ion-content>
 

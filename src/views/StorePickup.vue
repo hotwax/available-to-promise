@@ -23,11 +23,13 @@
 
     <ion-content ref="contentRef" :scroll-events="true" @ionScroll="enableScrolling()">
       <main v-if="selectedSegment !== 'facility'">
-        <ScheduleRuleItem />
+        <template v-if="ruleGroup.ruleGroupId">
+          <ScheduleRuleItem />
 
-        <section v-if="selectedSegment === 'RG_PICKUP_FACILITY' || selectedSegment === 'RG_PICKUP_CHANNEL'">
-          <RuleItem :selectedSegment="selectedSegment" v-for="(rule, ruleIndex) in rules" :rule="rule" :ruleIndex="ruleIndex" :key="rule.ruleId" />
-        </section>
+          <section>
+            <RuleItem :selectedSegment="selectedSegment" v-for="(rule, ruleIndex) in rules" :rule="rule" :ruleIndex="ruleIndex" :key="rule.ruleId" />
+          </section>
+        </template>
         <div class="empty-state" v-else>
           <p>{{ translate("No store pickup rules found") }}</p>
         </div>
@@ -77,6 +79,7 @@ import emitter from '@/event-bus';
 const store = useStore();
 const router = useRouter()
 
+const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
 const rules = computed(() => store.getters["rule/getRules"]);
 const isScrollable = computed(() => store.getters["util/isFacilitiesScrollable"]);
 const facilities = computed(() => store.getters["util/getFacilities"]);
