@@ -113,16 +113,16 @@ async function createGroup() {
           ...selectedConfigFacility,
           facilityId: resp.data.facilityId
         }
+
+        // Associating the config facility with the product store.
+        resp = await ChannelService.updateFacilityAssociationWithProductStore({productStoreId: eComStore.value.productStoreId, facilityId: selectedConfigFacility.facilityId})
+        if(hasError(resp)) throw resp.data;
       } else {
         throw resp.data;
       }
     } else {
       selectedConfigFacility = configFacilities.value.find((facility: any) => facility.facilityId === selectedConfigFacilityId.value)
     }
-
-    // Associating the config facility with the product store.
-    resp = await ChannelService.updateFacilityAssociationWithProductStore({productStoreId: eComStore.value.productStoreId, facilityId: selectedConfigFacility.facilityId})
-    if(hasError(resp)) throw resp.data;
 
     // Associating the facility group with the product store.
     resp = await ChannelService.updateGroupAssociationWithProductStore({productStoreId: eComStore.value.productStoreId, facilityGroupId: formData.value.facilityGroupId})
