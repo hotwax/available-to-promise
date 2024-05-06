@@ -280,7 +280,7 @@ async function editRuleName() {
     {
       text: translate('Update'),
       handler: async(data) => {
-        if(data.name) {
+        if(data.name.trim()) {
           emitter.emit("presentLoader");
           const rule = JSON.parse(JSON.stringify(props.rule))
           rule.ruleName = data.name
