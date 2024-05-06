@@ -147,3 +147,9 @@ function createShipping() {
   router.push({ path: '/create-shipping', query: { groupTypeEnumId: selectedSegment.value } })
 }
 </script>
+
+<style scoped>
+  ion-header {
+    display: flex;
+  }
+</style>

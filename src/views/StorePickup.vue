@@ -148,3 +148,9 @@ function createStorePickup() {
   router.push({ path: '/create-store-pickup', query: { groupTypeEnumId: selectedSegment.value } })
 }
 </script>
+
+<style scoped>
+  ion-header {
+    display: flex;
+  }
+</style>
