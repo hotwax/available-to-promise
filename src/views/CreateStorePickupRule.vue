@@ -104,7 +104,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonNote, IonPage, IonSegment, IonSegmentButton, IonText, IonTitle, IonToggle, IonToolbar, modalController } from '@ionic/vue';
+import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonNote, IonPage, IonSegment, IonSegmentButton, IonText, IonTitle, IonToggle, IonToolbar, modalController, onIonViewWillLeave } from '@ionic/vue';
 import { addCircleOutline, closeCircle, saveOutline, storefrontOutline } from 'ionicons/icons'
 import { translate } from "@/i18n";
 import { computed, onMounted, ref } from 'vue';
@@ -138,6 +138,18 @@ const formData = ref({
 
 onMounted(async () => {
   await store.dispatch("util/fetchConfigFacilities");
+})
+
+onIonViewWillLeave(() => {
+  formData.value = {
+    ruleName: '',
+    isPickupAllowed: false,
+    selectedFacilityGroups: {
+      included: [],
+      excluded: []
+    },
+    selectedConfigFacilites: []
+  }
 })
 
 function getDefaultUrl() {

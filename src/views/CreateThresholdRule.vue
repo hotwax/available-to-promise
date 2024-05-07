@@ -79,7 +79,8 @@ import {
   IonNote,
   IonText,
   IonTitle,
-  IonToolbar
+  IonToolbar,
+  onIonViewWillLeave
 } from '@ionic/vue';
 import { saveOutline } from 'ionicons/icons'
 import { translate } from "@/i18n";
@@ -98,6 +99,14 @@ const formData = ref({
   threshold: '',
   selectedConfigFacilites: []
 }) as any;
+
+onIonViewWillLeave(() => {
+  formData.value = {
+    ruleName: '',
+    threshold: '',
+    selectedConfigFacilites: []
+  }
+})
 
 const configFacilities = computed(() => store.getters["util/getConfigFacilities"])
 const appliedFilters = computed(() => store.getters["util/getAppliedFilters"]);

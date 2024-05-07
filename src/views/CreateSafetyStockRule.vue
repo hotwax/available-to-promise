@@ -81,7 +81,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonPage, IonText, IonTitle, IonToolbar, modalController } from '@ionic/vue';
+import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonPage, IonText, IonTitle, IonToolbar, modalController, onIonViewWillLeave } from '@ionic/vue';
 import { addCircleOutline, closeCircle, saveOutline } from 'ionicons/icons'
 import { translate } from "@/i18n";
 import ProductFilters from '@/components/ProductFilters.vue';
@@ -113,6 +113,17 @@ const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"
 
 onMounted(async () => {
   await Promise.allSettled([store.dispatch("util/clearAppliedFilters"), store.dispatch("util/fetchFacilityGroups")])
+})
+
+onIonViewWillLeave(() => {
+  formData.value = {
+    ruleName: '',
+    safetyStock: '',
+    selectedFacilityGroups: {
+      included: [],
+      excluded: []
+    }
+  }
 })
 
 async function openProductFacilityGroupModal(type: string) {
