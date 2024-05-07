@@ -6,7 +6,7 @@
           <ion-icon slot="icon-only" :icon="closeOutline" />
         </ion-button>
       </ion-buttons>
-      <ion-title>{{ translate("Create group") }}</ion-title>
+      <ion-title>{{ translate("Create channel group") }}</ion-title>
     </ion-toolbar>
   </ion-header>
 
