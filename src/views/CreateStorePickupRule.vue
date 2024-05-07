@@ -53,7 +53,7 @@
           <ion-card-content>
             <ion-chip outline v-for="group in formData.selectedFacilityGroups['included']" :key="group.facilityGroupId">
               {{ group.facilityGroupName }}
-              <ion-icon :icon="closeCircle"/>
+              <ion-icon :icon="closeCircle" @click="removeFacilityGroups(group.facilityGroupId, 'included')" />
             </ion-chip>
           </ion-card-content>
         </ion-card>
@@ -69,7 +69,7 @@
           <ion-card-content>
             <ion-chip outline v-for="group in formData.selectedFacilityGroups['excluded']" :key="group.facilityGroupId">
               {{ group.facilityGroupName }}
-              <ion-icon :icon="closeCircle"/>
+              <ion-icon :icon="closeCircle" @click="removeFacilityGroups(group.facilityGroupId, 'excluded')" />
             </ion-chip>
           </ion-card-content>
         </ion-card>
@@ -306,6 +306,9 @@ function generateRuleConditions(ruleId: string) {
   return conditions;
 }
 
+function removeFacilityGroups(facilityGroupId: any, type: string) {
+  formData.value.selectedFacilityGroups[type] = formData.value.selectedFacilityGroups[type].filter((group: any) => group.facilityGroupId !== facilityGroupId)
+}
 </script>
 
 <style scoped>

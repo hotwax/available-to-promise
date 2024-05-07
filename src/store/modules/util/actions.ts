@@ -11,9 +11,7 @@ import { DateTime } from 'luxon'
 
 const actions: ActionTree<UtilState, RootState> = {
   async fetchConfigFacilities ({ commit, state }) {
-    let configFacilities = JSON.parse(JSON.stringify(state.configFacilities))
-
-    if(configFacilities.length && configFacilities[0].productStoreId === store.state.user.currentEComStore.productStoreId) return;
+    let configFacilities = [];
 
     try {
       const resp = await UtilService.fetchFacilities({ facilityTypeId: 'CONFIGURATION', productStoreId: store.state.user.currentEComStore.productStoreId });
