@@ -16,7 +16,13 @@
   <ion-content>
     <ion-searchbar :placeholder="translate('Search', { label })" v-model="queryString" @keyup.enter="search()"/>
 
-    <ion-list>
+    <div class="empty-state" v-if="isLoading">
+      <ion-item lines="none">
+        <ion-spinner name="crescent" slot="start" />
+        {{ translate("Fetching", { label }) }}
+      </ion-item>
+    </div>
+    <ion-list v-else-if="facetOptions.length">
       <ion-item v-for="option in facetOptions" :key="option.id"  @click="updateSelectedValues(option.id)">
         <ion-label v-if="isAlreadyApplied(option.id)">{{ option.label }}</ion-label>
         <ion-checkbox v-if="!isAlreadyApplied(option.id)" :checked="selectedValues.includes(option.id)">
@@ -25,6 +31,12 @@
         <ion-note v-else slot="end" color="danger">{{ type === 'included' ? translate("excluded") : translate("included") }}</ion-note>
       </ion-item>
     </ion-list>
+    <div class="empty-state" v-else-if="!queryString">
+      <p>{{ translate("Search for to find results", { label }) }}</p>
+    </div>
+    <div class="empty-state" v-else>
+      <p>{{ translate("No result found for", { label: queryString }) }}</p>
+    </div>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
       <ion-fab-button @click="saveFilters()">
@@ -56,6 +68,7 @@ import {
   IonList,
   IonNote,
   IonSearchbar,
+  IonSpinner,
   IonTitle,
   IonToolbar,
   modalController
@@ -70,6 +83,7 @@ const queryString = ref('');
 const facetOptions = ref([]) as any;
 const isScrollable = ref(true);
 const selectedValues = ref([]) as any;
+let isLoading = ref(false)
 
 const props = defineProps(["label", "facetToSelect", "searchfield", "type"]);
 const store = useStore();
@@ -89,9 +103,10 @@ function search() {
 }
 
 async function getFilters(vSize?: any, vIndex?: any) {
+  isLoading.value = true;
   const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
   const viewIndex = vIndex ? vIndex : 0;
-
+  
   const payload = {
     facetToSelect: props.facetToSelect,
     docType: 'PRODUCT',
@@ -115,6 +130,7 @@ async function getFilters(vSize?: any, vIndex?: any) {
     facetOptions.value = [];
     isScrollable.value = false;
   }
+  isLoading.value = false;
 }
 
 async function loadMoreFilters(event: any){

@@ -25,7 +25,13 @@
       </ion-segment-button>
     </ion-segment>
 
-    <ion-list>
+    <div class="empty-state" v-if="isLoading">
+      <ion-item lines="none">
+        <ion-spinner name="crescent" slot="start" />
+        {{ translate("Fetching", { label }) }}
+      </ion-item>
+    </div>
+    <ion-list v-else-if="facetOptions.length">
       <ion-item v-for="option in facetOptions" :key="option.id"  @click="!isAlreadyApplied(option.id) ? updateSelectedValues(option.id): ''">
         <ion-label v-if="isAlreadyApplied(option.id)">{{ option.label }}</ion-label>
         <ion-checkbox v-if="!isAlreadyApplied(option.id)" :checked="isSelected(option.id)">
@@ -34,6 +40,12 @@
         <ion-note v-else slot="end" color="danger">{{ selectedSegment === 'included' ? translate("excluded") : translate("included") }}</ion-note>
       </ion-item>
     </ion-list>
+    <div class="empty-state" v-else-if="!queryString">
+      <p>{{ translate("Search for to find results", { label }) }}</p>
+    </div>
+    <div class="empty-state" v-else>
+      <p>{{ translate("No result found for", { label: queryString }) }}</p>
+    </div>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
       <ion-fab-button @click="saveFilters()">
@@ -67,6 +79,7 @@ import {
   IonSearchbar,
   IonSegment,
   IonSegmentButton,
+  IonSpinner,
   IonTitle,
   IonToolbar,
   modalController
@@ -86,6 +99,7 @@ const isScrollable = ref(true);
 const selectedSegment = ref("included")
 const includedFilters = ref([]) as any;
 const excludedFilters = ref([]) as any;
+const isLoading = ref(false);
 
 const props = defineProps(["label", "facetToSelect", "searchfield", "rule"]);
 const store = useStore();
@@ -107,6 +121,7 @@ function search() {
 }
 
 async function getFilters(vSize?: any, vIndex?: any) {
+  isLoading.value = true;
   const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
   const viewIndex = vIndex ? vIndex : 0;
 
@@ -133,6 +148,7 @@ async function getFilters(vSize?: any, vIndex?: any) {
     facetOptions.value = [];
     isScrollable.value = false;
   }
+  isLoading.value = false;
 }
 
 async function loadMoreFilters(event: any){
