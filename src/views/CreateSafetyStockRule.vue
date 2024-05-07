@@ -136,7 +136,7 @@ async function openProductFacilityGroupModal(type: string) {
   })
 
   modal.onDidDismiss().then((result: any) => {
-    if(result.data?.selectedGroups?.length) {
+    if(result.data?.selectedGroups) {
       formData.value.selectedFacilityGroups[type] = result.data.selectedGroups
     }
   })
