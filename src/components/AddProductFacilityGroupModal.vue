@@ -7,6 +7,9 @@
         </ion-button>
       </ion-buttons>
       <ion-title>{{ type === "included" ? translate("Include facility groups") : translate("Exclude facility groups") }}</ion-title>
+      <ion-buttons slot="end">
+        <ion-button fill="clear" color="danger" :disabled="!selectedGroups.length" @click="selectedGroups = []">{{ translate("Clear All") }}</ion-button>
+      </ion-buttons>
     </ion-toolbar>
   </ion-header>
 

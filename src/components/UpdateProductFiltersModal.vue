@@ -7,6 +7,9 @@
         </ion-button>
       </ion-buttons>
       <ion-title>{{ translate("Select", { label }) }}</ion-title>
+      <ion-buttons slot="end">
+        <ion-button fill="clear" color="danger" :disabled="!facetOptions.length || (selectedSegment === 'included' ? !includedFilters.length : !excludedFilters.length)" @click="selectedSegment === 'included' ? includedFilters = [] : excludedFilters = []">{{ translate("Clear All") }}</ion-button>
+      </ion-buttons>
     </ion-toolbar>
   </ion-header>
 
