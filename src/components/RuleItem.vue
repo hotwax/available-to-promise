@@ -101,7 +101,7 @@
       </ion-item>
 
       <ion-item lines="none">
-        <ion-button @click="editRuleName()" fill="clear">{{ translate("Edit name") }}</ion-button>
+        <ion-button @click="editRuleName()" size="default" fill="clear">{{ translate("Edit name") }}</ion-button>
         <ion-button @click="archiveRule()" color="medium" fill="clear" slot="end">
           <ion-icon :icon="archiveOutline" slot="icon-only"/>
         </ion-button>
