@@ -86,7 +86,7 @@ const api = async (customConfig: any) => {
   }
 
   const baseURL = store.getters["user/getInstanceUrl"];
-  if (baseURL) config.baseURL = baseURL.startsWith('http') ? baseURL.includes('/rest/s1/available-to-promise') ? baseURL : `${baseURL}rest/s1/available-to-promise/` : `https://${baseURL}.hotwax.io/rest/s1/available-to-promise/`;
+  if (baseURL) config.baseURL = baseURL.startsWith('http') ? baseURL.includes('/rest/s1/available-to-promise') ? baseURL : `${baseURL}/rest/s1/available-to-promise/` : `https://${baseURL}.hotwax.io/rest/s1/available-to-promise/`;
   if(customConfig.cache) config.adapter = axiosCache.adapter;
   const networkStatus =  await OfflineHelper.getNetworkStatus();
   if (customConfig.queue && !networkStatus.connected) {

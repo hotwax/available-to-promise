@@ -153,7 +153,7 @@ function generateRuleConditions(ruleId: string) {
       "fieldName": "facilities",
       "operator": "in",
       "fieldValue": includedFacilityGroupIds.length > 1 ? includedFacilityGroupIds.join(",") : includedFacilityGroupIds[0],
-      "multiValued": includedFacilityGroupIds.length > 1 ? "Y" : "N"
+      "multiValued": "Y"
     })
   }
 
@@ -165,7 +165,7 @@ function generateRuleConditions(ruleId: string) {
       "fieldName": "facilities",
       "operator": "not-in",
       "fieldValue": excludedFacilityGroupIds.length > 1 ? excludedFacilityGroupIds.join(",") : excludedFacilityGroupIds[0],
-      "multiValued": excludedFacilityGroupIds.length > 1 ? "Y" : "N"
+      "multiValued": "Y"
     })
   }
 
@@ -178,7 +178,7 @@ function generateRuleConditions(ruleId: string) {
           "fieldName": filter,
           "operator": type === "included" ? "in" : "not-in",
           "fieldValue": value.length > 1 ? value.join(",") : value[0],
-          "multiValued": value.length > 1 ? "Y" : "N"
+          "multiValued": "Y"
         })
       }
     })
