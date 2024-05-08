@@ -237,6 +237,6 @@ async function createRule() {
 }
 
 function validateSafetyStock(event: any) {
-  if(/[`!@#$%^&*()_+\-=\\|,.<>?~]/.test(event.key)) event.preventDefault();
+  if(/[`!@#$%^&*()_+\-=\\|,.<>?~^e]/.test(event.key)) event.preventDefault();
 }
 </script>

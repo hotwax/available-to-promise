@@ -156,7 +156,7 @@ async function editThreshold() {
       attributes: {
         // Added check to not allow mainly .(period) and other special characters to be entered in the alert input
         onkeydown: ($event: any) => {
-          if(/[`!@#$%^&*()_+\-=\\|,.<>?~]/.test($event.key)) $event.preventDefault();
+          if(/[`!@#$%^&*()_+\-=\\|,.<>?~^e]/.test($event.key)) $event.preventDefault();
         }
       }
     }],
@@ -216,7 +216,7 @@ async function editSafetyStock() {
       attributes: {
         // Added check to not allow mainly .(period) and other special characters to be entered in the alert input
         onkeydown: ($event: any) => {
-          if(/[`!@#$%^&*()_+\-=\\|,.<>?~]/.test($event.key)) $event.preventDefault();
+          if(/[`!@#$%^&*()_+\-=\\|,.<>?~^e]/.test($event.key)) $event.preventDefault();
         }
       }
     }],
