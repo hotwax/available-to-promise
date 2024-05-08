@@ -178,7 +178,7 @@ async function saveFilters() {
       "fieldName": props.searchfield,
       "operator": "in",
       "fieldValue": includedFilters.value?.length > 1 ? includedFilters.value.join(",") : includedFilters.value[0],
-      "multiValued": includedFilters.value?.length > 1 ? "Y" : "N"
+      "multiValued": "Y"
     })
   }
 
@@ -192,7 +192,7 @@ async function saveFilters() {
       "fieldName": props.searchfield,
       "operator": "not-in",
       "fieldValue": excludedFilters.value?.length > 1 ? excludedFilters.value.join(",") : excludedFilters.value[0],
-      "multiValued": excludedFilters.value?.length > 1 ? "Y" : "N"
+      "multiValued": "Y"
     })
   }
 

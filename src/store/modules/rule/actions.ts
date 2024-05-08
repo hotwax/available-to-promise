@@ -15,7 +15,7 @@ const actions: ActionTree<RuleState, RootState> = {
     let resp;
 
     try {
-      resp = await RuleService.fetchRuleGroup({ ...payload, productStoreId: productStore.productStoreId })
+      resp = await RuleService.fetchRuleGroup({ ...payload, productStoreId: productStore.productStoreId, statusId: "ATP_RG_ACTIVE" })
 
       if(!hasError(resp) && resp.data.length) {
         ruleGroup = resp.data[0]
