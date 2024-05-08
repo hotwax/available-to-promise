@@ -36,7 +36,7 @@ const actions: ActionTree<RuleState, RootState> = {
   },
 
   async fetchRules({ commit, dispatch }, payload) {
-    const rules = [] as any;
+    let rules = [] as any;
 
     try {
       const ruleGroup = await dispatch('fetchRuleGroup', payload)
@@ -53,20 +53,7 @@ const actions: ActionTree<RuleState, RootState> = {
       })
 
       if(!hasError(resp)) {
-        const responses = await Promise.allSettled(
-          resp.data.map((rule: any) => RuleService.fetchRulesActionsAndConditions(rule.ruleId))
-        )
-
-        const hasFailedResponse = responses.some((response: any) => hasError(response.value))
-        if (hasFailedResponse) {
-          logger.error('Failed to fetch some rules')
-        }
-
-        responses.map((response: any) => {
-          if(response.status === 'fulfilled') {
-            rules.push(response.value)
-          }
-        })
+        rules = resp.data;
       } else {
         throw resp.data
       }
