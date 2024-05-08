@@ -78,6 +78,7 @@
   "Failed to schedule service, hence other jobs are not updated": "Failed to schedule service, hence other jobs are not updated",
   "features": "{type} features",
   "Fetching": "Fetching {label}",
+  "Fetching facilities": "Fetching facilities",
   "Fetching time zones": "Fetching time zones",
   "Frequency": "Frequency",
   "Fulfillment capacity": "Fulfillment capacity",

@@ -13,7 +13,13 @@
   <ion-content>
     <ion-searchbar v-model="queryString" @keyup.enter="fetchFacilities()" />
 
-    <ion-list v-if="facilities?.length">
+    <div class="empty-state" v-if="isLoading">
+      <ion-item lines="none">
+        <ion-spinner name="crescent" slot="start" />
+        {{ translate("Fetching facilities") }}
+      </ion-item>
+    </div>
+    <ion-list v-else-if="facilities?.length">
       <ion-item lines="none" v-for="facility in facilities" :key="facility.facilityId" @click="updateSelectedFacilities(facility.facilityId)">
         <ion-checkbox :checked="isFacilitySelected(facility.facilityId)">
           <ion-label>
@@ -36,7 +42,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonButton, IonButtons, IonCheckbox, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonSearchbar, IonTitle, IonToolbar, modalController } from "@ionic/vue";
+import { IonButton, IonButtons, IonCheckbox, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonSearchbar, IonSpinner, IonTitle, IonToolbar, modalController } from "@ionic/vue";
 import { closeOutline, saveOutline } from "ionicons/icons";
 import { translate } from '@/i18n'
 import { defineProps, onMounted, ref } from "vue";
@@ -51,6 +57,7 @@ import emitter from "@/event-bus";
 const store = useStore();
 const queryString = ref('');
 const selectedFacilityValues = ref([]) as any;
+const isLoading = ref(false);
 
 const props = defineProps(["group", "selectedFacilities"]);
 const facilities = ref([]) as any;
@@ -65,6 +72,7 @@ function closeModal() {
 }
 
 async function fetchFacilities () {
+  isLoading.value = true;
   facilities.value = []
 
   try {
@@ -95,6 +103,7 @@ async function fetchFacilities () {
   } catch (err: any) {
     logger.error(err)
   }
+  isLoading.value = false;
 }
 
 function isFacilitySelected(facilityId: string) {
