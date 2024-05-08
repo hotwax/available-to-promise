@@ -8,6 +8,7 @@
       </ion-buttons>
       <ion-title>{{ translate("Select facilities") }}</ion-title>
       <ion-buttons slot="end">
+        <!-- Added check to disabled clear all button if not facility is selected. -->
         <ion-button fill="clear" color="danger" :disabled="!selectedFacilityValues.length" @click="selectedFacilityValues = []">{{ translate("Clear All") }}</ion-button>
       </ion-buttons>
     </ion-toolbar>

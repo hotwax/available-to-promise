@@ -8,6 +8,7 @@
       </ion-buttons>
       <ion-title>{{ translate("Select", { label }) }}</ion-title>
       <ion-buttons slot="end">
+        <!-- Added check to disable clear button if no facetOptions are available to select or if no filter is selected for the current segment. -->
         <ion-button fill="clear" color="danger" :disabled="!facetOptions.length || (selectedSegment === 'included' ? !includedFilters.length : !excludedFilters.length)" @click="selectedSegment === 'included' ? includedFilters = [] : excludedFilters = []">{{ translate("Clear All") }}</ion-button>
       </ion-buttons>
     </ion-toolbar>

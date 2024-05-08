@@ -8,6 +8,7 @@
       </ion-buttons>
       <ion-title>{{ type === "included" ? translate("Include", { label }) : translate("Exclude", { label }) }}</ion-title>
       <ion-buttons slot="end">
+        <!-- Clear all button should be disabled if no facetOptions are available to select or if no filter is selected. -->
         <ion-button fill="clear" color="danger" :disabled="!facetOptions.length || !selectedValues.length" @click="selectedValues = []">{{ translate("Clear All") }}</ion-button>
       </ion-buttons>
     </ion-toolbar>
