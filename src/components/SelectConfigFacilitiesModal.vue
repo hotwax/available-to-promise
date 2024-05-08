@@ -105,7 +105,7 @@ async function saveFacilities() {
       "fieldName": "facilities",
       "operator": "in",
       "fieldValue": selectedFacilityValues.value.length > 1 ? selectedFacilityValues.value.join(",") : selectedFacilityValues.value[0],
-      "multiValued": selectedFacilityValues.value.length > 1 ? "Y" : "N"
+      "multiValued": "Y"
     })
   }
 

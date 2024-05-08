@@ -150,7 +150,7 @@ function generateRuleConditions(ruleId: string) {
       "fieldName": "facilities",
       "operator": "in",
       "fieldValue": selectedFacilites.length > 1 ? selectedFacilites.join(",") : selectedFacilites[0],
-      "multiValued": selectedFacilites.length > 1 ? "Y" : "N"
+      "multiValued": "Y"
     })
   }
 
@@ -163,7 +163,7 @@ function generateRuleConditions(ruleId: string) {
           "fieldName": filter,
           "operator": type === "included" ? "in" : "not-in",
           "fieldValue": value.length > 1 ? value.join(",") : value[0],
-          "multiValued": value.length > 1 ? "Y" : "N"
+          "multiValued": "Y"
         })
       }
     })

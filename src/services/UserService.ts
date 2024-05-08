@@ -26,7 +26,8 @@ const login = async (username: string, password: string): Promise <any> => {
 }
 
 const getUserProfile = async (token: any): Promise<any> => {
-  const baseURL = store.getters["user/getBaseUrl"];
+  const url = store.getters["user/getBaseUrl"];
+  const baseURL = url.startsWith('http') ? url.includes('/rest/s1/available-to-promise') ? url : `${url}/rest/s1/available-to-promise/` : `https://${url}.hotwax.io/rest/s1/available-to-promise/`;
   try {
     const resp = await client({
       url: "user/profile",
@@ -62,7 +63,8 @@ const setUserTimeZone = async (payload: any): Promise <any>  => {
 
 const getEComStores = async (token: any): Promise<any> => {
   try {
-    const baseURL = store.getters["user/getBaseUrl"];
+    const url = store.getters["user/getBaseUrl"];
+    const baseURL = url.startsWith('http') ? url.includes('/rest/s1/available-to-promise') ? url : `${url}/rest/s1/available-to-promise/` : `https://${url}.hotwax.io/rest/s1/available-to-promise/`;
     const resp = await client({
       url: "user/productStore",
       method: "GET",

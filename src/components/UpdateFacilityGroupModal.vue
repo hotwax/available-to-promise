@@ -134,7 +134,7 @@ async function saveFacilityGroups() {
       "fieldName": "facilityGroups",
       "operator": "in",
       "fieldValue": includedGroups.value?.length > 1 ? includedGroups.value.join(",") : includedGroups.value[0],
-      "multiValued": includedGroups.value?.length > 1 ? "Y" : "N"
+      "multiValued": "Y"
     })
   }
 
@@ -148,7 +148,7 @@ async function saveFacilityGroups() {
       "fieldName": "facilityGroups",
       "operator": "not-in",
       "fieldValue": excludedGroups.value?.length > 1 ? excludedGroups.value.join(",") : excludedGroups.value[0],
-      "multiValued": excludedGroups.value?.length > 1 ? "Y" : "N"
+      "multiValued": "Y"
     })
   }
 
