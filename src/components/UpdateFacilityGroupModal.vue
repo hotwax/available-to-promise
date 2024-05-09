@@ -7,6 +7,10 @@
         </ion-button>
       </ion-buttons>
       <ion-title>{{ translate("Select facility groups") }}</ion-title>
+      <ion-buttons slot="end">
+        <!-- Added check to disable clear all button if not group is selected for current segment. -->
+        <ion-button fill="clear" color="danger" :disabled="selectedSegment === 'included' ? !includedGroups.length : !excludedGroups.length" @click="selectedSegment === 'included' ? includedGroups = [] : excludedGroups = []">{{ translate("Clear All") }}</ion-button>
+      </ion-buttons>
     </ion-toolbar>
   </ion-header>
 

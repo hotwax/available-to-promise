@@ -47,7 +47,7 @@
           <ion-card-content>
             <ion-chip outline v-for="group in formData.selectedFacilityGroups['included']" :key="group.facilityGroupId">
               {{ group.facilityGroupName }}
-              <ion-icon :icon="closeCircle"/>
+              <ion-icon :icon="closeCircle" @click="removeFacilityGroups(group.facilityGroupId, 'included')" />
             </ion-chip>
           </ion-card-content>
         </ion-card>
@@ -63,7 +63,7 @@
           <ion-card-content>
             <ion-chip outline v-for="group in formData.selectedFacilityGroups['excluded']" :key="group.facilityGroupId">
               {{ group.facilityGroupName }}
-              <ion-icon :icon="closeCircle"/>
+              <ion-icon :icon="closeCircle" @click="removeFacilityGroups(group.facilityGroupId, 'excluded')" />
             </ion-chip>
           </ion-card-content>
         </ion-card>
@@ -81,7 +81,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonPage, IonText, IonTitle, IonToolbar, modalController } from '@ionic/vue';
+import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonPage, IonText, IonTitle, IonToolbar, modalController, onIonViewWillLeave } from '@ionic/vue';
 import { addCircleOutline, closeCircle, saveOutline } from 'ionicons/icons'
 import { translate } from "@/i18n";
 import ProductFilters from '@/components/ProductFilters.vue';
@@ -115,6 +115,17 @@ onMounted(async () => {
   await Promise.allSettled([store.dispatch("util/clearAppliedFilters"), store.dispatch("util/fetchFacilityGroups")])
 })
 
+onIonViewWillLeave(() => {
+  formData.value = {
+    ruleName: '',
+    safetyStock: '',
+    selectedFacilityGroups: {
+      included: [],
+      excluded: []
+    }
+  }
+})
+
 async function openProductFacilityGroupModal(type: string) {
   const modal = await modalController.create({
     component: AddProductFacilityGroupModal,
@@ -125,7 +136,7 @@ async function openProductFacilityGroupModal(type: string) {
   })
 
   modal.onDidDismiss().then((result: any) => {
-    if(result.data?.selectedGroups?.length) {
+    if(result.data?.selectedGroups) {
       formData.value.selectedFacilityGroups[type] = result.data.selectedGroups
     }
   })
@@ -234,5 +245,9 @@ async function createRule() {
     showToast(translate("Failed to create rule."))
   }
   emitter.emit("dismissLoader");
+}
+
+function removeFacilityGroups(facilityGroupId: any, type: string) {
+  formData.value.selectedFacilityGroups[type] = formData.value.selectedFacilityGroups[type].filter((group: any) => group.facilityGroupId !== facilityGroupId)
 }
 </script>
