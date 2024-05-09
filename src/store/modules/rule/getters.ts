@@ -12,7 +12,7 @@ const getters: GetterTree <RuleState, RootState> = {
   getRuleGroup (state) {
     return state.ruleGroup
   },
-  getIsReorderActive (state) {
+  isReorderActive (state) {
     return state.isReorderActive
   }
 }

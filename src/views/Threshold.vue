@@ -52,7 +52,7 @@ const router = useRouter()
 
 const rules = computed(() => store.getters["rule/getRules"]);
 const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
-const isReorderActive = computed(() => store.getters["rule/getIsReorderActive"]);
+const isReorderActive = computed(() => store.getters["rule/isReorderActive"]);
 const reorderingRules = ref([]);
 
 onIonViewWillEnter(async() => {

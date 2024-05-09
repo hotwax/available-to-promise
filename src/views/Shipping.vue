@@ -87,7 +87,7 @@ const rules = computed(() => store.getters["rule/getRules"]);
 const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
 const isScrollable = computed(() => store.getters["util/isFacilitiesScrollable"]);
 const facilities = computed(() => store.getters["util/getFacilities"]);
-const isReorderActive = computed(() => store.getters["rule/getIsReorderActive"]);
+const isReorderActive = computed(() => store.getters["rule/isReorderActive"]);
 const reorderingRules = ref([]);
 
 const selectedSegment = ref(router.currentRoute.value.query.groupTypeEnumId ? router.currentRoute.value.query.groupTypeEnumId : "RG_SHIPPING_FACILITY")

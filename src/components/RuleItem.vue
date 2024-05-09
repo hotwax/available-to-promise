@@ -8,7 +8,7 @@
             <ion-card-title>{{ rule.ruleName }}</ion-card-title>
             <ion-card-subtitle>{{ ruleIndex+1 }}/{{ total }}</ion-card-subtitle>
           </div>
-          <ion-item v-if="isReorderActive" lines=none>
+          <ion-item v-if="isReorderActive" lines="none">
             <ion-reorder slot="end"></ion-reorder>
           </ion-item>
         </ion-card-header>
@@ -134,7 +134,7 @@ const total = computed(() => store.getters["rule/getTotalRulesCount"])
 const configFacilities = computed(() => store.getters["util/getConfigFacilities"])
 const facilityGroups = computed(() => store.getters["util/getFacilityGroups"])
 const rules = computed(() => store.getters["rule/getRules"]);
-const isReorderActive = computed(() => store.getters["rule/getIsReorderActive"]);
+const isReorderActive = computed(() => store.getters["rule/isReorderActive"]);
 
 const selectedPage = ref({
   path: '',

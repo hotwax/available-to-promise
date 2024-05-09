@@ -47,7 +47,7 @@ const doReorder = (event: CustomEvent, rules: any) => {
 
   let diffSeq = findRulesDiff(previousSeq, updatedSeq)
 
-  const updatedSeqenceNum = previousSeq.map((rejectionReason: any) => rejectionReason.sequenceNum)
+  const updatedSeqenceNum = previousSeq.map((rule: any) => rule.sequenceNum)
   Object.keys(diffSeq).map((key: any) => {
     diffSeq[key].sequenceNum = updatedSeqenceNum[key]
   })

@@ -110,7 +110,7 @@ const actions: ActionTree<RuleState, RootState> = {
   },
 
   async updateIsReorderActive({ commit }, payload) {
-    commit(types.RULE_IS_REORDER_ACTIVE_UPDATED, payload)
+    commit(types.RULE_REORDER_ACTIVE_UPDATED, payload)
   },
 }
 

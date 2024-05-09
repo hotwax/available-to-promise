@@ -48,7 +48,7 @@ import emitter from '@/event-bus';
 
 const store = useStore();
 const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
-const isReorderActive = computed(() => store.getters["rule/getIsReorderActive"]);
+const isReorderActive = computed(() => store.getters["rule/isReorderActive"]);
 
 const cronExpressions = JSON.parse(process.env?.VUE_APP_CRON_EXPRESSIONS as string)
 
