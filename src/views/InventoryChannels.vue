@@ -124,7 +124,7 @@
 
 <script setup lang="ts">
 import { IonBadge, IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonItemDivider, IonLabel, IonList, IonMenuButton, IonPage, IonSegment, IonSegmentButton, IonSelect, IonSelectOption, IonTitle, IonToolbar, modalController, popoverController } from '@ionic/vue';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { addOutline, albumsOutline, businessOutline, ellipsisVerticalOutline, globeOutline, optionsOutline, storefrontOutline, timeOutline, timerOutline } from 'ionicons/icons';
 import { translate } from '@/i18n';
 import ShopActionsPopover from '@/components/ShopActionsPopover.vue'
@@ -141,11 +141,19 @@ const selectedSegment = ref("channels")
 
 const inventoryChannels = computed(() => store.getters["channel/getInventoryChannels"])
 
-onMounted(async () => {
+onMounted(async() => {
+  emitter.on("productStoreOrConfigChanged", fetchInventoryChannels);
+})
+
+onUnmounted(() => {
+  emitter.off("productStoreOrConfigChanged", fetchInventoryChannels);
+})
+
+async function fetchInventoryChannels() {
   emitter.emit("presentLoader");
   await Promise.allSettled([store.dispatch("channel/fetchInventoryChannels"), store.dispatch("util/fetchConfigFacilities")]);
   emitter.emit("dismissLoader");
-})
+}
 
 async function openShopActionsPopover(event: Event) {
   const popover = await popoverController.create({
