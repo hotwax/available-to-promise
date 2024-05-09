@@ -14,7 +14,7 @@ const actions: ActionTree<ChannelState, RootState> = {
     let inventoryChannels = [] as any
 
     try {
-      resp = await ChannelService.fetchInventoryChannels({ facilityGroupTypeId: "CHANNEL_FAC_GROUP" });
+      resp = await ChannelService.fetchInventoryChannels({ facilityGroupTypeId: "CHANNEL_FAC_GROUP", productStoreId: store.state.user.currentEComStore.productStoreId });
 
       if(!hasError(resp)) {
         inventoryChannels = resp?.data;

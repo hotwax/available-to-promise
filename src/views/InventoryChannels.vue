@@ -21,53 +21,59 @@
     <ion-content>
       <main>
         <section v-if="selectedSegment === 'channels'">
-          <ion-card v-for="channel in inventoryChannels" :key="channel.facilityGroupId">
-            <ion-card-header>
-              <div>
-                <ion-card-subtitle class="overline">{{ channel.facilityGroupId }}</ion-card-subtitle>
-                <ion-card-title>{{ channel.facilityGroupName }}</ion-card-title>
-                <ion-card-subtitle>{{ channel.description }}</ion-card-subtitle>
-              </div>
-            </ion-card-header>
-
-            <ion-item lines="full">
-              <ion-icon slot="start" :icon="globeOutline"/>
-              <ion-label>
-                {{ channel.selectedConfigFacility?.facilityName }}
-                <p>{{ channel.selectedConfigFacility?.facilityId }}</p>
-              </ion-label>
-              <ion-button slot="end" fill="clear" color="medium" @click="openLinkThresholdFacilitiesToGroupModal(channel)">
-                <ion-icon :icon="optionsOutline" slot="icon-only" />
-              </ion-button>
-            </ion-item>
-
-            <ion-list>
-              <ion-item-divider color="light">
-                <ion-label>{{ translate("Facilities") }}</ion-label>
-                <ion-button slot="end" fill="clear" color="medium" @click="openLinkFacilitiesToGroupModal(channel)">
+          <template v-if="inventoryChannels.length">
+            <ion-card v-for="channel in inventoryChannels" :key="channel.facilityGroupId">
+              <ion-card-header>
+                <div>
+                  <ion-card-subtitle class="overline">{{ channel.facilityGroupId }}</ion-card-subtitle>
+                  <ion-card-title>{{ channel.facilityGroupName }}</ion-card-title>
+                  <ion-card-subtitle>{{ channel.description }}</ion-card-subtitle>
+                </div>
+              </ion-card-header>
+  
+              <ion-item lines="full">
+                <ion-icon slot="start" :icon="globeOutline"/>
+                <ion-label>
+                  {{ channel.selectedConfigFacility?.facilityName }}
+                  <p>{{ channel.selectedConfigFacility?.facilityId }}</p>
+                </ion-label>
+                <ion-button slot="end" fill="clear" color="medium" @click="openLinkThresholdFacilitiesToGroupModal(channel)">
                   <ion-icon :icon="optionsOutline" slot="icon-only" />
                 </ion-button>
-              </ion-item-divider>
-
-              <ion-item>
-                <ion-icon slot="start" :icon="storefrontOutline"/>
-                <ion-label>{{ translate("retail facilities", { count: getFacilityCount(channel, "RETAIL_STORE") })}}</ion-label>
-              </ion-item>
-
-              <ion-item lines="full">
-                <ion-icon slot="start" :icon="businessOutline"/>
-                <ion-label>{{ translate("warehouse", { count: getFacilityCount(channel, "WAREHOUSE") })}}</ion-label>
               </ion-item>
   
-              <ion-item lines="none">
-                <ion-button fill="clear" size="default" @click="openEditGroupModal(channel)">{{ translate("Edit group") }}</ion-button>
-                <!-- Functionality is not defined for this button hence commented it for now. -->
-                <!-- <ion-button color="medium" fill="clear" slot="end">
-                  <ion-icon :icon="ellipsisVerticalOutline" slot="icon-only"/>
-                </ion-button> -->
-              </ion-item>
-            </ion-list>
-          </ion-card>
+              <ion-list>
+                <ion-item-divider color="light">
+                  <ion-label>{{ translate("Facilities") }}</ion-label>
+                  <ion-button slot="end" fill="clear" color="medium" @click="openLinkFacilitiesToGroupModal(channel)">
+                    <ion-icon :icon="optionsOutline" slot="icon-only" />
+                  </ion-button>
+                </ion-item-divider>
+  
+                <ion-item>
+                  <ion-icon slot="start" :icon="storefrontOutline"/>
+                  <ion-label>{{ translate("retail facilities", { count: getFacilityCount(channel, "RETAIL_STORE") })}}</ion-label>
+                </ion-item>
+  
+                <ion-item lines="full">
+                  <ion-icon slot="start" :icon="businessOutline"/>
+                  <ion-label>{{ translate("warehouse", { count: getFacilityCount(channel, "WAREHOUSE") })}}</ion-label>
+                </ion-item>
+    
+                <ion-item lines="none">
+                  <ion-button fill="clear" size="default" @click="openEditGroupModal(channel)">{{ translate("Edit group") }}</ion-button>
+                  <!-- Functionality is not defined for this button hence commented it for now. -->
+                  <!-- <ion-button color="medium" fill="clear" slot="end">
+                    <ion-icon :icon="ellipsisVerticalOutline" slot="icon-only"/>
+                  </ion-button> -->
+                </ion-item>
+              </ion-list>
+            </ion-card>
+          </template>
+
+          <div class="empty-state" v-else>
+            <p>{{ translate("No inventory channel found.") }}</p>
+          </div>
         </section>
  
         <section v-else-if="selectedSegment === 'publish'">
