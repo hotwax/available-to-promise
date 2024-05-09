@@ -187,7 +187,7 @@ function isFacilitySelected(facilityId: any) {
 }
 
 async function createRule() {
-  if(!formData.value.ruleName) {
+  if(!formData.value.ruleName.trim()) {
     showToast(translate("Please fill in all the required fields."))
     return;
   }

@@ -22,7 +22,7 @@
                 </ion-input>
               </ion-item>
               <ion-item>
-                <ion-input v-model="formData.threshold">
+                <ion-input v-model="formData.threshold" type="number" @keydown="validateThreshold($event)">
                   <div slot="label">{{ translate("Threshold") }} <ion-text color="danger">*</ion-text></div>
                 </ion-input>
               </ion-item>
@@ -173,7 +173,7 @@ function generateRuleConditions(ruleId: string) {
 }
 
 async function createThresholdRule() {
-  if(!formData.value.ruleName || !formData.value.threshold) {
+  if(!formData.value.ruleName.trim() || !formData.value.threshold) {
     showToast(translate("Please fill in all the required fields."))
     return;
   }
@@ -225,6 +225,10 @@ async function createThresholdRule() {
     showToast(translate("Failed to create rule."))
   }
   emitter.emit("dismissLoader");
+}
+
+function validateThreshold(event: any) {
+  if(/[`!@#$%^&*()_+\-=\\|,.<>?~^e]/.test(event.key)) event.preventDefault();
 }
 </script>
 

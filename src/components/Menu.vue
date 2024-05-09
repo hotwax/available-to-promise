@@ -30,12 +30,12 @@
         </ion-item>
         <ion-item v-if="userProfile?.stores?.length > 1" lines="none">
           <ion-select interface="popover" :value="eComStore.productStoreId" @ionChange="setEComStore($event)">
-            <ion-select-option v-for="store in (userProfile?.stores ? userProfile.stores : [])" :key="store.productStoreId" :value="store.productStoreId" >{{ store.storeName }}</ion-select-option>
+            <ion-select-option v-for="store in (userProfile?.stores ? userProfile.stores : [])" :key="store.productStoreId" :value="store.productStoreId" >{{ store.storeName ? store.storeName : store.productStoreId }}</ion-select-option>
           </ion-select>
         </ion-item>
         <ion-item v-else lines="none">
           <ion-label class="ion-text-wrap">
-            {{ eComStore.storeName }}
+            {{ eComStore.storeName ? eComStore.storeName : eComStore.productStoreId }}
           </ion-label>
         </ion-item>
       </ion-toolbar>

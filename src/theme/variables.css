@@ -399,8 +399,4 @@ ion-content>section {
   .sort > div > :first-child{
     border-bottom: unset;
   }
-
-  ion-header {
-    display: flex;
-  }
 }

@@ -9,7 +9,7 @@
 
     <ion-content>
       <main v-if="ruleGroup.ruleGroupId">
-        <ScheduleRuleItem />
+        <ScheduleRuleItem v-if="rules.length" />
 
         <section>
           <RuleItem v-for="(rule, ruleIndex) in rules" :rule="rule" :ruleIndex="ruleIndex" :key="rule.ruleId" />
@@ -17,7 +17,7 @@
       </main>
 
       <div class="empty-state" v-else>
-       <p>{{ translate("No threshold rules found") }}</p>
+       <p>{{ translate("No safety stock rules found") }}</p>
       </div>
     </ion-content>
 

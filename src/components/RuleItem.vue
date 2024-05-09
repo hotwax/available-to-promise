@@ -152,7 +152,13 @@ async function editThreshold() {
       placeholder: translate("Threshold"),
       type: "number",
       value: props.rule.ruleActions?.length ? props.rule.ruleActions[0].fieldValue : 0,
-      min: 0
+      min: 0,
+      attributes: {
+        // Added check to not allow mainly .(period) and other special characters to be entered in the alert input
+        onkeydown: ($event: any) => {
+          if(/[`!@#$%^&*()_+\-=\\|,.<>?~^e]/.test($event.key)) $event.preventDefault();
+        }
+      }
     }],
     buttons: [{
       text: translate('Cancel'),
@@ -206,7 +212,13 @@ async function editSafetyStock() {
       placeholder: translate("Safety stock"),
       type: "number",
       value: props.rule.ruleActions?.length ? props.rule.ruleActions[0].fieldValue : 0,
-      min: 0
+      min: 0,
+      attributes: {
+        // Added check to not allow mainly .(period) and other special characters to be entered in the alert input
+        onkeydown: ($event: any) => {
+          if(/[`!@#$%^&*()_+\-=\\|,.<>?~^e]/.test($event.key)) $event.preventDefault();
+        }
+      }
     }],
     buttons: [{
       text: translate('Cancel'),
@@ -259,7 +271,7 @@ async function editRuleName() {
       name: "name",
       placeholder: translate("Name"),
       type: "text",
-      value: props.rule.ruleName
+      value: props.rule.ruleName.trim()
     }],
     buttons: [{
       text: translate('Cancel'),
@@ -268,7 +280,7 @@ async function editRuleName() {
     {
       text: translate('Update'),
       handler: async(data) => {
-        if(data.name) {
+        if(data.name.trim()) {
           emitter.emit("presentLoader");
           const rule = JSON.parse(JSON.stringify(props.rule))
           rule.ruleName = data.name
@@ -283,6 +295,9 @@ async function editRuleName() {
             showToast(translate("Failed to update rule name."))
           }
           emitter.emit("dismissLoader");
+        } else {
+          showToast(translate("Rule name can't be empty."))
+          return false;
         }
       }
     }]

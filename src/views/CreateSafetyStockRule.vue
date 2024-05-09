@@ -22,7 +22,7 @@
                 </ion-input>
               </ion-item>
               <ion-item>
-                <ion-input v-model="formData.safetyStock">
+                <ion-input v-model="formData.safetyStock" type="number" @keydown="validateSafetyStock($event)">
                   <div slot="label">{{ translate("Safety stock") }} <ion-text color="danger">*</ion-text></div>
                 </ion-input>
               </ion-item>
@@ -199,7 +199,7 @@ function generateRuleConditions(ruleId: string) {
 }
 
 async function createRule() {
-  if(!formData.value.ruleName || !formData.value.safetyStock || !formData.value.selectedFacilityGroups.included.length) {
+  if(!formData.value.ruleName.trim() || !formData.value.safetyStock || !formData.value.selectedFacilityGroups.included.length) {
     showToast(translate("Please fill in all the required fields."))
     return;
   }
@@ -245,6 +245,10 @@ async function createRule() {
     showToast(translate("Failed to create rule."))
   }
   emitter.emit("dismissLoader");
+}
+
+function validateSafetyStock(event: any) {
+  if(/[`!@#$%^&*()_+\-=\\|,.<>?~^e]/.test(event.key)) event.preventDefault();
 }
 
 function removeFacilityGroups(facilityGroupId: any, type: string) {
