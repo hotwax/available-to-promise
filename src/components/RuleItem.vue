@@ -101,7 +101,7 @@
       </ion-item>
 
       <ion-item lines="none">
-        <ion-button @click="editRuleName()" fill="clear">{{ translate("Edit name") }}</ion-button>
+        <ion-button @click="editRuleName()" size="default" fill="clear">{{ translate("Edit name") }}</ion-button>
         <ion-button @click="archiveRule()" color="medium" fill="clear" slot="end">
           <ion-icon :icon="archiveOutline" slot="icon-only"/>
         </ion-button>
@@ -315,7 +315,7 @@ function getRuleConditions(conditionTypeEnumId: string, fieldName?: string, oper
       let facilityGroupIds = condition?.fieldValue.split(",")
         facilityGroupIds = facilityGroupIds.map((id: string) => {
           let group = facilityGroups.value.find((group: any) => group.facilityGroupId === id)
-          return group ? group.facilityGroupName : null
+          return group ? group.facilityGroupName : id
         })
         return facilityGroupIds.join(", ")
     } else {
@@ -328,7 +328,7 @@ function getRuleConditions(conditionTypeEnumId: string, fieldName?: string, oper
       let facilities = condition?.fieldValue.split(",")
       facilities = facilities.map((id: string) => {
         let facility = configFacilities.value.find((facility: any) => facility.facilityId === id)
-        return facility ? facility.facilityName : null
+        return facility ? facility.facilityName : id
       })
       return facilities.join(", ")
     }

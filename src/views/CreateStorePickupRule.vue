@@ -53,7 +53,7 @@
           <ion-card-content>
             <ion-chip outline v-for="group in formData.selectedFacilityGroups['included']" :key="group.facilityGroupId">
               {{ group.facilityGroupName }}
-              <ion-icon :icon="closeCircle"/>
+              <ion-icon :icon="closeCircle" @click="removeFacilityGroups(group.facilityGroupId, 'included')" />
             </ion-chip>
           </ion-card-content>
         </ion-card>
@@ -69,7 +69,7 @@
           <ion-card-content>
             <ion-chip outline v-for="group in formData.selectedFacilityGroups['excluded']" :key="group.facilityGroupId">
               {{ group.facilityGroupName }}
-              <ion-icon :icon="closeCircle"/>
+              <ion-icon :icon="closeCircle" @click="removeFacilityGroups(group.facilityGroupId, 'excluded')" />
             </ion-chip>
           </ion-card-content>
         </ion-card>
@@ -104,7 +104,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonNote, IonPage, IonSegment, IonSegmentButton, IonText, IonTitle, IonToggle, IonToolbar, modalController } from '@ionic/vue';
+import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonNote, IonPage, IonSegment, IonSegmentButton, IonText, IonTitle, IonToggle, IonToolbar, modalController, onIonViewWillLeave } from '@ionic/vue';
 import { addCircleOutline, closeCircle, saveOutline, storefrontOutline } from 'ionicons/icons'
 import { translate } from "@/i18n";
 import { computed, onMounted, ref } from 'vue';
@@ -140,6 +140,18 @@ onMounted(async () => {
   await store.dispatch("util/fetchConfigFacilities");
 })
 
+onIonViewWillLeave(() => {
+  formData.value = {
+    ruleName: '',
+    isPickupAllowed: false,
+    selectedFacilityGroups: {
+      included: [],
+      excluded: []
+    },
+    selectedConfigFacilites: []
+  }
+})
+
 function getDefaultUrl() {
   return `store-pickup?groupTypeEnumId=${selectedSegment.value}`
 }
@@ -154,7 +166,7 @@ async function openProductFacilityGroupModal(type: string) {
   })
 
   modal.onDidDismiss().then((result: any) => {
-    if(result.data?.selectedGroups?.length) {
+    if(result.data?.selectedGroups) {
       formData.value.selectedFacilityGroups[type] = result.data.selectedGroups
     }
   })
@@ -247,7 +259,7 @@ function generateRuleConditions(ruleId: string) {
         "fieldName": "facilities",
         "operator": "in",
         "fieldValue": includedFacilityGroupIds.length > 1 ? includedFacilityGroupIds.join(",") : includedFacilityGroupIds[0],
-        "multiValued": includedFacilityGroupIds.length > 1 ? "Y" : "N"
+        "multiValued": "Y"
       })
     }
 
@@ -259,7 +271,7 @@ function generateRuleConditions(ruleId: string) {
         "fieldName": "facilities",
         "operator": "not-in",
         "fieldValue": excludedFacilityGroupIds.length > 1 ? excludedFacilityGroupIds.join(",") : excludedFacilityGroupIds[0],
-        "multiValued": excludedFacilityGroupIds.length > 1 ? "Y" : "N"
+        "multiValued": "Y"
       })
     }
   } else {
@@ -271,7 +283,7 @@ function generateRuleConditions(ruleId: string) {
         "fieldName": "facilities",
         "operator": "in",
         "fieldValue": selectedFacilites.length > 1 ? selectedFacilites.join(",") : selectedFacilites[0],
-        "multiValued": selectedFacilites.length > 1 ? "Y" : "N"
+        "multiValued": "Y"
       })
     }
   }
@@ -285,7 +297,7 @@ function generateRuleConditions(ruleId: string) {
           "fieldName": filter,
           "operator": type === "included" ? "in" : "not-in",
           "fieldValue": value.length > 1 ? value.join(",") : value[0],
-          "multiValued": value.length > 1 ? "Y" : "N"
+          "multiValued": "Y"
         })
       }
     })
@@ -294,6 +306,9 @@ function generateRuleConditions(ruleId: string) {
   return conditions;
 }
 
+function removeFacilityGroups(facilityGroupId: any, type: string) {
+  formData.value.selectedFacilityGroups[type] = formData.value.selectedFacilityGroups[type].filter((group: any) => group.facilityGroupId !== facilityGroupId)
+}
 </script>
 
 <style scoped>

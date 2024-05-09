@@ -65,6 +65,7 @@
   import { useRouter } from "vue-router";
   import { cloudUploadOutline, globeOutline, settingsOutline, sendOutline, storefrontOutline, pulseOutline } from 'ionicons/icons';
   import { translate } from "@/i18n";
+  import emitter from "@/event-bus";
 
   const store = useStore();
   const router = useRouter();
@@ -125,6 +126,7 @@
       store.dispatch("user/setEcomStore", {
         "productStoreId": event.detail.value
       })
+      emitter.emit("productStoreOrConfigChanged")
     }
   }
   </script>

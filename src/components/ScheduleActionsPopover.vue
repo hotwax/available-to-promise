@@ -89,6 +89,8 @@ async function runNow() {
               const payload = {
                 ruleGroupId: ruleGroup.value.ruleGroupId,
                 paused: "Y",  // passing Y as we just need to configure the scheduler and do not need to schedule it in active state
+                // Hardcoding for now, need to fetch system message remote id for the ftp server config.
+                systemMessageRemoteId: "RemoteSftp"
               }
 
               try {

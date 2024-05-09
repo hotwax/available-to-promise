@@ -14,7 +14,7 @@ const actions: ActionTree<ChannelState, RootState> = {
     let inventoryChannels = [] as any
 
     try {
-      resp = await ChannelService.fetchInventoryChannels({ facilityGroupTypeId: "CHANNEL_FAC_GROUP" });
+      resp = await ChannelService.fetchInventoryChannels({ facilityGroupTypeId: "CHANNEL_FAC_GROUP", productStoreId: store.state.user.currentEComStore.productStoreId });
 
       if(!hasError(resp)) {
         inventoryChannels = resp?.data;
@@ -38,7 +38,7 @@ const actions: ActionTree<ChannelState, RootState> = {
       if(!hasError(resp)) {
         const currentGroup = groups.find((group: any) => group.facilityGroupId === facilityGroupId)
         currentGroup.selectedConfigFacility = await resp.data.find((facility: any) => facility.facilityTypeId === "CONFIGURATION")
-        currentGroup.selectedFacilities = await resp.data.filter((facility: any) => facility.facilityTypeId === "RETAIL_STORE" || facility.facilityTypeId === "WAREHOUSE")
+        currentGroup.selectedFacilities = await resp.data.filter((facility: any) => facility.parentFacilityTypeId !== "VIRTUAL_FACILITY" && facility.facilityTypeId !== "VIRTUAL_FACILITY")
       } else {
         throw resp.data
       }
@@ -46,10 +46,9 @@ const actions: ActionTree<ChannelState, RootState> = {
       await Promise.allSettled(groups.map(async (group: any) => {
         try {
           const resp = await ChannelService.fetchGroupFacilities({ facilityGroupId: group.facilityGroupId, pageSize: 100 });
-
           if(!hasError(resp)) {
             group.selectedConfigFacility = await resp.data.find((facility: any) => facility.facilityTypeId === "CONFIGURATION")
-            group.selectedFacilities = await resp.data.filter((facility: any) => facility.facilityTypeId === "RETAIL_STORE" || facility.facilityTypeId === "WAREHOUSE")
+            group.selectedFacilities = await resp.data.filter((facility: any) => (facility.parentFacilityTypeId !== "VIRTUAL_FACILITY" && facility.facilityTypeId !== "VIRTUAL_FACILITY"))
           } else {
             throw resp.data
           }

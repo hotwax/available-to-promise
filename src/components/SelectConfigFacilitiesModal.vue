@@ -7,6 +7,10 @@
         </ion-button>
       </ion-buttons>
       <ion-title>{{ translate("Select facilities") }}</ion-title>
+      <ion-buttons slot="end">
+        <!-- Added check to disabled clear all button if not facility is selected. -->
+        <ion-button fill="clear" color="danger" :disabled="!selectedFacilityValues.length" @click="selectedFacilityValues = []">{{ translate("Clear All") }}</ion-button>
+      </ion-buttons>
     </ion-toolbar>
   </ion-header>
 
@@ -51,7 +55,7 @@ import {
   IonToolbar,
   modalController
 } from "@ionic/vue";
-import { computed, defineProps, onMounted } from "vue";
+import { computed, defineProps, onMounted, ref } from "vue";
 import { closeOutline, saveOutline } from "ionicons/icons";
 import { useStore } from "vuex";
 import { translate } from "@/i18n";
@@ -64,7 +68,7 @@ const store = useStore();
 const props = defineProps(["rule", "selectedFacilities"])
 
 const configFacilities = computed(() => store.getters["util/getConfigFacilities"])
-let selectedFacilityValues = JSON.parse(JSON.stringify(props.selectedFacilities))
+const selectedFacilityValues = ref(JSON.parse(JSON.stringify(props.selectedFacilities)));
 
 onMounted(async () => {
   await store.dispatch("util/fetchConfigFacilities");
@@ -75,16 +79,16 @@ async function closeModal() {
 }
 
 async function toggleFacilitySelection(updatedFacility: any) {
-  const selectedFacility = selectedFacilityValues.some((facilityId: any) => facilityId === updatedFacility.facilityId);
+  const selectedFacility = selectedFacilityValues.value.some((facilityId: any) => facilityId === updatedFacility.facilityId);
   if (selectedFacility) {
-    selectedFacilityValues = selectedFacilityValues.filter((facilityId: any) => facilityId !== updatedFacility.facilityId);
+    selectedFacilityValues.value = selectedFacilityValues.value.filter((facilityId: any) => facilityId !== updatedFacility.facilityId);
   } else {
-    selectedFacilityValues.push(updatedFacility.facilityId);
+    selectedFacilityValues.value.push(updatedFacility.facilityId);
   }
 }
 
 function isSelected(currentFacilityId: any) {
-  return selectedFacilityValues.some((facilityId: any) => facilityId === currentFacilityId);
+  return selectedFacilityValues.value.some((facilityId: any) => facilityId === currentFacilityId);
 }
 
 async function saveFacilities() {  
@@ -93,15 +97,15 @@ async function saveFacilities() {
 
   const condition = rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FACILITIES")
   if(condition) {
-    condition.fieldValue = selectedFacilityValues.join(",")
+    condition.fieldValue = selectedFacilityValues.value.join(",")
   } else {
     rule.ruleConditions.push({
       "ruleId": rule.ruleId,
       "conditionTypeEnumId": "ENTCT_ATP_FACILITIES",
       "fieldName": "facilities",
       "operator": "in",
-      "fieldValue": selectedFacilityValues.length > 1 ? selectedFacilityValues.join(",") : selectedFacilityValues[0],
-      "multiValued": selectedFacilityValues.length > 1 ? "Y" : "N"
+      "fieldValue": selectedFacilityValues.value.length > 1 ? selectedFacilityValues.value.join(",") : selectedFacilityValues.value[0],
+      "multiValued": "Y"
     })
   }
 

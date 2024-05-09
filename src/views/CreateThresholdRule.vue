@@ -79,7 +79,8 @@ import {
   IonNote,
   IonText,
   IonTitle,
-  IonToolbar
+  IonToolbar,
+  onIonViewWillLeave
 } from '@ionic/vue';
 import { saveOutline } from 'ionicons/icons'
 import { translate } from "@/i18n";
@@ -98,6 +99,14 @@ const formData = ref({
   threshold: '',
   selectedConfigFacilites: []
 }) as any;
+
+onIonViewWillLeave(() => {
+  formData.value = {
+    ruleName: '',
+    threshold: '',
+    selectedConfigFacilites: []
+  }
+})
 
 const configFacilities = computed(() => store.getters["util/getConfigFacilities"])
 const appliedFilters = computed(() => store.getters["util/getAppliedFilters"]);
@@ -141,7 +150,7 @@ function generateRuleConditions(ruleId: string) {
       "fieldName": "facilities",
       "operator": "in",
       "fieldValue": selectedFacilites.length > 1 ? selectedFacilites.join(",") : selectedFacilites[0],
-      "multiValued": selectedFacilites.length > 1 ? "Y" : "N"
+      "multiValued": "Y"
     })
   }
 
@@ -154,7 +163,7 @@ function generateRuleConditions(ruleId: string) {
           "fieldName": filter,
           "operator": type === "included" ? "in" : "not-in",
           "fieldValue": value.length > 1 ? value.join(",") : value[0],
-          "multiValued": value.length > 1 ? "Y" : "N"
+          "multiValued": "Y"
         })
       }
     })

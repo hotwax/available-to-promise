@@ -12,7 +12,7 @@ const fetchRuleGroup = async (payload: any): Promise <any>  => {
 
 const fetchRules = async (payload: any): Promise <any>  => {
   return api({
-    url: `ruleGroups/${payload.ruleGroupId}/rules`,
+    url: `decisionRules`,
     method: "GET",
     params: payload
   });
@@ -78,24 +78,6 @@ const updateRule = async (payload: any, ruleId: string): Promise <any>  => {
   }
 }
 
-const fetchRulesActionsAndConditions = async (ruleId: any): Promise <any>  => {
-  try {
-    const resp = await api({
-      url: `decisionRules/${ruleId}`,
-      method: "GET"
-    }) as any;
-
-    if(!hasError(resp)) {
-      return Promise.resolve(resp.data)
-    } else {
-      throw resp.data
-    }
-  } catch(err: any) {
-    logger.error(err)
-    return Promise.reject("Failed to fetch rule information.");
-  }
-}
-
 const fetchRuleScheduleInformation = async (ruleGroupId: string): Promise<any> => {
   return api({
     url: `ruleGroups/${ruleGroupId}/schedule`,
@@ -132,7 +114,6 @@ export const RuleService = {
   fetchRuleGroup,
   fetchRuleGroupHistory,
   fetchRules,
-  fetchRulesActionsAndConditions,
   fetchRuleScheduleInformation,
   runNow,
   scheduleRuleGroup,

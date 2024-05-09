@@ -20,7 +20,7 @@
     </ion-item>
   
     <ion-item lines="none">
-      <ion-button fill="clear" :disabled="ruleGroup.schedule?.paused === 'N'" @click="saveSchedule()">{{ translate("Schedule") }}</ion-button>
+      <ion-button fill="clear" :disabled="ruleGroup.schedule?.paused === 'N'" size="default" @click="saveSchedule()">{{ translate("Schedule") }}</ion-button>
       <ion-button color="medium" fill="clear" slot="end" @click="OpenScheduleActionsPopover($event)">
         <ion-icon :icon="ellipsisVerticalOutline" slot="icon-only"/>
       </ion-button>

@@ -66,7 +66,7 @@
 
 <script setup lang="ts">
 import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, IonLabel, IonMenuButton, IonPage, IonSegment, IonSegmentButton, IonTitle, IonToolbar, onIonViewWillEnter } from '@ionic/vue';
-import { computed, ref } from 'vue';
+import { computed, onUnmounted, ref } from 'vue';
 import { addOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue'
 import FacilityItem from '@/components/FacilityItem.vue'
@@ -84,17 +84,27 @@ const rules = computed(() => store.getters["rule/getRules"]);
 const isScrollable = computed(() => store.getters["util/isFacilitiesScrollable"]);
 const facilities = computed(() => store.getters["util/getFacilities"]);
 
-const selectedSegment = ref(router.currentRoute.value.query.groupTypeEnumId ? router.currentRoute.value.query.groupTypeEnumId : "RG_PICKUP_FACILITY")
+const selectedSegment = ref("") as any;
+
 const isScrollingEnabled = ref(false);
 const contentRef = ref({}) as any;
 const infiniteScrollRef = ref({}) as any;
 
 onIonViewWillEnter(async() => {
-  emitter.emit("presentLoader");
-  await Promise.allSettled([store.dispatch('rule/fetchRules', { groupTypeEnumId: 'RG_PICKUP_FACILITY' }), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilityGroups")])
-  emitter.emit("dismissLoader");
+  fetchRules();
+  emitter.on("productStoreOrConfigChanged", fetchRules);
 })
 
+onUnmounted(() => {
+  emitter.off("productStoreOrConfigChanged", fetchRules);
+})
+
+async function fetchRules() {
+  emitter.emit("presentLoader");
+  selectedSegment.value = router.currentRoute.value.query.groupTypeEnumId ? router.currentRoute.value.query.groupTypeEnumId : "RG_PICKUP_FACILITY";
+  await Promise.allSettled([store.dispatch('rule/fetchRules', { groupTypeEnumId: 'RG_PICKUP_FACILITY' }), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilityGroups")])
+  emitter.emit("dismissLoader");
+}
 
 async function fetchFacilities(vSize?: any, vIndex?: any) {
   const pageSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;

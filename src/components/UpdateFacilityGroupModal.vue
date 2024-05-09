@@ -7,6 +7,10 @@
         </ion-button>
       </ion-buttons>
       <ion-title>{{ translate("Select facility groups") }}</ion-title>
+      <ion-buttons slot="end">
+        <!-- Added check to disable clear all button if not group is selected for current segment. -->
+        <ion-button fill="clear" color="danger" :disabled="selectedSegment === 'included' ? !includedGroups.length : !excludedGroups.length" @click="selectedSegment === 'included' ? includedGroups = [] : excludedGroups = []">{{ translate("Clear All") }}</ion-button>
+      </ion-buttons>
     </ion-toolbar>
   </ion-header>
 
@@ -20,11 +24,11 @@
       </ion-segment-button>
     </ion-segment>
 
-    <ion-list v-if="facilityGroups.length">
-      <ion-item v-for="group in facilityGroups" :key="group.facilityGroupId" @click="!isAlreadyApplied(group.facilityGroupId) ? updateSelectedValues(group.facilityGroupId): ''">
-        <ion-label v-if="isAlreadyApplied(group.facilityGroupId)">{{ group.facilityGroupName }}</ion-label>
+    <ion-list v-if="facilityGroupValues.length">
+      <ion-item v-for="group in facilityGroupValues" :key="group.facilityGroupId" @click="!isAlreadyApplied(group.facilityGroupId) ? updateSelectedValues(group.facilityGroupId): ''">
+        <ion-label v-if="isAlreadyApplied(group.facilityGroupId)">{{ group.facilityGroupName ? group.facilityGroupName : group.facilityGroupId }}</ion-label>
         <ion-checkbox v-if="!isAlreadyApplied(group.facilityGroupId)" :checked="isSelected(group.facilityGroupId)">
-          {{ group.facilityGroupName }}
+          {{ group.facilityGroupName ? group.facilityGroupName : group.facilityGroupId }}
         </ion-checkbox>
         <ion-note v-else slot="end" color="danger">{{ selectedSegment === 'included' ? translate("excluded") : translate("included") }}</ion-note>
       </ion-item>
@@ -74,6 +78,7 @@ import emitter from "@/event-bus";
 const selectedSegment = ref("included")
 const includedGroups = ref([]) as any;
 const excludedGroups = ref([]) as any;
+const facilityGroupValues = ref([]) as any;
 
 const props = defineProps(["rule"]);
 const store = useStore();
@@ -87,6 +92,16 @@ onMounted(async () => {
 
   const excludedCondition = props.rule.ruleConditions?.find((condition: any) => condition.conditionTypeEnumId === 'ENTCT_ATP_FAC_GROUPS' && condition.fieldName === 'facilityGroups' && condition.operator === 'not-in')
   if(excludedCondition && excludedCondition.fieldValue) excludedGroups.value = excludedCondition.fieldValue.split(",");
+
+  facilityGroupValues.value = JSON.parse(JSON.stringify(facilityGroups.value));
+
+  includedGroups.value.map((id: any) => {
+    if(!facilityGroups.value.find((group: any) => group.facilityGroupId === id)) facilityGroupValues.value.unshift({ facilityGroupId: id });
+  })
+
+  excludedGroups.value.map((id: any) => {
+    if(!facilityGroups.value.find((group: any) => group.facilityGroupId === id)) facilityGroupValues.value.unshift({ facilityGroupId: id })
+  })
 })
 
 function closeModal() {
@@ -130,7 +145,7 @@ async function saveFacilityGroups() {
       "fieldName": "facilityGroups",
       "operator": "in",
       "fieldValue": includedGroups.value?.length > 1 ? includedGroups.value.join(",") : includedGroups.value[0],
-      "multiValued": includedGroups.value?.length > 1 ? "Y" : "N"
+      "multiValued": "Y"
     })
   }
 
@@ -144,7 +159,7 @@ async function saveFacilityGroups() {
       "fieldName": "facilityGroups",
       "operator": "not-in",
       "fieldValue": excludedGroups.value?.length > 1 ? excludedGroups.value.join(",") : excludedGroups.value[0],
-      "multiValued": excludedGroups.value?.length > 1 ? "Y" : "N"
+      "multiValued": "Y"
     })
   }
 
