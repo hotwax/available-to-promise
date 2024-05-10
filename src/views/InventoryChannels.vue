@@ -3,11 +3,9 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-menu-button slot="start" />
-        <ion-title>{{ translate("Inventory channels") }}</ion-title>
-      </ion-toolbar>
+        <ion-title slot="start">{{ translate("Inventory channels") }}</ion-title>
 
-      <ion-toolbar>
-        <ion-segment v-model="selectedSegment">
+        <ion-segment v-model="selectedSegment" slot="end">
           <ion-segment-button value="channels">
             <ion-label>{{ translate("Channels") }}</ion-label>
           </ion-segment-button>
@@ -219,9 +217,5 @@ ion-card-header {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-}
-
-ion-header {
-  display: flex;
 }
 </style>
