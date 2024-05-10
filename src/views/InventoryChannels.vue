@@ -219,4 +219,8 @@ ion-card-header {
   justify-content: space-between;
   align-items: center;
 }
+
+ion-header {
+  display: flex;
+}
 </style>
