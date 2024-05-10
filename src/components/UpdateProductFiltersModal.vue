@@ -16,6 +16,11 @@
 
   <ion-content>
     <ion-searchbar :placeholder="translate('Search', { label })" v-model="queryString" @keyup.enter="search()"/>
+    <ion-row>
+      <ion-chip v-for="filter in (selectedSegment === 'included' ? includedFilters : excludedFilters)" outline :key="filter.id">
+        <ion-label>{{ filter }}</ion-label>
+      </ion-chip>
+    </ion-row>
 
     <ion-segment v-model="selectedSegment">
       <ion-segment-button value="included">
@@ -66,6 +71,7 @@ import {
   IonButton,
   IonButtons,
   IonCheckbox,
+  IonChip,
   IonContent,
   IonFab,
   IonFabButton,
@@ -77,6 +83,7 @@ import {
   IonLabel,
   IonList,
   IonNote,
+  IonRow,
   IonSearchbar,
   IonSegment,
   IonSegmentButton,
@@ -232,5 +239,14 @@ async function saveFilters() {
 <style scoped>
   ion-content {
     --padding-bottom: 80px;
+  }
+
+  ion-row {
+    flex-wrap: nowrap;
+    overflow: scroll;
+  }
+
+  ion-chip {
+    flex-shrink: 0;
   }
 </style>
