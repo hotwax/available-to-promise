@@ -23,13 +23,14 @@
 
     <ion-content ref="contentRef" :scroll-events="true" @ionScroll="enableScrolling()">
       <main v-if="selectedSegment !== 'facility'">
-        <ScheduleRuleItem />
+        <template v-if="ruleGroup.ruleGroupId">
+          <ScheduleRuleItem v-if="rules.length" />
 
-        <section v-if="selectedSegment === 'RG_PICKUP_FACILITY' || selectedSegment === 'RG_PICKUP_CHANNEL'">
-          <ion-reorder-group :disabled="false" @ionItemReorder="reorderingRules = doReorder($event, reorderingRules)">
-            <RuleItem v-for="(rule, ruleIndex) in (isReorderActive ? reorderingRules : rules)" :rule="rule" :ruleIndex="ruleIndex" :key="rule.ruleId" />
-          </ion-reorder-group>
-        </section>
+          <section>
+            <ion-reorder-group :disabled="false" @ionItemReorder="reorderingRules = doReorder($event, reorderingRules)">
+              <RuleItem v-for="(rule, ruleIndex) in (isReorderActive ? reorderingRules : rules)" :rule="rule" :ruleIndex="ruleIndex" :key="rule.ruleId" />
+            </ion-reorder-group></section>
+        </template>
         <div class="empty-state" v-else>
           <p>{{ translate("No store pickup rules found") }}</p>
         </div>
@@ -69,7 +70,7 @@
 
 <script setup lang="ts">
 import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, IonLabel, IonMenuButton, IonPage, IonReorderGroup, IonSegment, IonSegmentButton, IonTitle, IonToolbar, onIonViewWillEnter } from '@ionic/vue';
-import { computed, ref } from 'vue';
+import { computed, onUnmounted, ref } from 'vue';
 import { addOutline, balloonOutline, saveOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue'
 import FacilityItem from '@/components/FacilityItem.vue'
@@ -84,23 +85,34 @@ import { RuleService } from '@/services/RuleService';
 const store = useStore();
 const router = useRouter()
 
+const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
 const rules = computed(() => store.getters["rule/getRules"]);
 const isScrollable = computed(() => store.getters["util/isFacilitiesScrollable"]);
 const facilities = computed(() => store.getters["util/getFacilities"]);
 const isReorderActive = computed(() => store.getters["rule/isReorderActive"]);
 const reorderingRules = ref([]);
 
-const selectedSegment = ref(router.currentRoute.value.query.groupTypeEnumId ? router.currentRoute.value.query.groupTypeEnumId : "RG_PICKUP_FACILITY")
+const selectedSegment = ref("") as any;
+
 const isScrollingEnabled = ref(false);
 const contentRef = ref({}) as any;
 const infiniteScrollRef = ref({}) as any;
 
 onIonViewWillEnter(async() => {
-  emitter.emit("presentLoader");
-  await Promise.allSettled([store.dispatch('rule/fetchRules', { groupTypeEnumId: 'RG_PICKUP_FACILITY' }), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilityGroups")])
-  emitter.emit("dismissLoader");
+  fetchRules();
+  emitter.on("productStoreOrConfigChanged", fetchRules);
 })
 
+onUnmounted(() => {
+  emitter.off("productStoreOrConfigChanged", fetchRules);
+})
+
+async function fetchRules() {
+  emitter.emit("presentLoader");
+  selectedSegment.value = router.currentRoute.value.query.groupTypeEnumId ? router.currentRoute.value.query.groupTypeEnumId : "RG_PICKUP_FACILITY";
+  await Promise.allSettled([store.dispatch('rule/fetchRules', { groupTypeEnumId: 'RG_PICKUP_FACILITY' }), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilityGroups")])
+  emitter.emit("dismissLoader");
+}
 
 async function fetchFacilities(vSize?: any, vIndex?: any) {
   const pageSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
@@ -186,3 +198,9 @@ function createStorePickup() {
   router.push({ path: '/create-store-pickup', query: { groupTypeEnumId: selectedSegment.value } })
 }
 </script>
+
+<style scoped>
+  ion-header {
+    display: flex;
+  }
+</style>

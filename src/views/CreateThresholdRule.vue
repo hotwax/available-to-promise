@@ -22,7 +22,7 @@
                 </ion-input>
               </ion-item>
               <ion-item>
-                <ion-input v-model="formData.threshold">
+                <ion-input v-model="formData.threshold" type="number" @keydown="validateThreshold($event)">
                   <div slot="label">{{ translate("Threshold") }} <ion-text color="danger">*</ion-text></div>
                 </ion-input>
               </ion-item>
@@ -34,7 +34,7 @@
         <h1>{{ translate("Channels") }} <ion-text color="danger">*</ion-text></h1>
       </div>
 
-      <section> 
+      <section v-if="configFacilities.length">
         <ion-card v-for="facility in configFacilities" :key="facility.facilityId" @click="toggleFacilitySelection(facility.facilityId)" button>
           <ion-card-header>
             <div>
@@ -45,6 +45,9 @@
           </ion-card-header>
         </ion-card>
       </section>
+      <div v-else class="empty-state">
+        <ion-note>{{ translate("No channel found for current product store.") }}</ion-note>
+      </div>
 
       <ProductFilters />
     </ion-content>
@@ -73,9 +76,11 @@ import {
   IonInput,
   IonItem,
   IonPage,
+  IonNote,
   IonText,
   IonTitle,
-  IonToolbar
+  IonToolbar,
+  onIonViewWillLeave
 } from '@ionic/vue';
 import { saveOutline } from 'ionicons/icons'
 import { translate } from "@/i18n";
@@ -94,6 +99,14 @@ const formData = ref({
   threshold: '',
   selectedConfigFacilites: []
 }) as any;
+
+onIonViewWillLeave(() => {
+  formData.value = {
+    ruleName: '',
+    threshold: '',
+    selectedConfigFacilites: []
+  }
+})
 
 const configFacilities = computed(() => store.getters["util/getConfigFacilities"])
 const appliedFilters = computed(() => store.getters["util/getAppliedFilters"]);
@@ -137,7 +150,7 @@ function generateRuleConditions(ruleId: string) {
       "fieldName": "facilities",
       "operator": "in",
       "fieldValue": selectedFacilites.length > 1 ? selectedFacilites.join(",") : selectedFacilites[0],
-      "multiValued": selectedFacilites.length > 1 ? "Y" : "N"
+      "multiValued": "Y"
     })
   }
 
@@ -150,7 +163,7 @@ function generateRuleConditions(ruleId: string) {
           "fieldName": filter,
           "operator": type === "included" ? "in" : "not-in",
           "fieldValue": value.length > 1 ? value.join(",") : value[0],
-          "multiValued": value.length > 1 ? "Y" : "N"
+          "multiValued": "Y"
         })
       }
     })
@@ -160,7 +173,7 @@ function generateRuleConditions(ruleId: string) {
 }
 
 async function createThresholdRule() {
-  if(!formData.value.ruleName || !formData.value.threshold) {
+  if(!formData.value.ruleName.trim() || !formData.value.threshold) {
     showToast(translate("Please fill in all the required fields."))
     return;
   }
@@ -213,6 +226,10 @@ async function createThresholdRule() {
   }
   emitter.emit("dismissLoader");
 }
+
+function validateThreshold(event: any) {
+  if(/[`!@#$%^&*()_+\-=\\|,.<>?~^e]/.test(event.key)) event.preventDefault();
+}
 </script>
 
 <style scoped>
@@ -225,5 +242,9 @@ ion-card-header {
 
 ion-card-header > ion-checkbox {
   flex-shrink: 0;
+}
+
+.empty-state {
+  align-items: start;
 }
 </style>

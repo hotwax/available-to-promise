@@ -53,7 +53,7 @@
           <ion-card-content>
             <ion-chip outline v-for="group in formData.selectedFacilityGroups['included']" :key="group.facilityGroupId">
               {{ group.facilityGroupName }}
-              <ion-icon :icon="closeCircle"/>
+              <ion-icon :icon="closeCircle" @click="removeFacilityGroups(group.facilityGroupId, 'included')" />
             </ion-chip>
           </ion-card-content>
         </ion-card>
@@ -69,22 +69,27 @@
           <ion-card-content>
             <ion-chip outline v-for="group in formData.selectedFacilityGroups['excluded']" :key="group.facilityGroupId">
               {{ group.facilityGroupName }}
-              <ion-icon :icon="closeCircle"/>
+              <ion-icon :icon="closeCircle" @click="removeFacilityGroups(group.facilityGroupId, 'excluded')" />
             </ion-chip>
           </ion-card-content>
         </ion-card>
       </section>
 
       <section v-else>
-        <ion-card v-for="facility in configFacilities" :key="facility.facilityId" @click="toggleFacilitySelection(facility.facilityId)" button>
-          <ion-card-header>
-            <div>
-              <ion-card-title>{{ facility.facilityName }}</ion-card-title>
-              <ion-card-subtitle>{{ facility.facilityId }}</ion-card-subtitle>
-            </div>
-            <ion-checkbox :checked="isFacilitySelected(facility.facilityId)" />
-          </ion-card-header>
-        </ion-card>
+        <template v-if="configFacilities.length">
+          <ion-card v-for="facility in configFacilities" :key="facility.facilityId" @click="toggleFacilitySelection(facility.facilityId)" button>
+            <ion-card-header>
+              <div>
+                <ion-card-title>{{ facility.facilityName }}</ion-card-title>
+                <ion-card-subtitle>{{ facility.facilityId }}</ion-card-subtitle>
+              </div>
+              <ion-checkbox :checked="isFacilitySelected(facility.facilityId)" />
+            </ion-card-header>
+          </ion-card>
+        </template>
+        <div v-else class="empty-state">
+          <ion-note>{{ translate("No channel found for current product store.") }}</ion-note>
+        </div>
       </section>
 
       <ProductFilters />
@@ -99,7 +104,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonPage, IonSegment, IonSegmentButton, IonText, IonTitle, IonToggle, IonToolbar, modalController } from '@ionic/vue';
+import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonNote, IonPage, IonSegment, IonSegmentButton, IonText, IonTitle, IonToggle, IonToolbar, modalController, onIonViewWillLeave } from '@ionic/vue';
 import { addCircleOutline, closeCircle, saveOutline, storefrontOutline } from 'ionicons/icons'
 import { translate } from "@/i18n";
 import { computed, onMounted, ref } from 'vue';
@@ -135,6 +140,18 @@ onMounted(async () => {
   await store.dispatch("util/fetchConfigFacilities");
 })
 
+onIonViewWillLeave(() => {
+  formData.value = {
+    ruleName: '',
+    isPickupAllowed: false,
+    selectedFacilityGroups: {
+      included: [],
+      excluded: []
+    },
+    selectedConfigFacilites: []
+  }
+})
+
 function getDefaultUrl() {
   return `store-pickup?groupTypeEnumId=${selectedSegment.value}`
 }
@@ -149,7 +166,7 @@ async function openProductFacilityGroupModal(type: string) {
   })
 
   modal.onDidDismiss().then((result: any) => {
-    if(result.data?.selectedGroups?.length) {
+    if(result.data?.selectedGroups) {
       formData.value.selectedFacilityGroups[type] = result.data.selectedGroups
     }
   })
@@ -170,15 +187,15 @@ function isFacilitySelected(facilityId: any) {
 }
 
 async function createRule() {
-  if(!formData.value.ruleName) {
+  if(!formData.value.ruleName.trim()) {
     showToast(translate("Please fill in all the required fields."))
     return;
   }
 
-  if( selectedSegment.value === 'RG_PICKUP_FACILITY' && !formData.value.selectedFacilityGroups.included.length) {
-    showToast(translate("Please fill in all the required fields."))
+  if(selectedSegment.value === 'RG_PICKUP_FACILITY' && !formData.value.selectedFacilityGroups.included.length) {
+    showToast(translate("Please include atleast one facility group."))
     return;
-  } else if(!formData.value.selectedConfigFacilites.length) {
+  } else if(selectedSegment.value === 'RG_PICKUP_CHANNEL' && !formData.value.selectedConfigFacilites.length) {
     showToast(translate("Please select atleast one config facility."))
     return;
   }
@@ -242,7 +259,7 @@ function generateRuleConditions(ruleId: string) {
         "fieldName": "facilities",
         "operator": "in",
         "fieldValue": includedFacilityGroupIds.length > 1 ? includedFacilityGroupIds.join(",") : includedFacilityGroupIds[0],
-        "multiValued": includedFacilityGroupIds.length > 1 ? "Y" : "N"
+        "multiValued": "Y"
       })
     }
 
@@ -254,7 +271,7 @@ function generateRuleConditions(ruleId: string) {
         "fieldName": "facilities",
         "operator": "not-in",
         "fieldValue": excludedFacilityGroupIds.length > 1 ? excludedFacilityGroupIds.join(",") : excludedFacilityGroupIds[0],
-        "multiValued": excludedFacilityGroupIds.length > 1 ? "Y" : "N"
+        "multiValued": "Y"
       })
     }
   } else {
@@ -266,7 +283,7 @@ function generateRuleConditions(ruleId: string) {
         "fieldName": "facilities",
         "operator": "in",
         "fieldValue": selectedFacilites.length > 1 ? selectedFacilites.join(",") : selectedFacilites[0],
-        "multiValued": selectedFacilites.length > 1 ? "Y" : "N"
+        "multiValued": "Y"
       })
     }
   }
@@ -280,7 +297,7 @@ function generateRuleConditions(ruleId: string) {
           "fieldName": filter,
           "operator": type === "included" ? "in" : "not-in",
           "fieldValue": value.length > 1 ? value.join(",") : value[0],
-          "multiValued": value.length > 1 ? "Y" : "N"
+          "multiValued": "Y"
         })
       }
     })
@@ -289,6 +306,9 @@ function generateRuleConditions(ruleId: string) {
   return conditions;
 }
 
+function removeFacilityGroups(facilityGroupId: any, type: string) {
+  formData.value.selectedFacilityGroups[type] = formData.value.selectedFacilityGroups[type].filter((group: any) => group.facilityGroupId !== facilityGroupId)
+}
 </script>
 
 <style scoped>
@@ -301,5 +321,9 @@ ion-card-header {
 
 ion-card-header > ion-checkbox {
   flex-shrink: 0;
+}
+
+.empty-state {
+  align-items: start;
 }
 </style>

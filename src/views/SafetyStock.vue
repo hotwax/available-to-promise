@@ -9,7 +9,7 @@
 
     <ion-content>
       <main v-if="ruleGroup.ruleGroupId">
-        <ScheduleRuleItem />
+        <ScheduleRuleItem v-if="rules.length" />
 
         <section>
           <ion-reorder-group :disabled="false" @ionItemReorder="reorderingRules = doReorder($event, reorderingRules)">
@@ -19,7 +19,7 @@
       </main>
 
       <div class="empty-state" v-else>
-       <p>{{ translate("No threshold rules found") }}</p>
+       <p>{{ translate("No safety stock rules found") }}</p>
       </div>
     </ion-content>
 
@@ -41,7 +41,7 @@ import RuleItem from '@/components/RuleItem.vue';
 import { useRouter } from "vue-router";
 import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
 import { useStore } from 'vuex';
-import { computed, ref } from 'vue';
+import { computed, onUnmounted, ref } from 'vue';
 import { translate } from '@/i18n';
 import emitter from '@/event-bus';
 import { RuleService } from '@/services/RuleService';
@@ -56,10 +56,19 @@ const isReorderActive = computed(() => store.getters["rule/isReorderActive"]);
 const reorderingRules = ref([]);
 
 onIonViewWillEnter(async() => {
+  fetchRules();
+  emitter.on("productStoreOrConfigChanged", fetchRules);
+})
+
+onUnmounted(() => {
+  emitter.off("productStoreOrConfigChanged", fetchRules);
+})
+
+async function fetchRules() {
   emitter.emit("presentLoader");
   await Promise.allSettled([store.dispatch('rule/fetchRules', { groupTypeEnumId: 'RG_SAFETY_STOCK' }), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilityGroups")]);
   emitter.emit("dismissLoader");
-})
+}
 
 function activateReordering() {
   store.dispatch("rule/updateIsReorderActive", true)

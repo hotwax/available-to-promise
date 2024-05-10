@@ -106,7 +106,6 @@
           </ion-list>
         </div>
       </ion-accordion>
-      
     </ion-accordion-group>
   </ion-card>
 </template>
@@ -154,7 +153,13 @@ async function editThreshold() {
       placeholder: translate("Threshold"),
       type: "number",
       value: props.rule.ruleActions?.length ? props.rule.ruleActions[0].fieldValue : 0,
-      min: 0
+      min: 0,
+      attributes: {
+        // Added check to not allow mainly .(period) and other special characters to be entered in the alert input
+        onkeydown: ($event: any) => {
+          if(/[`!@#$%^&*()_+\-=\\|,.<>?~^e]/.test($event.key)) $event.preventDefault();
+        }
+      }
     }],
     buttons: [{
       text: translate('Cancel'),
@@ -208,7 +213,13 @@ async function editSafetyStock() {
       placeholder: translate("Safety stock"),
       type: "number",
       value: props.rule.ruleActions?.length ? props.rule.ruleActions[0].fieldValue : 0,
-      min: 0
+      min: 0,
+      attributes: {
+        // Added check to not allow mainly .(period) and other special characters to be entered in the alert input
+        onkeydown: ($event: any) => {
+          if(/[`!@#$%^&*()_+\-=\\|,.<>?~^e]/.test($event.key)) $event.preventDefault();
+        }
+      }
     }],
     buttons: [{
       text: translate('Cancel'),
@@ -261,7 +272,7 @@ async function editRuleName() {
       name: "name",
       placeholder: translate("Name"),
       type: "text",
-      value: props.rule.ruleName
+      value: props.rule.ruleName.trim()
     }],
     buttons: [{
       text: translate('Cancel'),
@@ -270,7 +281,7 @@ async function editRuleName() {
     {
       text: translate('Update'),
       handler: async(data) => {
-        if(data.name) {
+        if(data.name.trim()) {
           emitter.emit("presentLoader");
           const rule = JSON.parse(JSON.stringify(props.rule))
           rule.ruleName = data.name
@@ -285,6 +296,9 @@ async function editRuleName() {
             showToast(translate("Failed to update rule name."))
           }
           emitter.emit("dismissLoader");
+        } else {
+          showToast(translate("Rule name can't be empty."))
+          return false;
         }
       }
     }]
@@ -302,7 +316,7 @@ function getRuleConditions(conditionTypeEnumId: string, fieldName?: string, oper
       let facilityGroupIds = condition?.fieldValue.split(",")
         facilityGroupIds = facilityGroupIds.map((id: string) => {
           let group = facilityGroups.value.find((group: any) => group.facilityGroupId === id)
-          return group ? group.facilityGroupName : null
+          return group ? group.facilityGroupName : id
         })
         return facilityGroupIds.join(", ")
     } else {
@@ -315,7 +329,7 @@ function getRuleConditions(conditionTypeEnumId: string, fieldName?: string, oper
       let facilities = condition?.fieldValue.split(",")
       facilities = facilities.map((id: string) => {
         let facility = configFacilities.value.find((facility: any) => facility.facilityId === id)
-        return facility ? facility.facilityName : null
+        return facility ? facility.facilityName : id
       })
       return facilities.join(", ")
     }

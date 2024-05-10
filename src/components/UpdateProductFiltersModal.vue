@@ -7,6 +7,10 @@
         </ion-button>
       </ion-buttons>
       <ion-title>{{ translate("Select", { label }) }}</ion-title>
+      <ion-buttons slot="end">
+        <!-- Added check to disable clear button if no facetOptions are available to select or if no filter is selected for the current segment. -->
+        <ion-button fill="clear" color="danger" :disabled="!facetOptions.length || (selectedSegment === 'included' ? !includedFilters.length : !excludedFilters.length)" @click="selectedSegment === 'included' ? includedFilters = [] : excludedFilters = []">{{ translate("Clear All") }}</ion-button>
+      </ion-buttons>
     </ion-toolbar>
   </ion-header>
 
@@ -22,7 +26,13 @@
       </ion-segment-button>
     </ion-segment>
 
-    <ion-list>
+    <div class="empty-state" v-if="isLoading">
+      <ion-item lines="none">
+        <ion-spinner name="crescent" slot="start" />
+        {{ translate("Fetching", { label }) }}
+      </ion-item>
+    </div>
+    <ion-list v-else-if="facetOptions.length">
       <ion-item v-for="option in facetOptions" :key="option.id"  @click="!isAlreadyApplied(option.id) ? updateSelectedValues(option.id): ''">
         <ion-label v-if="isAlreadyApplied(option.id)">{{ option.label }}</ion-label>
         <ion-checkbox v-if="!isAlreadyApplied(option.id)" :checked="isSelected(option.id)">
@@ -31,6 +41,12 @@
         <ion-note v-else slot="end" color="danger">{{ selectedSegment === 'included' ? translate("excluded") : translate("included") }}</ion-note>
       </ion-item>
     </ion-list>
+    <div class="empty-state" v-else-if="!queryString">
+      <p>{{ translate("Search for to find results", { label }) }}</p>
+    </div>
+    <div class="empty-state" v-else>
+      <p>{{ translate("No result found for", { label: queryString }) }}</p>
+    </div>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
       <ion-fab-button @click="saveFilters()">
@@ -64,6 +80,7 @@ import {
   IonSearchbar,
   IonSegment,
   IonSegmentButton,
+  IonSpinner,
   IonTitle,
   IonToolbar,
   modalController
@@ -83,6 +100,7 @@ const isScrollable = ref(true);
 const selectedSegment = ref("included")
 const includedFilters = ref([]) as any;
 const excludedFilters = ref([]) as any;
+const isLoading = ref(false);
 
 const props = defineProps(["label", "facetToSelect", "searchfield", "rule"]);
 const store = useStore();
@@ -104,6 +122,7 @@ function search() {
 }
 
 async function getFilters(vSize?: any, vIndex?: any) {
+  isLoading.value = true;
   const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
   const viewIndex = vIndex ? vIndex : 0;
 
@@ -117,7 +136,7 @@ async function getFilters(vSize?: any, vIndex?: any) {
     limit: viewSize,
     q: queryString.value,
     term: queryString.value,
-    offset: 0,
+    offset: viewSize * viewIndex,
   }
 
   const resp = await UtilService.fetchFacets(payload);
@@ -130,6 +149,7 @@ async function getFilters(vSize?: any, vIndex?: any) {
     facetOptions.value = [];
     isScrollable.value = false;
   }
+  isLoading.value = false;
 }
 
 async function loadMoreFilters(event: any){
@@ -178,7 +198,7 @@ async function saveFilters() {
       "fieldName": props.searchfield,
       "operator": "in",
       "fieldValue": includedFilters.value?.length > 1 ? includedFilters.value.join(",") : includedFilters.value[0],
-      "multiValued": includedFilters.value?.length > 1 ? "Y" : "N"
+      "multiValued": "Y"
     })
   }
 
@@ -192,7 +212,7 @@ async function saveFilters() {
       "fieldName": props.searchfield,
       "operator": "not-in",
       "fieldValue": excludedFilters.value?.length > 1 ? excludedFilters.value.join(",") : excludedFilters.value[0],
-      "multiValued": excludedFilters.value?.length > 1 ? "Y" : "N"
+      "multiValued": "Y"
     })
   }
 

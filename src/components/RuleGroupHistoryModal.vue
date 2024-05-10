@@ -63,7 +63,7 @@ async function fetchGroupHistory() {
   }
 
   try {
-    const resp = await RuleService.fetchRuleGroupHistory(ruleGroup.value.jobName)
+    const resp = await RuleService.fetchRuleGroupHistory({ jobName: ruleGroup.value.jobName, pageSize: 20, orderByField: "lastUpdatedStamp DESC" })
 
     if(!hasError(resp)) {
       // Sorting the history based on startTime, as we does not get the records in sorted order from api

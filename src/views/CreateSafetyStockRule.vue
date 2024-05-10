@@ -22,7 +22,7 @@
                 </ion-input>
               </ion-item>
               <ion-item>
-                <ion-input v-model="formData.safetyStock">
+                <ion-input v-model="formData.safetyStock" type="number" @keydown="validateSafetyStock($event)">
                   <div slot="label">{{ translate("Safety stock") }} <ion-text color="danger">*</ion-text></div>
                 </ion-input>
               </ion-item>
@@ -47,7 +47,7 @@
           <ion-card-content>
             <ion-chip outline v-for="group in formData.selectedFacilityGroups['included']" :key="group.facilityGroupId">
               {{ group.facilityGroupName }}
-              <ion-icon :icon="closeCircle"/>
+              <ion-icon :icon="closeCircle" @click="removeFacilityGroups(group.facilityGroupId, 'included')" />
             </ion-chip>
           </ion-card-content>
         </ion-card>
@@ -63,7 +63,7 @@
           <ion-card-content>
             <ion-chip outline v-for="group in formData.selectedFacilityGroups['excluded']" :key="group.facilityGroupId">
               {{ group.facilityGroupName }}
-              <ion-icon :icon="closeCircle"/>
+              <ion-icon :icon="closeCircle" @click="removeFacilityGroups(group.facilityGroupId, 'excluded')" />
             </ion-chip>
           </ion-card-content>
         </ion-card>
@@ -81,7 +81,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonPage, IonText, IonTitle, IonToolbar, modalController } from '@ionic/vue';
+import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonPage, IonText, IonTitle, IonToolbar, modalController, onIonViewWillLeave } from '@ionic/vue';
 import { addCircleOutline, closeCircle, saveOutline } from 'ionicons/icons'
 import { translate } from "@/i18n";
 import ProductFilters from '@/components/ProductFilters.vue';
@@ -115,6 +115,17 @@ onMounted(async () => {
   await Promise.allSettled([store.dispatch("util/clearAppliedFilters"), store.dispatch("util/fetchFacilityGroups")])
 })
 
+onIonViewWillLeave(() => {
+  formData.value = {
+    ruleName: '',
+    safetyStock: '',
+    selectedFacilityGroups: {
+      included: [],
+      excluded: []
+    }
+  }
+})
+
 async function openProductFacilityGroupModal(type: string) {
   const modal = await modalController.create({
     component: AddProductFacilityGroupModal,
@@ -125,7 +136,7 @@ async function openProductFacilityGroupModal(type: string) {
   })
 
   modal.onDidDismiss().then((result: any) => {
-    if(result.data?.selectedGroups?.length) {
+    if(result.data?.selectedGroups) {
       formData.value.selectedFacilityGroups[type] = result.data.selectedGroups
     }
   })
@@ -153,7 +164,7 @@ function generateRuleConditions(ruleId: string) {
       "fieldName": "facilities",
       "operator": "in",
       "fieldValue": includedFacilityGroupIds.length > 1 ? includedFacilityGroupIds.join(",") : includedFacilityGroupIds[0],
-      "multiValued": includedFacilityGroupIds.length > 1 ? "Y" : "N"
+      "multiValued": "Y"
     })
   }
 
@@ -165,7 +176,7 @@ function generateRuleConditions(ruleId: string) {
       "fieldName": "facilities",
       "operator": "not-in",
       "fieldValue": excludedFacilityGroupIds.length > 1 ? excludedFacilityGroupIds.join(",") : excludedFacilityGroupIds[0],
-      "multiValued": excludedFacilityGroupIds.length > 1 ? "Y" : "N"
+      "multiValued": "Y"
     })
   }
 
@@ -178,7 +189,7 @@ function generateRuleConditions(ruleId: string) {
           "fieldName": filter,
           "operator": type === "included" ? "in" : "not-in",
           "fieldValue": value.length > 1 ? value.join(",") : value[0],
-          "multiValued": value.length > 1 ? "Y" : "N"
+          "multiValued": "Y"
         })
       }
     })
@@ -188,7 +199,7 @@ function generateRuleConditions(ruleId: string) {
 }
 
 async function createRule() {
-  if(!formData.value.ruleName || !formData.value.safetyStock || !formData.value.selectedFacilityGroups.included.length) {
+  if(!formData.value.ruleName.trim() || !formData.value.safetyStock || !formData.value.selectedFacilityGroups.included.length) {
     showToast(translate("Please fill in all the required fields."))
     return;
   }
@@ -234,5 +245,13 @@ async function createRule() {
     showToast(translate("Failed to create rule."))
   }
   emitter.emit("dismissLoader");
+}
+
+function validateSafetyStock(event: any) {
+  if(/[`!@#$%^&*()_+\-=\\|,.<>?~^e]/.test(event.key)) event.preventDefault();
+}
+
+function removeFacilityGroups(facilityGroupId: any, type: string) {
+  formData.value.selectedFacilityGroups[type] = formData.value.selectedFacilityGroups[type].filter((group: any) => group.facilityGroupId !== facilityGroupId)
 }
 </script>

@@ -6,7 +6,7 @@
           <ion-icon slot="icon-only" :icon="closeOutline" />
         </ion-button>
       </ion-buttons>
-      <ion-title>{{ translate("Edit group") }}</ion-title>
+      <ion-title>{{ translate("Edit channel group") }}</ion-title>
     </ion-toolbar>
   </ion-header>
 
@@ -16,7 +16,7 @@
         <ion-input :label="translate('Name')" labelPlacement="floating" v-model="formData.facilityGroupName"/>
       </ion-item>
       <ion-item>
-        <ion-textarea :label="translate('Description')" labelPlacement="floating" v-model="formData.description" />
+        <ion-textarea :label="translate('Description')" labelPlacement="floating" v-model="formData.description" :maxlength="255" />
       </ion-item>
     </ion-list>
   </ion-content>
