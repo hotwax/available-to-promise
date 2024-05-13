@@ -99,6 +99,34 @@ const routes: Array<RouteRecordRaw> = [
     beforeEnter: authGuard
   },
   {
+    path: '/update-threshold/:ruleId',
+    name: 'Update threshold',
+    component: CreateThresholdRule,
+    beforeEnter: authGuard,
+    props: true
+  },
+  {
+    path: '/update-safety-stock/:ruleId',
+    name: 'Update safety stock',
+    component: CreateSafetyStockRule,
+    beforeEnter: authGuard,
+    props: true
+  },
+  {
+    path: '/update-store-pickup/:ruleId',
+    name: 'Update store pickup',
+    component: CreateStorePickupRule,
+    beforeEnter: authGuard,
+    props: true
+  },
+  {
+    path: '/update-shipping/:ruleId',
+    name: 'Update shipping',
+    component: CreateShippingRule,
+    beforeEnter: authGuard,
+    props: true
+  },
+  {
     path: '/login',
     name: 'DxpLogin',
     component: Login,

@@ -101,7 +101,8 @@
       </ion-item>
 
       <ion-item lines="none">
-        <ion-button @click="editRuleName()" size="default" fill="clear">{{ translate("Edit name") }}</ion-button>
+        <!-- <ion-button @click="editRuleName()" size="default" fill="clear">{{ translate("Edit name") }}</ion-button> -->
+        <ion-button @click="editRule()" size="default" fill="clear">{{ translate("Edit rule") }}</ion-button>
         <ion-button @click="archiveRule()" color="medium" fill="clear" slot="end">
           <ion-icon :icon="archiveOutline" slot="icon-only"/>
         </ion-button>
@@ -502,6 +503,21 @@ function findRulesDiff(previousSeq: any, updatedSeq: any) {
     }
   }, {})
   return diffSeq;
+}
+
+function editRule() {
+  let path = ""
+  if(selectedPage.value.path === "/threshold") {
+    path = `update-threshold/${props.rule.ruleId}`
+  } else if(selectedPage.value.path === "/safety-stock") {
+    path = `update-safety-stock/${props.rule.ruleId}`
+  } else if(selectedPage.value.path === "/store-pickup") {
+    path = `update-store-pickup/${props.rule.ruleId}`
+  } else if(selectedPage.value.path === "/shipping") {
+    path = `update-shipping/${props.rule.ruleId}`
+  }
+
+  router.push(path);
 }
 </script>
 
