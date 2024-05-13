@@ -138,15 +138,14 @@ onIonViewWillEnter(async () => {
         currentRule.value.ruleConditions.map((condition: any) => {
           if(condition.conditionTypeEnumId === "ENTCT_ATP_FILTER") {
             if(condition.operator === "in") {
-              currentAppliedFilters["included"][condition.fieldName] = condition.fieldValue.split(",")
+              currentAppliedFilters["included"][condition.fieldName] = condition.fieldValue ? condition.fieldValue.split(",") : []
             } else {
-              currentAppliedFilters["excluded"][condition.fieldName] = condition.fieldValue.split(",")
+              currentAppliedFilters["excluded"][condition.fieldName] = condition.fieldValue ? condition.fieldValue.split(",") : []
             }
           }
         })
-        await store.dispatch('util/updateAppliedFilters', currentAppliedFilters)
 
-        console.log(generateRuleConditions(props.ruleId))
+        await store.dispatch('util/updateAppliedFilters', currentAppliedFilters)
       } else {
         throw resp.data
       }
@@ -181,7 +180,7 @@ function generateRuleActions(ruleId: string) {
     "ruleId": ruleId,
     "actionTypeEnumId": "ATP_THRESHOLD",
     "fieldName": "facility-safety-stock",
-    "fieldValue": formData.value.threhold ? formData.value.threhold : 0
+    "fieldValue": formData.value.threshold ? formData.value.threshold : 0
   }]
 }
 
@@ -194,7 +193,7 @@ function generateRuleConditions(ruleId: string) {
 
     Object.entries(appliedFilters.value).map(([type, filters]: any) => {
       Object.entries(filters as any).map(([filter, value]: any) => {
-        const condition = ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FILTER" && condition.operator === (type === "included" ? "in" : "not-in"))
+        const condition = ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FILTER" && condition.fieldName === filter && condition.operator === (type === "included" ? "in" : "not-in"))
         if(condition) {
           condition.fieldValue = value.join(",")
         }
@@ -206,29 +205,25 @@ function generateRuleConditions(ruleId: string) {
     const conditions = [];
 
     const selectedFacilites = formData.value.selectedConfigFacilites
-    if(selectedFacilites?.length) {
-      conditions.push({
-        "ruleId": ruleId,
-        "conditionTypeEnumId": "ENTCT_ATP_FACILITIES",
-        "fieldName": "facilities",
-        "operator": "in",
-        "fieldValue": selectedFacilites.length ? selectedFacilites.join(",") : "",
-        "multiValued": "Y"
-      })
-    }
+    conditions.push({
+      "ruleId": ruleId,
+      "conditionTypeEnumId": "ENTCT_ATP_FACILITIES",
+      "fieldName": "facilities",
+      "operator": "in",
+      "fieldValue": selectedFacilites.length ? selectedFacilites.join(",") : "",
+      "multiValued": "Y"
+    })
 
     Object.entries(appliedFilters.value).map(([type, filters]: any) => {
       Object.entries(filters as any).map(([filter, value]: any) => {
-        if(value.length) {
-          conditions.push({
-            "ruleId": ruleId,
-            "conditionTypeEnumId": "ENTCT_ATP_FILTER",
-            "fieldName": filter,
-            "operator": type === "included" ? "in" : "not-in",
-            "fieldValue": value.length ? value.join(",") : "",
-            "multiValued": "Y"
-          })
-        }
+        conditions.push({
+          "ruleId": ruleId,
+          "conditionTypeEnumId": "ENTCT_ATP_FILTER",
+          "fieldName": filter,
+          "operator": type === "included" ? "in" : "not-in",
+          "fieldValue": value.length ? value.join(",") : "",
+          "multiValued": "Y"
+        })
       })
     })
 
@@ -237,7 +232,7 @@ function generateRuleConditions(ruleId: string) {
 }
 
 async function createThresholdRule() {
-  validateRule();
+  if(!isRuleValid()) return;
 
   emitter.emit("presentLoader");
 
@@ -279,37 +274,41 @@ async function createThresholdRule() {
 }
 
 async function updateRule() {
-  validateRule()
+  if(!isRuleValid()) return;
+
+  console.log(generateRuleConditions(props.ruleId));
   
-  try {
-    await RuleService.updateRule({
-      ...currentRule.value,
-      "ruleName": formData.value.ruleName,
-      "ruleConditions": generateRuleConditions(props.ruleId),
-      "ruleActions": generateRuleActions(props.ruleId)
-    }, props.ruleId);
-    showToast(translate("Rule updated successfully."))
-    store.dispatch("rule/clearRuleState")
-    store.dispatch("util/clearAppliedFilters")
-    router.push("/threshold");
-  } catch(err: any) {
-    logger.error(err);
-  }
+  
+  // try {
+  //   await RuleService.updateRule({
+  //     ...currentRule.value,
+  //     "ruleName": formData.value.ruleName,
+  //     "ruleConditions": generateRuleConditions(props.ruleId),
+  //     "ruleActions": generateRuleActions(props.ruleId)
+  //   }, props.ruleId);
+  //   showToast(translate("Rule updated successfully."))
+  //   store.dispatch("rule/clearRuleState")
+  //   store.dispatch("util/clearAppliedFilters")
+  //   router.push("/threshold");
+  // } catch(err: any) {
+  //   logger.error(err);
+  // }
 }
 
-function validateRule() {
+function isRuleValid() {
   if(!formData.value.ruleName.trim() || !formData.value.threshold) {
     showToast(translate("Please fill in all the required fields."))
-    return;
+    return false;
   }
   if(formData.value.threshold < 0){
     showToast(translate("Threshold should be greater than or equal to 0."))
-    return;
+    return false;
   }
   if(!formData.value.selectedConfigFacilites.length) {
     showToast(translate("Please select atleast one config facility."))
-    return;
+    return false;
   }
+  return true
 }
 
 function validateThreshold(event: any) {
