@@ -101,7 +101,6 @@ const formData = ref({
   selectedConfigFacilites: []
 }) as any;
 const currentRule = ref({}) as any;
-
 const props = defineProps(["ruleId"]);
 
 onIonViewWillLeave(() => {
