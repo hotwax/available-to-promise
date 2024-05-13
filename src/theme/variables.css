@@ -344,6 +344,10 @@ ion-content>section {
   text-align: center; 
 }
 
+ion-toolbar > ion-segment {
+  width: unset;
+}
+
 @media (min-width: 700px) {
   main {
     max-width: 375px;

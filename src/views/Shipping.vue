@@ -4,10 +4,8 @@
       <ion-toolbar>
         <ion-menu-button slot="start" />
         <ion-title>{{ translate("Shipping") }}</ion-title>
-      </ion-toolbar>
 
-      <ion-toolbar>
-        <ion-segment v-model="selectedSegment" @ionChange="updateRuleGroup()">
+        <ion-segment v-model="selectedSegment" @ionChange="updateRuleGroup()" slot="end">
           <ion-segment-button value="RG_SHIPPING_FACILITY">
             <ion-label>{{ translate("Product and facility") }}</ion-label>
           </ion-segment-button>
@@ -157,9 +155,3 @@ function createShipping() {
   router.push({ path: '/create-shipping', query: { groupTypeEnumId: selectedSegment.value } })
 }
 </script>
-
-<style scoped>
-  ion-header {
-    display: flex;
-  }
-</style>

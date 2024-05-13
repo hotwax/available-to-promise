@@ -3,11 +3,9 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-menu-button slot="start" />
-        <ion-title>{{ translate("Inventory channels") }}</ion-title>
-      </ion-toolbar>
+        <ion-title slot="start">{{ translate("Inventory channels") }}</ion-title>
 
-      <ion-toolbar>
-        <ion-segment v-model="selectedSegment">
+        <ion-segment v-model="selectedSegment" slot="end">
           <ion-segment-button value="channels">
             <ion-label>{{ translate("Channels") }}</ion-label>
           </ion-segment-button>
@@ -148,6 +146,7 @@ const selectedSegment = ref("channels")
 const inventoryChannels = computed(() => store.getters["channel/getInventoryChannels"])
 
 onMounted(async() => {
+  fetchInventoryChannels()
   emitter.on("productStoreOrConfigChanged", fetchInventoryChannels);
 })
 
