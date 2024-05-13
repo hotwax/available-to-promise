@@ -248,7 +248,7 @@ async function createRule() {
 }
 
 function validateSafetyStock(event: any) {
-  if(/[`!@#$%^&*()_+\-=\\|,.<>?~^e]/.test(event.key)) event.preventDefault();
+  if(/[`!@#$%^&*()_+\-=\\|,.<>?~e]/.test(event.key) && event.key !== 'Backspace') event.preventDefault();
 }
 
 function removeFacilityGroups(facilityGroupId: any, type: string) {
