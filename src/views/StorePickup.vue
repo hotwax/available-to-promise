@@ -29,7 +29,7 @@
           </section>
         </template>
         <div class="empty-state" v-else>
-          <p>{{ translate("No store pickup rules found") }}</p>
+          <p>{{ translate("No store pickup rule found.") }}</p>
         </div>
       </main>
       <main v-else>
