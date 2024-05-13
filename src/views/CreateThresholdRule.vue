@@ -189,13 +189,13 @@ function generateRuleConditions(ruleId: string) {
     const ruleConditions = JSON.parse(JSON.stringify(currentRule.value.ruleConditions));
 
     const facilityCondition = ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FACILITIES");
-    if(facilityCondition) facilityCondition.fieldValue = formData.value.selectedConfigFacilites.join(",");
+    if(facilityCondition) facilityCondition["fieldValue"] = formData.value.selectedConfigFacilites.join(",");
 
     Object.entries(appliedFilters.value).map(([type, filters]: any) => {
       Object.entries(filters as any).map(([filter, value]: any) => {
         const condition = ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FILTER" && condition.fieldName === filter && condition.operator === (type === "included" ? "in" : "not-in"))
         if(condition) {
-          condition.fieldValue = value.join(",")
+          condition["fieldValue"] = value.length ? value.join(",") : ""
         }
       })
     })
@@ -276,23 +276,20 @@ async function createThresholdRule() {
 async function updateRule() {
   if(!isRuleValid()) return;
 
-  console.log(generateRuleConditions(props.ruleId));
-  
-  
-  // try {
-  //   await RuleService.updateRule({
-  //     ...currentRule.value,
-  //     "ruleName": formData.value.ruleName,
-  //     "ruleConditions": generateRuleConditions(props.ruleId),
-  //     "ruleActions": generateRuleActions(props.ruleId)
-  //   }, props.ruleId);
-  //   showToast(translate("Rule updated successfully."))
-  //   store.dispatch("rule/clearRuleState")
-  //   store.dispatch("util/clearAppliedFilters")
-  //   router.push("/threshold");
-  // } catch(err: any) {
-  //   logger.error(err);
-  // }
+  try {
+    await RuleService.updateRule({
+      ...currentRule.value,
+      "ruleName": formData.value.ruleName,
+      "ruleConditions": generateRuleConditions(props.ruleId),
+      "ruleActions": generateRuleActions(props.ruleId)
+    }, props.ruleId);
+    showToast(translate("Rule updated successfully."))
+    store.dispatch("rule/clearRuleState")
+    store.dispatch("util/clearAppliedFilters")
+    router.push("/threshold");
+  } catch(err: any) {
+    logger.error(err);
+  }
 }
 
 function isRuleValid() {
