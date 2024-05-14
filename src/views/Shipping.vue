@@ -5,14 +5,14 @@
         <ion-menu-button slot="start" />
         <ion-title>{{ translate("Shipping") }}</ion-title>
 
-        <ion-segment v-model="selectedSegment" @ionChange="updateRuleGroup()" slot="end">
+        <ion-segment :value="selectedSegment" @ionChange="updateSegment($event)" slot="end">
           <ion-segment-button value="RG_SHIPPING_FACILITY">
             <ion-label>{{ translate("Product and facility") }}</ion-label>
           </ion-segment-button>
           <ion-segment-button value="RG_SHIPPING_CHANNEL">
             <ion-label>{{ translate("Product and channel") }}</ion-label>
           </ion-segment-button>
-          <ion-segment-button value="facility">
+          <ion-segment-button value="SHIPPING_FACILITY">
             <ion-label>{{ translate("Facility") }}</ion-label>
           </ion-segment-button>
         </ion-segment>
@@ -53,7 +53,7 @@
       </ion-infinite-scroll>
     </ion-content>
 
-    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab v-if="selectedSegment !== 'SHIPPING_FACILITY'" vertical="bottom" horizontal="end" slot="fixed">
       <ion-fab-button @click="createShipping()">
         <ion-icon :icon="addOutline" />
       </ion-fab-button>
@@ -62,8 +62,8 @@
 </template>
 
 <script setup lang="ts">
-import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, IonLabel, IonMenuButton, IonPage, IonSegment, IonSegmentButton, IonTitle, IonToolbar, onIonViewWillEnter } from '@ionic/vue';
-import { computed, onUnmounted, ref } from 'vue';
+import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, IonLabel, IonMenuButton, IonPage, IonSegment, IonSegmentButton, IonTitle, IonToolbar, onIonViewDidEnter, onIonViewWillLeave } from '@ionic/vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { addOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue'
 import { translate } from '@/i18n';
@@ -80,13 +80,13 @@ const rules = computed(() => store.getters["rule/getRules"]);
 const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
 const isScrollable = computed(() => store.getters["util/isFacilitiesScrollable"]);
 const facilities = computed(() => store.getters["util/getFacilities"]);
+const selectedSegment = computed(() => store.getters["util/getSelectedSegment"]);
 
-const selectedSegment = ref("") as any;
 const isScrollingEnabled = ref(false);
 const contentRef = ref({}) as any;
 const infiniteScrollRef = ref({}) as any;
 
-onIonViewWillEnter(async() => {
+onMounted(async() => {
   fetchRules();
   emitter.on("productStoreOrConfigChanged", fetchRules);
 })
@@ -97,7 +97,7 @@ onUnmounted(() => {
 
 async function fetchRules() {
   emitter.emit("presentLoader");
-  selectedSegment.value = router.currentRoute.value.query.groupTypeEnumId ? router.currentRoute.value.query.groupTypeEnumId : "RG_SHIPPING_FACILITY";
+  if(!selectedSegment.value || (selectedSegment.value !== 'RG_SHIPPING_FACILITY' && selectedSegment.value !== 'RG_SHIPPING_CHANNEL' && selectedSegment.value !== 'SHIPPING_FACILITY')) store.dispatch("util/updateSelectedSegment", "RG_SHIPPING_FACILITY");
   await Promise.allSettled([store.dispatch('rule/fetchRules', { groupTypeEnumId: router.currentRoute.value.query.groupTypeEnumId ? router.currentRoute.value.query.groupTypeEnumId : "RG_SHIPPING_FACILITY" }), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilityGroups")])
   emitter.emit("dismissLoader");
 }
@@ -140,7 +140,9 @@ async function loadMoreFacilities(event: any) {
   });
 }
 
-async function updateRuleGroup() {
+async function updateSegment(event: any) {
+  store.dispatch("util/updateSelectedSegment", event.detail.value);
+
   emitter.emit("presentLoader");
   if(selectedSegment.value === 'facility') {
     isScrollingEnabled.value = false;
@@ -152,6 +154,6 @@ async function updateRuleGroup() {
 }
 
 function createShipping() {
-  router.push({ path: '/create-shipping', query: { groupTypeEnumId: selectedSegment.value } })
+  router.push("create-shipping");
 }
 </script>

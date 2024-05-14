@@ -5,14 +5,14 @@
         <ion-menu-button slot="start" />
         <ion-title>{{ translate("Store pickup") }}</ion-title>
 
-        <ion-segment v-model="selectedSegment" @ionChange="updateRuleGroup()" slot="end">
+        <ion-segment :value="selectedSegment" @ionChange="updateSegment($event)" slot="end">
           <ion-segment-button value="RG_PICKUP_FACILITY">
             <ion-label>{{ translate("Product and facility") }}</ion-label>
           </ion-segment-button>
           <ion-segment-button value="RG_PICKUP_CHANNEL">
             <ion-label>{{ translate("Product and channel") }}</ion-label>
           </ion-segment-button>
-          <ion-segment-button value="facility">
+          <ion-segment-button value="PICKUP_FACILITY">
             <ion-label>{{ translate("Facility") }}</ion-label>
           </ion-segment-button>
         </ion-segment>
@@ -54,7 +54,7 @@
       </ion-infinite-scroll>
     </ion-content>
 
-    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab v-if="selectedSegment !== 'PICKUP_FACILITY'" vertical="bottom" horizontal="end" slot="fixed">
       <ion-fab-button @click="createStorePickup()">
         <ion-icon :icon="addOutline" />
       </ion-fab-button>
@@ -63,8 +63,8 @@
 </template>
 
 <script setup lang="ts">
-import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, IonLabel, IonMenuButton, IonPage, IonSegment, IonSegmentButton, IonTitle, IonToolbar, onIonViewWillEnter } from '@ionic/vue';
-import { computed, onUnmounted, ref } from 'vue';
+import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, IonLabel, IonMenuButton, IonPage, IonSegment, IonSegmentButton, IonTitle, IonToolbar, onIonViewWillLeave, onIonViewDidEnter } from '@ionic/vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { addOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue'
 import FacilityItem from '@/components/FacilityItem.vue'
@@ -81,14 +81,13 @@ const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
 const rules = computed(() => store.getters["rule/getRules"]);
 const isScrollable = computed(() => store.getters["util/isFacilitiesScrollable"]);
 const facilities = computed(() => store.getters["util/getFacilities"]);
-
-const selectedSegment = ref("") as any;
+const selectedSegment = computed(() => store.getters["util/getSelectedSegment"]);
 
 const isScrollingEnabled = ref(false);
 const contentRef = ref({}) as any;
 const infiniteScrollRef = ref({}) as any;
 
-onIonViewWillEnter(async() => {
+onMounted(() => {
   fetchRules();
   emitter.on("productStoreOrConfigChanged", fetchRules);
 })
@@ -99,8 +98,8 @@ onUnmounted(() => {
 
 async function fetchRules() {
   emitter.emit("presentLoader");
-  selectedSegment.value = router.currentRoute.value.query.groupTypeEnumId ? router.currentRoute.value.query.groupTypeEnumId : "RG_PICKUP_FACILITY";
-  await Promise.allSettled([store.dispatch('rule/fetchRules', { groupTypeEnumId: router.currentRoute.value.query.groupTypeEnumId ? router.currentRoute.value.query.groupTypeEnumId : 'RG_PICKUP_FACILITY' }), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilityGroups")])
+  if(!selectedSegment.value || (selectedSegment.value !== 'RG_PICKUP_FACILITY' && selectedSegment.value !== 'RG_PICKUP_CHANNEL' && selectedSegment.value !== 'PICKUP_FACILITY')) store.dispatch("util/updateSelectedSegment", "RG_PICKUP_FACILITY");
+  await Promise.allSettled([store.dispatch('rule/fetchRules', { groupTypeEnumId: selectedSegment.value}), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilityGroups")])
   emitter.emit("dismissLoader");
 }
 
@@ -141,18 +140,20 @@ async function loadMoreFacilities(event: any) {
   });
 }
 
-async function updateRuleGroup() {
+async function updateSegment(event: any) {
+  store.dispatch("util/updateSelectedSegment", event.detail.value);
+
   emitter.emit("presentLoader");
   if(selectedSegment.value === 'facility') {
     isScrollingEnabled.value = false;
     await fetchFacilities();
   } else {
-    await store.dispatch('rule/fetchRules', { groupTypeEnumId: selectedSegment.value})
+    await store.dispatch('rule/fetchRules', { groupTypeEnumId: selectedSegment.value })
   }
   emitter.emit("dismissLoader");
 }
 
 function createStorePickup() {
-  router.push({ path: '/create-store-pickup', query: { groupTypeEnumId: selectedSegment.value } })
+  router.push("create-store-pickup")
 }
 </script>

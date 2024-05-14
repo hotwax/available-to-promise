@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header :translucent="true">
       <ion-toolbar>
-        <ion-back-button slot="start" :default-href="getDefaultUrl()" />
+        <ion-back-button slot="start" default-href="/shipping" />
         <ion-title>{{ translate("New shipping rule") }}</ion-title>
       </ion-toolbar>
     </ion-header>
@@ -29,16 +29,10 @@
           </ion-card>
         </div>
       </section>
-      
+
       <div class="section-header">
-        <ion-segment v-model="selectedSegment">
-          <ion-segment-button value="RG_SHIPPING_FACILITY">
-            <ion-label>{{ translate("Facility") }}</ion-label>
-          </ion-segment-button>
-          <ion-segment-button value="RG_SHIPPING_CHANNEL">
-            <ion-label>{{ translate("Channel") }}</ion-label>
-          </ion-segment-button>
-        </ion-segment>
+        <h1 v-if="selectedSegment === 'RG_SHIPPING_FACILITY'">{{ translate("Facilities") }}</h1>
+        <h1 v-else-if="selectedSegment === 'RG_SHIPPING_CHANNEL'">{{ translate("Channels") }} <ion-text color="danger">*</ion-text></h1>
       </div>
 
       <section v-if="selectedSegment === 'RG_SHIPPING_FACILITY'">
@@ -104,7 +98,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonNote, IonPage, IonSegment, IonSegmentButton, IonText, IonTitle, IonToggle, IonToolbar, modalController, onIonViewWillLeave } from '@ionic/vue';
+import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonNote, IonPage, IonText, IonTitle, IonToggle, IonToolbar, modalController, onIonViewWillLeave } from '@ionic/vue';
 import { computed, onMounted, ref } from 'vue';
 import { addCircleOutline, closeCircle, saveOutline, storefrontOutline } from 'ionicons/icons'
 import { translate } from "@/i18n";
@@ -152,10 +146,6 @@ onIonViewWillLeave(() => {
   }
   store.dispatch("util/clearAppliedFilters")
 })
-
-function getDefaultUrl() {
-  return `shipping?groupTypeEnumId=${selectedSegment.value}`
-}
 
 async function openProductFacilityGroupModal(type: string) {
   const modal = await modalController.create({
@@ -231,7 +221,7 @@ async function createRule() {
     showToast(translate("Rule created successfully."))
     store.dispatch("rule/clearRuleState")
     store.dispatch("util/clearAppliedFilters")
-    router.push(getDefaultUrl());
+    router.push("/shipping");
   } catch(err: any) {
     logger.error(err);
     showToast(translate("Failed to create rule."))

@@ -41,5 +41,8 @@ const mutations: MutationTree <UtilState> = {
     state.facilities.list = payload.facilities
     state.facilities.isScrollable = payload.isScrollable
   },
+  [types.UTIL_SELECTED_SEGMENT_UPDATED](state, payload) {
+    state.selectedSegment = payload
+  },
 }
 export default mutations;

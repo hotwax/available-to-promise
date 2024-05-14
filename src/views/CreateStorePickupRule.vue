@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header :translucent="true">
       <ion-toolbar>
-        <ion-back-button slot="start" :default-href="getDefaultUrl()" />
+        <ion-back-button slot="start" default-href="/store-pickup" />
         <ion-title>{{ translate("New store pickup rule") }}</ion-title>
       </ion-toolbar>
     </ion-header>
@@ -31,14 +31,8 @@
       </section>
 
       <div class="section-header">
-        <ion-segment v-model="selectedSegment">
-          <ion-segment-button value="RG_PICKUP_FACILITY">
-            <ion-label>{{ translate("Facility") }}</ion-label>
-          </ion-segment-button>
-          <ion-segment-button value="RG_PICKUP_CHANNEL">
-            <ion-label>{{ translate("Channel") }}</ion-label>
-          </ion-segment-button>
-        </ion-segment>
+        <h1 v-if="selectedSegment === 'RG_PICKUP_FACILITY'">{{ translate("Facilities") }}</h1>
+        <h1 v-else-if="selectedSegment === 'RG_PICKUP_CHANNEL'">{{ translate("Channels") }} <ion-text color="danger">*</ion-text></h1>
       </div>
 
       <section v-if="selectedSegment === 'RG_PICKUP_FACILITY'">
@@ -104,7 +98,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonNote, IonPage, IonSegment, IonSegmentButton, IonText, IonTitle, IonToggle, IonToolbar, modalController, onIonViewWillLeave } from '@ionic/vue';
+import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonNote, IonPage, IonText, IonTitle, IonToggle, IonToolbar, modalController, onIonViewWillLeave } from '@ionic/vue';
 import { addCircleOutline, closeCircle, saveOutline, storefrontOutline } from 'ionicons/icons'
 import { translate } from "@/i18n";
 import { computed, onMounted, ref } from 'vue';
@@ -119,12 +113,12 @@ import emitter from '@/event-bus';
 
 const store = useStore();
 const router = useRouter();
-const selectedSegment = ref(router.currentRoute.value.query.groupTypeEnumId)
 const configFacilities = computed(() => store.getters["util/getConfigFacilities"])
 const appliedFilters = computed(() => store.getters["util/getAppliedFilters"])
 const rules = computed(() => store.getters["rule/getRules"]);
 const total = computed(() => store.getters["rule/getTotalRulesCount"])
 const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
+const selectedSegment = computed(() => store.getters["util/getSelectedSegment"]);
 
 const formData = ref({
   ruleName: '',
@@ -152,10 +146,6 @@ onIonViewWillLeave(() => {
   }
   store.dispatch("util/clearAppliedFilters")
 })
-
-function getDefaultUrl() {
-  return `store-pickup?groupTypeEnumId=${selectedSegment.value}`
-}
 
 async function openProductFacilityGroupModal(type: string) {
   const modal = await modalController.create({
@@ -231,7 +221,7 @@ async function createRule() {
     showToast(translate("Rule created successfully."))
     store.dispatch("rule/clearRuleState")
     store.dispatch("util/clearAppliedFilters")
-    router.push(getDefaultUrl());
+    router.push("/store-pickup");
   } catch(err: any) {
     logger.error(err);
     showToast(translate("Failed to create rule."))
