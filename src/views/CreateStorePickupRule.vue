@@ -247,7 +247,7 @@ function generateRuleConditions(ruleId: string) {
       conditions.push({
         "ruleId": ruleId,
         "conditionTypeEnumId": "ENTCT_ATP_FAC_GROUPS",
-        "fieldName": "facilities",
+        "fieldName": "facilityGroups",
         "operator": "in",
         "fieldValue": includedFacilityGroupIds.length > 1 ? includedFacilityGroupIds.join(",") : includedFacilityGroupIds[0],
         "multiValued": "Y"
@@ -259,7 +259,7 @@ function generateRuleConditions(ruleId: string) {
       conditions.push({
         "ruleId": ruleId,
         "conditionTypeEnumId": "ENTCT_ATP_FAC_GROUPS",
-        "fieldName": "facilities",
+        "fieldName": "facilityGroups",
         "operator": "not-in",
         "fieldValue": excludedFacilityGroupIds.length > 1 ? excludedFacilityGroupIds.join(",") : excludedFacilityGroupIds[0],
         "multiValued": "Y"
