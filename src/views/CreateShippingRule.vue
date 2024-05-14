@@ -150,6 +150,7 @@ onIonViewWillLeave(() => {
     },
     selectedConfigFacilites: []
   }
+  store.dispatch("util/clearAppliedFilters")
 })
 
 function getDefaultUrl() {

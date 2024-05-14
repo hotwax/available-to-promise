@@ -112,7 +112,7 @@ const total = computed(() => store.getters["rule/getTotalRulesCount"])
 const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
 
 onMounted(async () => {
-  await Promise.allSettled([store.dispatch("util/clearAppliedFilters"), store.dispatch("util/fetchFacilityGroups")])
+  await Promise.allSettled([store.dispatch("util/fetchFacilityGroups")])
 })
 
 onIonViewWillLeave(() => {
@@ -124,6 +124,7 @@ onIonViewWillLeave(() => {
       excluded: []
     }
   }
+  store.dispatch("util/clearAppliedFilters")
 })
 
 async function openProductFacilityGroupModal(type: string) {

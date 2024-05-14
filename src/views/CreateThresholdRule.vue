@@ -106,6 +106,7 @@ onIonViewWillLeave(() => {
     threshold: '',
     selectedConfigFacilites: []
   }
+  store.dispatch("util/clearAppliedFilters")
 })
 
 const configFacilities = computed(() => store.getters["util/getConfigFacilities"])
