@@ -100,7 +100,7 @@ onUnmounted(() => {
 async function fetchRules() {
   emitter.emit("presentLoader");
   selectedSegment.value = router.currentRoute.value.query.groupTypeEnumId ? router.currentRoute.value.query.groupTypeEnumId : "RG_PICKUP_FACILITY";
-  await Promise.allSettled([store.dispatch('rule/fetchRules', { groupTypeEnumId: 'RG_PICKUP_FACILITY' }), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilityGroups")])
+  await Promise.allSettled([store.dispatch('rule/fetchRules', { groupTypeEnumId: router.currentRoute.value.query.groupTypeEnumId ? router.currentRoute.value.query.groupTypeEnumId : 'RG_PICKUP_FACILITY' }), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilityGroups")])
   emitter.emit("dismissLoader");
 }
 
