@@ -204,8 +204,6 @@ onIonViewWillLeave(() => {
 })
 
 function getDefaultUrl() {
-  console.log('enterd', selectedSegment.value);
-  
   return `/store-pickup?groupTypeEnumId=${selectedSegment.value}`
 }
 

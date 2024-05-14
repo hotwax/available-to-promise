@@ -39,9 +39,6 @@
       <template v-if="selectedPage.path === '/threshold' || selectedSegment === 'RG_PICKUP_CHANNEL' || selectedSegment === 'RG_SHIPPING_CHANNEL'">
         <ion-item-divider color="light">
           <ion-label>{{ translate("Channels") }}</ion-label>
-          <ion-button slot="end" fill="clear" color="medium" @click="openSelectConfigFacilitiesModal()">
-            <ion-icon :icon="optionsOutline" slot="icon-only" />
-          </ion-button>
         </ion-item-divider>
 
         <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FACILITIES')" lines="none">
@@ -53,9 +50,6 @@
       <template v-else>
         <ion-item-divider color="light">
           <ion-label>{{ translate("Facility groups") }}</ion-label>
-          <ion-button slot="end" fill="clear" color="medium" @click="openUpdateFacilityGroupModal()">
-            <ion-icon :icon="optionsOutline" slot="icon-only" />
-          </ion-button>
         </ion-item-divider>
         
         <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FAC_GROUPS', 'facilityGroups', 'in')">
@@ -70,9 +64,6 @@
 
       <ion-item-divider color="light">
         <ion-label>{{ translate("Product tags") }}</ion-label>
-        <ion-button slot="end" fill="clear" color="medium" @click="openUpdateProductFiltersModal('tags', 'tagsFacet', 'tags')">
-          <ion-icon :icon="optionsOutline" slot="icon-only" />
-        </ion-button>
       </ion-item-divider>
 
       <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'tags', 'in')">
@@ -86,9 +77,6 @@
 
       <ion-item-divider color="light">
         <ion-label>{{ translate("Product features") }}</ion-label>
-        <ion-button slot="end" fill="clear" color="medium"  @click="openUpdateProductFiltersModal('product features', 'productFeaturesFacet', 'productFeatures')">
-          <ion-icon :icon="optionsOutline" slot="icon-only" />
-        </ion-button>
       </ion-item-divider>
 
       <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'productFeatures', 'in')">
@@ -122,8 +110,6 @@ import { useStore } from 'vuex';
 import { showToast } from '@/utils';
 import logger from '@/logger';
 import SelectConfigFacilitiesModal from '@/components/SelectConfigFacilitiesModal.vue';
-import UpdateProductFiltersModal from '@/components/UpdateProductFiltersModal.vue';
-import UpdateFacilityGroupModal from '@/components/UpdateFacilityGroupModal.vue';
 import emitter from '@/event-bus';
 
 const router = useRouter();
@@ -367,56 +353,9 @@ async function archiveRule() {
   return alert.present();
 }
 
-function getSelectedFacilities() {
-  const condition = props.rule.ruleConditions?.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FACILITIES")
-  return (condition && condition.fieldValue) ? condition.fieldValue.split(",") : []
-}
-
-function getSelectedFacilityGroups() {
-  const condition = props.rule.ruleConditions?.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS")
-  return (condition && condition.fieldValue) ? condition.fieldValue.split(",") : []
-}
-
-async function openSelectConfigFacilitiesModal() {
-  const modal = await modalController.create({
-    component: SelectConfigFacilitiesModal,
-    componentProps: {
-      selectedFacilities: getSelectedFacilities(),
-      rule: props.rule
-    },
-  })
-
-  modal.present()
-}
-
-async function openUpdateFacilityGroupModal() {
-  const modal = await modalController.create({
-    component: UpdateFacilityGroupModal,
-    componentProps: {
-      rule: props.rule
-    },
-  })
-
-  modal.present()
-}
-
 function isRuleConditionAvailable(conditionTypeEnumId: string, fieldName?: string, operator? : string) {
   if(fieldName) return props.rule.ruleConditions?.find((condition: any) => condition.conditionTypeEnumId === conditionTypeEnumId && condition.fieldName === fieldName && condition.operator === operator)?.fieldValue
   else return props.rule.ruleConditions?.find((condition: any) => condition.conditionTypeEnumId === conditionTypeEnumId)?.fieldValue
-}
-
-async function openUpdateProductFiltersModal(label: string, facetToSelect: string, searchfield: string) {
-  const modal = await modalController.create({
-    component: UpdateProductFiltersModal,
-    componentProps: {
-      label,
-      facetToSelect,
-      searchfield,
-      rule: props.rule
-    },
-  })
-
-  modal.present()
 }
 
 async function updateRulePickup(event: any) {

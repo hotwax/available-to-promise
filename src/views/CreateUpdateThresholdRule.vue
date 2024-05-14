@@ -163,7 +163,7 @@ function toggleFacilitySelection(facilityId: any) {
 }
 
 function isFacilitySelected(facilityId: any) {
-  return formData.value.selectedConfigFacilites.includes(facilityId)
+  return formData.value.selectedConfigFacilites?.includes(facilityId)
 }
 
 function generateRuleActions(ruleId: string) {

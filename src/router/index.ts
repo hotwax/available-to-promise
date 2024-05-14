@@ -8,10 +8,10 @@ import SafetyStock from '@/views/SafetyStock.vue'
 import StorePickup from '@/views/StorePickup.vue'
 import Shipping from '@/views/Shipping.vue'
 import InventoryChannels from '@/views/InventoryChannels.vue'
-import CreateThresholdRule from '@/views/CreateThresholdRule.vue';
-import CreateSafetyStockRule from '@/views/CreateSafetyStockRule.vue'
-import CreateStorePickupRule from '@/views/CreateStorePickupRule.vue'
-import CreateShippingRule from '@/views/CreateShippingRule.vue'
+import CreateUpdateThresholdRule from '@/views/CreateUpdateThresholdRule.vue';
+import CreateUpdateSafetyStockRule from '@/views/CreateUpdateSafetyStockRule.vue'
+import CreateUpdateStorePickupRule from '@/views/CreateUpdateStorePickupRule.vue'
+import CreateUpdateShippingRule from '@/views/CreateUpdateShippingRule.vue'
 
 
 import 'vue-router'
@@ -77,52 +77,52 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/create-threshold',
     name: 'Create threshold',
-    component: CreateThresholdRule,
+    component: CreateUpdateThresholdRule,
     beforeEnter: authGuard
   },
   {
     path: '/create-safety-stock',
     name: 'Create safety stock',
-    component: CreateSafetyStockRule,
+    component: CreateUpdateSafetyStockRule,
     beforeEnter: authGuard
   },
   {
     path: '/create-store-pickup',
     name: 'Create store pickup',
-    component: CreateStorePickupRule,
+    component: CreateUpdateStorePickupRule,
     beforeEnter: authGuard
   },
   {
     path: '/create-shipping',
     name: 'Create shipping',
-    component: CreateShippingRule,
+    component: CreateUpdateShippingRule,
     beforeEnter: authGuard
   },
   {
     path: '/update-threshold/:ruleId',
     name: 'Update threshold',
-    component: CreateThresholdRule,
+    component: CreateUpdateThresholdRule,
     beforeEnter: authGuard,
     props: true
   },
   {
     path: '/update-safety-stock/:ruleId',
     name: 'Update safety stock',
-    component: CreateSafetyStockRule,
+    component: CreateUpdateSafetyStockRule,
     beforeEnter: authGuard,
     props: true
   },
   {
     path: '/update-store-pickup/:ruleId',
     name: 'Update store pickup',
-    component: CreateStorePickupRule,
+    component: CreateUpdateStorePickupRule,
     beforeEnter: authGuard,
     props: true
   },
   {
     path: '/update-shipping/:ruleId',
     name: 'Update shipping',
-    component: CreateShippingRule,
+    component: CreateUpdateShippingRule,
     beforeEnter: authGuard,
     props: true
   },
