@@ -3,7 +3,7 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-back-button slot="start" :default-href="getDefaultUrl()" />
-        <ion-title>{{ translate("New shipping rule") }}</ion-title>
+        <ion-title>{{ currentRule.ruleId ? translate("Update shipping rule") : translate("New shipping rule") }}</ion-title>
       </ion-toolbar>
     </ion-header>
     
@@ -30,7 +30,7 @@
         </div>
       </section>
       
-      <div class="section-header">
+      <div v-if="!currentRule.ruleId" class="section-header">
         <ion-segment v-model="selectedSegment">
           <ion-segment-button value="RG_SHIPPING_FACILITY">
             <ion-label>{{ translate("Facility") }}</ion-label>
@@ -39,6 +39,10 @@
             <ion-label>{{ translate("Channel") }}</ion-label>
           </ion-segment-button>
         </ion-segment>
+      </div>
+      <div v-else class="section-header">
+        <h1 v-if="selectedSegment === 'RG_PICKUP_FACILITY'">{{ translate("Facility") }}</h1>
+        <h1 v-else>{{ translate("Channel") }}</h1>
       </div>
 
       <section v-if="selectedSegment === 'RG_SHIPPING_FACILITY'">
@@ -96,7 +100,7 @@
     </ion-content>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button @click="createRule()">
+      <ion-fab-button @click="currentRule.ruleId ? updateRule() : createRule()">
         <ion-icon :icon="saveOutline" />
       </ion-fab-button>
     </ion-fab>
@@ -104,27 +108,32 @@
 </template>
 
 <script setup lang="ts">
-import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonNote, IonPage, IonSegment, IonSegmentButton, IonText, IonTitle, IonToggle, IonToolbar, modalController, onIonViewWillLeave } from '@ionic/vue';
-import { computed, onMounted, ref } from 'vue';
+import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonNote, IonPage, IonSegment, IonSegmentButton, IonText, IonTitle, IonToggle, IonToolbar, modalController, onIonViewWillEnter, onIonViewWillLeave } from '@ionic/vue';
+import { computed, defineProps, ref } from 'vue';
 import { addCircleOutline, closeCircle, saveOutline, storefrontOutline } from 'ionicons/icons'
 import { translate } from "@/i18n";
 import ProductFilters from '@/components/ProductFilters.vue';
 import AddProductFacilityGroupModal from '@/components/AddProductFacilityGroupModal.vue';
 import { useStore } from 'vuex';
 import { RuleService } from '@/services/RuleService';
-import { showToast } from '@/utils';
+import { hasError, showToast } from '@/utils';
 import logger from '@/logger';
 import { useRouter } from 'vue-router';
 import emitter from '@/event-bus';
 
 const store = useStore();
 const router = useRouter();
+
+const props = defineProps(["ruleId"]);
 const selectedSegment = ref(router.currentRoute.value.query.groupTypeEnumId)
+const currentRule = ref({}) as any;
+
 const configFacilities = computed(() => store.getters["util/getConfigFacilities"])
 const appliedFilters = computed(() => store.getters["util/getAppliedFilters"])
 const rules = computed(() => store.getters["rule/getRules"]);
 const total = computed(() => store.getters["rule/getTotalRulesCount"])
 const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
+const facilityGroups = computed(() => store.getters["util/getFacilityGroups"])
 
 const formData = ref({
   ruleName: '',
@@ -136,8 +145,49 @@ const formData = ref({
   selectedConfigFacilites: []
 }) as any;
 
-onMounted(async () => {
+onIonViewWillEnter(async () => {
   await store.dispatch("util/fetchConfigFacilities");
+  if(props.ruleId) {
+    try {
+      const resp = await RuleService.fetchRules({ ruleId: props.ruleId })
+
+      if(!hasError(resp)) {
+        currentRule.value = resp.data[0];
+
+        formData.value.ruleName = currentRule.value.ruleName;
+        formData.value.isBrokeringAllowed = currentRule.value.ruleActions[0]?.fieldValue ? currentRule.value.ruleActions[0]?.fieldValue : ''
+
+        if(selectedSegment.value === "RG_SHIPPING_FACILITY") {
+          const includedGroups = currentRule.value.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS" && condition.operator === "in")
+          const includedGroupIds = includedGroups.fieldValue ? includedGroups.fieldValue.split(",") : []
+          formData.value.selectedFacilityGroups.included = facilityGroups.value.filter((group: any) => includedGroupIds.includes(group.facilityGroupId));
+
+          const excludedGroups = currentRule.value.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS" && condition.operator === "not-in")
+          const excludedGroupIds = excludedGroups.fieldValue ? excludedGroups.fieldValue.split(",") : []
+          formData.value.selectedFacilityGroups.excluded = facilityGroups.value.filter((group: any) => excludedGroupIds.includes(group.facilityGroupId));
+        } else if(selectedSegment.value === "RG_SHIPPING_CHANNEL") {
+          const facilityCondition = currentRule.value.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FACILITIES")
+          formData.value.selectedConfigFacilites = facilityCondition.fieldValue?.split(",");
+        }
+
+        const currentAppliedFilters = JSON.parse(JSON.stringify(appliedFilters.value))
+        currentRule.value.ruleConditions.map((condition: any) => {
+          if(condition.conditionTypeEnumId === "ENTCT_ATP_FILTER") {
+            if(condition.operator === "in") {
+              currentAppliedFilters["included"][condition.fieldName] = condition.fieldValue ? condition.fieldValue.split(",") : []
+            } else {
+              currentAppliedFilters["excluded"][condition.fieldName] = condition.fieldValue ? condition.fieldValue.split(",") : []
+            }
+          }
+        })
+        await store.dispatch('util/updateAppliedFilters', currentAppliedFilters)
+      } else {
+        throw resp.data
+      }
+    } catch(err: any) {
+      logger.error(err);
+    }
+  }
 })
 
 onIonViewWillLeave(() => {
@@ -150,10 +200,11 @@ onIonViewWillLeave(() => {
     },
     selectedConfigFacilites: []
   }
+  store.dispatch("util/clearAppliedFilters")
 })
 
 function getDefaultUrl() {
-  return `shipping?groupTypeEnumId=${selectedSegment.value}`
+  return `/shipping?groupTypeEnumId=${selectedSegment.value}`
 }
 
 async function openProductFacilityGroupModal(type: string) {
@@ -187,18 +238,6 @@ function isFacilitySelected(facilityId: any) {
 }
 
 async function createRule() {
-  if(!formData.value.ruleName.trim()) {
-    showToast(translate("Please fill in all the required fields."))
-    return;
-  }
-
-  if(selectedSegment.value === 'RG_SHIPPING_FACILITY' && !formData.value.selectedFacilityGroups.included.length) {
-    showToast(translate("Please include atleast one facility group."))
-    return;
-  } else if(selectedSegment.value === 'RG_SHIPPING_CHANNEL' && !formData.value.selectedConfigFacilites.length) {
-    showToast(translate("Please select atleast one config facility."))
-    return;
-  }
 
   emitter.emit("presentLoader");
 
@@ -239,6 +278,14 @@ async function createRule() {
 }
 
 function generateRuleActions(ruleId: string) {
+  if(currentRule.value.ruleId) {
+    const ruleAction = currentRule.value.ruleActions.find((action: any) => action.actionTypeEnumId === "ATP_ALLOW_BROKERING")
+    if(ruleAction) {
+      ruleAction.fieldValue = formData.value.isBrokeringAllowed ? 'Y' : 'N';
+      return [ruleAction];
+    }
+  }
+
   return [{
     "ruleId": ruleId,
     "actionTypeEnumId": "ATP_ALLOW_BROKERING",
@@ -248,62 +295,118 @@ function generateRuleActions(ruleId: string) {
 }
 
 function generateRuleConditions(ruleId: string) {
-  const conditions = [];
+  if(currentRule.value.ruleId) {
+    const ruleConditions = JSON.parse(JSON.stringify(currentRule.value.ruleConditions));
 
-  if(selectedSegment.value === 'RG_SHIPPING_FACILITY') {
-    const includedFacilityGroupIds = formData.value.selectedFacilityGroups.included.map((group: any) => group.facilityGroupId)  
-    if(includedFacilityGroupIds?.length) {
+    if(selectedSegment.value === 'RG_SHIPPING_FACILITY') {
+      const includedCondition = ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS" && condition.operator === "in");
+      const includedFacilityGroupIds = formData.value.selectedFacilityGroups.included.map((group: any) => group.facilityGroupId);
+      if(includedFacilityGroupIds.length) includedCondition["fieldValue"] = includedFacilityGroupIds.join(",")
+  
+      const excludedCondition = ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS" && condition.operator === "not-in");
+      const excludedFacilityGroupIds = formData.value.selectedFacilityGroups.excluded.map((group: any) => group.facilityGroupId);
+      if(excludedFacilityGroupIds.length) excludedCondition["fieldValue"] = excludedFacilityGroupIds.join(",")
+    } else {
+      const facilityCondition = ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FACILITIES");
+      if(facilityCondition) facilityCondition["fieldValue"] = formData.value.selectedConfigFacilites.join(",");
+    }
+
+    Object.entries(appliedFilters.value).map(([type, filters]: any) => {
+      Object.entries(filters as any).map(([filter, value]: any) => {
+        const condition = ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FILTER" && condition.fieldName === filter && condition.operator === (type === "included" ? "in" : "not-in"))
+        if(condition) {
+          condition["fieldValue"] = value.length ? value.join(",") : ""
+        }
+      })
+    })
+
+    return ruleConditions;
+  } else {
+    const conditions = [];
+
+    if(selectedSegment.value === 'RG_SHIPPING_FACILITY') {
+      const includedFacilityGroupIds = formData.value.selectedFacilityGroups.included.map((group: any) => group.facilityGroupId)  
       conditions.push({
         "ruleId": ruleId,
         "conditionTypeEnumId": "ENTCT_ATP_FAC_GROUPS",
         "fieldName": "facilityGroups",
         "operator": "in",
-        "fieldValue": includedFacilityGroupIds.length > 1 ? includedFacilityGroupIds.join(",") : includedFacilityGroupIds[0],
+        "fieldValue": includedFacilityGroupIds.length ? includedFacilityGroupIds.join(",") : "",
         "multiValued": "Y"
       })
-    }
 
-    const excludedFacilityGroupIds = formData.value.selectedFacilityGroups.excluded.map((group: any) => group.facilityGroupId)
-    if(excludedFacilityGroupIds?.length) {
+      const excludedFacilityGroupIds = formData.value.selectedFacilityGroups.excluded.map((group: any) => group.facilityGroupId)
       conditions.push({
         "ruleId": ruleId,
         "conditionTypeEnumId": "ENTCT_ATP_FAC_GROUPS",
         "fieldName": "facilityGroups",
         "operator": "not-in",
-        "fieldValue": excludedFacilityGroupIds.length > 1 ? excludedFacilityGroupIds.join(",") : excludedFacilityGroupIds[0],
+        "fieldValue": excludedFacilityGroupIds.length ? excludedFacilityGroupIds.join(",") : "",
         "multiValued": "Y"
       })
-    }
-  } else {
-    const selectedFacilites = formData.value.selectedConfigFacilites
-    if(selectedFacilites?.length) {
+    } else {
+      const selectedFacilites = formData.value.selectedConfigFacilites
       conditions.push({
         "ruleId": ruleId,
         "conditionTypeEnumId": "ENTCT_ATP_FACILITIES",
         "fieldName": "facilities",
         "operator": "in",
-        "fieldValue": selectedFacilites.length > 1 ? selectedFacilites.join(",") : selectedFacilites[0],
+        "fieldValue": selectedFacilites.length ? selectedFacilites.join(",") : "",
         "multiValued": "Y"
       })
     }
-  }
 
-  Object.entries(appliedFilters.value).map(([type, filters]: any) => {
-    Object.entries(filters as any).map(([filter, value]: any) => {
-      if(value.length) {
+    Object.entries(appliedFilters.value).map(([type, filters]: any) => {
+      Object.entries(filters as any).map(([filter, value]: any) => {
         conditions.push({
           "ruleId": ruleId,
           "conditionTypeEnumId": "ENTCT_ATP_FILTER",
           "fieldName": filter,
           "operator": type === "included" ? "in" : "not-in",
-          "fieldValue": value.length > 1 ? value.join(",") : value[0],
+          "fieldValue": value.length ? value.join(",") : "",
           "multiValued": "Y"
         })
-      }
+      })
     })
-  })
 
-  return conditions;
+    return conditions;
+  }
+}
+
+async function updateRule() {
+  if(!isRuleValid()) return;
+
+  try {
+    await RuleService.updateRule({
+      ...currentRule.value,
+      "ruleName": formData.value.ruleName,
+      "ruleConditions": generateRuleConditions(props.ruleId),
+      "ruleActions": generateRuleActions(props.ruleId)
+    }, props.ruleId);
+    showToast(translate("Rule updated successfully."))
+    store.dispatch("rule/clearRuleState")
+    store.dispatch("util/clearAppliedFilters")
+    router.push(getDefaultUrl());
+  } catch(err: any) {
+    logger.error(err);
+  }
+}
+
+function isRuleValid() {
+  if(!formData.value.ruleName.trim()) {
+    showToast(translate("Please fill in all the required fields."))
+    return false;
+  }
+
+  if(selectedSegment.value === 'RG_SHIPPING_FACILITY' && !formData.value.selectedFacilityGroups.included.length) {
+    showToast(translate("Please include atleast one facility group."))
+    return false;
+  } else if(selectedSegment.value === 'RG_SHIPPING_CHANNEL' && !formData.value.selectedConfigFacilites.length) {
+    showToast(translate("Please select atleast one config facility."))
+    return false;
+  }
+
+  return true;
 }
 
 function removeFacilityGroups(facilityGroupId: any, type: string) {

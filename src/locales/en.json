@@ -259,6 +259,8 @@
   "Unable to schedule service.": "Unable to schedule service.",
   "Unable to update threshold rule.": "Unable to update threshold rule.",
   "Update": "Update",
+  "Update shipping rule": "Update shipping rule",
+  "Update store pickup rule": "Update store pickup rule",
   "Update time zone": "Update time zone",
   "Update threshold rule": "Update threshold rule",
   "Unlimited": "Unlimited",

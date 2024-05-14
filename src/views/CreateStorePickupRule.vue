@@ -40,7 +40,7 @@
           </ion-segment-button>
         </ion-segment>
       </div else>
-      <div  class="section-header">
+      <div v-else class="section-header">
         <h1 v-if="selectedSegment === 'RG_PICKUP_FACILITY'">{{ translate("Facility") }}</h1>
         <h1 v-else>{{ translate("Channel") }}</h1>
       </div>
@@ -157,7 +157,7 @@ onIonViewWillEnter(async () => {
         formData.value.ruleName = currentRule.value.ruleName;
         formData.value.isPickupAllowed = currentRule.value.ruleActions[0]?.fieldValue ? currentRule.value.ruleActions[0]?.fieldValue : ''
 
-        if(selectedSegment.value === 'RG_PICKUP_FACILITY') {
+        if(selectedSegment.value === "RG_PICKUP_FACILITY") {
           const includedGroups = currentRule.value.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS" && condition.operator === "in")
           const includedGroupIds = includedGroups.fieldValue ? includedGroups.fieldValue.split(",") : []
           formData.value.selectedFacilityGroups.included = facilityGroups.value.filter((group: any) => includedGroupIds.includes(group.facilityGroupId));
@@ -165,7 +165,7 @@ onIonViewWillEnter(async () => {
           const excludedGroups = currentRule.value.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS" && condition.operator === "not-in")
           const excludedGroupIds = excludedGroups.fieldValue ? excludedGroups.fieldValue.split(",") : []
           formData.value.selectedFacilityGroups.excluded = facilityGroups.value.filter((group: any) => excludedGroupIds.includes(group.facilityGroupId));
-        } else {
+        } else if(selectedSegment.value === "RG_PICKUP_CHANNEL") {
           const facilityCondition = currentRule.value.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FACILITIES")
           formData.value.selectedConfigFacilites = facilityCondition.fieldValue?.split(",");
         }
@@ -204,7 +204,9 @@ onIonViewWillLeave(() => {
 })
 
 function getDefaultUrl() {
-  return `store-pickup?groupTypeEnumId=${selectedSegment.value}`
+  console.log('enterd', selectedSegment.value);
+  
+  return `/store-pickup?groupTypeEnumId=${selectedSegment.value}`
 }
 
 async function openProductFacilityGroupModal(type: string) {
@@ -280,7 +282,7 @@ async function createRule() {
 
 function generateRuleActions(ruleId: string) {
   if(currentRule.value.ruleId) {
-    const ruleAction = currentRule.value.ruleActions.find((action: any) => action.actionTypeEnumId === "A")
+    const ruleAction = currentRule.value.ruleActions.find((action: any) => action.actionTypeEnumId === "ATP_ALLOW_PICKUP")
     if(ruleAction) {
       ruleAction.fieldValue = formData.value.isPickupAllowed ? 'Y' : 'N';
       return [ruleAction];
@@ -387,7 +389,7 @@ async function updateRule() {
     showToast(translate("Rule updated successfully."))
     store.dispatch("rule/clearRuleState")
     store.dispatch("util/clearAppliedFilters")
-    router.push("/safety-stock");
+    router.push(getDefaultUrl());
   } catch(err: any) {
     logger.error(err);
   }
