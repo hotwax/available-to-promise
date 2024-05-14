@@ -127,8 +127,8 @@
 </template>
 
 <script setup lang="ts">
-import { IonBadge, IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonItemDivider, IonLabel, IonList, IonMenuButton, IonPage, IonSegment, IonSegmentButton, IonSelect, IonSelectOption, IonTitle, IonToolbar, modalController, onIonViewDidEnter, popoverController } from '@ionic/vue';
-import { computed, onMounted, onUnmounted } from 'vue';
+import { IonBadge, IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonItemDivider, IonLabel, IonList, IonMenuButton, IonPage, IonSegment, IonSegmentButton, IonSelect, IonSelectOption, IonTitle, IonToolbar, modalController, onIonViewWillEnter, popoverController } from '@ionic/vue';
+import { computed, onUnmounted } from 'vue';
 import { addOutline, albumsOutline, businessOutline, ellipsisVerticalOutline, globeOutline, optionsOutline, storefrontOutline, timeOutline, timerOutline } from 'ionicons/icons';
 import { translate } from '@/i18n';
 import ShopActionsPopover from '@/components/ShopActionsPopover.vue'
@@ -144,7 +144,7 @@ const store = useStore();
 const inventoryChannels = computed(() => store.getters["channel/getInventoryChannels"])
 const selectedSegment = computed(() => store.getters["util/getSelectedSegment"])
 
-onMounted(async() => {
+onIonViewWillEnter(async() => {
   fetchInventoryChannels()
   emitter.on("productStoreOrConfigChanged", fetchInventoryChannels);
 })

@@ -63,8 +63,8 @@
 </template>
 
 <script setup lang="ts">
-import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, IonLabel, IonMenuButton, IonPage, IonSegment, IonSegmentButton, IonTitle, IonToolbar, onIonViewWillLeave, onIonViewDidEnter } from '@ionic/vue';
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, IonLabel, IonMenuButton, IonPage, IonSegment, IonSegmentButton, IonTitle, IonToolbar, onIonViewWillEnter } from '@ionic/vue';
+import { computed, onUnmounted, ref } from 'vue';
 import { addOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue'
 import FacilityItem from '@/components/FacilityItem.vue'
@@ -87,7 +87,7 @@ const isScrollingEnabled = ref(false);
 const contentRef = ref({}) as any;
 const infiniteScrollRef = ref({}) as any;
 
-onMounted(() => {
+onIonViewWillEnter(() => {
   fetchRules();
   emitter.on("productStoreOrConfigChanged", fetchRules);
 })

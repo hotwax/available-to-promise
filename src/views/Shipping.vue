@@ -62,8 +62,8 @@
 </template>
 
 <script setup lang="ts">
-import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, IonLabel, IonMenuButton, IonPage, IonSegment, IonSegmentButton, IonTitle, IonToolbar, onIonViewDidEnter, onIonViewWillLeave } from '@ionic/vue';
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, IonLabel, IonMenuButton, IonPage, IonSegment, IonSegmentButton, IonTitle, IonToolbar, onIonViewWillEnter } from '@ionic/vue';
+import { computed, onUnmounted, ref } from 'vue';
 import { addOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue'
 import { translate } from '@/i18n';
@@ -86,7 +86,7 @@ const isScrollingEnabled = ref(false);
 const contentRef = ref({}) as any;
 const infiniteScrollRef = ref({}) as any;
 
-onMounted(async() => {
+onIonViewWillEnter(async() => {
   fetchRules();
   emitter.on("productStoreOrConfigChanged", fetchRules);
 })
@@ -98,7 +98,7 @@ onUnmounted(() => {
 async function fetchRules() {
   emitter.emit("presentLoader");
   if(!selectedSegment.value || (selectedSegment.value !== 'RG_SHIPPING_FACILITY' && selectedSegment.value !== 'RG_SHIPPING_CHANNEL' && selectedSegment.value !== 'SHIPPING_FACILITY')) store.dispatch("util/updateSelectedSegment", "RG_SHIPPING_FACILITY");
-  await Promise.allSettled([store.dispatch('rule/fetchRules', { groupTypeEnumId: router.currentRoute.value.query.groupTypeEnumId ? router.currentRoute.value.query.groupTypeEnumId : "RG_SHIPPING_FACILITY" }), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilityGroups")])
+  await Promise.allSettled([store.dispatch('rule/fetchRules', { groupTypeEnumId: selectedSegment.value }), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilityGroups")])
   emitter.emit("dismissLoader");
 }
 
