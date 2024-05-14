@@ -89,7 +89,6 @@
       </ion-item>
 
       <ion-item lines="none">
-        <!-- <ion-button @click="editRuleName()" size="default" fill="clear">{{ translate("Edit name") }}</ion-button> -->
         <ion-button @click="editRule()" size="default" fill="clear">{{ translate("Edit rule") }}</ion-button>
         <ion-button @click="archiveRule()" color="medium" fill="clear" slot="end">
           <ion-icon :icon="archiveOutline" slot="icon-only"/>
@@ -100,16 +99,15 @@
 </template>
 
 <script setup lang="ts">
-import { IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonChip, IonIcon, IonItem, IonItemDivider, IonLabel, IonList, IonToggle, alertController, modalController } from '@ionic/vue';
+import { IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonChip, IonIcon, IonItem, IonItemDivider, IonLabel, IonList, IonToggle, alertController } from '@ionic/vue';
 import { computed, defineProps, onMounted, ref } from 'vue';
-import { archiveOutline, checkmarkDoneCircleOutline, chevronDownOutline, chevronUpOutline, closeCircleOutline, globeOutline, optionsOutline, pulseOutline, sendOutline, storefrontOutline } from 'ionicons/icons';
+import { archiveOutline, checkmarkDoneCircleOutline, chevronDownOutline, chevronUpOutline, closeCircleOutline, globeOutline, pulseOutline, sendOutline, storefrontOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
 import { translate } from '@/i18n';
 import { RuleService } from '@/services/RuleService';
 import { useStore } from 'vuex';
 import { showToast } from '@/utils';
 import logger from '@/logger';
-import SelectConfigFacilitiesModal from '@/components/SelectConfigFacilitiesModal.vue';
 import emitter from '@/event-bus';
 
 const router = useRouter();
@@ -244,48 +242,6 @@ async function editSafetyStock() {
           logger.error(err);
         }
         emitter.emit("dismissLoader");
-      }
-    }]
-  })
-
-  await alert.present()
-}
-
-async function editRuleName() {
-  const alert = await alertController.create({
-    header: translate("Edit name"),
-    inputs: [{
-      name: "name",
-      placeholder: translate("Name"),
-      type: "text",
-      value: props.rule.ruleName.trim()
-    }],
-    buttons: [{
-      text: translate('Cancel'),
-      role: "cancel"
-    },
-    {
-      text: translate('Update'),
-      handler: async(data) => {
-        if(data.name.trim()) {
-          emitter.emit("presentLoader");
-          const rule = JSON.parse(JSON.stringify(props.rule))
-          rule.ruleName = data.name
-
-          try {
-            await RuleService.updateRule(rule, props.rule.ruleId)
-            showToast(translate("Rule name updated successfully."))
-            await store.dispatch('rule/updateRuleData', { rule })
-            alertController.dismiss()
-          } catch(err: any) {
-            logger.error(err)
-            showToast(translate("Failed to update rule name."))
-          }
-          emitter.emit("dismissLoader");
-        } else {
-          showToast(translate("Rule name can't be empty."))
-          return false;
-        }
       }
     }]
   })

@@ -61,32 +61,11 @@
 </template>
 
 <script setup lang="ts">
-import {
-  IonBackButton,
-  IonCard,
-  IonCardHeader,
-  IonCardSubtitle,
-  IonCardTitle,
-  IonCheckbox,
-  IonContent,
-  IonFab,
-  IonFabButton,
-  IonHeader,
-  IonIcon,
-  IonInput,
-  IonItem,
-  IonPage,
-  IonNote,
-  IonText,
-  IonTitle,
-  IonToolbar,
-  onIonViewWillLeave,
-onIonViewWillEnter
-} from '@ionic/vue';
+import { IonBackButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonPage, IonNote, IonText, IonTitle, IonToolbar, onIonViewWillLeave, onIonViewWillEnter } from '@ionic/vue';
 import { saveOutline } from 'ionicons/icons'
 import { translate } from "@/i18n";
 import ProductFilters from '@/components/ProductFilters.vue';
-import { computed, defineProps, onMounted, ref } from 'vue';
+import { computed, defineProps, ref } from 'vue';
 import { useStore } from 'vuex';
 import { RuleService } from '@/services/RuleService';
 import { hasError, showToast } from '@/utils';
