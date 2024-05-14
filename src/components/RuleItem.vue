@@ -517,7 +517,11 @@ function editRule() {
     path = `update-shipping/${props.rule.ruleId}`
   }
 
-  router.push(path);
+  if(props.selectedSegment) {
+    router.push({ path, query: { groupTypeEnumId: props.selectedSegment } });
+  } else {
+    router.push(path)
+  }
 }
 </script>
 
