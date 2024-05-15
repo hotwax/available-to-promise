@@ -46,14 +46,14 @@
         </ion-card>
       </section>
       <div v-else class="empty-state">
-        <ion-note>{{ translate("No channel found for current product store.") }}</ion-note>
+        <ion-note>{{ translate("No channel found for selected product store. Either change the product store or associate channels with the product store.") }}</ion-note>
       </div>
 
       <ProductFilters />
     </ion-content>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button @click="createThresholdRule()">
+      <ion-fab-button :disabled="!configFacilities.length" @click="createThresholdRule()">
         <ion-icon :icon="saveOutline" />
       </ion-fab-button>
     </ion-fab>

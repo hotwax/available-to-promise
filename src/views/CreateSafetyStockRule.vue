@@ -35,7 +35,7 @@
         <h1>{{ translate("Facilities") }}</h1>
       </div>
 
-      <section>
+      <section v-if="facilityGroups.length">
         <ion-card>
           <ion-item lines="none">
             <ion-label>{{ translate("Included") }} <ion-text color="danger">*</ion-text></ion-label>
@@ -68,12 +68,15 @@
           </ion-card-content>
         </ion-card>
       </section>
+      <div v-else class="empty-state">
+        <ion-note>{{ translate("No facility group found for selected product store. Either change the product store or associate facility groups with the product store.") }}</ion-note>
+      </div>
 
       <ProductFilters />
     </ion-content>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button @click="createRule()">
+      <ion-fab-button :disabled="!facilityGroups.length" @click="createRule()">
         <ion-icon :icon="saveOutline" />
       </ion-fab-button>
     </ion-fab>
@@ -110,6 +113,7 @@ const appliedFilters = computed(() => store.getters["util/getAppliedFilters"]);
 const rules = computed(() => store.getters["rule/getRules"]);
 const total = computed(() => store.getters["rule/getTotalRulesCount"])
 const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
+const facilityGroups = computed(() => store.getters["util/getFacilityGroups"])
 
 onMounted(async () => {
   await Promise.allSettled([store.dispatch("util/fetchFacilityGroups")])
@@ -256,3 +260,9 @@ function removeFacilityGroups(facilityGroupId: any, type: string) {
   formData.value.selectedFacilityGroups[type] = formData.value.selectedFacilityGroups[type].filter((group: any) => group.facilityGroupId !== facilityGroupId)
 }
 </script>
+
+<style scoped>
+.empty-state {
+  align-items: start;
+}
+</style>

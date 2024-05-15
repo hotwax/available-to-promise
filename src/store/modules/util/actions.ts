@@ -28,9 +28,8 @@ const actions: ActionTree<UtilState, RootState> = {
   },
 
   async fetchFacilityGroups ({ commit, state }) {
-    let facilityGroups = JSON.parse(JSON.stringify(state.facilityGroups))
+    let facilityGroups = {};
 
-    if(facilityGroups.length && facilityGroups[0].productStoreId === store.state.user.currentEComStore.productStoreId) return;
     try {
       const resp = await UtilService.fetchFacilityGroups({ productStoreId: store.state.user.currentEComStore.productStoreId, pageSize: 100 });
 
