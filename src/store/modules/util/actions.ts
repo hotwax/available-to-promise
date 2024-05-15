@@ -10,7 +10,7 @@ import { DateTime } from 'luxon'
 
 
 const actions: ActionTree<UtilState, RootState> = {
-  async fetchConfigFacilities ({ commit, state }) {
+  async fetchConfigFacilities ({ commit }) {
     let configFacilities = [];
 
     try {
@@ -27,10 +27,9 @@ const actions: ActionTree<UtilState, RootState> = {
     commit(types.UTIL_CONFIG_FACILITES_UPDATED, configFacilities)
   },
 
-  async fetchFacilityGroups ({ commit, state }) {
-    let facilityGroups = JSON.parse(JSON.stringify(state.facilityGroups))
+  async fetchFacilityGroups ({ commit }) {
+    let facilityGroups = {};
 
-    if(facilityGroups.length && facilityGroups[0].productStoreId === store.state.user.currentEComStore.productStoreId) return;
     try {
       const resp = await UtilService.fetchFacilityGroups({ productStoreId: store.state.user.currentEComStore.productStoreId, pageSize: 100 });
 
