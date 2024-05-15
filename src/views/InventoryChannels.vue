@@ -205,11 +205,13 @@ async function openLinkThresholdFacilitiesToGroupModal(group: any) {
   return popover.present();
 }
 
-function getFacilityCount(group: any, facilityTypeId: string) {
+function getFacilityCount(channel: any, facilityTypeId: string) {
+  if(!channel.selectedFacilities?.length) return 0;
+
   if(facilityTypeId === 'STORE') {
-    return group.selectedFacilities?.length ? group.selectedFacilities.filter((facility: any) => facility.facilityTypeId === "RETAIL_STORE" || facility.facilityTypeId === "OUTLET_STORE").length : 0;
+    return channel.selectedFacilities.filter((facility: any) => facility.facilityTypeId === "RETAIL_STORE" || facility.facilityTypeId === "OUTLET_STORE").length;
   } else {
-    return group.selectedFacilities?.length ? group.selectedFacilities.filter((facility: any) => facility.facilityTypeId === "WAREHOUSE" || facility.facilityTypeId === "OUTLET_WAREHOUSE").length : 0;
+    return channel.selectedFacilities.filter((facility: any) => facility.facilityTypeId === "WAREHOUSE" || facility.facilityTypeId === "OUTLET_WAREHOUSE").length;
   }
 }
 
