@@ -29,7 +29,7 @@
           </section>
         </template>
         <div v-else class="empty-state">
-          <p>{{ translate("No shipping rules found") }}</p>
+          <p>{{ translate("No shipping rule found.") }}</p>
         </div>
       </main>
       <main v-else>
