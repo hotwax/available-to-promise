@@ -24,7 +24,7 @@
       </ion-item>
     </div>
     <ion-list v-else-if="facetOptions.length">
-      <ion-item v-for="option in facetOptions" :key="option.id"  @click="updateSelectedValues(option.id)">
+      <ion-item v-for="option in facetOptions" :key="option.id"  @click="!isAlreadyApplied(option.id) ? updateSelectedValues(option.id) : null">
         <ion-label v-if="isAlreadyApplied(option.id)">{{ option.label }}</ion-label>
         <ion-checkbox v-if="!isAlreadyApplied(option.id)" :checked="selectedValues.includes(option.id)">
           {{ option.label }}
