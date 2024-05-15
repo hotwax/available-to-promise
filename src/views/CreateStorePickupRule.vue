@@ -31,7 +31,7 @@
       </section>
 
       <div class="section-header">
-        <h1 v-if="selectedSegment === 'RG_PICKUP_FACILITY'">{{ translate("Facilities") }}</h1>
+        <h1 v-if="selectedSegment === 'RG_PICKUP_FACILITY'">{{ translate("Facilities") }} <ion-text color="danger">*</ion-text></h1>
         <h1 v-else-if="selectedSegment === 'RG_PICKUP_CHANNEL'">{{ translate("Channels") }} <ion-text color="danger">*</ion-text></h1>
       </div>
 
