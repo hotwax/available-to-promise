@@ -17,7 +17,7 @@
       </main>
 
       <div class="empty-state" v-else>
-       <p>{{ translate("No threshold rules found") }}</p>
+       <p>{{ translate("No threshold rule found.") }}</p>
       </div>
 
       <ion-fab vertical="bottom" horizontal="end" slot="fixed">

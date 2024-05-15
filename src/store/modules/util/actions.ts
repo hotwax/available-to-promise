@@ -10,7 +10,7 @@ import { DateTime } from 'luxon'
 
 
 const actions: ActionTree<UtilState, RootState> = {
-  async fetchConfigFacilities ({ commit, state }) {
+  async fetchConfigFacilities ({ commit }) {
     let configFacilities = [];
 
     try {
@@ -27,7 +27,7 @@ const actions: ActionTree<UtilState, RootState> = {
     commit(types.UTIL_CONFIG_FACILITES_UPDATED, configFacilities)
   },
 
-  async fetchFacilityGroups ({ commit, state }) {
+  async fetchFacilityGroups ({ commit }) {
     let facilityGroups = {};
 
     try {
