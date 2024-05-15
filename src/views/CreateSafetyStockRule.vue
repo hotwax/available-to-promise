@@ -84,11 +84,11 @@
 </template>
 
 <script setup lang="ts">
-import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonPage, IonText, IonTitle, IonToolbar, modalController, onIonViewWillLeave } from '@ionic/vue';
+import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonPage, IonText, IonTitle, IonToolbar, modalController, onIonViewWillEnter, onIonViewWillLeave } from '@ionic/vue';
 import { addCircleOutline, closeCircle, saveOutline } from 'ionicons/icons'
 import { translate } from "@/i18n";
 import ProductFilters from '@/components/ProductFilters.vue';
-import { computed, onMounted, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useStore } from 'vuex';
 import AddProductFacilityGroupModal from '@/components/AddProductFacilityGroupModal.vue';
 import { RuleService } from '@/services/RuleService';
@@ -115,8 +115,9 @@ const total = computed(() => store.getters["rule/getTotalRulesCount"])
 const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
 const facilityGroups = computed(() => store.getters["util/getFacilityGroups"])
 
-onMounted(async () => {
-  await Promise.allSettled([store.dispatch("util/fetchFacilityGroups")])
+onIonViewWillEnter(async() => {
+  fetchStoreConfig();
+  emitter.on("productStoreOrConfigChanged", fetchStoreConfig);
 })
 
 onIonViewWillLeave(() => {
@@ -129,7 +130,18 @@ onIonViewWillLeave(() => {
     }
   }
   store.dispatch("util/clearAppliedFilters")
+  emitter.off("productStoreOrConfigChanged", fetchStoreConfig);
 })
+
+async function fetchStoreConfig() {
+  emitter.emit("presentLoader");
+  await store.dispatch("util/fetchFacilityGroups")
+  formData.value.selectedFacilityGroups = {
+    included: [],
+    excluded: []
+  }
+  emitter.emit("dismissLoader");
+}
 
 async function openProductFacilityGroupModal(type: string) {
   const modal = await modalController.create({

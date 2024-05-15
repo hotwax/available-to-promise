@@ -80,12 +80,13 @@ import {
   IonText,
   IonTitle,
   IonToolbar,
+  onIonViewWillEnter,
   onIonViewWillLeave
 } from '@ionic/vue';
 import { saveOutline } from 'ionicons/icons'
 import { translate } from "@/i18n";
 import ProductFilters from '@/components/ProductFilters.vue';
-import { computed, onMounted, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useStore } from 'vuex';
 import { RuleService } from '@/services/RuleService';
 import { showToast } from '@/utils';
@@ -100,6 +101,17 @@ const formData = ref({
   selectedConfigFacilites: []
 }) as any;
 
+const configFacilities = computed(() => store.getters["util/getConfigFacilities"])
+const appliedFilters = computed(() => store.getters["util/getAppliedFilters"]);
+const rules = computed(() => store.getters["rule/getRules"]);
+const total = computed(() => store.getters["rule/getTotalRulesCount"])
+const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
+
+onIonViewWillEnter(async() => {
+  fetchStoreConfig();
+  emitter.on("productStoreOrConfigChanged", fetchStoreConfig);
+})
+
 onIonViewWillLeave(() => {
   formData.value = {
     ruleName: '',
@@ -107,17 +119,15 @@ onIonViewWillLeave(() => {
     selectedConfigFacilites: []
   }
   store.dispatch("util/clearAppliedFilters")
+  emitter.off("productStoreOrConfigChanged", fetchStoreConfig);
 })
 
-const configFacilities = computed(() => store.getters["util/getConfigFacilities"])
-const appliedFilters = computed(() => store.getters["util/getAppliedFilters"]);
-const rules = computed(() => store.getters["rule/getRules"]);
-const total = computed(() => store.getters["rule/getTotalRulesCount"])
-const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
-
-onMounted(async () => {
+async function fetchStoreConfig() {
+  emitter.emit("presentLoader");
   await store.dispatch("util/fetchConfigFacilities");
-})
+  formData.value.selectedConfigFacilites = [];
+  emitter.emit("dismissLoader");
+}
 
 function toggleFacilitySelection(facilityId: any) {
   if(isFacilitySelected(facilityId)) {

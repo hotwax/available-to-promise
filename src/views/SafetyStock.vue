@@ -30,13 +30,13 @@
 </template>
 
 <script setup lang="ts">
-import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonMenuButton, IonPage, IonTitle, IonToolbar, onIonViewWillEnter } from '@ionic/vue';
+import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonMenuButton, IonPage, IonTitle, IonToolbar, onIonViewWillEnter, onIonViewWillLeave } from '@ionic/vue';
 import { addOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue';
 import { useRouter } from "vue-router";
 import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
 import { useStore } from 'vuex';
-import { computed, onUnmounted } from 'vue';
+import { computed } from 'vue';
 import { translate } from '@/i18n';
 import emitter from '@/event-bus';
 
@@ -51,7 +51,7 @@ onIonViewWillEnter(async() => {
   emitter.on("productStoreOrConfigChanged", fetchRules);
 })
 
-onUnmounted(() => {
+onIonViewWillLeave(() => {
   emitter.off("productStoreOrConfigChanged", fetchRules);
 })
 

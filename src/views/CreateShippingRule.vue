@@ -104,8 +104,8 @@
 </template>
 
 <script setup lang="ts">
-import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonNote, IonPage, IonText, IonTitle, IonToggle, IonToolbar, modalController, onIonViewWillLeave } from '@ionic/vue';
-import { computed, onMounted, ref } from 'vue';
+import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonNote, IonPage, IonText, IonTitle, IonToggle, IonToolbar, modalController, onIonViewWillEnter, onIonViewWillLeave } from '@ionic/vue';
+import { computed, ref } from 'vue';
 import { addCircleOutline, closeCircle, saveOutline, storefrontOutline } from 'ionicons/icons'
 import { translate } from "@/i18n";
 import ProductFilters from '@/components/ProductFilters.vue';
@@ -137,8 +137,9 @@ const formData = ref({
   selectedConfigFacilites: []
 }) as any;
 
-onMounted(async () => {
-  await Promise.allSettled([store.dispatch("util/fetchFacilityGroups"), store.dispatch("util/fetchConfigFacilities")]);
+onIonViewWillEnter(async() => {
+  fetchStoreConfig();
+  emitter.on("productStoreOrConfigChanged", fetchStoreConfig);
 })
 
 onIonViewWillLeave(() => {
@@ -152,7 +153,19 @@ onIonViewWillLeave(() => {
     selectedConfigFacilites: []
   }
   store.dispatch("util/clearAppliedFilters")
+  emitter.off("productStoreOrConfigChanged", fetchStoreConfig);
 })
+
+async function fetchStoreConfig() {
+  emitter.emit("presentLoader");
+  await Promise.allSettled([store.dispatch("util/fetchFacilityGroups"), store.dispatch("util/fetchConfigFacilities")]);
+  formData.value.selectedFacilityGroups = {
+    included: [],
+    excluded: []
+  }
+  formData.value.selectedConfigFacilites = []
+  emitter.emit("dismissLoader");
+}
 
 async function openProductFacilityGroupModal(type: string) {
   const modal = await modalController.create({
