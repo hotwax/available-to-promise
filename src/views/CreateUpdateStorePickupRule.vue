@@ -39,7 +39,7 @@
             <ion-label>{{ translate("Channel") }}</ion-label>
           </ion-segment-button>
         </ion-segment>
-      </div else>
+      </div>
       <div v-else class="section-header">
         <h1 v-if="selectedSegment === 'RG_PICKUP_FACILITY'">{{ translate("Facility") }}</h1>
         <h1 v-else>{{ translate("Channel") }}</h1>
