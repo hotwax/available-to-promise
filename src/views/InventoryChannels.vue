@@ -3,11 +3,9 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-menu-button slot="start" />
-        <ion-title>{{ translate("Inventory channels") }}</ion-title>
-      </ion-toolbar>
+        <ion-title slot="start">{{ translate("Inventory channels") }}</ion-title>
 
-      <ion-toolbar>
-        <ion-segment v-model="selectedSegment">
+        <ion-segment v-model="selectedSegment" slot="end">
           <ion-segment-button value="channels">
             <ion-label>{{ translate("Channels") }}</ion-label>
           </ion-segment-button>
@@ -52,7 +50,7 @@
   
                 <ion-item>
                   <ion-icon slot="start" :icon="storefrontOutline"/>
-                  <ion-label>{{ translate("retail facilities", { count: getFacilityCount(channel, "RETAIL_STORE") })}}</ion-label>
+                  <ion-label>{{ translate("retail facilities", { count: getFacilityCount(channel, "STORE") })}}</ion-label>
                 </ion-item>
   
                 <ion-item lines="full">
@@ -148,6 +146,7 @@ const selectedSegment = ref("channels")
 const inventoryChannels = computed(() => store.getters["channel/getInventoryChannels"])
 
 onMounted(async() => {
+  fetchInventoryChannels()
   emitter.on("productStoreOrConfigChanged", fetchInventoryChannels);
 })
 
@@ -206,8 +205,14 @@ async function openLinkThresholdFacilitiesToGroupModal(group: any) {
   return popover.present();
 }
 
-function getFacilityCount(group: any, facilityTypeId: string) {
-  return group.selectedFacilities?.length ? group.selectedFacilities.filter((facility: any) => facility.facilityTypeId === facilityTypeId).length : 0;
+function getFacilityCount(channel: any, facilityTypeId: string) {
+  if(!channel.selectedFacilities?.length) return 0;
+
+  if(facilityTypeId === 'STORE') {
+    return channel.selectedFacilities.filter((facility: any) => facility.facilityTypeId === "RETAIL_STORE" || facility.facilityTypeId === "OUTLET_STORE").length;
+  } else {
+    return channel.selectedFacilities.filter((facility: any) => facility.facilityTypeId === "WAREHOUSE" || facility.facilityTypeId === "OUTLET_WAREHOUSE").length;
+  }
 }
 
 </script>

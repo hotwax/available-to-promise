@@ -4,10 +4,8 @@
       <ion-toolbar>
         <ion-menu-button slot="start" />
         <ion-title>{{ translate("Store pickup") }}</ion-title>
-      </ion-toolbar>
 
-      <ion-toolbar>
-        <ion-segment v-model="selectedSegment" @ionChange="updateRuleGroup()">
+        <ion-segment v-model="selectedSegment" @ionChange="updateRuleGroup()" slot="end">
           <ion-segment-button value="RG_PICKUP_FACILITY">
             <ion-label>{{ translate("Product and facility") }}</ion-label>
           </ion-segment-button>
@@ -32,7 +30,7 @@
             </ion-reorder-group></section>
         </template>
         <div class="empty-state" v-else>
-          <p>{{ translate("No store pickup rules found") }}</p>
+          <p>{{ translate("No store pickup rule found.") }}</p>
         </div>
       </main>
       <main v-else>
@@ -198,9 +196,3 @@ function createStorePickup() {
   router.push({ path: '/create-store-pickup', query: { groupTypeEnumId: selectedSegment.value } })
 }
 </script>
-
-<style scoped>
-  ion-header {
-    display: flex;
-  }
-</style>
