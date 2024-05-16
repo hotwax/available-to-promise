@@ -125,7 +125,7 @@ onIonViewWillEnter(async () => {
         currentRule.value = resp.data[0];
 
         formData.value.ruleName = currentRule.value.ruleName;
-        formData.value.safetyStock = currentRule.value.ruleActions[0]?.fieldValue ? currentRule.value.ruleActions[0]?.fieldValue : ''
+        formData.value.safetyStock = currentRule.value.ruleActions[0]?.fieldValue ? currentRule.value.ruleActions[0].fieldValue : ''
 
         const includedGroups = currentRule.value.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS" && condition.operator === "in")
         const includedGroupIds = includedGroups.fieldValue ? includedGroups.fieldValue.split(",") : []

@@ -155,7 +155,7 @@ onIonViewWillEnter(async () => {
         currentRule.value = resp.data[0];
 
         formData.value.ruleName = currentRule.value.ruleName;
-        formData.value.isPickupAllowed = currentRule.value.ruleActions[0]?.fieldValue ? currentRule.value.ruleActions[0]?.fieldValue : ''
+        formData.value.isPickupAllowed = currentRule.value.ruleActions[0]?.fieldValue ? currentRule.value.ruleActions[0].fieldValue : ''
 
         if(selectedSegment.value === "RG_PICKUP_FACILITY") {
           const includedGroups = currentRule.value.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS" && condition.operator === "in")

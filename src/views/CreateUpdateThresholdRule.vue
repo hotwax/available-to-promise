@@ -107,7 +107,7 @@ onIonViewWillEnter(async () => {
         currentRule.value = resp.data[0];
 
         formData.value.ruleName = currentRule.value.ruleName;
-        formData.value.threshold = currentRule.value.ruleActions[0]?.fieldValue ? currentRule.value.ruleActions[0]?.fieldValue : ''
+        formData.value.threshold = currentRule.value.ruleActions[0]?.fieldValue ? currentRule.value.ruleActions[0].fieldValue : ''
 
         const facilityCondition = currentRule.value.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FACILITIES")
         formData.value.selectedConfigFacilites = facilityCondition.fieldValue?.split(",");
