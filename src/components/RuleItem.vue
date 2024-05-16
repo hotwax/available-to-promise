@@ -35,78 +35,76 @@
       <ion-toggle :checked="props.rule.ruleActions ? props.rule.ruleActions[0].fieldValue : false" @click.prevent="updateRuleShipping($event)">{{ translate(selectedPage.name) }}</ion-toggle>
     </ion-item>
 
-    <ion-list>
-      <template v-if="selectedPage.path === '/threshold' || selectedSegment === 'RG_PICKUP_CHANNEL' || selectedSegment === 'RG_SHIPPING_CHANNEL'">
-        <ion-item-divider color="light">
-          <ion-label>{{ translate("Channels") }}</ion-label>
-        </ion-item-divider>
+    <template v-if="selectedPage.path === '/threshold' || selectedSegment === 'RG_PICKUP_CHANNEL' || selectedSegment === 'RG_SHIPPING_CHANNEL'">
+      <ion-item-divider color="light">
+        <ion-label>{{ translate("Channels") }}</ion-label>
+      </ion-item-divider>
 
-        <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FACILITIES')" lines="full">
-          <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
-          <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FACILITIES") }}</ion-label>
-        </ion-item>
-      </template>
-      
-      <template v-else>
-        <ion-item-divider color="light">
-          <ion-label>{{ translate("Facility groups") }}</ion-label>
-        </ion-item-divider>
-        
-        <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FAC_GROUPS', 'facilityGroups', 'in')">
-          <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
-          <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FAC_GROUPS", "facilityGroups", "in") }}</ion-label>
-        </ion-item>
-        <ion-item lines="full" v-if="isRuleConditionAvailable('ENTCT_ATP_FAC_GROUPS', 'facilityGroups', 'not-in')">
-          <ion-icon slot="start" :icon="closeCircleOutline"/>
-          <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FAC_GROUPS", "facilityGroups", "not-in") }}</ion-label>
-        </ion-item>
-      </template>
-
-      <template v-if="areProductFiltersSelected()">
-        <ion-item-divider color="light">
-          <ion-label>{{ translate("Product tags") }}</ion-label>
-        </ion-item-divider>
-
-        <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'tags', 'in')">
-          <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
-          <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FILTER", "tags", "in") }}</ion-label>
-        </ion-item>
-        <ion-item lines="none" v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'tags', 'not-in')">
-          <ion-icon slot="start" :icon="closeCircleOutline"/>
-          <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FILTER", "tags", "not-in") }}</ion-label>
-        </ion-item>
-
-        <ion-item-divider color="light">
-          <ion-label>{{ translate("Product features") }}</ion-label>
-        </ion-item-divider>
-
-        <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'productFeatures', 'in')">
-          <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
-          <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FILTER", "productFeatures", "in") }}</ion-label>
-        </ion-item>
-        <ion-item lines="full" v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'productFeatures', 'not-in')">
-          <ion-icon slot="start" :icon="closeCircleOutline"/>
-          <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FILTER", "productFeatures", "not-in") }}</ion-label>
-        </ion-item>
-      </template>
-      <template v-else>
-        <ion-item-divider color="light">
-          <ion-label>{{ translate("Products") }}</ion-label>
-        </ion-item-divider>
-
-        <ion-item lines="full">
-          <ion-icon slot="start" :icon="shirtOutline"/>
-          <ion-label class="ion-text-wrap">{{ translate("All products selected.") }}</ion-label>
-        </ion-item>
-      </template>
-
-      <ion-item lines="none">
-        <ion-button @click="editRule()" size="default" fill="clear">{{ translate("Edit rule") }}</ion-button>
-        <ion-button @click="archiveRule()" color="medium" fill="clear" slot="end">
-          <ion-icon :icon="archiveOutline" slot="icon-only"/>
-        </ion-button>
+      <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FACILITIES')" lines="full">
+        <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
+        <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FACILITIES") }}</ion-label>
       </ion-item>
-    </ion-list>
+    </template>
+    
+    <template v-else>
+      <ion-item-divider color="light">
+        <ion-label>{{ translate("Facility groups") }}</ion-label>
+      </ion-item-divider>
+      
+      <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FAC_GROUPS', 'facilityGroups', 'in')">
+        <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
+        <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FAC_GROUPS", "facilityGroups", "in") }}</ion-label>
+      </ion-item>
+      <ion-item lines="full" v-if="isRuleConditionAvailable('ENTCT_ATP_FAC_GROUPS', 'facilityGroups', 'not-in')">
+        <ion-icon slot="start" :icon="closeCircleOutline"/>
+        <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FAC_GROUPS", "facilityGroups", "not-in") }}</ion-label>
+      </ion-item>
+    </template>
+
+    <template v-if="areProductFiltersSelected()">
+      <ion-item-divider color="light">
+        <ion-label>{{ translate("Product tags") }}</ion-label>
+      </ion-item-divider>
+
+      <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'tags', 'in')">
+        <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
+        <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FILTER", "tags", "in") }}</ion-label>
+      </ion-item>
+      <ion-item lines="none" v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'tags', 'not-in')">
+        <ion-icon slot="start" :icon="closeCircleOutline"/>
+        <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FILTER", "tags", "not-in") }}</ion-label>
+      </ion-item>
+
+      <ion-item-divider color="light">
+        <ion-label>{{ translate("Product features") }}</ion-label>
+      </ion-item-divider>
+
+      <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'productFeatures', 'in')">
+        <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
+        <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FILTER", "productFeatures", "in") }}</ion-label>
+      </ion-item>
+      <ion-item lines="full" v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'productFeatures', 'not-in')">
+        <ion-icon slot="start" :icon="closeCircleOutline"/>
+        <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FILTER", "productFeatures", "not-in") }}</ion-label>
+      </ion-item>
+    </template>
+    <template v-else>
+      <ion-item-divider color="light">
+        <ion-label>{{ translate("Products") }}</ion-label>
+      </ion-item-divider>
+
+      <ion-item lines="full">
+        <ion-icon slot="start" :icon="shirtOutline"/>
+        <ion-label class="ion-text-wrap">{{ translate("All products selected.") }}</ion-label>
+      </ion-item>
+    </template>
+
+    <div class="actions">
+      <ion-button @click="editRule()" size="default" fill="clear">{{ translate("Edit rule") }}</ion-button>
+      <ion-button @click="archiveRule()" color="medium" fill="clear" slot="end">
+        <ion-icon :icon="archiveOutline" slot="icon-only"/>
+      </ion-button>
+    </div>
   </ion-card>
 </template>
 
@@ -442,5 +440,10 @@ ion-card-header {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
 }
 </style>
