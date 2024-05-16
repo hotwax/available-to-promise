@@ -3,7 +3,7 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-menu-button slot="start" />
-        <ion-title>{{ translate("Store pickup") }}</ion-title>
+        <ion-title slot="start">{{ translate("Store pickup") }}</ion-title>
 
         <ion-segment :value="selectedSegment" @ionChange="updateSegment($event)" slot="end">
           <ion-segment-button value="RG_PICKUP_FACILITY">
