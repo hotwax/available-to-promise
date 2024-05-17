@@ -24,7 +24,7 @@
       
         <ion-item lines="none">
           <ion-button fill="clear" :disabled="ruleGroup.schedule?.paused === 'N'" @click="saveSchedule()">{{ translate("Schedule") }}</ion-button>
-          <ion-button color="medium" fill="clear" slot="end" @click="OpenScheduleActionsPopover($event)">
+          <ion-button color="medium" fill="clear" slot="end" @click="openScheduleActionsPopover($event)">
             <ion-icon :icon="ellipsisVerticalOutline" slot="icon-only"/>
           </ion-button>
         </ion-item>
@@ -52,7 +52,7 @@ const isReorderActive = computed(() => store.getters["rule/isReorderActive"]);
 
 const cronExpressions = JSON.parse(process.env?.VUE_APP_CRON_EXPRESSIONS as string)
 
-async function OpenScheduleActionsPopover(event: Event) {
+async function openScheduleActionsPopover(event: Event) {
   const popover = await popoverController.create({
     component: ScheduleActionsPopover,
     showBackdrop: false,

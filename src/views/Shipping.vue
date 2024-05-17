@@ -25,7 +25,7 @@
           <ScheduleRuleItem v-if="rules.length" />
 
           <section>
-            <ion-reorder-group :disabled="false" @ionItemReorder="reorderingRules = doReorder($event, reorderingRules)">
+            <ion-reorder-group :disabled="false" @ionItemReorder="updateReorderingRules($event)">
               <RuleItem v-for="(rule, ruleIndex) in (isReorderActive ? reorderingRules : rules)" :rule="rule" :ruleIndex="ruleIndex" :key="rule.ruleId" />
             </ion-reorder-group>
           </section>
@@ -182,8 +182,8 @@ async function saveReorder() {
     await RuleService.updateRule(rule, rule.ruleId)
   }))
 
-  const isFailedToUpdateSomeRUle = responses.some((response) => response.status === 'rejected')
-  if(isFailedToUpdateSomeRUle) {
+  const isFailedToUpdateSomeRule = responses.some((response) => response.status === 'rejected')
+  if(isFailedToUpdateSomeRule) {
     showToast(translate("Failed to update sequence for some rules."))
   } else {
     showToast(translate("Sequence for rules updated successfully."))
@@ -191,6 +191,10 @@ async function saveReorder() {
   emitter.emit("dismissLoader");
   await store.dispatch('rule/updateRules', { rules: reorderingRules.value })
   store.dispatch("rule/updateIsReorderActive", false)
+}
+
+function updateReorderingRules(event: any) {
+  reorderingRules.value = doReorder(event, reorderingRules.value)
 }
 
 function createShipping() {
