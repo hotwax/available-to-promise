@@ -3,7 +3,7 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-back-button slot="start" default-href="/safety-stock" />
-        <ion-title>{{ translate("New safety stock rule") }}</ion-title>
+        <ion-title>{{ currentRule.ruleId ? translate("Update safety stock rule") : translate("New safety stock rule") }}</ion-title>
       </ion-toolbar>
     </ion-header>
     
@@ -73,7 +73,7 @@
     </ion-content>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button @click="createRule()">
+      <ion-fab-button @click="currentRule.ruleId ? updateRule() : createRule()">
         <ion-icon :icon="saveOutline" />
       </ion-fab-button>
     </ion-fab>
@@ -81,17 +81,17 @@
 </template>
 
 <script setup lang="ts">
-import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonPage, IonText, IonTitle, IonToolbar, modalController, onIonViewWillLeave } from '@ionic/vue';
+import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonPage, IonText, IonTitle, IonToolbar, modalController, onIonViewWillEnter, onIonViewWillLeave } from '@ionic/vue';
 import { addCircleOutline, closeCircle, saveOutline } from 'ionicons/icons'
 import { translate } from "@/i18n";
 import ProductFilters from '@/components/ProductFilters.vue';
-import { computed, onMounted, ref } from 'vue';
+import { computed, defineProps, ref } from 'vue';
 import { useStore } from 'vuex';
 import AddProductFacilityGroupModal from '@/components/AddProductFacilityGroupModal.vue';
 import { RuleService } from '@/services/RuleService';
 import { useRouter } from 'vue-router';
 import logger from '@/logger';
-import { showToast } from '@/utils';
+import { hasError, showToast } from '@/utils';
 import emitter from '@/event-bus';
 
 const router = useRouter();
@@ -105,14 +105,55 @@ const formData = ref({
     excluded: []
   }
 }) as any;
+const currentRule = ref({}) as any;
+const props = defineProps(["ruleId"]);
 
 const appliedFilters = computed(() => store.getters["util/getAppliedFilters"]);
 const rules = computed(() => store.getters["rule/getRules"]);
 const total = computed(() => store.getters["rule/getTotalRulesCount"])
 const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
+const facilityGroups = computed(() => store.getters["util/getFacilityGroups"])
 
-onMounted(async () => {
-  await Promise.allSettled([store.dispatch("util/clearAppliedFilters"), store.dispatch("util/fetchFacilityGroups")])
+onIonViewWillEnter(async () => {
+  await store.dispatch("util/fetchFacilityGroups");
+
+  if(props.ruleId) {
+    try {
+      const resp = await RuleService.fetchRules({ ruleId: props.ruleId })
+
+      if(!hasError(resp)) {
+        currentRule.value = resp.data[0];
+
+        formData.value.ruleName = currentRule.value.ruleName;
+        formData.value.safetyStock = currentRule.value.ruleActions[0]?.fieldValue ? currentRule.value.ruleActions[0].fieldValue : ''
+
+        const includedGroups = currentRule.value.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS" && condition.operator === "in")
+        const includedGroupIds = includedGroups.fieldValue ? includedGroups.fieldValue.split(",") : []
+        formData.value.selectedFacilityGroups.included = facilityGroups.value.filter((group: any) => includedGroupIds.includes(group.facilityGroupId));
+        
+        const excludedGroups = currentRule.value.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS" && condition.operator === "not-in")
+        const excludedGroupIds = excludedGroups.fieldValue ? excludedGroups.fieldValue.split(",") : []
+        formData.value.selectedFacilityGroups.excluded = facilityGroups.value.filter((group: any) => excludedGroupIds.includes(group.facilityGroupId));
+
+        const currentAppliedFilters = JSON.parse(JSON.stringify(appliedFilters.value))
+        currentRule.value.ruleConditions.map((condition: any) => {
+          if(condition.conditionTypeEnumId === "ENTCT_ATP_FILTER") {
+            if(condition.operator === "in") {
+              currentAppliedFilters["included"][condition.fieldName] = condition.fieldValue ? condition.fieldValue.split(",") : []
+            } else {
+              currentAppliedFilters["excluded"][condition.fieldName] = condition.fieldValue ? condition.fieldValue.split(",") : []
+            }
+          }
+        })
+
+        await store.dispatch('util/updateAppliedFilters', currentAppliedFilters)
+      } else {
+        throw resp.data
+      }
+    } catch(err: any) {
+      logger.error(err);
+    }
+  }
 })
 
 onIonViewWillLeave(() => {
@@ -124,6 +165,7 @@ onIonViewWillLeave(() => {
       excluded: []
     }
   }
+  store.dispatch("util/clearAppliedFilters")
 })
 
 async function openProductFacilityGroupModal(type: string) {
@@ -145,6 +187,14 @@ async function openProductFacilityGroupModal(type: string) {
 }
 
 function generateRuleActions(ruleId: string) {
+  if(currentRule.value.ruleId) {
+    const ruleAction = currentRule.value.ruleActions.find((action: any) => action.actionTypeEnumId === "ATP_SAFETY_STOCK")
+    if(ruleAction) {
+      ruleAction.fieldValue = formData.value.safetyStock ? formData.value.safetyStock : 0;
+      return [ruleAction];
+    }
+  }
+
   return [{
     "ruleId": ruleId,
     "actionTypeEnumId": "ATP_SAFETY_STOCK",
@@ -154,60 +204,69 @@ function generateRuleActions(ruleId: string) {
 }
 
 function generateRuleConditions(ruleId: string) {
-  const conditions = [];
+  if(currentRule.value.ruleId) {
+    const ruleConditions = JSON.parse(JSON.stringify(currentRule.value.ruleConditions));
 
-  const includedFacilityGroupIds = formData.value.selectedFacilityGroups.included.map((group: any) => group.facilityGroupId)  
-  if(includedFacilityGroupIds?.length) {
+    const includedCondition = ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS" && condition.operator === "in");
+    const includedFacilityGroupIds = formData.value.selectedFacilityGroups.included.map((group: any) => group.facilityGroupId);
+    if(includedFacilityGroupIds.length) includedCondition["fieldValue"] = includedFacilityGroupIds.join(",")
+
+    const excludedCondition = ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS" && condition.operator === "not-in");
+    const excludedFacilityGroupIds = formData.value.selectedFacilityGroups.excluded.map((group: any) => group.facilityGroupId);
+    if(excludedFacilityGroupIds.length) excludedCondition["fieldValue"] = excludedFacilityGroupIds.join(",")
+
+    Object.entries(appliedFilters.value).map(([type, filters]: any) => {
+      Object.entries(filters as any).map(([filter, value]: any) => {
+        const condition = ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FILTER" && condition.fieldName === filter && condition.operator === (type === "included" ? "in" : "not-in"))
+        if(condition) {
+          condition["fieldValue"] = value.length ? value.join(",") : ""
+        }
+      })
+    })
+
+    return ruleConditions;
+  } else {
+    const conditions = [];
+
+    const includedFacilityGroupIds = formData.value.selectedFacilityGroups.included.map((group: any) => group.facilityGroupId)  
     conditions.push({
       "ruleId": ruleId,
       "conditionTypeEnumId": "ENTCT_ATP_FAC_GROUPS",
-      "fieldName": "facilities",
+      "fieldName": "facilityGroups",
       "operator": "in",
-      "fieldValue": includedFacilityGroupIds.length > 1 ? includedFacilityGroupIds.join(",") : includedFacilityGroupIds[0],
+      "fieldValue": includedFacilityGroupIds ? includedFacilityGroupIds.join(",") : "",
       "multiValued": "Y"
     })
-  }
 
-  const excludedFacilityGroupIds = formData.value.selectedFacilityGroups.excluded.map((group: any) => group.facilityGroupId)
-  if(excludedFacilityGroupIds?.length) {
+    const excludedFacilityGroupIds = formData.value.selectedFacilityGroups.excluded.map((group: any) => group.facilityGroupId)
     conditions.push({
       "ruleId": ruleId,
       "conditionTypeEnumId": "ENTCT_ATP_FAC_GROUPS",
-      "fieldName": "facilities",
+      "fieldName": "facilityGroups",
       "operator": "not-in",
-      "fieldValue": excludedFacilityGroupIds.length > 1 ? excludedFacilityGroupIds.join(",") : excludedFacilityGroupIds[0],
+      "fieldValue": excludedFacilityGroupIds.length ? excludedFacilityGroupIds.join(",") : "",
       "multiValued": "Y"
     })
-  }
 
-  Object.entries(appliedFilters.value).map(([type, filters]: any) => {
-    Object.entries(filters as any).map(([filter, value]: any) => {
-      if(value.length) {
+    Object.entries(appliedFilters.value).map(([type, filters]: any) => {
+      Object.entries(filters as any).map(([filter, value]: any) => {
         conditions.push({
           "ruleId": ruleId,
           "conditionTypeEnumId": "ENTCT_ATP_FILTER",
           "fieldName": filter,
           "operator": type === "included" ? "in" : "not-in",
-          "fieldValue": value.length > 1 ? value.join(",") : value[0],
+          "fieldValue": value.length ? value.join(",") : "",
           "multiValued": "Y"
         })
-      }
+      })
     })
-  })
 
-  return conditions;
+    return conditions;
+  }
 }
 
 async function createRule() {
-  if(!formData.value.ruleName.trim() || !formData.value.safetyStock || !formData.value.selectedFacilityGroups.included.length) {
-    showToast(translate("Please fill in all the required fields."))
-    return;
-  }
-
-  if(formData.value.safety < 0) {
-    showToast(translate("Safety stock should be greater than or equal to 0."));
-    return;
-  }
+  if(!isRuleValid()) return;
 
   emitter.emit("presentLoader");
 
@@ -245,6 +304,39 @@ async function createRule() {
     showToast(translate("Failed to create rule."))
   }
   emitter.emit("dismissLoader");
+}
+
+async function updateRule() {
+  if(!isRuleValid()) return;
+
+  try {
+    await RuleService.updateRule({
+      ...currentRule.value,
+      "ruleName": formData.value.ruleName,
+      "ruleConditions": generateRuleConditions(props.ruleId),
+      "ruleActions": generateRuleActions(props.ruleId)
+    }, props.ruleId);
+    showToast(translate("Rule updated successfully."))
+    store.dispatch("rule/clearRuleState")
+    store.dispatch("util/clearAppliedFilters")
+    router.push("/safety-stock");
+  } catch(err: any) {
+    logger.error(err);
+  }
+}
+
+function isRuleValid() {
+  if(!formData.value.ruleName.trim() || !formData.value.safetyStock || !formData.value.selectedFacilityGroups.included.length) {
+    showToast(translate("Please fill in all the required fields."))
+    return false;
+  }
+
+  if(formData.value.safety < 0) {
+    showToast(translate("Safety stock should be greater than or equal to 0."));
+    return false;
+  }
+
+  return true
 }
 
 function validateSafetyStock(event: any) {

@@ -35,69 +35,69 @@
           <template v-if="selectedPage.path === '/threshold' || selectedSegment === 'RG_PICKUP_CHANNEL' || selectedSegment === 'RG_SHIPPING_CHANNEL'">
             <ion-item-divider color="light">
               <ion-label>{{ translate("Channels") }}</ion-label>
-              <ion-button slot="end" fill="clear" color="medium" @click="openSelectConfigFacilitiesModal()">
-                <ion-icon :icon="optionsOutline" slot="icon-only" />
-              </ion-button>
             </ion-item-divider>
 
-            <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FACILITIES')" lines="none">
+            <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FACILITIES')" lines="full">
               <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
               <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FACILITIES") }}</ion-label>
             </ion-item>
           </template>
-
+          
           <template v-else>
             <ion-item-divider color="light">
               <ion-label>{{ translate("Facility groups") }}</ion-label>
-              <ion-button slot="end" fill="clear" color="medium" @click="openUpdateFacilityGroupModal()">
-                <ion-icon :icon="optionsOutline" slot="icon-only" />
-              </ion-button>
             </ion-item-divider>
-
+            
             <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FAC_GROUPS', 'facilityGroups', 'in')">
               <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
               <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FAC_GROUPS", "facilityGroups", "in") }}</ion-label>
             </ion-item>
-            <ion-item lines="none" v-if="isRuleConditionAvailable('ENTCT_ATP_FAC_GROUPS', 'facilityGroups', 'not-in')">
+            <ion-item lines="full" v-if="isRuleConditionAvailable('ENTCT_ATP_FAC_GROUPS', 'facilityGroups', 'not-in')">
               <ion-icon slot="start" :icon="closeCircleOutline"/>
               <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FAC_GROUPS", "facilityGroups", "not-in") }}</ion-label>
             </ion-item>
           </template>
 
-          <ion-item-divider color="light">
-            <ion-label>{{ translate("Product tags") }}</ion-label>
-            <ion-button slot="end" fill="clear" color="medium" @click="openUpdateProductFiltersModal('tags', 'tagsFacet', 'tags')">
-              <ion-icon :icon="optionsOutline" slot="icon-only" />
-            </ion-button>
-          </ion-item-divider>
+          <template v-if="areProductFiltersSelected()">
+            <ion-item-divider color="light">
+              <ion-label>{{ translate("Product tags") }}</ion-label>
+            </ion-item-divider>
 
-          <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'tags', 'in')">
-            <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
-            <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FILTER", "tags", "in") }}</ion-label>
-          </ion-item>
-          <ion-item lines="none" v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'tags', 'not-in')">
-            <ion-icon slot="start" :icon="closeCircleOutline"/>
-            <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FILTER", "tags", "not-in") }}</ion-label>
-          </ion-item>
+            <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'tags', 'in')">
+              <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
+              <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FILTER", "tags", "in") }}</ion-label>
+            </ion-item>
+            <ion-item lines="none" v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'tags', 'not-in')">
+              <ion-icon slot="start" :icon="closeCircleOutline"/>
+              <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FILTER", "tags", "not-in") }}</ion-label>
+            </ion-item>
 
-          <ion-item-divider color="light">
-            <ion-label>{{ translate("Product features") }}</ion-label>
-            <ion-button slot="end" fill="clear" color="medium"  @click="openUpdateProductFiltersModal('product features', 'productFeaturesFacet', 'productFeatures')">
-              <ion-icon :icon="optionsOutline" slot="icon-only" />
-            </ion-button>
-          </ion-item-divider>
+            <ion-item-divider color="light">
+              <ion-label>{{ translate("Product features") }}</ion-label>
+            </ion-item-divider>
 
-          <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'productFeatures', 'in')">
-            <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
-            <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FILTER", "productFeatures", "in") }}</ion-label>
-          </ion-item>
-          <ion-item lines="full" v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'productFeatures', 'not-in')">
-            <ion-icon slot="start" :icon="closeCircleOutline"/>
-            <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FILTER", "productFeatures", "not-in") }}</ion-label>
-          </ion-item>
+            <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'productFeatures', 'in')">
+              <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
+              <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FILTER", "productFeatures", "in") }}</ion-label>
+            </ion-item>
+            <ion-item lines="full" v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'productFeatures', 'not-in')">
+              <ion-icon slot="start" :icon="closeCircleOutline"/>
+              <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FILTER", "productFeatures", "not-in") }}</ion-label>
+            </ion-item>
+          </template>
+          <template v-else>
+            <ion-item-divider color="light">
+              <ion-label>{{ translate("Products") }}</ion-label>
+            </ion-item-divider>
+
+            <ion-item lines="full">
+              <ion-icon slot="start" :icon="shirtOutline"/>
+              <ion-label class="ion-text-wrap">{{ translate("All products selected.") }}</ion-label>
+            </ion-item>
+          </template>
 
           <div class="actions">
-            <ion-button @click="editRuleName()" size="default" fill="clear">{{ translate("Edit name") }}</ion-button>
+            <ion-button @click="editRule()" size="default" fill="clear">{{ translate("Edit rule") }}</ion-button>
             <ion-button @click="archiveRule()" color="medium" fill="clear" slot="end">
               <ion-icon :icon="archiveOutline" slot="icon-only"/>
             </ion-button>
@@ -109,18 +109,15 @@
 </template>
 
 <script setup lang="ts">
-import { IonAccordion, IonAccordionGroup, IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonChip, IonIcon, IonItem, IonItemDivider, IonLabel, IonList, IonReorder, IonToggle, alertController, modalController } from '@ionic/vue';
+import { IonAccordion, IonAccordionGroup, IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonChip, IonIcon, IonItem, IonItemDivider, IonLabel, IonList, IonReorder, IonToggle, alertController } from '@ionic/vue';
 import { computed, defineProps, onMounted, ref } from 'vue';
-import { archiveOutline, checkmarkDoneCircleOutline, closeCircleOutline, globeOutline, optionsOutline, pulseOutline, sendOutline, storefrontOutline } from 'ionicons/icons';
+import { archiveOutline, checkmarkDoneCircleOutline, chevronDownOutline, chevronUpOutline, closeCircleOutline, globeOutline, pulseOutline, sendOutline, shirtOutline, storefrontOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
 import { translate } from '@/i18n';
 import { RuleService } from '@/services/RuleService';
 import { useStore } from 'vuex';
 import { showToast } from '@/utils';
 import logger from '@/logger';
-import SelectConfigFacilitiesModal from '@/components/SelectConfigFacilitiesModal.vue';
-import UpdateProductFiltersModal from '@/components/UpdateProductFiltersModal.vue';
-import UpdateFacilityGroupModal from '@/components/UpdateFacilityGroupModal.vue';
 import emitter from '@/event-bus';
 
 const router = useRouter();
@@ -263,48 +260,6 @@ async function editSafetyStock() {
   await alert.present()
 }
 
-async function editRuleName() {
-  const alert = await alertController.create({
-    header: translate("Edit name"),
-    inputs: [{
-      name: "name",
-      placeholder: translate("Name"),
-      type: "text",
-      value: props.rule.ruleName.trim()
-    }],
-    buttons: [{
-      text: translate('Cancel'),
-      role: "cancel"
-    },
-    {
-      text: translate('Update'),
-      handler: async(data) => {
-        if(data.name.trim()) {
-          emitter.emit("presentLoader");
-          const rule = JSON.parse(JSON.stringify(props.rule))
-          rule.ruleName = data.name
-
-          try {
-            await RuleService.updateRule(rule, props.rule.ruleId)
-            showToast(translate("Rule name updated successfully."))
-            await store.dispatch('rule/updateRuleData', { rule })
-            alertController.dismiss()
-          } catch(err: any) {
-            logger.error(err)
-            showToast(translate("Failed to update rule name."))
-          }
-          emitter.emit("dismissLoader");
-        } else {
-          showToast(translate("Rule name can't be empty."))
-          return false;
-        }
-      }
-    }]
-  })
-
-  await alert.present()
-}
-
 function getRuleConditions(conditionTypeEnumId: string, fieldName?: string, operator? : string) {
   if(!props.rule.ruleConditions) return;
 
@@ -365,51 +320,13 @@ async function archiveRule() {
   return alert.present();
 }
 
-function getSelectedFacilities() {
-  const condition = props.rule.ruleConditions?.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FACILITIES")
-  return (condition && condition.fieldValue) ? condition.fieldValue.split(",") : []
-}
-
-async function openSelectConfigFacilitiesModal() {
-  const modal = await modalController.create({
-    component: SelectConfigFacilitiesModal,
-    componentProps: {
-      selectedFacilities: getSelectedFacilities(),
-      rule: props.rule
-    },
-  })
-
-  modal.present()
-}
-
-async function openUpdateFacilityGroupModal() {
-  const modal = await modalController.create({
-    component: UpdateFacilityGroupModal,
-    componentProps: {
-      rule: props.rule
-    },
-  })
-
-  modal.present()
-}
-
 function isRuleConditionAvailable(conditionTypeEnumId: string, fieldName?: string, operator? : string) {
   if(fieldName) return props.rule.ruleConditions?.find((condition: any) => condition.conditionTypeEnumId === conditionTypeEnumId && condition.fieldName === fieldName && condition.operator === operator)?.fieldValue
   else return props.rule.ruleConditions?.find((condition: any) => condition.conditionTypeEnumId === conditionTypeEnumId)?.fieldValue
 }
 
-async function openUpdateProductFiltersModal(label: string, facetToSelect: string, searchfield: string) {
-  const modal = await modalController.create({
-    component: UpdateProductFiltersModal,
-    componentProps: {
-      label,
-      facetToSelect,
-      searchfield,
-      rule: props.rule
-    },
-  })
-
-  modal.present()
+function areProductFiltersSelected() {
+  return props.rule.ruleConditions.some((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FILTER" && condition.fieldValue);
 }
 
 async function updateRulePickup(event: any) {
@@ -454,6 +371,25 @@ async function updateRuleShipping(event: any) {
     showToast(translate("Failed to update rule brokering."))
   }
   emitter.emit("dismissLoader");
+}
+
+function editRule() {
+  let path = ""
+  if(selectedPage.value.path === "/threshold") {
+    path = `update-threshold/${props.rule.ruleId}`
+  } else if(selectedPage.value.path === "/safety-stock") {
+    path = `update-safety-stock/${props.rule.ruleId}`
+  } else if(selectedPage.value.path === "/store-pickup") {
+    path = `update-store-pickup/${props.rule.ruleId}`
+  } else if(selectedPage.value.path === "/shipping") {
+    path = `update-shipping/${props.rule.ruleId}`
+  }
+
+  if(props.selectedSegment) {
+    router.push({ path, query: { groupTypeEnumId: props.selectedSegment } });
+  } else {
+    router.push(path)
+  }
 }
 </script>
 
