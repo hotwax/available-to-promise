@@ -35,13 +35,13 @@
 </template>
 
 <script setup lang="ts">
-import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonMenuButton, IonPage, IonReorderGroup, IonTitle, IonToolbar, onIonViewWillEnter } from '@ionic/vue';
+import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonMenuButton, IonPage, IonReorderGroup, IonTitle, IonToolbar, onIonViewDidLeave, onIonViewWillEnter } from '@ionic/vue';
 import { addOutline, saveOutline, balloonOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue';
 import { useRouter } from "vue-router";
 import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
 import { useStore } from 'vuex';
-import { computed, onUnmounted, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { translate } from '@/i18n';
 import emitter from '@/event-bus';
 import { RuleService } from '@/services/RuleService';
@@ -60,8 +60,9 @@ onIonViewWillEnter(async() => {
   emitter.on("productStoreOrConfigChanged", fetchRules);
 })
 
-onUnmounted(() => {
+onIonViewDidLeave(() => {
   emitter.off("productStoreOrConfigChanged", fetchRules);
+  store.dispatch("rule/updateIsReorderActive", false)
 })
 
 async function fetchRules() {

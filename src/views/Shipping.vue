@@ -67,8 +67,8 @@
 </template>
 
 <script setup lang="ts">
-import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, IonLabel, IonMenuButton, IonPage, IonReorderGroup, IonSegment, IonSegmentButton, IonTitle, IonToolbar, onIonViewWillEnter } from '@ionic/vue';
-import { computed, onUnmounted, ref } from 'vue';
+import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, IonLabel, IonMenuButton, IonPage, IonReorderGroup, IonSegment, IonSegmentButton, IonTitle, IonToolbar, onIonViewDidLeave, onIonViewWillEnter } from '@ionic/vue';
+import { computed, ref } from 'vue';
 import { addOutline, balloonOutline, saveOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue'
 import { translate } from '@/i18n';
@@ -100,8 +100,9 @@ onIonViewWillEnter(async() => {
   emitter.on("productStoreOrConfigChanged", fetchRules);
 })
 
-onUnmounted(() => {
+onIonViewDidLeave(() => {
   emitter.off("productStoreOrConfigChanged", fetchRules);
+  store.dispatch("rule/updateIsReorderActive", false)
 })
 
 async function fetchRules() {
