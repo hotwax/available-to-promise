@@ -123,12 +123,13 @@ import emitter from '@/event-bus';
 const router = useRouter();
 const store = useStore();
 
-const props = defineProps(["selectedSegment", "rule", "ruleIndex"])
+const props = defineProps(["rule", "ruleIndex"])
 const total = computed(() => store.getters["rule/getTotalRulesCount"])
 const configFacilities = computed(() => store.getters["util/getConfigFacilities"])
 const facilityGroups = computed(() => store.getters["util/getFacilityGroups"])
 const rules = computed(() => store.getters["rule/getRules"]);
 const isReorderActive = computed(() => store.getters["rule/isReorderActive"]);
+const selectedSegment = computed(() => store.getters["util/getSelectedSegment"])
 
 const selectedPage = ref({
   path: '',
@@ -389,8 +390,8 @@ function editRule() {
     path = `update-shipping/${props.rule.ruleId}`
   }
 
-  if(props.selectedSegment) {
-    router.push({ path, query: { groupTypeEnumId: props.selectedSegment } });
+  if(selectedSegment.value) {
+    router.push({ path, query: { groupTypeEnumId: selectedSegment.value } });
   } else {
     router.push(path)
   }

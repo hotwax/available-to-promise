@@ -48,7 +48,7 @@
             </ion-item>
             <ion-card-content>
               <ion-chip outline v-for="group in formData.selectedFacilityGroups['included']" :key="group.facilityGroupId">
-                {{ group.facilityGroupName }}
+                {{ group.facilityGroupName ? group.facilityGroupName : group.facilityGroupId }}
                 <ion-icon :icon="closeCircle" @click="removeFacilityGroups(group.facilityGroupId, 'included')" />
               </ion-chip>
             </ion-card-content>
@@ -64,7 +64,7 @@
             </ion-item>
             <ion-card-content>
               <ion-chip outline v-for="group in formData.selectedFacilityGroups['excluded']" :key="group.facilityGroupId">
-                {{ group.facilityGroupName }}
+                {{ group.facilityGroupName ? group.facilityGroupName : group.facilityGroupId }}
                 <ion-icon :icon="closeCircle" @click="removeFacilityGroups(group.facilityGroupId, 'excluded')" />
               </ion-chip>
             </ion-card-content>
@@ -80,7 +80,7 @@
           <ion-card v-for="facility in configFacilities" :key="facility.facilityId" @click="toggleFacilitySelection(facility.facilityId)" button>
             <ion-card-header>
               <div>
-                <ion-card-title>{{ facility.facilityName }}</ion-card-title>
+                <ion-card-title>{{ facility.facilityName ? facility.facilityName : facility.facilityId }}</ion-card-title>
                 <ion-card-subtitle>{{ facility.facilityId }}</ion-card-subtitle>
               </div>
               <ion-checkbox :checked="isFacilitySelected(facility.facilityId)" />
