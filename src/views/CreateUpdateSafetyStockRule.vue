@@ -35,7 +35,7 @@
         <h1>{{ translate("Facilities") }}</h1>
       </div>
 
-      <section>
+      <section v-if="facilityGroups.length">
         <ion-card>
           <ion-item lines="none">
             <ion-label>{{ translate("Included") }} <ion-text color="danger">*</ion-text></ion-label>
@@ -68,12 +68,15 @@
           </ion-card-content>
         </ion-card>
       </section>
+      <div v-else class="empty-state">
+        <ion-note>{{ translate("No facility group found for selected product store. Either change the product store or associate facility groups with the product store.") }}</ion-note>
+      </div>
 
       <ProductFilters />
     </ion-content>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button @click="currentRule.ruleId ? updateRule() : createRule()">
+      <ion-fab-button :disabled="!facilityGroups.length" @click="currentRule.ruleId ? updateRule() : createRule()">
         <ion-icon :icon="saveOutline" />
       </ion-fab-button>
     </ion-fab>
@@ -81,7 +84,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonPage, IonText, IonTitle, IonToolbar, modalController, onIonViewWillEnter, onIonViewWillLeave } from '@ionic/vue';
+import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonNote, IonPage, IonText, IonTitle, IonToolbar, modalController, onIonViewWillEnter, onIonViewWillLeave } from '@ionic/vue';
 import { addCircleOutline, closeCircle, saveOutline } from 'ionicons/icons'
 import { translate } from "@/i18n";
 import ProductFilters from '@/components/ProductFilters.vue';
@@ -115,7 +118,8 @@ const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"
 const facilityGroups = computed(() => store.getters["util/getFacilityGroups"])
 
 onIonViewWillEnter(async () => {
-  await store.dispatch("util/fetchFacilityGroups");
+  fetchStoreConfig();
+  emitter.on("productStoreOrConfigChanged", fetchStoreConfig);
 
   if(props.ruleId) {
     try {
@@ -166,7 +170,18 @@ onIonViewWillLeave(() => {
     }
   }
   store.dispatch("util/clearAppliedFilters")
+  emitter.off("productStoreOrConfigChanged", fetchStoreConfig);
 })
+
+async function fetchStoreConfig() {
+  emitter.emit("presentLoader");
+  await store.dispatch("util/fetchFacilityGroups")
+  formData.value.selectedFacilityGroups = {
+    included: [],
+    excluded: []
+  }
+  emitter.emit("dismissLoader");
+}
 
 async function openProductFacilityGroupModal(type: string) {
   const modal = await modalController.create({
@@ -347,3 +362,9 @@ function removeFacilityGroups(facilityGroupId: any, type: string) {
   formData.value.selectedFacilityGroups[type] = formData.value.selectedFacilityGroups[type].filter((group: any) => group.facilityGroupId !== facilityGroupId)
 }
 </script>
+
+<style scoped>
+.empty-state {
+  align-items: start;
+}
+</style>

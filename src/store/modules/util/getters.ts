@@ -18,6 +18,9 @@ const getters: GetterTree<UtilState, RootState> = {
   isFacilitiesScrollable(state) {
     return state.facilities.isScrollable
   },
+  getSelectedSegment(state) {
+    return state.selectedSegment
+  },
 }
 
 export default getters;

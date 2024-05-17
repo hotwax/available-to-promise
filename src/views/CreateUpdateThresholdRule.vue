@@ -46,14 +46,14 @@
         </ion-card>
       </section>
       <div v-else class="empty-state">
-        <ion-note>{{ translate("No channel found for current product store.") }}</ion-note>
+        <ion-note>{{ translate("No channel found for selected product store. Either change the product store or associate channels with the product store.") }}</ion-note>
       </div>
 
       <ProductFilters />
     </ion-content>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button @click="currentRule.ruleId? updateRule() : createThresholdRule()">
+      <ion-fab-button :disabled="!configFacilities.length" @click="currentRule.ruleId? updateRule() : createThresholdRule()">
         <ion-icon :icon="saveOutline" />
       </ion-fab-button>
     </ion-fab>
@@ -82,15 +82,6 @@ const formData = ref({
 const currentRule = ref({}) as any;
 const props = defineProps(["ruleId"]);
 
-onIonViewWillLeave(() => {
-  formData.value = {
-    ruleName: '',
-    threshold: '',
-    selectedConfigFacilites: []
-  }
-  store.dispatch("util/clearAppliedFilters")
-})
-
 const configFacilities = computed(() => store.getters["util/getConfigFacilities"])
 const appliedFilters = computed(() => store.getters["util/getAppliedFilters"]);
 const rules = computed(() => store.getters["rule/getRules"]);
@@ -98,7 +89,9 @@ const total = computed(() => store.getters["rule/getTotalRulesCount"])
 const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
 
 onIonViewWillEnter(async () => {
-  await store.dispatch("util/fetchConfigFacilities");
+  fetchStoreConfig();
+  emitter.on("productStoreOrConfigChanged", fetchStoreConfig);
+
   if(props.ruleId) {
     try {
       const resp = await RuleService.fetchRules({ ruleId: props.ruleId })
@@ -132,6 +125,23 @@ onIonViewWillEnter(async () => {
     }
   }
 })
+
+onIonViewWillLeave(() => {
+  formData.value = {
+    ruleName: '',
+    threshold: '',
+    selectedConfigFacilites: []
+  }
+  store.dispatch("util/clearAppliedFilters")
+  emitter.off("productStoreOrConfigChanged", fetchStoreConfig);
+})
+
+async function fetchStoreConfig() {
+  emitter.emit("presentLoader");
+  await store.dispatch("util/fetchConfigFacilities");
+  formData.value.selectedConfigFacilites = [];
+  emitter.emit("dismissLoader");
+}
 
 function toggleFacilitySelection(facilityId: any) {
   if(isFacilitySelected(facilityId)) {

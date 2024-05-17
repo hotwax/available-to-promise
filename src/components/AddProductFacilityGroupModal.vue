@@ -19,7 +19,7 @@
       <ion-item v-for="group in facilityGroups" :key="group.facilityGroupId"  @click="!isAlreadyApplied(group.facilityGroupId) ? updateSelectedGroups(group) : null">
         <ion-label v-if="isAlreadyApplied(group.facilityGroupId)">{{ group.facilityGroupName }}</ion-label>
         <ion-checkbox v-if="!isAlreadyApplied(group.facilityGroupId)" :checked="isAlreadySelected(group.facilityGroupId)">
-          {{ group.facilityGroupName }}
+          {{ group.facilityGroupName ? group.facilityGroupName : group.facilityGroupId }}
         </ion-checkbox>
         <ion-note v-else slot="end" color="danger">{{ type === 'included' ? translate("excluded") : translate("included") }}</ion-note>
       </ion-item>

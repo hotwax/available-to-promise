@@ -127,6 +127,10 @@ const actions: ActionTree<UtilState, RootState> = {
 
   async updateFacilities({ commit, state }, payload) {
     commit(types.UTIL_FACILITY_LIST_UPDATED , { facilities: payload.facilities, isScrollable: state.facilities.isScrollable });
+  },
+
+  async updateSelectedSegment({ commit }, payload) {
+    commit(types.UTIL_SELECTED_SEGMENT_UPDATED , payload);
   }
 }
 

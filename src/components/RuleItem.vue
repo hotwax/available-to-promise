@@ -152,7 +152,7 @@ async function editThreshold() {
       attributes: {
         // Added check to not allow mainly .(period) and other special characters to be entered in the alert input
         onkeydown: ($event: any) => {
-          if(/[`!@#$%^&*()_+\-=\\|,.<>?~^e]/.test($event.key)) $event.preventDefault();
+          if(/[`!@#$%^&*()_+\-=\\|,.<>?~^e]/.test($event.key) && event.key !== 'Backspace') $event.preventDefault();
         }
       }
     }],
@@ -167,6 +167,8 @@ async function editThreshold() {
           showToast(translate("Threshold should be greater than or equal to 0."));
           return false;
         }
+
+        if(data.threshold === props.rule.ruleActions[0].fieldValue) return;
 
         emitter.emit("presentLoader");
 
@@ -228,6 +230,8 @@ async function editSafetyStock() {
           return false;
         }
 
+        if(data.safetyStock === props.rule.ruleActions[0].fieldValue) return;
+
         emitter.emit("presentLoader");
 
         const rule = JSON.parse(JSON.stringify(props.rule))
@@ -269,7 +273,7 @@ function getRuleConditions(conditionTypeEnumId: string, fieldName?: string, oper
       let facilityGroupIds = condition?.fieldValue.split(",")
         facilityGroupIds = facilityGroupIds.map((id: string) => {
           let group = facilityGroups.value.find((group: any) => group.facilityGroupId === id)
-          return group ? group.facilityGroupName : id
+          return group?.facilityGroupName ? group.facilityGroupName : id
         })
         return facilityGroupIds.join(", ")
     } else {
@@ -282,7 +286,7 @@ function getRuleConditions(conditionTypeEnumId: string, fieldName?: string, oper
       let facilities = condition?.fieldValue.split(",")
       facilities = facilities.map((id: string) => {
         let facility = configFacilities.value.find((facility: any) => facility.facilityId === id)
-        return facility ? facility.facilityName : id
+        return facility?.facilityName ? facility.facilityName : id
       })
       return facilities.join(", ")
     }

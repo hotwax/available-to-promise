@@ -5,7 +5,7 @@
         <ion-menu-button slot="start" />
         <ion-title slot="start">{{ translate("Inventory channels") }}</ion-title>
 
-        <ion-segment v-model="selectedSegment" slot="end">
+        <ion-segment :value="selectedSegment" @ionChange="updateSegment($event)" slot="end">
           <ion-segment-button value="channels">
             <ion-label>{{ translate("Channels") }}</ion-label>
           </ion-segment-button>
@@ -118,7 +118,7 @@
       </main>
     </ion-content>
 
-    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab v-if="selectedSegment === 'channels'" vertical="bottom" horizontal="end" slot="fixed">
       <ion-fab-button @click="openCreateGroupModal()">
         <ion-icon :icon="addOutline" />
       </ion-fab-button>
@@ -127,8 +127,8 @@
 </template>
 
 <script setup lang="ts">
-import { IonBadge, IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonItemDivider, IonLabel, IonList, IonMenuButton, IonPage, IonSegment, IonSegmentButton, IonSelect, IonSelectOption, IonTitle, IonToolbar, modalController, popoverController } from '@ionic/vue';
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { IonBadge, IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonItemDivider, IonLabel, IonList, IonMenuButton, IonPage, IonSegment, IonSegmentButton, IonSelect, IonSelectOption, IonTitle, IonToolbar, modalController, onIonViewWillEnter, onIonViewWillLeave, popoverController } from '@ionic/vue';
+import { computed } from 'vue';
 import { addOutline, albumsOutline, businessOutline, ellipsisVerticalOutline, globeOutline, optionsOutline, storefrontOutline, timeOutline, timerOutline } from 'ionicons/icons';
 import { translate } from '@/i18n';
 import ShopActionsPopover from '@/components/ShopActionsPopover.vue'
@@ -141,21 +141,21 @@ import emitter from '@/event-bus';
 
 const store = useStore();
 
-const selectedSegment = ref("channels")
-
 const inventoryChannels = computed(() => store.getters["channel/getInventoryChannels"])
+const selectedSegment = computed(() => store.getters["util/getSelectedSegment"])
 
-onMounted(async() => {
+onIonViewWillEnter(async() => {
   fetchInventoryChannels()
   emitter.on("productStoreOrConfigChanged", fetchInventoryChannels);
 })
 
-onUnmounted(() => {
+onIonViewWillLeave(() => {
   emitter.off("productStoreOrConfigChanged", fetchInventoryChannels);
 })
 
 async function fetchInventoryChannels() {
   emitter.emit("presentLoader");
+  if(!selectedSegment.value || (selectedSegment.value !== 'channels' && selectedSegment.value !== 'publish')) store.dispatch("util/updateSelectedSegment", "channels");
   await Promise.allSettled([store.dispatch("channel/fetchInventoryChannels"), store.dispatch("util/fetchConfigFacilities")]);
   emitter.emit("dismissLoader");
 }
@@ -213,6 +213,10 @@ function getFacilityCount(channel: any, facilityTypeId: string) {
   } else {
     return channel.selectedFacilities.filter((facility: any) => facility.facilityTypeId === "WAREHOUSE" || facility.facilityTypeId === "OUTLET_WAREHOUSE").length;
   }
+}
+
+function updateSegment(event: any) {
+  store.dispatch("util/updateSelectedSegment", event.detail.value);
 }
 
 </script>
