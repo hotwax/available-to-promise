@@ -73,28 +73,28 @@
         {
           title: "Threshold",
           url: "/threshold",
-          childRoutes: ["/create-threshold"],
+          childRoutes: ["/create-threshold", "/update-threshold/"],
           iosIcon: globeOutline,
           mdIcon: globeOutline
         },
         {
           title: "Safety stock",
           url: "/safety-stock",
-          childRoutes: ["/create-safety-stock"],
+          childRoutes: ["/create-safety-stock", "/update-safety-stock/"],
           iosIcon: pulseOutline,
           mdIcon: pulseOutline
         },
         {
           title: "Store pickup",
           url: "/store-pickup",
-          childRoutes: ["/create-store-pickup"],
+          childRoutes: ["/create-store-pickup", "update-store-pickup/"],
           iosIcon: storefrontOutline,
           mdIcon: storefrontOutline
         },
         {
           title: "Shipping",
           url: "/shipping",
-          childRoutes: ["/create-shipping"],
+          childRoutes: ["/create-shipping", "/update-shipping/"],
           iosIcon: sendOutline,
           mdIcon: sendOutline
         },

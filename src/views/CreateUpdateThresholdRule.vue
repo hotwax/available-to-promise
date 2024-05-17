@@ -3,7 +3,7 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-back-button slot="start" default-href="/threshold" />
-        <ion-title>{{ translate("New threshold rule") }}</ion-title>
+        <ion-title>{{ currentRule.ruleId ? translate("Update threshold rule") : translate("New threshold rule") }}</ion-title>
       </ion-toolbar>
     </ion-header>
     
@@ -53,7 +53,7 @@
     </ion-content>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button :disabled="!configFacilities.length" @click="createThresholdRule()">
+      <ion-fab-button :disabled="!configFacilities.length" @click="currentRule.ruleId? updateRule() : createThresholdRule()">
         <ion-icon :icon="saveOutline" />
       </ion-fab-button>
     </ion-fab>
@@ -61,35 +61,14 @@
 </template>
 
 <script setup lang="ts">
-import {
-  IonBackButton,
-  IonCard,
-  IonCardHeader,
-  IonCardSubtitle,
-  IonCardTitle,
-  IonCheckbox,
-  IonContent,
-  IonFab,
-  IonFabButton,
-  IonHeader,
-  IonIcon,
-  IonInput,
-  IonItem,
-  IonPage,
-  IonNote,
-  IonText,
-  IonTitle,
-  IonToolbar,
-  onIonViewWillEnter,
-  onIonViewWillLeave
-} from '@ionic/vue';
+import { IonBackButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonPage, IonNote, IonText, IonTitle, IonToolbar, onIonViewWillLeave, onIonViewWillEnter } from '@ionic/vue';
 import { saveOutline } from 'ionicons/icons'
 import { translate } from "@/i18n";
 import ProductFilters from '@/components/ProductFilters.vue';
-import { computed, ref } from 'vue';
+import { computed, defineProps, ref } from 'vue';
 import { useStore } from 'vuex';
 import { RuleService } from '@/services/RuleService';
-import { showToast } from '@/utils';
+import { hasError, showToast } from '@/utils';
 import logger from '@/logger';
 import router from '@/router';
 import emitter from '@/event-bus';
@@ -100,6 +79,8 @@ const formData = ref({
   threshold: '',
   selectedConfigFacilites: []
 }) as any;
+const currentRule = ref({}) as any;
+const props = defineProps(["ruleId"]);
 
 const configFacilities = computed(() => store.getters["util/getConfigFacilities"])
 const appliedFilters = computed(() => store.getters["util/getAppliedFilters"]);
@@ -107,9 +88,42 @@ const rules = computed(() => store.getters["rule/getRules"]);
 const total = computed(() => store.getters["rule/getTotalRulesCount"])
 const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
 
-onIonViewWillEnter(async() => {
+onIonViewWillEnter(async () => {
   fetchStoreConfig();
   emitter.on("productStoreOrConfigChanged", fetchStoreConfig);
+
+  if(props.ruleId) {
+    try {
+      const resp = await RuleService.fetchRules({ ruleId: props.ruleId })
+
+      if(!hasError(resp)) {
+        currentRule.value = resp.data[0];
+
+        formData.value.ruleName = currentRule.value.ruleName;
+        formData.value.threshold = currentRule.value.ruleActions[0]?.fieldValue ? currentRule.value.ruleActions[0].fieldValue : ''
+
+        const facilityCondition = currentRule.value.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FACILITIES")
+        formData.value.selectedConfigFacilites = facilityCondition.fieldValue?.split(",");
+
+        const currentAppliedFilters = JSON.parse(JSON.stringify(appliedFilters.value))
+        currentRule.value.ruleConditions.map((condition: any) => {
+          if(condition.conditionTypeEnumId === "ENTCT_ATP_FILTER") {
+            if(condition.operator === "in") {
+              currentAppliedFilters["included"][condition.fieldName] = condition.fieldValue ? condition.fieldValue.split(",") : []
+            } else {
+              currentAppliedFilters["excluded"][condition.fieldName] = condition.fieldValue ? condition.fieldValue.split(",") : []
+            }
+          }
+        })
+
+        await store.dispatch('util/updateAppliedFilters', currentAppliedFilters)
+      } else {
+        throw resp.data
+      }
+    } catch(err: any) {
+      logger.error(err);
+    }
+  }
 })
 
 onIonViewWillLeave(() => {
@@ -138,66 +152,75 @@ function toggleFacilitySelection(facilityId: any) {
 }
 
 function isFacilitySelected(facilityId: any) {
-  return formData.value.selectedConfigFacilites.includes(facilityId)
+  return formData.value.selectedConfigFacilites?.includes(facilityId)
 }
 
 function generateRuleActions(ruleId: string) {
+  if(currentRule.value.ruleId) {
+    const ruleAction = currentRule.value.ruleActions.find((action: any) => action.actionTypeEnumId === "ATP_THRESHOLD")
+    if(ruleAction) {
+      ruleAction.fieldValue = formData.value.threshold ? formData.value.threshold : 0;
+      return [ruleAction];
+    }
+  }
+
   return [{
     "ruleId": ruleId,
     "actionTypeEnumId": "ATP_THRESHOLD",
     "fieldName": "facility-safety-stock",
-    "fieldValue": formData.value.threshold
+    "fieldValue": formData.value.threshold ? formData.value.threshold : 0
   }]
 }
 
 function generateRuleConditions(ruleId: string) {
-  const conditions = [];
-  
-  const selectedFacilites = formData.value.selectedConfigFacilites
-  if(selectedFacilites?.length) {
+  if(currentRule.value.ruleId) {
+    const ruleConditions = JSON.parse(JSON.stringify(currentRule.value.ruleConditions));
+
+    const facilityCondition = ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FACILITIES");
+    if(facilityCondition) facilityCondition["fieldValue"] = formData.value.selectedConfigFacilites.join(",");
+
+    Object.entries(appliedFilters.value).map(([type, filters]: any) => {
+      Object.entries(filters as any).map(([filter, value]: any) => {
+        const condition = ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FILTER" && condition.fieldName === filter && condition.operator === (type === "included" ? "in" : "not-in"))
+        if(condition) {
+          condition["fieldValue"] = value.length ? value.join(",") : ""
+        }
+      })
+    })
+
+    return ruleConditions;
+  } else {
+    const conditions = [];
+
+    const selectedFacilites = formData.value.selectedConfigFacilites
     conditions.push({
       "ruleId": ruleId,
       "conditionTypeEnumId": "ENTCT_ATP_FACILITIES",
       "fieldName": "facilities",
       "operator": "in",
-      "fieldValue": selectedFacilites.length > 1 ? selectedFacilites.join(",") : selectedFacilites[0],
+      "fieldValue": selectedFacilites.length ? selectedFacilites.join(",") : "",
       "multiValued": "Y"
     })
-  }
 
-  Object.entries(appliedFilters.value).map(([type, filters]: any) => {
-    Object.entries(filters as any).map(([filter, value]: any) => {
-      if(value.length) {
+    Object.entries(appliedFilters.value).map(([type, filters]: any) => {
+      Object.entries(filters as any).map(([filter, value]: any) => {
         conditions.push({
           "ruleId": ruleId,
           "conditionTypeEnumId": "ENTCT_ATP_FILTER",
           "fieldName": filter,
           "operator": type === "included" ? "in" : "not-in",
-          "fieldValue": value.length > 1 ? value.join(",") : value[0],
+          "fieldValue": value.length ? value.join(",") : "",
           "multiValued": "Y"
         })
-      }
+      })
     })
-  })
 
-  return conditions;
+    return conditions;
+  }
 }
 
 async function createThresholdRule() {
-  if(!formData.value.ruleName.trim() || !formData.value.threshold) {
-    showToast(translate("Please fill in all the required fields."))
-    return;
-  }
-
-  if(formData.value.threshold < 0){
-    showToast(translate("Threshold should be greater than or equal to 0."))
-    return;
-  }
-
-  if(!formData.value.selectedConfigFacilites.length) {
-    showToast(translate("Please select atleast one config facility."))
-    return;
-  }
+  if(!isRuleValid()) return;
 
   emitter.emit("presentLoader");
 
@@ -236,6 +259,41 @@ async function createThresholdRule() {
     showToast(translate("Failed to create rule."))
   }
   emitter.emit("dismissLoader");
+}
+
+async function updateRule() {
+  if(!isRuleValid()) return;
+
+  try {
+    await RuleService.updateRule({
+      ...currentRule.value,
+      "ruleName": formData.value.ruleName,
+      "ruleConditions": generateRuleConditions(props.ruleId),
+      "ruleActions": generateRuleActions(props.ruleId)
+    }, props.ruleId);
+    showToast(translate("Rule updated successfully."))
+    store.dispatch("rule/clearRuleState")
+    store.dispatch("util/clearAppliedFilters")
+    router.push("/threshold");
+  } catch(err: any) {
+    logger.error(err);
+  }
+}
+
+function isRuleValid() {
+  if(!formData.value.ruleName.trim() || !formData.value.threshold) {
+    showToast(translate("Please fill in all the required fields."))
+    return false;
+  }
+  if(formData.value.threshold < 0){
+    showToast(translate("Threshold should be greater than or equal to 0."))
+    return false;
+  }
+  if(!formData.value.selectedConfigFacilites.length) {
+    showToast(translate("Please select atleast one config facility."))
+    return false;
+  }
+  return true
 }
 
 function validateThreshold(event: any) {

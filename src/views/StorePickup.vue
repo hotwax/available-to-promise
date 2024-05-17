@@ -25,7 +25,9 @@
           <ScheduleRuleItem v-if="rules.length" />
 
           <section>
-            <RuleItem :selectedSegment="selectedSegment" v-for="(rule, ruleIndex) in rules" :rule="rule" :ruleIndex="ruleIndex" :key="rule.ruleId" />
+            <ion-reorder-group :disabled="false" @ionItemReorder="updateReorderingRules($event)">
+              <RuleItem v-for="(rule, ruleIndex) in (isReorderActive ? reorderingRules : rules)" :rule="rule" :ruleIndex="ruleIndex" :key="rule.ruleId" />
+            </ion-reorder-group>
           </section>
         </template>
         <div class="empty-state" v-else>
@@ -54,8 +56,11 @@
       </ion-infinite-scroll>
     </ion-content>
 
-    <ion-fab v-if="selectedSegment !== 'PICKUP_FACILITY'" vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button @click="createStorePickup()">
+    <ion-fab v-if="selectedSegment !== 'PICKUP_FACILITY'" vertical="bottom" horizontal="end" slot="fixed" class="ion-margin">
+      <ion-fab-button :disabled="!rules.length" class="ion-margin-bottom" color="light" @click="isReorderActive ? saveReorder() : activateReordering()">
+        <ion-icon :icon="isReorderActive ? saveOutline : balloonOutline" />
+      </ion-fab-button>
+      <ion-fab-button :disabled="isReorderActive" @click="createStorePickup()">
         <ion-icon :icon="addOutline" />
       </ion-fab-button>
     </ion-fab>
@@ -63,9 +68,9 @@
 </template>
 
 <script setup lang="ts">
-import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, IonLabel, IonMenuButton, IonPage, IonSegment, IonSegmentButton, IonTitle, IonToolbar, onIonViewWillEnter, onIonViewWillLeave } from '@ionic/vue';
+import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, IonLabel, IonMenuButton, IonPage, IonReorderGroup, IonSegment, IonSegmentButton, IonTitle, IonToolbar, onIonViewDidLeave, onIonViewWillEnter } from '@ionic/vue';
 import { computed, ref } from 'vue';
-import { addOutline } from 'ionicons/icons';
+import { addOutline, balloonOutline, saveOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue'
 import FacilityItem from '@/components/FacilityItem.vue'
 import { translate } from '@/i18n';
@@ -73,6 +78,8 @@ import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import emitter from '@/event-bus';
+import { doReorder, showToast } from '@/utils';
+import { RuleService } from '@/services/RuleService';
 
 const store = useStore();
 const router = useRouter()
@@ -82,7 +89,9 @@ const rules = computed(() => store.getters["rule/getRules"]);
 const isScrollable = computed(() => store.getters["util/isFacilitiesScrollable"]);
 const facilities = computed(() => store.getters["util/getFacilities"]);
 const selectedSegment = computed(() => store.getters["util/getSelectedSegment"]);
+const isReorderActive = computed(() => store.getters["rule/isReorderActive"]);
 
+const reorderingRules = ref([]);
 const isScrollingEnabled = ref(false);
 const contentRef = ref({}) as any;
 const infiniteScrollRef = ref({}) as any;
@@ -92,8 +101,9 @@ onIonViewWillEnter(async() => {
   emitter.on("productStoreOrConfigChanged", fetchRules);
 })
 
-onIonViewWillLeave(() => {
+onIonViewDidLeave(() => {
   emitter.off("productStoreOrConfigChanged", fetchRules);
+  store.dispatch("rule/updateIsReorderActive", false)
 })
 
 async function fetchRules() {
@@ -147,10 +157,46 @@ async function updateSegment(event: any) {
   if(selectedSegment.value === 'facility') {
     isScrollingEnabled.value = false;
     await fetchFacilities();
+    store.dispatch("rule/updateIsReorderActive", false)
   } else {
-    await store.dispatch('rule/fetchRules', { groupTypeEnumId: selectedSegment.value })
+    store.dispatch("rule/updateIsReorderActive", false)
+    reorderingRules.value = []
+    await store.dispatch('rule/fetchRules', { groupTypeEnumId: selectedSegment.value})
   }
   emitter.emit("dismissLoader");
+}
+
+function activateReordering() {
+  store.dispatch("rule/updateIsReorderActive", true)
+  reorderingRules.value = rules.value;
+}
+
+async function saveReorder() {
+  const diffRules = reorderingRules.value.filter((reorderRule: any) => rules.value.some((rule: any) => rule.ruleId === reorderRule.ruleId && rule.sequenceNum !== reorderRule.sequenceNum))
+  if(!diffRules.length) {
+    store.dispatch("rule/updateIsReorderActive", false)
+    showToast(translate("No sequence has been changed."))
+    return;
+  }
+
+  emitter.emit("presentLoader", { messgae: "Saving changes.." })
+  const responses = await Promise.allSettled(diffRules.map(async (rule: any) => {
+    await RuleService.updateRule(rule, rule.ruleId)
+  }))
+
+  const isFailedToUpdateSomeRule = responses.some((response) => response.status === 'rejected')
+  if(isFailedToUpdateSomeRule) {
+    showToast(translate("Failed to update sequence for some rules."))
+  } else {
+    showToast(translate("Sequence for rules updated successfully."))
+  }
+  emitter.emit("dismissLoader");
+  await store.dispatch('rule/updateRules', { rules: reorderingRules.value })
+  store.dispatch("rule/updateIsReorderActive", false)
+}
+
+function updateReorderingRules(event: any) {
+  reorderingRules.value = doReorder(event, reorderingRules.value)
 }
 
 function createStorePickup() {

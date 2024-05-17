@@ -12,7 +12,8 @@ const userModule: Module<RuleState, RootState> = {
       list: [],
       total: ''
     },
-    ruleGroup: {}
+    ruleGroup: {},
+    isReorderActive: false
   },
   getters,
   actions,
