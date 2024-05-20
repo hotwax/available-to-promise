@@ -12,9 +12,11 @@
           <ion-segment-button value="RG_PICKUP_CHANNEL">
             <ion-label>{{ translate("Product and channel") }}</ion-label>
           </ion-segment-button>
-          <ion-segment-button value="PICKUP_FACILITY">
+          <!-- Hidden Facility segment for now as it is not functionality -->
+          <!-- Todo: add functionality to the Facility segment -->
+          <!-- <ion-segment-button value="PICKUP_FACILITY">
             <ion-label>{{ translate("Facility") }}</ion-label>
-          </ion-segment-button>
+          </ion-segment-button> -->
         </ion-segment>
       </ion-toolbar>
     </ion-header>
