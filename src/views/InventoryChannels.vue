@@ -9,7 +9,8 @@
           <ion-segment-button value="channels">
             <ion-label>{{ translate("Channels") }}</ion-label>
           </ion-segment-button>
-          <ion-segment-button value="publish">
+          <!-- Todo: add functionality to the Publish segment -->
+          <ion-segment-button value="publish" disabled>
             <ion-label>{{ translate("Publish") }}</ion-label>
           </ion-segment-button>
         </ion-segment>
