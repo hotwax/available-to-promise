@@ -22,7 +22,7 @@
                 </ion-input>
               </ion-item>
               <ion-item>
-                <ion-input v-model="formData.threshold" type="number" @keydown="validateThreshold($event)">
+                <ion-input v-model="formData.threshold" type="number" min="0" @keydown="validateThreshold($event)">
                   <div slot="label">{{ translate("Threshold") }} <ion-text color="danger">*</ion-text></div>
                 </ion-input>
               </ion-item>
@@ -290,7 +290,7 @@ function isRuleValid() {
     return false;
   }
   if(!formData.value.selectedConfigFacilites.length) {
-    showToast(translate("Please select atleast one config facility."))
+    showToast(translate("Please select atleast one channel."))
     return false;
   }
   return true
