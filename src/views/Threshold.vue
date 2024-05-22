@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonMenuButton, IonPage, IonReorderGroup, IonTitle, IonToolbar, onIonViewDidLeave, onIonViewWillEnter } from '@ionic/vue';
+import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonMenuButton, IonPage, IonReorderGroup, IonTitle, IonToolbar, onIonViewDidLeave, onIonViewDidEnter } from '@ionic/vue';
 import { addOutline, balloonOutline, saveOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue'
 import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
@@ -55,7 +55,7 @@ const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
 const isReorderActive = computed(() => store.getters["rule/isReorderActive"]);
 const reorderingRules = ref([]);
 
-onIonViewWillEnter(async() => {
+onIonViewDidEnter(async() => {
   fetchRules();
   emitter.on("productStoreOrConfigChanged", fetchRules);
 })
