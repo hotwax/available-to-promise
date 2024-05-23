@@ -68,7 +68,7 @@ import ProductFilters from '@/components/ProductFilters.vue';
 import { computed, defineProps, ref } from 'vue';
 import { useStore } from 'vuex';
 import { RuleService } from '@/services/RuleService';
-import { hasError, showToast } from '@/utils';
+import { generateRuleActions, generateRuleConditions, hasError, showToast } from '@/utils';
 import logger from '@/logger';
 import router from '@/router';
 import emitter from '@/event-bus';
@@ -155,101 +155,6 @@ function isFacilitySelected(facilityId: any) {
   return formData.value.selectedConfigFacilites?.includes(facilityId)
 }
 
-function generateRuleActions(ruleId: string) {
-  if(currentRule.value.ruleId) {
-    const ruleAction = currentRule.value.ruleActions.find((action: any) => action.actionTypeEnumId === "ATP_THRESHOLD")
-    if(ruleAction) {
-      ruleAction.fieldValue = formData.value.threshold ? formData.value.threshold : 0;
-      return [ruleAction];
-    }
-  }
-
-  return [{
-    "ruleId": ruleId,
-    "actionTypeEnumId": "ATP_THRESHOLD",
-    "fieldName": "facility-safety-stock",
-    "fieldValue": formData.value.threshold ? formData.value.threshold : 0
-  }]
-}
-
-function generateRuleConditions(ruleId: string) {
-  const conditions = [];
-
-  const selectedFacilites = formData.value.selectedConfigFacilites
-  conditions.push({
-    "ruleId": ruleId,
-    "conditionTypeEnumId": "ENTCT_ATP_FACILITIES",
-    "fieldName": "facilities",
-    "operator": "in",
-    "fieldValue": selectedFacilites.length ? selectedFacilites.join(",") : "",
-    "multiValued": "Y"
-  })
-
-  Object.entries(appliedFilters.value).map(([type, filters]: any) => {
-    Object.entries(filters as any).map(([filter, value]: any) => {
-      if(value.length) {
-        conditions.push({
-          "ruleId": ruleId,
-          "conditionTypeEnumId": "ENTCT_ATP_FILTER",
-          "fieldName": filter,
-          "operator": type === "included" ? "in" : "not-in",
-          "fieldValue": value.join(","),
-          "multiValued": "Y"
-        })
-      }
-    })
-  })
-
-  return conditions;
-}
-
-/* function generateRuleConditions(ruleId: string) {
-  if(currentRule.value.ruleId) {
-    const ruleConditions = JSON.parse(JSON.stringify(currentRule.value.ruleConditions));
-
-    const facilityCondition = ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FACILITIES");
-    if(facilityCondition) facilityCondition["fieldValue"] = formData.value.selectedConfigFacilites.join(",");
-
-    Object.entries(appliedFilters.value).map(([type, filters]: any) => {
-      Object.entries(filters as any).map(([filter, value]: any) => {
-        const condition = ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FILTER" && condition.fieldName === filter && condition.operator === (type === "included" ? "in" : "not-in"))
-        if(condition) {
-          condition["fieldValue"] = value.length ? value.join(",") : ""
-        }
-      })
-    })
-
-    return ruleConditions;
-  } else {
-    const conditions = [];
-
-    const selectedFacilites = formData.value.selectedConfigFacilites
-    conditions.push({
-      "ruleId": ruleId,
-      "conditionTypeEnumId": "ENTCT_ATP_FACILITIES",
-      "fieldName": "facilities",
-      "operator": "in",
-      "fieldValue": selectedFacilites.length ? selectedFacilites.join(",") : "",
-      "multiValued": "Y"
-    })
-
-    Object.entries(appliedFilters.value).map(([type, filters]: any) => {
-      Object.entries(filters as any).map(([filter, value]: any) => {
-        conditions.push({
-          "ruleId": ruleId,
-          "conditionTypeEnumId": "ENTCT_ATP_FILTER",
-          "fieldName": filter,
-          "operator": type === "included" ? "in" : "not-in",
-          "fieldValue": value.length ? value.join(",") : "",
-          "multiValued": "Y"
-        })
-      })
-    })
-
-    return conditions;
-  }
-} */
-
 async function createThresholdRule() {
   if(!isRuleValid()) return;
 
@@ -277,8 +182,8 @@ async function createThresholdRule() {
 
     await RuleService.updateRule({
       ...params,
-      "ruleConditions": generateRuleConditions(rule.ruleId),
-      "ruleActions": generateRuleActions(rule.ruleId)
+      "ruleConditions": generateRuleConditions(rule.ruleId, "ENTCT_ATP_FACILITIES", appliedFilters.value, formData.value.selectedConfigFacilites),
+      "ruleActions": generateRuleActions(rule.ruleId, "ATP_THRESHOLD", formData.value.threshold, false, [])
     }, rule.ruleId);
 
     showToast(translate("Rule created successfully."))
@@ -296,7 +201,7 @@ async function updateRule() {
   if(!isRuleValid()) return;
 
   const currentRuleConditions = JSON.parse(JSON.stringify(currentRule.value.ruleConditions));
-  const updatedRuleConditions = generateRuleConditions(props.ruleId);
+  const updatedRuleConditions = generateRuleConditions(props.ruleId, "ENTCT_ATP_FACILITIES", appliedFilters.value, formData.value.selectedConfigFacilites);
   const conditionsToRemove = currentRuleConditions.filter((condition: any) => !updatedRuleConditions.some((updatedCondition: any) => condition.conditionTypeEnumId === updatedCondition.conditionTypeEnumId && condition.fieldName === updatedCondition.fieldName && condition.operator === updatedCondition.operator))
 
   updatedRuleConditions.map((updatedCondition: any) => {
@@ -309,7 +214,7 @@ async function updateRule() {
       ...currentRule.value,
       "ruleName": formData.value.ruleName,
       "ruleConditions": updatedRuleConditions,
-      "ruleActions": generateRuleActions(props.ruleId)
+      "ruleActions": generateRuleActions(props.ruleId, "ATP_THRESHOLD", formData.value.threshold, true, currentRule.value.ruleActions)
     }, props.ruleId);
     showToast(translate("Rule updated successfully."))
 
