@@ -45,7 +45,7 @@
       <ion-infinite-scroll
         @ionInfinite="loadMoreFacilities($event)"
         threshold="100px"
-        v-show="isScrollable"
+        v-show="selectedSegment === 'SHIPPING_FACILITY' && isScrollable"
         ref="infiniteScrollRef"
       >
         <ion-infinite-scroll-content

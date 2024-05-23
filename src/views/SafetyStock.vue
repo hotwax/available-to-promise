@@ -67,6 +67,7 @@ onIonViewDidLeave(() => {
 
 async function fetchRules() {
   emitter.emit("presentLoader");
+  store.dispatch("util/updateSelectedSegment", "");
   store.dispatch("rule/updateIsReorderActive", false)
   await Promise.allSettled([store.dispatch('rule/fetchRules', { groupTypeEnumId: 'RG_SAFETY_STOCK', pageSize: 50 }), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilityGroups")]);
   emitter.emit("dismissLoader");
