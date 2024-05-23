@@ -97,7 +97,7 @@
           </template>
 
           <div class="actions">
-            <ion-button @click="editRule()" size="default" fill="clear">{{ translate("Edit rule") }}</ion-button>
+            <ion-button @click="editRule()" fill="clear">{{ translate("Edit rule") }}</ion-button>
             <ion-button @click="archiveRule()" color="medium" fill="clear" slot="end">
               <ion-icon :icon="archiveOutline" slot="icon-only"/>
             </ion-button>
