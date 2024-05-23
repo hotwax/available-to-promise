@@ -3,7 +3,7 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-back-button slot="start" default-href="/threshold" />
-        <ion-title>{{ currentRule.ruleId ? translate("Update threshold rule") : translate("New threshold rule") }}</ion-title>
+        <ion-title>{{ currentRule.ruleId ? translate("Edit threshold rule") : translate("New threshold rule") }}</ion-title>
       </ion-toolbar>
     </ion-header>
     

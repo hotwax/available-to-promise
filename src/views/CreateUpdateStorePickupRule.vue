@@ -3,7 +3,7 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-back-button slot="start" default-href="/store-pickup" />
-        <ion-title>{{ currentRule.ruleId ? translate("Update store pickup rule") : translate("New store pickup rule") }}</ion-title>
+        <ion-title>{{ currentRule.ruleId ? translate("Edit store pickup rule") : translate("New store pickup rule") }}</ion-title>
       </ion-toolbar>
     </ion-header>
     
