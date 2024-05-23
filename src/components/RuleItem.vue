@@ -25,11 +25,11 @@
           </ion-item>
           <ion-item lines="full" v-else-if="selectedPage.path === '/store-pickup'">
             <ion-icon slot="start" :icon="storefrontOutline"/>
-            <ion-toggle :checked="props.rule.ruleActions ? props.rule.ruleActions[0].fieldValue : false" @click.prevent="updateRulePickup($event)">{{ translate(selectedPage.name) }}</ion-toggle>
+            <ion-toggle :checked="props.rule.ruleActions[0].fieldValue === 'Y' ? true : false" @click.prevent="updateRulePickup($event)">{{ translate(selectedPage.name) }}</ion-toggle>
           </ion-item>
           <ion-item lines="full" v-else-if="selectedPage.path === '/shipping'">
             <ion-icon slot="start" :icon="sendOutline"/>
-            <ion-toggle :checked="props.rule.ruleActions ? props.rule.ruleActions[0].fieldValue : false" @click.prevent="updateRuleShipping($event)">{{ translate(selectedPage.name) }}</ion-toggle>
+            <ion-toggle :checked="props.rule.ruleActions[0].fieldValue === 'Y' ? true : false" @click.prevent="updateRuleShipping($event)">{{ translate(selectedPage.name) }}</ion-toggle>
           </ion-item>
 
           <template v-if="selectedPage.path === '/threshold' || selectedSegment === 'RG_PICKUP_CHANNEL' || selectedSegment === 'RG_SHIPPING_CHANNEL'">

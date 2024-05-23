@@ -112,7 +112,7 @@ import { useRouter } from 'vue-router';
 import AddProductFacilityGroupModal from '@/components/AddProductFacilityGroupModal.vue';
 import { useStore } from 'vuex';
 import { RuleService } from '@/services/RuleService';
-import { hasError, showToast } from '@/utils';
+import { generateRuleActions, generateRuleConditions, hasError, showToast } from '@/utils';
 import logger from '@/logger';
 import emitter from '@/event-bus';
 
@@ -156,11 +156,12 @@ onIonViewWillEnter(async () => {
 
         if(selectedSegment.value === "RG_PICKUP_FACILITY") {
           const includedGroups = currentRule.value.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS" && condition.operator === "in")
-          const includedGroupIds = includedGroups.fieldValue ? includedGroups.fieldValue.split(",") : []
+          const includedGroupIds = includedGroups?.fieldValue ? includedGroups.fieldValue.split(",") : []
           formData.value.selectedFacilityGroups.included = facilityGroups.value.filter((group: any) => includedGroupIds.includes(group.facilityGroupId));
           
+          
           const excludedGroups = currentRule.value.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS" && condition.operator === "not-in")
-          const excludedGroupIds = excludedGroups.fieldValue ? excludedGroups.fieldValue.split(",") : []
+          const excludedGroupIds = excludedGroups?.fieldValue ? excludedGroups.fieldValue.split(",") : []
           formData.value.selectedFacilityGroups.excluded = facilityGroups.value.filter((group: any) => excludedGroupIds.includes(group.facilityGroupId));
         } else if(selectedSegment.value === "RG_PICKUP_CHANNEL") {
           const facilityCondition = currentRule.value.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FACILITIES")
@@ -268,8 +269,8 @@ async function createRule() {
     const rule = await RuleService.createRule(params)
     await RuleService.updateRule({
       ...params,
-      "ruleConditions": generateRuleConditions(rule.ruleId),
-      "ruleActions": generateRuleActions(rule.ruleId)
+      "ruleConditions": generateRuleConditions(rule.ruleId, selectedSegment.value === 'RG_PICKUP_FACILITY' ? "ENTCT_ATP_FAC_GROUPS" : "ENTCT_ATP_FACILITIES", appliedFilters.value, selectedSegment.value === 'RG_PICKUP_FACILITY' ? formData.value.selectedFacilityGroups : formData.value.selectedConfigFacilites),
+      "ruleActions": generateRuleActions(rule.ruleId, "ATP_ALLOW_PICKUP", formData.value.isPickupAllowed, false, [])
     }, rule.ruleId);
 
     showToast(translate("Rule created successfully."))
@@ -283,113 +284,31 @@ async function createRule() {
   emitter.emit("dismissLoader");
 }
 
-function generateRuleActions(ruleId: string) {
-  if(currentRule.value.ruleId) {
-    const ruleAction = currentRule.value.ruleActions.find((action: any) => action.actionTypeEnumId === "ATP_ALLOW_PICKUP")
-    if(ruleAction) {
-      ruleAction.fieldValue = formData.value.isPickupAllowed ? 'Y' : 'N';
-      return [ruleAction];
-    }
-  }
-
-  return [{
-    "ruleId": ruleId,
-    "actionTypeEnumId": "ATP_ALLOW_PICKUP",
-    "fieldName": "allow-pickup",
-    "fieldValue": formData.value.isPickupAllowed ? 'Y' : 'N'
-  }]
-}
-
-function generateRuleConditions(ruleId: string) {
-  if(currentRule.value.ruleId) {
-    const ruleConditions = JSON.parse(JSON.stringify(currentRule.value.ruleConditions));
-
-    if(selectedSegment.value === 'RG_PICKUP_FACILITY') {
-      const includedCondition = ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS" && condition.operator === "in");
-      const includedFacilityGroupIds = formData.value.selectedFacilityGroups.included.map((group: any) => group.facilityGroupId);
-      if(includedFacilityGroupIds.length) includedCondition["fieldValue"] = includedFacilityGroupIds.join(",")
-  
-      const excludedCondition = ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS" && condition.operator === "not-in");
-      const excludedFacilityGroupIds = formData.value.selectedFacilityGroups.excluded.map((group: any) => group.facilityGroupId);
-      if(excludedFacilityGroupIds.length) excludedCondition["fieldValue"] = excludedFacilityGroupIds.join(",")
-    } else {
-      const facilityCondition = ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FACILITIES");
-      if(facilityCondition) facilityCondition["fieldValue"] = formData.value.selectedConfigFacilites.join(",");
-    }
-
-    Object.entries(appliedFilters.value).map(([type, filters]: any) => {
-      Object.entries(filters as any).map(([filter, value]: any) => {
-        const condition = ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FILTER" && condition.fieldName === filter && condition.operator === (type === "included" ? "in" : "not-in"))
-        if(condition) {
-          condition["fieldValue"] = value.length ? value.join(",") : ""
-        }
-      })
-    })
-
-    return ruleConditions;
-  } else {
-    const conditions = [];
-
-    if(selectedSegment.value === 'RG_PICKUP_FACILITY') {
-      const includedFacilityGroupIds = formData.value.selectedFacilityGroups.included.map((group: any) => group.facilityGroupId)  
-      conditions.push({
-        "ruleId": ruleId,
-        "conditionTypeEnumId": "ENTCT_ATP_FAC_GROUPS",
-        "fieldName": "facilityGroups",
-        "operator": "in",
-        "fieldValue": includedFacilityGroupIds.length ? includedFacilityGroupIds.join(",") : "",
-        "multiValued": "Y"
-      })
-
-      const excludedFacilityGroupIds = formData.value.selectedFacilityGroups.excluded.map((group: any) => group.facilityGroupId)
-      conditions.push({
-        "ruleId": ruleId,
-        "conditionTypeEnumId": "ENTCT_ATP_FAC_GROUPS",
-        "fieldName": "facilityGroups",
-        "operator": "not-in",
-        "fieldValue": excludedFacilityGroupIds.length ? excludedFacilityGroupIds.join(",") : "",
-        "multiValued": "Y"
-      })
-    } else {
-      const selectedFacilites = formData.value.selectedConfigFacilites
-      conditions.push({
-        "ruleId": ruleId,
-        "conditionTypeEnumId": "ENTCT_ATP_FACILITIES",
-        "fieldName": "facilities",
-        "operator": "in",
-        "fieldValue": selectedFacilites.length ? selectedFacilites.join(",") : "",
-        "multiValued": "Y"
-      })
-    }
-
-    Object.entries(appliedFilters.value).map(([type, filters]: any) => {
-      Object.entries(filters as any).map(([filter, value]: any) => {
-        conditions.push({
-          "ruleId": ruleId,
-          "conditionTypeEnumId": "ENTCT_ATP_FILTER",
-          "fieldName": filter,
-          "operator": type === "included" ? "in" : "not-in",
-          "fieldValue": value.length ? value.join(",") : "",
-          "multiValued": "Y"
-        })
-      })
-    })
-
-    return conditions;
-  }
-}
-
 async function updateRule() {
   if(!isRuleValid()) return;
+
+  const currentRuleConditions = JSON.parse(JSON.stringify(currentRule.value.ruleConditions));
+  const updatedRuleConditions = generateRuleConditions(props.ruleId, selectedSegment.value === 'RG_PICKUP_FACILITY' ? "ENTCT_ATP_FAC_GROUPS" : "ENTCT_ATP_FACILITIES", appliedFilters.value, selectedSegment.value === 'RG_PICKUP_FACILITY' ? formData.value.selectedFacilityGroups : formData.value.selectedConfigFacilites);
+  const conditionsToRemove = currentRuleConditions.filter((condition: any) => !updatedRuleConditions.some((updatedCondition: any) => condition.conditionTypeEnumId === updatedCondition.conditionTypeEnumId && condition.fieldName === updatedCondition.fieldName && condition.operator === updatedCondition.operator))
+
+  updatedRuleConditions.map((updatedCondition: any) => {
+    const current = currentRuleConditions.find((condition: any) => condition.conditionTypeEnumId === updatedCondition.conditionTypeEnumId && condition.fieldName === updatedCondition.fieldName && condition.operator === updatedCondition.operator);
+    if(current) updatedCondition["conditionSeqId"] = current.conditionSeqId;
+  })
 
   try {
     await RuleService.updateRule({
       ...currentRule.value,
       "ruleName": formData.value.ruleName,
-      "ruleConditions": generateRuleConditions(props.ruleId),
-      "ruleActions": generateRuleActions(props.ruleId)
+      "ruleConditions": updatedRuleConditions,
+      "ruleActions": generateRuleActions(props.ruleId, "ATP_ALLOW_PICKUP", formData.value.isPickupAllowed, true, currentRule.value.ruleActions)
     }, props.ruleId);
     showToast(translate("Rule updated successfully."))
+
+    const removeResponses = await Promise.allSettled(conditionsToRemove.map(async (condition: any) => await RuleService.deleteCondition({ ...condition, ruleId: props.ruleId})));
+    const hasFailedResponse = removeResponses.some((response: any) => response.status === 'rejected');
+    if(hasFailedResponse) logger.error("Failed to delete some rule conditions.")
+
     store.dispatch("rule/clearRuleState")
     store.dispatch("util/clearAppliedFilters")
     router.push('/store-pickup');
