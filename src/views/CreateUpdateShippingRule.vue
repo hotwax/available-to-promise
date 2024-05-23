@@ -243,6 +243,7 @@ function isFacilitySelected(facilityId: any) {
 }
 
 async function createRule() {
+  if(!isRuleValid()) return;
 
   emitter.emit("presentLoader");
 
