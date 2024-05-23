@@ -48,13 +48,13 @@
               <ion-label>{{ translate("Facility groups") }}</ion-label>
             </ion-item-divider>
             
-            <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FAC_GROUPS', 'facilityGroups', 'in')">
+            <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FAC_GROUPS', 'facilityGroupId', 'in')">
               <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
-              <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FAC_GROUPS", "facilityGroups", "in") }}</ion-label>
+              <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FAC_GROUPS", "facilityGroupId", "in") }}</ion-label>
             </ion-item>
-            <ion-item lines="full" v-if="isRuleConditionAvailable('ENTCT_ATP_FAC_GROUPS', 'facilityGroups', 'not-in')">
+            <ion-item lines="full" v-if="isRuleConditionAvailable('ENTCT_ATP_FAC_GROUPS', 'facilityGroupId', 'not-in')">
               <ion-icon slot="start" :icon="closeCircleOutline"/>
-              <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FAC_GROUPS", "facilityGroups", "not-in") }}</ion-label>
+              <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FAC_GROUPS", "facilityGroupId", "not-in") }}</ion-label>
             </ion-item>
           </template>
 
@@ -271,7 +271,6 @@ function getRuleConditions(conditionTypeEnumId: string, fieldName?: string, oper
   if(fieldName && operator) {
     const condition = props.rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === conditionTypeEnumId && condition.fieldName === fieldName && condition.operator === operator)
     if(condition && conditionTypeEnumId === 'ENTCT_ATP_FAC_GROUPS') {
-      
       let facilityGroupIds = condition?.fieldValue.split(",")
         facilityGroupIds = facilityGroupIds.map((id: string) => {
           let group = facilityGroups.value.find((group: any) => group.facilityGroupId === id)
