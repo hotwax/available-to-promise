@@ -8,7 +8,7 @@
     </ion-header>
 
     <ion-content>
-      <main v-if="ruleGroup.ruleGroupId">
+      <main v-if="ruleGroup.ruleGroupId && rules.length">
         <ScheduleRuleItem v-if="rules.length" />
 
         <section>
