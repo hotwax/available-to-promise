@@ -103,6 +103,8 @@ const generateRuleConditions = (ruleId: string, conditionTypeEnumId: string, app
   const conditions = [];
 
   if(conditionTypeEnumId === "ENTCT_ATP_FACILITIES") {
+    console.log('entered');
+    
     conditions.push({
       "ruleId": ruleId,
       conditionTypeEnumId,
@@ -111,6 +113,33 @@ const generateRuleConditions = (ruleId: string, conditionTypeEnumId: string, app
       "fieldValue": selectedFac.length ? selectedFac.join(",") : "",
       "multiValued": "Y"
     })
+  } else {
+    const includedFacilityGroupIds = selectedFac.included.map((group: any) => group.facilityGroupId)  
+    console.log(includedFacilityGroupIds);
+    
+    if(includedFacilityGroupIds.length) {
+      conditions.push({
+        "ruleId": ruleId,
+        "conditionTypeEnumId": "ENTCT_ATP_FAC_GROUPS",
+        "fieldName": "facilityGroups",
+        "operator": "in",
+        "fieldValue": includedFacilityGroupIds.join(","),
+        "multiValued": "Y"
+      })
+    }
+    
+    const excludedFacilityGroupIds = selectedFac.excluded.map((group: any) => group.facilityGroupId)
+    console.log(excludedFacilityGroupIds);
+    if(excludedFacilityGroupIds.length) {
+      conditions.push({
+        "ruleId": ruleId,
+        "conditionTypeEnumId": "ENTCT_ATP_FAC_GROUPS",
+        "fieldName": "facilityGroups",
+        "operator": "not-in",
+        "fieldValue": excludedFacilityGroupIds.join(","),
+        "multiValued": "Y"
+      })
+    }
   }
 
   Object.entries(appliedFilters).map(([type, filters]: any) => {

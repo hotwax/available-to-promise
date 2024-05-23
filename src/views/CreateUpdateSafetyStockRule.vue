@@ -94,7 +94,7 @@ import AddProductFacilityGroupModal from '@/components/AddProductFacilityGroupMo
 import { RuleService } from '@/services/RuleService';
 import { useRouter } from 'vue-router';
 import logger from '@/logger';
-import { hasError, showToast } from '@/utils';
+import { generateRuleActions, generateRuleConditions, hasError, showToast } from '@/utils';
 import emitter from '@/event-bus';
 
 const router = useRouter();
@@ -201,85 +201,6 @@ async function openProductFacilityGroupModal(type: string) {
   modal.present()
 }
 
-function generateRuleActions(ruleId: string) {
-  if(currentRule.value.ruleId) {
-    const ruleAction = currentRule.value.ruleActions.find((action: any) => action.actionTypeEnumId === "ATP_SAFETY_STOCK")
-    if(ruleAction) {
-      ruleAction.fieldValue = formData.value.safetyStock ? formData.value.safetyStock : 0;
-      return [ruleAction];
-    }
-  }
-
-  return [{
-    "ruleId": ruleId,
-    "actionTypeEnumId": "ATP_SAFETY_STOCK",
-    "fieldName": "facility-safety-stock",
-    "fieldValue": formData.value.safetyStock
-  }]
-}
-
-function generateRuleConditions(ruleId: string) {
-  if(currentRule.value.ruleId) {
-    const ruleConditions = JSON.parse(JSON.stringify(currentRule.value.ruleConditions));
-
-    const includedCondition = ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS" && condition.operator === "in");
-    const includedFacilityGroupIds = formData.value.selectedFacilityGroups.included.map((group: any) => group.facilityGroupId);
-    if(includedFacilityGroupIds.length) includedCondition["fieldValue"] = includedFacilityGroupIds.join(",")
-
-    const excludedCondition = ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS" && condition.operator === "not-in");
-    const excludedFacilityGroupIds = formData.value.selectedFacilityGroups.excluded.map((group: any) => group.facilityGroupId);
-    if(excludedFacilityGroupIds.length) excludedCondition["fieldValue"] = excludedFacilityGroupIds.join(",")
-
-    Object.entries(appliedFilters.value).map(([type, filters]: any) => {
-      Object.entries(filters as any).map(([filter, value]: any) => {
-        const condition = ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FILTER" && condition.fieldName === filter && condition.operator === (type === "included" ? "in" : "not-in"))
-        if(condition) {
-          condition["fieldValue"] = value.length ? value.join(",") : ""
-        }
-      })
-    })
-
-    return ruleConditions;
-  } else {
-    const conditions = [];
-
-    const includedFacilityGroupIds = formData.value.selectedFacilityGroups.included.map((group: any) => group.facilityGroupId)  
-    conditions.push({
-      "ruleId": ruleId,
-      "conditionTypeEnumId": "ENTCT_ATP_FAC_GROUPS",
-      "fieldName": "facilityGroups",
-      "operator": "in",
-      "fieldValue": includedFacilityGroupIds ? includedFacilityGroupIds.join(",") : "",
-      "multiValued": "Y"
-    })
-
-    const excludedFacilityGroupIds = formData.value.selectedFacilityGroups.excluded.map((group: any) => group.facilityGroupId)
-    conditions.push({
-      "ruleId": ruleId,
-      "conditionTypeEnumId": "ENTCT_ATP_FAC_GROUPS",
-      "fieldName": "facilityGroups",
-      "operator": "not-in",
-      "fieldValue": excludedFacilityGroupIds.length ? excludedFacilityGroupIds.join(",") : "",
-      "multiValued": "Y"
-    })
-
-    Object.entries(appliedFilters.value).map(([type, filters]: any) => {
-      Object.entries(filters as any).map(([filter, value]: any) => {
-        conditions.push({
-          "ruleId": ruleId,
-          "conditionTypeEnumId": "ENTCT_ATP_FILTER",
-          "fieldName": filter,
-          "operator": type === "included" ? "in" : "not-in",
-          "fieldValue": value.length ? value.join(",") : "",
-          "multiValued": "Y"
-        })
-      })
-    })
-
-    return conditions;
-  }
-}
-
 async function createRule() {
   if(!isRuleValid()) return;
 
@@ -306,8 +227,8 @@ async function createRule() {
     const rule = await RuleService.createRule(params)
     await RuleService.updateRule({
       ...params,
-      "ruleConditions": generateRuleConditions(rule.ruleId),
-      "ruleActions": generateRuleActions(rule.ruleId)
+      "ruleConditions": generateRuleConditions(rule.ruleId, "ENTCT_ATP_FAC_GROUPS", appliedFilters.value, formData.value.selectedFacilityGroups),
+      "ruleActions": generateRuleActions(rule.ruleId, "ATP_SAFETY_STOCK", formData.value.safetyStock, false, [])
     }, rule.ruleId);
 
     showToast(translate("Rule created successfully."))
@@ -324,14 +245,28 @@ async function createRule() {
 async function updateRule() {
   if(!isRuleValid()) return;
 
+  const currentRuleConditions = JSON.parse(JSON.stringify(currentRule.value.ruleConditions));
+  const updatedRuleConditions = generateRuleConditions(props.ruleId, "ENTCT_ATP_FAC_GROUPS", appliedFilters.value, formData.value.selectedFacilityGroups);
+  const conditionsToRemove = currentRuleConditions.filter((condition: any) => !updatedRuleConditions.some((updatedCondition: any) => condition.conditionTypeEnumId === updatedCondition.conditionTypeEnumId && condition.fieldName === updatedCondition.fieldName && condition.operator === updatedCondition.operator))
+
+  updatedRuleConditions.map((updatedCondition: any) => {
+    const current = currentRuleConditions.find((condition: any) => condition.conditionTypeEnumId === updatedCondition.conditionTypeEnumId && condition.fieldName === updatedCondition.fieldName && condition.operator === updatedCondition.operator);
+    if(current) updatedCondition["conditionSeqId"] = current.conditionSeqId;
+  })
+
   try {
     await RuleService.updateRule({
       ...currentRule.value,
       "ruleName": formData.value.ruleName,
-      "ruleConditions": generateRuleConditions(props.ruleId),
-      "ruleActions": generateRuleActions(props.ruleId)
+      "ruleConditions": updatedRuleConditions,
+      "ruleActions": generateRuleActions(props.ruleId, "ATP_SAFETY_STOCK", formData.value.safetyStock, true, currentRule.value.ruleActions)
     }, props.ruleId);
     showToast(translate("Rule updated successfully."))
+
+    const removeResponses = await Promise.allSettled(conditionsToRemove.map(async (condition: any) => await RuleService.deleteCondition({ ...condition, ruleId: props.ruleId})));
+    const hasFailedResponse = removeResponses.some((response: any) => response.status === 'rejected');
+    if(hasFailedResponse) logger.error("Failed to delete some rule conditions.")
+
     store.dispatch("rule/clearRuleState")
     store.dispatch("util/clearAppliedFilters")
     router.push("/safety-stock");
@@ -346,7 +281,7 @@ function isRuleValid() {
     return false;
   }
 
-  if(formData.value.safety < 0) {
+  if(formData.value.safetyStock < 0) {
     showToast(translate("Safety stock should be greater than or equal to 0."));
     return false;
   }
