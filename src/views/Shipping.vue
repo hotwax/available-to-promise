@@ -22,7 +22,7 @@
     <ion-content ref="contentRef" :scroll-events="true" @ionScroll="enableScrolling()">
       <main v-if="selectedSegment !== 'SHIPPING_FACILITY'">
         <template v-if="ruleGroup.ruleGroupId && rules.length">
-          <ScheduleRuleItem v-if="rules.length" />
+          <ScheduleRuleItem />
 
           <section>
             <ion-reorder-group :disabled="false" @ionItemReorder="updateReorderingRules($event)">
