@@ -59,13 +59,13 @@
                   <ion-label>{{ translate("warehouse", { count: getFacilityCount(channel, "WAREHOUSE") })}}</ion-label>
                 </ion-item>
     
-                <ion-item lines="none">
-                  <ion-button fill="clear" size="default" @click="openEditGroupModal(channel)">{{ translate("Edit group") }}</ion-button>
+                <div class="actions">
+                  <ion-button fill="clear" @click="openEditGroupModal(channel)">{{ translate("Edit group") }}</ion-button>
                   <!-- Functionality is not defined for this button hence commented it for now. -->
                   <!-- <ion-button color="medium" fill="clear" slot="end">
                     <ion-icon :icon="ellipsisVerticalOutline" slot="icon-only"/>
                   </ion-button> -->
-                </ion-item>
+                </div>
               </ion-list>
             </ion-card>
           </template>
@@ -228,5 +228,10 @@ ion-card-header {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
 }
 </style>
