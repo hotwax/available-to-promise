@@ -8,8 +8,8 @@
     </ion-header>
 
     <ion-content>
-      <main v-if="ruleGroup.ruleGroupId">
-        <ScheduleRuleItem v-if="rules.length" />
+      <main v-if="ruleGroup.ruleGroupId && rules.length">
+        <ScheduleRuleItem />
 
         <section>
           <ion-reorder-group :disabled="false" @ionItemReorder="updateReorderingRules($event)">
