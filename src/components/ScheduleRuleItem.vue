@@ -22,12 +22,12 @@
           </ion-select>
         </ion-item>
       
-        <ion-item lines="none">
-          <ion-button fill="clear" :disabled="ruleGroup.schedule?.paused === 'N'" @click="saveSchedule()">{{ translate("Schedule") }}</ion-button>
+        <div class="actions">
+          <ion-button size="default" fill="clear" :disabled="ruleGroup.schedule?.paused === 'N'" @click="saveSchedule()">{{ translate("Schedule") }}</ion-button>
           <ion-button color="medium" fill="clear" slot="end" @click="openScheduleActionsPopover($event)">
             <ion-icon :icon="ellipsisVerticalOutline" slot="icon-only"/>
           </ion-button>
-        </ion-item>
+        </div>
       </ion-card>
     </ion-accordion>
   </ion-accordion-group>
@@ -104,5 +104,10 @@ ion-card-header {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
 }
 </style>
