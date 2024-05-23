@@ -59,7 +59,7 @@
           </template>
 
           <template v-if="areProductFiltersSelected()">
-            <ion-item-divider color="light">
+            <ion-item-divider color="light" v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'tags', 'in') || isRuleConditionAvailable('ENTCT_ATP_FILTER', 'tags', 'not-in')">
               <ion-label>{{ translate("Product tags") }}</ion-label>
             </ion-item-divider>
 
@@ -72,7 +72,7 @@
               <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FILTER", "tags", "not-in") }}</ion-label>
             </ion-item>
 
-            <ion-item-divider color="light">
+            <ion-item-divider color="light" v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'productFeatures', 'in') || isRuleConditionAvailable('ENTCT_ATP_FILTER', 'productFeatures', 'not-in')">
               <ion-label>{{ translate("Product features") }}</ion-label>
             </ion-item-divider>
 
