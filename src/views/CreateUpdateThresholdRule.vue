@@ -173,6 +173,37 @@ function generateRuleActions(ruleId: string) {
 }
 
 function generateRuleConditions(ruleId: string) {
+  const conditions = [];
+
+  const selectedFacilites = formData.value.selectedConfigFacilites
+  conditions.push({
+    "ruleId": ruleId,
+    "conditionTypeEnumId": "ENTCT_ATP_FACILITIES",
+    "fieldName": "facilities",
+    "operator": "in",
+    "fieldValue": selectedFacilites.length ? selectedFacilites.join(",") : "",
+    "multiValued": "Y"
+  })
+
+  Object.entries(appliedFilters.value).map(([type, filters]: any) => {
+    Object.entries(filters as any).map(([filter, value]: any) => {
+      if(value.length) {
+        conditions.push({
+          "ruleId": ruleId,
+          "conditionTypeEnumId": "ENTCT_ATP_FILTER",
+          "fieldName": filter,
+          "operator": type === "included" ? "in" : "not-in",
+          "fieldValue": value.join(","),
+          "multiValued": "Y"
+        })
+      }
+    })
+  })
+
+  return conditions;
+}
+
+/* function generateRuleConditions(ruleId: string) {
   if(currentRule.value.ruleId) {
     const ruleConditions = JSON.parse(JSON.stringify(currentRule.value.ruleConditions));
 
@@ -217,7 +248,7 @@ function generateRuleConditions(ruleId: string) {
 
     return conditions;
   }
-}
+} */
 
 async function createThresholdRule() {
   if(!isRuleValid()) return;
@@ -264,14 +295,28 @@ async function createThresholdRule() {
 async function updateRule() {
   if(!isRuleValid()) return;
 
+  const currentRuleConditions = JSON.parse(JSON.stringify(currentRule.value.ruleConditions));
+  const updatedRuleConditions = generateRuleConditions(props.ruleId);
+  const conditionsToRemove = currentRuleConditions.filter((condition: any) => !updatedRuleConditions.some((updatedCondition: any) => condition.conditionTypeEnumId === updatedCondition.conditionTypeEnumId && condition.fieldName === updatedCondition.fieldName && condition.operator === updatedCondition.operator))
+
+  updatedRuleConditions.map((updatedCondition: any) => {
+    const current = currentRuleConditions.find((condition: any) => condition.conditionTypeEnumId === updatedCondition.conditionTypeEnumId && condition.fieldName === updatedCondition.fieldName && condition.operator === updatedCondition.operator);
+    if(current) updatedCondition["conditionSeqId"] = current.conditionSeqId;
+  })
+
   try {
     await RuleService.updateRule({
       ...currentRule.value,
       "ruleName": formData.value.ruleName,
-      "ruleConditions": generateRuleConditions(props.ruleId),
+      "ruleConditions": updatedRuleConditions,
       "ruleActions": generateRuleActions(props.ruleId)
     }, props.ruleId);
     showToast(translate("Rule updated successfully."))
+
+    const removeResponses = await Promise.allSettled(conditionsToRemove.map(async (condition: any) => await RuleService.deleteCondition({ ...condition, ruleId: props.ruleId})));
+    const hasFailedResponse = removeResponses.some((response: any) => response.status === 'rejected');
+    if(hasFailedResponse) logger.error("Failed to delete some rule conditions.")
+
     store.dispatch("rule/clearRuleState")
     store.dispatch("util/clearAppliedFilters")
     router.push("/threshold");
