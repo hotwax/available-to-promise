@@ -342,7 +342,7 @@ async function updateRulePickup(event: any) {
   try {
     const rule = JSON.parse(JSON.stringify(props.rule))
     rule.ruleActions.map((action: any) => {
-      if(action.actionTypeEnumId === "ATP_ALLOW_PICKUP") action.fieldValue = isChecked
+      if(action.actionTypeEnumId === "ATP_ALLOW_PICKUP") action.fieldValue = isChecked ? "Y" : "N"
     })
 
     await RuleService.updateRule(rule, props.rule.ruleId)
@@ -364,7 +364,7 @@ async function updateRuleShipping(event: any) {
   try {
     const rule = JSON.parse(JSON.stringify(props.rule))
     rule.ruleActions.map((action: any) => {
-      if(action.actionTypeEnumId === "ATP_ALLOW_BROKERING") action.fieldValue = isChecked
+      if(action.actionTypeEnumId === "ATP_ALLOW_BROKERING") action.fieldValue = isChecked ? "Y" : "N"
     })
 
     await RuleService.updateRule(rule, props.rule.ruleId)
