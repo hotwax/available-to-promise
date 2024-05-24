@@ -8,8 +8,8 @@
     </ion-header>
 
     <ion-content>
-      <main v-if="ruleGroup.ruleGroupId">
-        <ScheduleRuleItem v-if="rules.length" />
+      <main v-if="ruleGroup.ruleGroupId && rules.length">
+        <ScheduleRuleItem />
 
         <section>
           <ion-reorder-group :disabled="false" @ionItemReorder="updateReorderingRules($event)">
@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonMenuButton, IonPage, IonReorderGroup, IonTitle, IonToolbar, onIonViewDidLeave, onIonViewWillEnter } from '@ionic/vue';
+import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonMenuButton, IonPage, IonReorderGroup, IonTitle, IonToolbar, onIonViewDidLeave, onIonViewDidEnter } from '@ionic/vue';
 import { addOutline, saveOutline, balloonOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue';
 import { useRouter } from "vue-router";
@@ -55,7 +55,7 @@ const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
 const isReorderActive = computed(() => store.getters["rule/isReorderActive"]);
 const reorderingRules = ref([]);
 
-onIonViewWillEnter(async() => {
+onIonViewDidEnter(async() => {
   fetchRules();
   emitter.on("productStoreOrConfigChanged", fetchRules);
 })
@@ -67,8 +67,9 @@ onIonViewDidLeave(() => {
 
 async function fetchRules() {
   emitter.emit("presentLoader");
+  store.dispatch("util/updateSelectedSegment", "");
   store.dispatch("rule/updateIsReorderActive", false)
-  await Promise.allSettled([store.dispatch('rule/fetchRules', { groupTypeEnumId: 'RG_SAFETY_STOCK' }), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilityGroups")]);
+  await Promise.allSettled([store.dispatch('rule/fetchRules', { groupTypeEnumId: 'RG_SAFETY_STOCK', pageSize: 50 }), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilityGroups")]);
   emitter.emit("dismissLoader");
 }
 

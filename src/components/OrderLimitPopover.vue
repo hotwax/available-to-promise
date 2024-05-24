@@ -94,5 +94,6 @@ async function showOrderLimitAlert(header: string, message: string, showInput: b
     }]
   })
   await alert.present()
+  popoverController.dismiss();
 }
 </script>

@@ -59,13 +59,13 @@
                   <ion-label>{{ translate("warehouse", { count: getFacilityCount(channel, "WAREHOUSE") })}}</ion-label>
                 </ion-item>
     
-                <ion-item lines="none">
-                  <ion-button fill="clear" size="default" @click="openEditGroupModal(channel)">{{ translate("Edit group") }}</ion-button>
+                <div class="actions">
+                  <ion-button fill="clear" @click="openEditGroupModal(channel)">{{ translate("Edit group") }}</ion-button>
                   <!-- Functionality is not defined for this button hence commented it for now. -->
                   <!-- <ion-button color="medium" fill="clear" slot="end">
                     <ion-icon :icon="ellipsisVerticalOutline" slot="icon-only"/>
                   </ion-button> -->
-                </ion-item>
+                </div>
               </ion-list>
             </ion-card>
           </template>
@@ -128,7 +128,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonBadge, IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonItemDivider, IonLabel, IonList, IonMenuButton, IonPage, IonSegment, IonSegmentButton, IonSelect, IonSelectOption, IonTitle, IonToolbar, modalController, onIonViewWillEnter, onIonViewWillLeave, popoverController } from '@ionic/vue';
+import { IonBadge, IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonItemDivider, IonLabel, IonList, IonMenuButton, IonPage, IonSegment, IonSegmentButton, IonSelect, IonSelectOption, IonTitle, IonToolbar, modalController, onIonViewDidEnter, onIonViewWillLeave, popoverController } from '@ionic/vue';
 import { computed } from 'vue';
 import { addOutline, albumsOutline, businessOutline, ellipsisVerticalOutline, globeOutline, optionsOutline, storefrontOutline, timeOutline, timerOutline } from 'ionicons/icons';
 import { translate } from '@/i18n';
@@ -145,7 +145,7 @@ const store = useStore();
 const inventoryChannels = computed(() => store.getters["channel/getInventoryChannels"])
 const selectedSegment = computed(() => store.getters["util/getSelectedSegment"])
 
-onIonViewWillEnter(async() => {
+onIonViewDidEnter(async() => {
   fetchInventoryChannels()
   emitter.on("productStoreOrConfigChanged", fetchInventoryChannels);
 })
@@ -228,5 +228,10 @@ ion-card-header {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
 }
 </style>

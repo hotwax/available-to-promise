@@ -3,7 +3,7 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-back-button slot="start" default-href="/safety-stock" />
-        <ion-title>{{ currentRule.ruleId ? translate("Update safety stock rule") : translate("New safety stock rule") }}</ion-title>
+        <ion-title>{{ currentRule.ruleId ? translate("Edit safety stock rule") : translate("New safety stock rule") }}</ion-title>
       </ion-toolbar>
     </ion-header>
     
@@ -22,7 +22,7 @@
                 </ion-input>
               </ion-item>
               <ion-item>
-                <ion-input v-model="formData.safetyStock" type="number" @keydown="validateSafetyStock($event)">
+                <ion-input v-model="formData.safetyStock" type="number" min="0" @keydown="validateSafetyStock($event)">
                   <div slot="label">{{ translate("Safety stock") }} <ion-text color="danger">*</ion-text></div>
                 </ion-input>
               </ion-item>
@@ -32,7 +32,7 @@
       </section>
 
       <div class="section-header">
-        <h1>{{ translate("Facilities") }}</h1>
+        <h1>{{ translate("Facilities") }} <ion-text color="danger">*</ion-text></h1>
       </div>
 
       <section v-if="facilityGroups.length">
@@ -272,13 +272,18 @@ async function updateRule() {
 }
 
 function isRuleValid() {
-  if(!formData.value.ruleName.trim() || !formData.value.safetyStock || !formData.value.selectedFacilityGroups.included.length) {
+  if(!formData.value.ruleName.trim() || !formData.value.safetyStock) {
     showToast(translate("Please fill in all the required fields."))
     return false;
   }
 
   if(formData.value.safetyStock < 0) {
     showToast(translate("Safety stock should be greater than or equal to 0."));
+    return false;
+  }
+
+  if(!formData.value.selectedFacilityGroups.included.length) {
+    showToast(translate("Please include atleast one facility."))
     return false;
   }
 

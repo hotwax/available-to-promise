@@ -3,7 +3,7 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-back-button slot="start" default-href="/store-pickup" />
-        <ion-title>{{ currentRule.ruleId ? translate("Update store pickup rule") : translate("New store pickup rule") }}</ion-title>
+        <ion-title>{{ currentRule.ruleId ? translate("Edit store pickup rule") : translate("New store pickup rule") }}</ion-title>
       </ion-toolbar>
     </ion-header>
     
@@ -318,10 +318,10 @@ function isRuleValid() {
   }
 
   if(selectedSegment.value === 'RG_PICKUP_FACILITY' && !formData.value.selectedFacilityGroups.included.length) {
-    showToast(translate("Please include atleast one facility group."))
+    showToast(translate("Please include atleast one facility."))
     return false;
   } else if(selectedSegment.value === 'RG_PICKUP_CHANNEL' && !formData.value.selectedConfigFacilites.length) {
-    showToast(translate("Please select atleast one config facility."))
+    showToast(translate("Please select atleast one channel."))
     return false;
   }
 
