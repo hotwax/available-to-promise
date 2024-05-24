@@ -141,15 +141,14 @@ const formData = ref({
 }) as any;
 
 onIonViewDidEnter(async () => {
+  emitter.on("productStoreOrConfigChanged", revertRedirect);
   emitter.emit("presentLoader");
   await Promise.allSettled([store.dispatch("util/fetchFacilityGroups"), store.dispatch("util/fetchConfigFacilities")]);
-  emitter.emit("dismissLoader");
-  emitter.on("productStoreOrConfigChanged", revertRedirect);
-
+  
   if(props.ruleId) {
     try {
       const resp = await RuleService.fetchRules({ ruleId: props.ruleId })
-
+      
       if(!hasError(resp)) {
         currentRule.value = resp.data[0];
 
@@ -187,6 +186,7 @@ onIonViewDidEnter(async () => {
       logger.error(err);
     }
   }
+  emitter.emit("dismissLoader");
 })
 
 onIonViewWillLeave(() => {

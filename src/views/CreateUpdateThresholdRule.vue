@@ -89,10 +89,9 @@ const total = computed(() => store.getters["rule/getTotalRulesCount"])
 const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
 
 onIonViewDidEnter(async () => {
+  emitter.on("productStoreOrConfigChanged", revertRedirect);
   emitter.emit("presentLoader");
   await store.dispatch("util/fetchConfigFacilities");
-  emitter.emit("dismissLoader");
-  emitter.on("productStoreOrConfigChanged", revertRedirect);
 
   if(props.ruleId) {
     try {
@@ -126,6 +125,7 @@ onIonViewDidEnter(async () => {
       logger.error(err);
     }
   }
+  emitter.emit("dismissLoader");
 })
 
 onIonViewWillLeave(() => {
