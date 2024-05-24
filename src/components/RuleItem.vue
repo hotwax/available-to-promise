@@ -25,11 +25,11 @@
           </ion-item>
           <ion-item lines="full" v-else-if="selectedPage.path === '/store-pickup'">
             <ion-icon slot="start" :icon="storefrontOutline"/>
-            <ion-toggle :checked="props.rule.ruleActions ? props.rule.ruleActions[0].fieldValue : false" @click.prevent="updateRulePickup($event)">{{ translate(selectedPage.name) }}</ion-toggle>
+            <ion-toggle :checked="props.rule.ruleActions[0].fieldValue === 'Y' ? true : false" @click.prevent="updateRulePickup($event)">{{ translate(selectedPage.name) }}</ion-toggle>
           </ion-item>
           <ion-item lines="full" v-else-if="selectedPage.path === '/shipping'">
             <ion-icon slot="start" :icon="sendOutline"/>
-            <ion-toggle :checked="props.rule.ruleActions ? props.rule.ruleActions[0].fieldValue : false" @click.prevent="updateRuleShipping($event)">{{ translate(selectedPage.name) }}</ion-toggle>
+            <ion-toggle :checked="props.rule.ruleActions[0].fieldValue === 'Y' ? true : false" @click.prevent="updateRuleShipping($event)">{{ translate(selectedPage.name) }}</ion-toggle>
           </ion-item>
 
           <template v-if="selectedPage.path === '/threshold' || selectedSegment === 'RG_PICKUP_CHANNEL' || selectedSegment === 'RG_SHIPPING_CHANNEL'">
@@ -48,18 +48,18 @@
               <ion-label>{{ translate("Facility groups") }}</ion-label>
             </ion-item-divider>
             
-            <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FAC_GROUPS', 'facilityGroups', 'in')">
+            <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FAC_GROUPS', 'facilityGroupId', 'in')">
               <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
-              <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FAC_GROUPS", "facilityGroups", "in") }}</ion-label>
+              <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FAC_GROUPS", "facilityGroupId", "in") }}</ion-label>
             </ion-item>
-            <ion-item lines="full" v-if="isRuleConditionAvailable('ENTCT_ATP_FAC_GROUPS', 'facilityGroups', 'not-in')">
+            <ion-item lines="full" v-if="isRuleConditionAvailable('ENTCT_ATP_FAC_GROUPS', 'facilityGroupId', 'not-in')">
               <ion-icon slot="start" :icon="closeCircleOutline"/>
-              <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FAC_GROUPS", "facilityGroups", "not-in") }}</ion-label>
+              <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FAC_GROUPS", "facilityGroupId", "not-in") }}</ion-label>
             </ion-item>
           </template>
 
           <template v-if="areProductFiltersSelected()">
-            <ion-item-divider color="light">
+            <ion-item-divider color="light" v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'tags', 'in') || isRuleConditionAvailable('ENTCT_ATP_FILTER', 'tags', 'not-in')">
               <ion-label>{{ translate("Product tags") }}</ion-label>
             </ion-item-divider>
 
@@ -72,7 +72,7 @@
               <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FILTER", "tags", "not-in") }}</ion-label>
             </ion-item>
 
-            <ion-item-divider color="light">
+            <ion-item-divider color="light" v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'productFeatures', 'in') || isRuleConditionAvailable('ENTCT_ATP_FILTER', 'productFeatures', 'not-in')">
               <ion-label>{{ translate("Product features") }}</ion-label>
             </ion-item-divider>
 
@@ -342,7 +342,7 @@ async function updateRulePickup(event: any) {
   try {
     const rule = JSON.parse(JSON.stringify(props.rule))
     rule.ruleActions.map((action: any) => {
-      if(action.actionTypeEnumId === "ATP_ALLOW_PICKUP") action.fieldValue = isChecked
+      if(action.actionTypeEnumId === "ATP_ALLOW_PICKUP") action.fieldValue = isChecked ? "Y" : "N"
     })
 
     await RuleService.updateRule(rule, props.rule.ruleId)
@@ -364,7 +364,7 @@ async function updateRuleShipping(event: any) {
   try {
     const rule = JSON.parse(JSON.stringify(props.rule))
     rule.ruleActions.map((action: any) => {
-      if(action.actionTypeEnumId === "ATP_ALLOW_BROKERING") action.fieldValue = isChecked
+      if(action.actionTypeEnumId === "ATP_ALLOW_BROKERING") action.fieldValue = isChecked ? "Y" : "N"
     })
 
     await RuleService.updateRule(rule, props.rule.ruleId)

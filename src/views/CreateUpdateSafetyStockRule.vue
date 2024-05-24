@@ -84,7 +84,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonNote, IonPage, IonText, IonTitle, IonToolbar, modalController, onIonViewWillEnter, onIonViewWillLeave } from '@ionic/vue';
+import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonNote, IonPage, IonText, IonTitle, IonToolbar, modalController, onIonViewDidEnter  , onIonViewWillLeave } from '@ionic/vue';
 import { addCircleOutline, closeCircle, saveOutline } from 'ionicons/icons'
 import { translate } from "@/i18n";
 import ProductFilters from '@/components/ProductFilters.vue';
@@ -94,7 +94,7 @@ import AddProductFacilityGroupModal from '@/components/AddProductFacilityGroupMo
 import { RuleService } from '@/services/RuleService';
 import { useRouter } from 'vue-router';
 import logger from '@/logger';
-import { hasError, showToast } from '@/utils';
+import { generateRuleActions, generateRuleConditions, hasError, showToast } from '@/utils';
 import emitter from '@/event-bus';
 
 const router = useRouter();
@@ -117,10 +117,11 @@ const total = computed(() => store.getters["rule/getTotalRulesCount"])
 const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
 const facilityGroups = computed(() => store.getters["util/getFacilityGroups"])
 
-onIonViewWillEnter(async () => {
-  fetchStoreConfig();
-  emitter.on("productStoreOrConfigChanged", fetchStoreConfig);
-
+onIonViewDidEnter(async () => {
+  emitter.on("productStoreOrConfigChanged", redirectLink);
+  emitter.emit("presentLoader");
+  await store.dispatch("util/fetchFacilityGroups")
+  
   if(props.ruleId) {
     try {
       const resp = await RuleService.fetchRules({ ruleId: props.ruleId })
@@ -132,11 +133,11 @@ onIonViewWillEnter(async () => {
         formData.value.safetyStock = currentRule.value.ruleActions[0]?.fieldValue ? currentRule.value.ruleActions[0].fieldValue : ''
 
         const includedGroups = currentRule.value.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS" && condition.operator === "in")
-        const includedGroupIds = includedGroups.fieldValue ? includedGroups.fieldValue.split(",") : []
+        const includedGroupIds = includedGroups?.fieldValue ? includedGroups.fieldValue.split(",") : []
         formData.value.selectedFacilityGroups.included = facilityGroups.value.filter((group: any) => includedGroupIds.includes(group.facilityGroupId));
         
         const excludedGroups = currentRule.value.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS" && condition.operator === "not-in")
-        const excludedGroupIds = excludedGroups.fieldValue ? excludedGroups.fieldValue.split(",") : []
+        const excludedGroupIds = excludedGroups?.fieldValue ? excludedGroups.fieldValue.split(",") : []
         formData.value.selectedFacilityGroups.excluded = facilityGroups.value.filter((group: any) => excludedGroupIds.includes(group.facilityGroupId));
 
         const currentAppliedFilters = JSON.parse(JSON.stringify(appliedFilters.value))
@@ -158,6 +159,7 @@ onIonViewWillEnter(async () => {
       logger.error(err);
     }
   }
+  emitter.emit("dismissLoader");
 })
 
 onIonViewWillLeave(() => {
@@ -170,17 +172,11 @@ onIonViewWillLeave(() => {
     }
   }
   store.dispatch("util/clearAppliedFilters")
-  emitter.off("productStoreOrConfigChanged", fetchStoreConfig);
+  emitter.off("productStoreOrConfigChanged", redirectLink);
 })
 
-async function fetchStoreConfig() {
-  emitter.emit("presentLoader");
-  await store.dispatch("util/fetchFacilityGroups")
-  formData.value.selectedFacilityGroups = {
-    included: [],
-    excluded: []
-  }
-  emitter.emit("dismissLoader");
+async function redirectLink() {
+  router.push("/safety-stock");
 }
 
 async function openProductFacilityGroupModal(type: string) {
@@ -199,85 +195,6 @@ async function openProductFacilityGroupModal(type: string) {
   })
 
   modal.present()
-}
-
-function generateRuleActions(ruleId: string) {
-  if(currentRule.value.ruleId) {
-    const ruleAction = currentRule.value.ruleActions.find((action: any) => action.actionTypeEnumId === "ATP_SAFETY_STOCK")
-    if(ruleAction) {
-      ruleAction.fieldValue = formData.value.safetyStock ? formData.value.safetyStock : 0;
-      return [ruleAction];
-    }
-  }
-
-  return [{
-    "ruleId": ruleId,
-    "actionTypeEnumId": "ATP_SAFETY_STOCK",
-    "fieldName": "facility-safety-stock",
-    "fieldValue": formData.value.safetyStock
-  }]
-}
-
-function generateRuleConditions(ruleId: string) {
-  if(currentRule.value.ruleId) {
-    const ruleConditions = JSON.parse(JSON.stringify(currentRule.value.ruleConditions));
-
-    const includedCondition = ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS" && condition.operator === "in");
-    const includedFacilityGroupIds = formData.value.selectedFacilityGroups.included.map((group: any) => group.facilityGroupId);
-    if(includedFacilityGroupIds.length) includedCondition["fieldValue"] = includedFacilityGroupIds.join(",")
-
-    const excludedCondition = ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS" && condition.operator === "not-in");
-    const excludedFacilityGroupIds = formData.value.selectedFacilityGroups.excluded.map((group: any) => group.facilityGroupId);
-    if(excludedFacilityGroupIds.length) excludedCondition["fieldValue"] = excludedFacilityGroupIds.join(",")
-
-    Object.entries(appliedFilters.value).map(([type, filters]: any) => {
-      Object.entries(filters as any).map(([filter, value]: any) => {
-        const condition = ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FILTER" && condition.fieldName === filter && condition.operator === (type === "included" ? "in" : "not-in"))
-        if(condition) {
-          condition["fieldValue"] = value.length ? value.join(",") : ""
-        }
-      })
-    })
-
-    return ruleConditions;
-  } else {
-    const conditions = [];
-
-    const includedFacilityGroupIds = formData.value.selectedFacilityGroups.included.map((group: any) => group.facilityGroupId)  
-    conditions.push({
-      "ruleId": ruleId,
-      "conditionTypeEnumId": "ENTCT_ATP_FAC_GROUPS",
-      "fieldName": "facilityGroups",
-      "operator": "in",
-      "fieldValue": includedFacilityGroupIds ? includedFacilityGroupIds.join(",") : "",
-      "multiValued": "Y"
-    })
-
-    const excludedFacilityGroupIds = formData.value.selectedFacilityGroups.excluded.map((group: any) => group.facilityGroupId)
-    conditions.push({
-      "ruleId": ruleId,
-      "conditionTypeEnumId": "ENTCT_ATP_FAC_GROUPS",
-      "fieldName": "facilityGroups",
-      "operator": "not-in",
-      "fieldValue": excludedFacilityGroupIds.length ? excludedFacilityGroupIds.join(",") : "",
-      "multiValued": "Y"
-    })
-
-    Object.entries(appliedFilters.value).map(([type, filters]: any) => {
-      Object.entries(filters as any).map(([filter, value]: any) => {
-        conditions.push({
-          "ruleId": ruleId,
-          "conditionTypeEnumId": "ENTCT_ATP_FILTER",
-          "fieldName": filter,
-          "operator": type === "included" ? "in" : "not-in",
-          "fieldValue": value.length ? value.join(",") : "",
-          "multiValued": "Y"
-        })
-      })
-    })
-
-    return conditions;
-  }
 }
 
 async function createRule() {
@@ -306,8 +223,8 @@ async function createRule() {
     const rule = await RuleService.createRule(params)
     await RuleService.updateRule({
       ...params,
-      "ruleConditions": generateRuleConditions(rule.ruleId),
-      "ruleActions": generateRuleActions(rule.ruleId)
+      "ruleConditions": generateRuleConditions(rule.ruleId, "ENTCT_ATP_FAC_GROUPS", appliedFilters.value, formData.value.selectedFacilityGroups),
+      "ruleActions": generateRuleActions(rule.ruleId, "ATP_SAFETY_STOCK", formData.value.safetyStock, false, [])
     }, rule.ruleId);
 
     showToast(translate("Rule created successfully."))
@@ -324,14 +241,28 @@ async function createRule() {
 async function updateRule() {
   if(!isRuleValid()) return;
 
+  const currentRuleConditions = JSON.parse(JSON.stringify(currentRule.value.ruleConditions));
+  const updatedRuleConditions = generateRuleConditions(props.ruleId, "ENTCT_ATP_FAC_GROUPS", appliedFilters.value, formData.value.selectedFacilityGroups);
+  const conditionsToRemove = currentRuleConditions.filter((condition: any) => !updatedRuleConditions.some((updatedCondition: any) => condition.conditionTypeEnumId === updatedCondition.conditionTypeEnumId && condition.fieldName === updatedCondition.fieldName && condition.operator === updatedCondition.operator))
+
+  updatedRuleConditions.map((updatedCondition: any) => {
+    const current = currentRuleConditions.find((condition: any) => condition.conditionTypeEnumId === updatedCondition.conditionTypeEnumId && condition.fieldName === updatedCondition.fieldName && condition.operator === updatedCondition.operator);
+    if(current) updatedCondition["conditionSeqId"] = current.conditionSeqId;
+  })
+
   try {
     await RuleService.updateRule({
       ...currentRule.value,
       "ruleName": formData.value.ruleName,
-      "ruleConditions": generateRuleConditions(props.ruleId),
-      "ruleActions": generateRuleActions(props.ruleId)
+      "ruleConditions": updatedRuleConditions,
+      "ruleActions": generateRuleActions(props.ruleId, "ATP_SAFETY_STOCK", formData.value.safetyStock, true, currentRule.value.ruleActions)
     }, props.ruleId);
     showToast(translate("Rule updated successfully."))
+
+    const removeResponses = await Promise.allSettled(conditionsToRemove.map(async (condition: any) => await RuleService.deleteCondition({ ...condition, ruleId: props.ruleId})));
+    const hasFailedResponse = removeResponses.some((response: any) => response.status === 'rejected');
+    if(hasFailedResponse) logger.error("Failed to delete some rule conditions.")
+
     store.dispatch("rule/clearRuleState")
     store.dispatch("util/clearAppliedFilters")
     router.push("/safety-stock");

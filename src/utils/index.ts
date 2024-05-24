@@ -67,4 +67,93 @@ const findRulesDiff = (previousSeq: any, updatedSeq: any) => {
   return diffSeq;
 }
 
-export { doReorder, generateInternalId, getDate, getDateAndTime, getTime, hasError, showToast, timeTillRun }
+const generateRuleActions = (ruleId: string, actionTypeEnumId: string, actionValue: any, isConditionExists: boolean, ruleActions: any) => {
+  if(isConditionExists) {
+    const ruleAction = ruleActions.find((action: any) => action.actionTypeEnumId === actionTypeEnumId)
+    if(ruleAction) {
+      if(actionTypeEnumId === "ATP_THRESHOLD" || actionTypeEnumId === "ATP_SAFETY_STOCK") {
+        ruleAction.fieldValue = actionValue ? actionValue : 0;
+      } else {
+        ruleAction.fieldValue = actionValue ? "Y" : "N"
+      }
+      return [ruleAction];
+    }
+  }
+
+  let condition;
+  if(actionTypeEnumId === "ATP_THRESHOLD" || actionTypeEnumId === "ATP_SAFETY_STOCK") {
+    condition = [{
+      ruleId,
+      actionTypeEnumId,
+      "fieldName": "facility-safety-stock",
+      "fieldValue": actionValue ? actionValue : 0
+    }]
+  } else {
+    condition = [{
+      ruleId,
+      actionTypeEnumId,
+      "fieldName": actionTypeEnumId === "ATP_ALLOW_PICKUP" ? "allow-pickup" : "allow-brokering",
+      "fieldValue": actionValue ? "Y" : "N"
+    }]
+  }
+  return condition
+}
+
+const generateRuleConditions = (ruleId: string, conditionTypeEnumId: string, appliedFilters: any, selectedFac: any) => {
+  const conditions = [];
+
+  if(conditionTypeEnumId === "ENTCT_ATP_FACILITIES") {
+    conditions.push({
+      "ruleId": ruleId,
+      conditionTypeEnumId,
+      "fieldName": "facilityId",
+      "operator": "in",
+      "fieldValue": selectedFac.length ? selectedFac.join(",") : "",
+      "multiValued": "Y"
+    })
+  } else {
+    const includedFacilityGroupIds = selectedFac.included.map((group: any) => group.facilityGroupId)  
+    if(includedFacilityGroupIds.length) {
+      conditions.push({
+        "ruleId": ruleId,
+        "conditionTypeEnumId": "ENTCT_ATP_FAC_GROUPS",
+        "fieldName": "facilityGroupId",
+        "operator": "in",
+        "fieldValue": includedFacilityGroupIds.join(","),
+        "multiValued": "Y"
+      })
+    }
+    
+    const excludedFacilityGroupIds = selectedFac.excluded.map((group: any) => group.facilityGroupId)
+    if(excludedFacilityGroupIds.length) {
+      conditions.push({
+        "ruleId": ruleId,
+        "conditionTypeEnumId": "ENTCT_ATP_FAC_GROUPS",
+        "fieldName": "facilityGroupId",
+        "operator": "not-in",
+        "fieldValue": excludedFacilityGroupIds.join(","),
+        "multiValued": "Y"
+      })
+    }
+  }
+
+  Object.entries(appliedFilters).map(([type, filters]: any) => {
+    Object.entries(filters as any).map(([filter, value]: any) => {
+      if(value.length) {
+        conditions.push({
+          "ruleId": ruleId,
+          "conditionTypeEnumId": "ENTCT_ATP_FILTER",
+          "fieldName": filter,
+          "operator": type === "included" ? "in" : "not-in",
+          "fieldValue": value.join(","),
+          "multiValued": "Y"
+        })
+      }
+    })
+  })
+
+  return conditions;
+}
+
+
+export { doReorder, generateInternalId, generateRuleActions, generateRuleConditions, getDate, getDateAndTime, getTime, hasError, showToast, timeTillRun }

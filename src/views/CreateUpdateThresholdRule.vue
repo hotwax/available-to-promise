@@ -61,14 +61,14 @@
 </template>
 
 <script setup lang="ts">
-import { IonBackButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonPage, IonNote, IonText, IonTitle, IonToolbar, onIonViewWillLeave, onIonViewWillEnter } from '@ionic/vue';
+import { IonBackButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonPage, IonNote, IonText, IonTitle, IonToolbar, onIonViewWillLeave, onIonViewDidEnter } from '@ionic/vue';
 import { saveOutline } from 'ionicons/icons'
 import { translate } from "@/i18n";
 import ProductFilters from '@/components/ProductFilters.vue';
 import { computed, defineProps, ref } from 'vue';
 import { useStore } from 'vuex';
 import { RuleService } from '@/services/RuleService';
-import { hasError, showToast } from '@/utils';
+import { generateRuleActions, generateRuleConditions, hasError, showToast } from '@/utils';
 import logger from '@/logger';
 import router from '@/router';
 import emitter from '@/event-bus';
@@ -88,9 +88,10 @@ const rules = computed(() => store.getters["rule/getRules"]);
 const total = computed(() => store.getters["rule/getTotalRulesCount"])
 const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
 
-onIonViewWillEnter(async () => {
-  fetchStoreConfig();
-  emitter.on("productStoreOrConfigChanged", fetchStoreConfig);
+onIonViewDidEnter(async () => {
+  emitter.on("productStoreOrConfigChanged", redirectLink);
+  emitter.emit("presentLoader");
+  await store.dispatch("util/fetchConfigFacilities");
 
   if(props.ruleId) {
     try {
@@ -103,7 +104,7 @@ onIonViewWillEnter(async () => {
         formData.value.threshold = currentRule.value.ruleActions[0]?.fieldValue ? currentRule.value.ruleActions[0].fieldValue : ''
 
         const facilityCondition = currentRule.value.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FACILITIES")
-        formData.value.selectedConfigFacilites = facilityCondition.fieldValue?.split(",");
+        formData.value.selectedConfigFacilites = facilityCondition?.fieldValue ? facilityCondition.fieldValue?.split(",") : [];
 
         const currentAppliedFilters = JSON.parse(JSON.stringify(appliedFilters.value))
         currentRule.value.ruleConditions.map((condition: any) => {
@@ -124,6 +125,7 @@ onIonViewWillEnter(async () => {
       logger.error(err);
     }
   }
+  emitter.emit("dismissLoader");
 })
 
 onIonViewWillLeave(() => {
@@ -133,14 +135,11 @@ onIonViewWillLeave(() => {
     selectedConfigFacilites: []
   }
   store.dispatch("util/clearAppliedFilters")
-  emitter.off("productStoreOrConfigChanged", fetchStoreConfig);
+  emitter.off("productStoreOrConfigChanged", redirectLink);
 })
 
-async function fetchStoreConfig() {
-  emitter.emit("presentLoader");
-  await store.dispatch("util/fetchConfigFacilities");
-  formData.value.selectedConfigFacilites = [];
-  emitter.emit("dismissLoader");
+async function redirectLink() {
+  router.push("/threshold")
 }
 
 function toggleFacilitySelection(facilityId: any) {
@@ -153,70 +152,6 @@ function toggleFacilitySelection(facilityId: any) {
 
 function isFacilitySelected(facilityId: any) {
   return formData.value.selectedConfigFacilites?.includes(facilityId)
-}
-
-function generateRuleActions(ruleId: string) {
-  if(currentRule.value.ruleId) {
-    const ruleAction = currentRule.value.ruleActions.find((action: any) => action.actionTypeEnumId === "ATP_THRESHOLD")
-    if(ruleAction) {
-      ruleAction.fieldValue = formData.value.threshold ? formData.value.threshold : 0;
-      return [ruleAction];
-    }
-  }
-
-  return [{
-    "ruleId": ruleId,
-    "actionTypeEnumId": "ATP_THRESHOLD",
-    "fieldName": "facility-safety-stock",
-    "fieldValue": formData.value.threshold ? formData.value.threshold : 0
-  }]
-}
-
-function generateRuleConditions(ruleId: string) {
-  if(currentRule.value.ruleId) {
-    const ruleConditions = JSON.parse(JSON.stringify(currentRule.value.ruleConditions));
-
-    const facilityCondition = ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FACILITIES");
-    if(facilityCondition) facilityCondition["fieldValue"] = formData.value.selectedConfigFacilites.join(",");
-
-    Object.entries(appliedFilters.value).map(([type, filters]: any) => {
-      Object.entries(filters as any).map(([filter, value]: any) => {
-        const condition = ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FILTER" && condition.fieldName === filter && condition.operator === (type === "included" ? "in" : "not-in"))
-        if(condition) {
-          condition["fieldValue"] = value.length ? value.join(",") : ""
-        }
-      })
-    })
-
-    return ruleConditions;
-  } else {
-    const conditions = [];
-
-    const selectedFacilites = formData.value.selectedConfigFacilites
-    conditions.push({
-      "ruleId": ruleId,
-      "conditionTypeEnumId": "ENTCT_ATP_FACILITIES",
-      "fieldName": "facilities",
-      "operator": "in",
-      "fieldValue": selectedFacilites.length ? selectedFacilites.join(",") : "",
-      "multiValued": "Y"
-    })
-
-    Object.entries(appliedFilters.value).map(([type, filters]: any) => {
-      Object.entries(filters as any).map(([filter, value]: any) => {
-        conditions.push({
-          "ruleId": ruleId,
-          "conditionTypeEnumId": "ENTCT_ATP_FILTER",
-          "fieldName": filter,
-          "operator": type === "included" ? "in" : "not-in",
-          "fieldValue": value.length ? value.join(",") : "",
-          "multiValued": "Y"
-        })
-      })
-    })
-
-    return conditions;
-  }
 }
 
 async function createThresholdRule() {
@@ -246,8 +181,8 @@ async function createThresholdRule() {
 
     await RuleService.updateRule({
       ...params,
-      "ruleConditions": generateRuleConditions(rule.ruleId),
-      "ruleActions": generateRuleActions(rule.ruleId)
+      "ruleConditions": generateRuleConditions(rule.ruleId, "ENTCT_ATP_FACILITIES", appliedFilters.value, formData.value.selectedConfigFacilites),
+      "ruleActions": generateRuleActions(rule.ruleId, "ATP_THRESHOLD", formData.value.threshold, false, [])
     }, rule.ruleId);
 
     showToast(translate("Rule created successfully."))
@@ -264,14 +199,28 @@ async function createThresholdRule() {
 async function updateRule() {
   if(!isRuleValid()) return;
 
+  const currentRuleConditions = JSON.parse(JSON.stringify(currentRule.value.ruleConditions));
+  const updatedRuleConditions = generateRuleConditions(props.ruleId, "ENTCT_ATP_FACILITIES", appliedFilters.value, formData.value.selectedConfigFacilites);
+  const conditionsToRemove = currentRuleConditions.filter((condition: any) => !updatedRuleConditions.some((updatedCondition: any) => condition.conditionTypeEnumId === updatedCondition.conditionTypeEnumId && condition.fieldName === updatedCondition.fieldName && condition.operator === updatedCondition.operator))
+
+  updatedRuleConditions.map((updatedCondition: any) => {
+    const current = currentRuleConditions.find((condition: any) => condition.conditionTypeEnumId === updatedCondition.conditionTypeEnumId && condition.fieldName === updatedCondition.fieldName && condition.operator === updatedCondition.operator);
+    if(current) updatedCondition["conditionSeqId"] = current.conditionSeqId;
+  })
+
   try {
     await RuleService.updateRule({
       ...currentRule.value,
       "ruleName": formData.value.ruleName,
-      "ruleConditions": generateRuleConditions(props.ruleId),
-      "ruleActions": generateRuleActions(props.ruleId)
+      "ruleConditions": updatedRuleConditions,
+      "ruleActions": generateRuleActions(props.ruleId, "ATP_THRESHOLD", formData.value.threshold, true, currentRule.value.ruleActions)
     }, props.ruleId);
     showToast(translate("Rule updated successfully."))
+
+    const removeResponses = await Promise.allSettled(conditionsToRemove.map(async (condition: any) => await RuleService.deleteCondition({ ...condition, ruleId: props.ruleId})));
+    const hasFailedResponse = removeResponses.some((response: any) => response.status === 'rejected');
+    if(hasFailedResponse) logger.error("Failed to delete some rule conditions.")
+
     store.dispatch("rule/clearRuleState")
     store.dispatch("util/clearAppliedFilters")
     router.push("/threshold");

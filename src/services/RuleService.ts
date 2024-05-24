@@ -108,9 +108,18 @@ const runNow = async (ruleGroupId: any): Promise<any> => {
   });
 }
 
+const deleteCondition = async (payload: any): Promise<any> => {
+  return api({
+    url: `decisionRules/${payload.ruleId}/conditions`,
+    method: "delete",
+    data: payload
+  });
+}
+
 export const RuleService = {
   createRule,
   createRuleGroup,
+  deleteCondition,
   fetchRuleGroup,
   fetchRuleGroupHistory,
   fetchRules,
