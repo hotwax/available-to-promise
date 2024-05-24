@@ -61,7 +61,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonBackButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonPage, IonNote, IonText, IonTitle, IonToolbar, onIonViewWillLeave, onIonViewWillEnter } from '@ionic/vue';
+import { IonBackButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonPage, IonNote, IonText, IonTitle, IonToolbar, onIonViewWillLeave, onIonViewDidEnter } from '@ionic/vue';
 import { saveOutline } from 'ionicons/icons'
 import { translate } from "@/i18n";
 import ProductFilters from '@/components/ProductFilters.vue';
@@ -88,8 +88,8 @@ const rules = computed(() => store.getters["rule/getRules"]);
 const total = computed(() => store.getters["rule/getTotalRulesCount"])
 const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
 
-onIonViewWillEnter(async () => {
-  fetchStoreConfig();
+onIonViewDidEnter(async () => {
+  await fetchStoreConfig();
   emitter.on("productStoreOrConfigChanged", fetchStoreConfig);
 
   if(props.ruleId) {
@@ -103,7 +103,7 @@ onIonViewWillEnter(async () => {
         formData.value.threshold = currentRule.value.ruleActions[0]?.fieldValue ? currentRule.value.ruleActions[0].fieldValue : ''
 
         const facilityCondition = currentRule.value.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FACILITIES")
-        formData.value.selectedConfigFacilites = facilityCondition.fieldValue?.split(",");
+        formData.value.selectedConfigFacilites = facilityCondition?.fieldValue ? facilityCondition.fieldValue?.split(",") : [];
 
         const currentAppliedFilters = JSON.parse(JSON.stringify(appliedFilters.value))
         currentRule.value.ruleConditions.map((condition: any) => {
@@ -138,8 +138,8 @@ onIonViewWillLeave(() => {
 
 async function fetchStoreConfig() {
   emitter.emit("presentLoader");
-  await store.dispatch("util/fetchConfigFacilities");
   formData.value.selectedConfigFacilites = [];
+  await store.dispatch("util/fetchConfigFacilities");
   emitter.emit("dismissLoader");
 }
 

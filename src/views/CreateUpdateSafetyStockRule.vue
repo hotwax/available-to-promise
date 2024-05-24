@@ -84,7 +84,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonNote, IonPage, IonText, IonTitle, IonToolbar, modalController, onIonViewWillEnter, onIonViewWillLeave } from '@ionic/vue';
+import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonNote, IonPage, IonText, IonTitle, IonToolbar, modalController, onIonViewDidEnter  , onIonViewWillLeave } from '@ionic/vue';
 import { addCircleOutline, closeCircle, saveOutline } from 'ionicons/icons'
 import { translate } from "@/i18n";
 import ProductFilters from '@/components/ProductFilters.vue';
@@ -117,8 +117,8 @@ const total = computed(() => store.getters["rule/getTotalRulesCount"])
 const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
 const facilityGroups = computed(() => store.getters["util/getFacilityGroups"])
 
-onIonViewWillEnter(async () => {
-  fetchStoreConfig();
+onIonViewDidEnter(async () => {
+  await fetchStoreConfig();
   emitter.on("productStoreOrConfigChanged", fetchStoreConfig);
 
   if(props.ruleId) {
@@ -132,11 +132,11 @@ onIonViewWillEnter(async () => {
         formData.value.safetyStock = currentRule.value.ruleActions[0]?.fieldValue ? currentRule.value.ruleActions[0].fieldValue : ''
 
         const includedGroups = currentRule.value.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS" && condition.operator === "in")
-        const includedGroupIds = includedGroups.fieldValue ? includedGroups.fieldValue.split(",") : []
+        const includedGroupIds = includedGroups?.fieldValue ? includedGroups.fieldValue.split(",") : []
         formData.value.selectedFacilityGroups.included = facilityGroups.value.filter((group: any) => includedGroupIds.includes(group.facilityGroupId));
         
         const excludedGroups = currentRule.value.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS" && condition.operator === "not-in")
-        const excludedGroupIds = excludedGroups.fieldValue ? excludedGroups.fieldValue.split(",") : []
+        const excludedGroupIds = excludedGroups?.fieldValue ? excludedGroups.fieldValue.split(",") : []
         formData.value.selectedFacilityGroups.excluded = facilityGroups.value.filter((group: any) => excludedGroupIds.includes(group.facilityGroupId));
 
         const currentAppliedFilters = JSON.parse(JSON.stringify(appliedFilters.value))
@@ -175,11 +175,11 @@ onIonViewWillLeave(() => {
 
 async function fetchStoreConfig() {
   emitter.emit("presentLoader");
-  await store.dispatch("util/fetchFacilityGroups")
   formData.value.selectedFacilityGroups = {
     included: [],
     excluded: []
   }
+  await store.dispatch("util/fetchFacilityGroups")
   emitter.emit("dismissLoader");
 }
 

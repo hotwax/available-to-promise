@@ -104,7 +104,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonNote, IonPage, IonText, IonTitle, IonToggle, IonToolbar, modalController, onIonViewWillEnter, onIonViewWillLeave } from '@ionic/vue';
+import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonNote, IonPage, IonText, IonTitle, IonToggle, IonToolbar, modalController, onIonViewDidEnter, onIonViewWillLeave } from '@ionic/vue';
 import { computed, defineProps, ref } from 'vue';
 import { addCircleOutline, closeCircle, saveOutline, storefrontOutline } from 'ionicons/icons'
 import { translate } from "@/i18n";
@@ -141,8 +141,8 @@ const formData = ref({
   selectedConfigFacilites: []
 }) as any;
 
-onIonViewWillEnter(async () => {
-  fetchStoreConfig();
+onIonViewDidEnter(async () => {
+  await fetchStoreConfig();
   emitter.on("productStoreOrConfigChanged", fetchStoreConfig);
   if(props.ruleId) {
     try {
@@ -164,7 +164,7 @@ onIonViewWillEnter(async () => {
           formData.value.selectedFacilityGroups.excluded = facilityGroups.value.filter((group: any) => excludedGroupIds.includes(group.facilityGroupId));
         } else if(selectedSegment.value === "RG_SHIPPING_CHANNEL") {
           const facilityCondition = currentRule.value.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FACILITIES")
-          formData.value.selectedConfigFacilites = facilityCondition.fieldValue?.split(",");
+          formData.value.selectedConfigFacilites = facilityCondition?.fieldValue ?  facilityCondition.fieldValue.split(",") : [];
         }
 
         const currentAppliedFilters = JSON.parse(JSON.stringify(appliedFilters.value))
@@ -203,12 +203,12 @@ onIonViewWillLeave(() => {
 
 async function fetchStoreConfig() {
   emitter.emit("presentLoader");
-  await Promise.allSettled([store.dispatch("util/fetchFacilityGroups"), store.dispatch("util/fetchConfigFacilities")]);
   formData.value.selectedFacilityGroups = {
     included: [],
     excluded: []
   }
   formData.value.selectedConfigFacilites = []
+  await Promise.allSettled([store.dispatch("util/fetchFacilityGroups"), store.dispatch("util/fetchConfigFacilities")]);
   emitter.emit("dismissLoader");
 }
 
