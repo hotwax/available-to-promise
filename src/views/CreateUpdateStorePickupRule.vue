@@ -405,10 +405,10 @@ function isRuleValid() {
   }
 
   if(selectedSegment.value === 'RG_PICKUP_FACILITY' && !formData.value.selectedFacilityGroups.included.length) {
-    showToast(translate("Please include atleast one facility group."))
+    showToast(translate("Please include atleast one facility."))
     return false;
   } else if(selectedSegment.value === 'RG_PICKUP_CHANNEL' && !formData.value.selectedConfigFacilites.length) {
-    showToast(translate("Please select atleast one config facility."))
+    showToast(translate("Please select atleast one channel."))
     return false;
   }
 

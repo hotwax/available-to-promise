@@ -123,6 +123,7 @@ async function runNow() {
       ]
     });
 
-  return scheduleAlert.present();
+  await scheduleAlert.present();
+  popoverController.dismiss()
 }
 </script> 

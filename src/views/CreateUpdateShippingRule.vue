@@ -243,6 +243,7 @@ function isFacilitySelected(facilityId: any) {
 }
 
 async function createRule() {
+  if(!isRuleValid()) return;
 
   emitter.emit("presentLoader");
 
@@ -404,10 +405,10 @@ function isRuleValid() {
   }
 
   if(selectedSegment.value === 'RG_SHIPPING_FACILITY' && !formData.value.selectedFacilityGroups.included.length) {
-    showToast(translate("Please include atleast one facility group."))
+    showToast(translate("Please include atleast one facility."))
     return false;
   } else if(selectedSegment.value === 'RG_SHIPPING_CHANNEL' && !formData.value.selectedConfigFacilites.length) {
-    showToast(translate("Please select atleast one config facility."))
+    showToast(translate("Please select atleast one channel."))
     return false;
   }
 

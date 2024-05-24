@@ -45,7 +45,7 @@
       <ion-infinite-scroll
         @ionInfinite="loadMoreFacilities($event)"
         threshold="100px"
-        v-show="isScrollable"
+        v-show="selectedSegment === 'SHIPPING_FACILITY' && isScrollable"
         ref="infiniteScrollRef"
       >
         <ion-infinite-scroll-content
@@ -67,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, IonLabel, IonMenuButton, IonPage, IonReorderGroup, IonSegment, IonSegmentButton, IonTitle, IonToolbar, onIonViewDidLeave, onIonViewWillEnter } from '@ionic/vue';
+import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, IonLabel, IonMenuButton, IonPage, IonReorderGroup, IonSegment, IonSegmentButton, IonTitle, IonToolbar, onIonViewDidLeave, onIonViewDidEnter } from '@ionic/vue';
 import { computed, ref } from 'vue';
 import { addOutline, balloonOutline, saveOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue'
@@ -95,7 +95,7 @@ const isScrollingEnabled = ref(false);
 const contentRef = ref({}) as any;
 const infiniteScrollRef = ref({}) as any;
 
-onIonViewWillEnter(async() => {
+onIonViewDidEnter(async() => {
   fetchRules();
   emitter.on("productStoreOrConfigChanged", fetchRules);
 })
@@ -109,7 +109,7 @@ async function fetchRules() {
   emitter.emit("presentLoader");
   store.dispatch("rule/updateIsReorderActive", false)
   if(!selectedSegment.value || (selectedSegment.value !== 'RG_SHIPPING_FACILITY' && selectedSegment.value !== 'RG_SHIPPING_CHANNEL' && selectedSegment.value !== 'SHIPPING_FACILITY')) store.dispatch("util/updateSelectedSegment", "RG_SHIPPING_FACILITY");
-  await Promise.allSettled([store.dispatch('rule/fetchRules', { groupTypeEnumId: selectedSegment.value }), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilityGroups")])
+  await Promise.allSettled([store.dispatch('rule/fetchRules', { groupTypeEnumId: selectedSegment.value, pageSize: 50 }), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilityGroups")])
   if(selectedSegment.value === 'SHIPPING_FACILITY') fetchFacilities();
   emitter.emit("dismissLoader");
 }
@@ -163,7 +163,7 @@ async function updateSegment(event: any) {
   } else {
     store.dispatch("rule/updateIsReorderActive", false)
     reorderingRules.value = []
-    await store.dispatch('rule/fetchRules', { groupTypeEnumId: selectedSegment.value})
+    await store.dispatch('rule/fetchRules', { groupTypeEnumId: selectedSegment.value, pageSize: 50 })
   }
   emitter.emit("dismissLoader");
 }

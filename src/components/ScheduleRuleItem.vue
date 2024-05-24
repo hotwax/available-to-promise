@@ -77,7 +77,7 @@ async function saveSchedule() {
     const resp = await RuleService.scheduleRuleGroup(payload)
     if(!hasError(resp)) {
       showToast(translate("Service has been scheduled"))
-      await store.dispatch('rule/fetchRules', { groupTypeEnumId: ruleGroup.value.groupTypeEnumId })
+      await store.dispatch('rule/fetchRules', { groupTypeEnumId: ruleGroup.value.groupTypeEnumId, pageSize: 50 })
     } else {
       throw resp.data
     }
