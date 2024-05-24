@@ -89,8 +89,10 @@ const total = computed(() => store.getters["rule/getTotalRulesCount"])
 const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
 
 onIonViewDidEnter(async () => {
-  await fetchStoreConfig();
-  emitter.on("productStoreOrConfigChanged", fetchStoreConfig);
+  emitter.emit("presentLoader");
+  await store.dispatch("util/fetchConfigFacilities");
+  emitter.emit("dismissLoader");
+  emitter.on("productStoreOrConfigChanged", revertRedirect);
 
   if(props.ruleId) {
     try {
@@ -133,14 +135,11 @@ onIonViewWillLeave(() => {
     selectedConfigFacilites: []
   }
   store.dispatch("util/clearAppliedFilters")
-  emitter.off("productStoreOrConfigChanged", fetchStoreConfig);
+  emitter.off("productStoreOrConfigChanged", revertRedirect);
 })
 
-async function fetchStoreConfig() {
-  emitter.emit("presentLoader");
-  formData.value.selectedConfigFacilites = [];
-  await store.dispatch("util/fetchConfigFacilities");
-  emitter.emit("dismissLoader");
+async function revertRedirect() {
+  router.push("/threshold")
 }
 
 function toggleFacilitySelection(facilityId: any) {

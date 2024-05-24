@@ -118,8 +118,10 @@ const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"
 const facilityGroups = computed(() => store.getters["util/getFacilityGroups"])
 
 onIonViewDidEnter(async () => {
-  await fetchStoreConfig();
-  emitter.on("productStoreOrConfigChanged", fetchStoreConfig);
+  emitter.emit("presentLoader");
+  await store.dispatch("util/fetchFacilityGroups")
+  emitter.emit("dismissLoader");
+  emitter.on("productStoreOrConfigChanged", revertRedirect);
 
   if(props.ruleId) {
     try {
@@ -170,17 +172,11 @@ onIonViewWillLeave(() => {
     }
   }
   store.dispatch("util/clearAppliedFilters")
-  emitter.off("productStoreOrConfigChanged", fetchStoreConfig);
+  emitter.off("productStoreOrConfigChanged", revertRedirect);
 })
 
-async function fetchStoreConfig() {
-  emitter.emit("presentLoader");
-  formData.value.selectedFacilityGroups = {
-    included: [],
-    excluded: []
-  }
-  await store.dispatch("util/fetchFacilityGroups")
-  emitter.emit("dismissLoader");
+async function revertRedirect() {
+  router.push("/safety-stock");
 }
 
 async function openProductFacilityGroupModal(type: string) {

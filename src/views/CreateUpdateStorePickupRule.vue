@@ -141,8 +141,10 @@ const formData = ref({
 }) as any;
 
 onIonViewDidEnter(async () => {
-  await fetchStoreConfig();
-  emitter.on("productStoreOrConfigChanged", fetchStoreConfig);
+  emitter.emit("presentLoader");
+  await Promise.allSettled([store.dispatch("util/fetchFacilityGroups"), store.dispatch("util/fetchConfigFacilities")]);
+  emitter.emit("dismissLoader");
+  emitter.on("productStoreOrConfigChanged", revertRedirect);
 
   if(props.ruleId) {
     try {
@@ -198,18 +200,11 @@ onIonViewWillLeave(() => {
     selectedConfigFacilites: []
   }
   store.dispatch("util/clearAppliedFilters")
-  emitter.off("productStoreOrConfigChanged", fetchStoreConfig);
+  emitter.off("productStoreOrConfigChanged", revertRedirect);
 })
 
-async function fetchStoreConfig() {
-  emitter.emit("presentLoader");
-  formData.value.selectedFacilityGroups = {
-    included: [],
-    excluded: []
-  }
-  formData.value.selectedConfigFacilites = []
-  await Promise.allSettled([store.dispatch("util/fetchFacilityGroups"), store.dispatch("util/fetchConfigFacilities")]);
-  emitter.emit("dismissLoader");
+async function revertRedirect() {
+  router.push("/store-pickup");
 }
 
 async function openProductFacilityGroupModal(type: string) {
