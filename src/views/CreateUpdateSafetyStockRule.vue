@@ -118,7 +118,7 @@ const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"
 const facilityGroups = computed(() => store.getters["util/getFacilityGroups"])
 
 onIonViewDidEnter(async () => {
-  emitter.on("productStoreOrConfigChanged", revertRedirect);
+  emitter.on("productStoreOrConfigChanged", redirectLink);
   emitter.emit("presentLoader");
   await store.dispatch("util/fetchFacilityGroups")
   
@@ -172,10 +172,10 @@ onIonViewWillLeave(() => {
     }
   }
   store.dispatch("util/clearAppliedFilters")
-  emitter.off("productStoreOrConfigChanged", revertRedirect);
+  emitter.off("productStoreOrConfigChanged", redirectLink);
 })
 
-async function revertRedirect() {
+async function redirectLink() {
   router.push("/safety-stock");
 }
 

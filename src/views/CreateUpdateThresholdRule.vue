@@ -89,7 +89,7 @@ const total = computed(() => store.getters["rule/getTotalRulesCount"])
 const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
 
 onIonViewDidEnter(async () => {
-  emitter.on("productStoreOrConfigChanged", revertRedirect);
+  emitter.on("productStoreOrConfigChanged", redirectLink);
   emitter.emit("presentLoader");
   await store.dispatch("util/fetchConfigFacilities");
 
@@ -135,10 +135,10 @@ onIonViewWillLeave(() => {
     selectedConfigFacilites: []
   }
   store.dispatch("util/clearAppliedFilters")
-  emitter.off("productStoreOrConfigChanged", revertRedirect);
+  emitter.off("productStoreOrConfigChanged", redirectLink);
 })
 
-async function revertRedirect() {
+async function redirectLink() {
   router.push("/threshold")
 }
 
