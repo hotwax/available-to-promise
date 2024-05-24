@@ -14,7 +14,7 @@
           <!-- When the group is in draft status, do not display the runTime from the schedule -->
           <ion-label slot="end">{{ ruleGroup.schedule?.paused === 'N' ? getDateAndTime(ruleGroup.schedule?.nextExecutionDateTime) : "-" }}</ion-label>
         </ion-item>
-        <ion-item>
+        <ion-item lines="full">
           <ion-icon slot="start" :icon="timerOutline"/>
           <!-- When the group is in draft status or the job is not present, do not display the frequency and just display the label for schedule -->
           <ion-select :label="translate('Schedule')" interface="popover" :placeholder="translate('Select')" value="0 0 0 * * ?" :disabled="true">
