@@ -59,6 +59,8 @@
     IonSelectOption,
     IonTitle,
     IonToolbar,
+    alertController,
+    SelectCustomEvent
   } from "@ionic/vue";
   import { computed } from "vue";
   import { useStore } from "@/store";
@@ -66,7 +68,6 @@
   import { cloudUploadOutline, globeOutline, settingsOutline, sendOutline, storefrontOutline, pulseOutline } from 'ionicons/icons';
   import { translate } from "@/i18n";
   import emitter from "@/event-bus";
-  import { alertController, SelectCustomEvent } from "@ionic/core";
 
   const store = useStore();
   const router = useRouter();
