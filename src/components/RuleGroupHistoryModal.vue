@@ -12,13 +12,15 @@
   
   <ion-content>
     <ion-list v-if="groupHistory.length">
-      <ion-item v-for="history in groupHistory" :key="history.jobRunId">
+    <template v-for="history in groupHistory" :key="history.jobRunId">
+      <ion-item v-if="history.endTime">
         <ion-label>
           <h3>{{ getTime(history.startTime) }}</h3>
           <p>{{ getDate(history.startTime) }}</p>
         </ion-label>
         <ion-badge color="dark" v-if="history.endTime">{{ timeTillRun(history.endTime) }}</ion-badge>
       </ion-item>
+    </template>
     </ion-list>
     <div class="empty-state" v-else>
       <p>{{ translate("No available history for rule.", { name: router.currentRoute.value.name?.toString().toLowerCase() }) }}</p>

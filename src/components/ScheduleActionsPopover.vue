@@ -109,6 +109,7 @@ async function runNow() {
               const resp = await RuleService.runNow(ruleGroup.value.ruleGroupId)
               if(!hasError(resp) && resp.data.jobRunId) {
                 showToast(translate("Service has been scheduled"))
+                await store.dispatch('rule/fetchRules', { groupTypeEnumId: ruleGroup.value.groupTypeEnumId, pageSize: 50 })
                 popoverController.dismiss();
               } else {
                 throw resp.data
