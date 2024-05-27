@@ -44,5 +44,8 @@ const mutations: MutationTree <UtilState> = {
   [types.UTIL_SELECTED_SEGMENT_UPDATED](state, payload) {
     state.selectedSegment = payload
   },
+  [types.UTIL_PICKUP_GROUPS_UPDATED](state, payload) {
+    state.pickupGroups = payload
+  },
 }
 export default mutations;

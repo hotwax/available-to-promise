@@ -125,6 +125,45 @@ const actions: ActionTree<UtilState, RootState> = {
     return facilitiesData;
   },
 
+  async fetchPickupGroups({ commit }) {
+    let groups = [] as any;
+
+    try {
+      const resp = await UtilService.fetchFacilityGroups({ facilityGroupTypeId: 'PICKUP', productStoreId: store.state.user.currentEComStore.productStoreId, pageSize: 100 })
+
+      if(!hasError(resp)) {
+        groups = resp.data;
+        console.log(resp.data);
+        
+      } else {
+        throw resp.data
+      }
+    } catch(error) {
+      logger.error(error)
+    }
+    commit(types.UTIL_PICKUP_GROUPS_UPDATED , groups);
+  },
+
+  async fetchPickGroupFacilities({ commit, state }) {
+    let pickupGroupFacilities = {} as any;
+    const pickupGroups = state.pickupGroups.length ? JSON.parse(JSON.stringify(state.pickupGroups)) : [];
+
+    try {
+      const resp = await UtilService.fetchPickupGroupFacilities({ facilityGroupId:  , pageSize: 100 })
+
+      if(!hasError(resp)) {
+        groups = resp.data;
+        console.log(resp.data);
+        
+      } else {
+        throw resp.data
+      }
+    } catch(error) {
+      logger.error(error)
+    }
+    commit(types.UTIL_PICKUP_GROUPS_UPDATED , groups);
+  },
+
   async updateFacilities({ commit, state }, payload) {
     commit(types.UTIL_FACILITY_LIST_UPDATED , { facilities: payload.facilities, isScrollable: state.facilities.isScrollable });
   },

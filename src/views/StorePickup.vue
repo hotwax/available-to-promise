@@ -12,11 +12,9 @@
           <ion-segment-button value="RG_PICKUP_CHANNEL">
             <ion-label>{{ translate("Product and channel") }}</ion-label>
           </ion-segment-button>
-          <!-- Hidden Facility segment for now as it is not functionality -->
-          <!-- Todo: add functionality to the Facility segment -->
-          <!-- <ion-segment-button value="PICKUP_FACILITY">
+          <ion-segment-button value="PICKUP_FACILITY">
             <ion-label>{{ translate("Facility") }}</ion-label>
-          </ion-segment-button> -->
+          </ion-segment-button>
         </ion-segment>
       </ion-toolbar>
     </ion-header>
@@ -157,10 +155,11 @@ async function updateSegment(event: any) {
   store.dispatch("util/updateSelectedSegment", event.detail.value);
 
   emitter.emit("presentLoader");
-  if(selectedSegment.value === 'facility') {
+  if(selectedSegment.value === 'PICKUP_FACILITY') {
     isScrollingEnabled.value = false;
     await fetchFacilities();
     store.dispatch("rule/updateIsReorderActive", false)
+    store.dispatch("util/fetchPickupGroups")
   } else {
     store.dispatch("rule/updateIsReorderActive", false)
     reorderingRules.value = []

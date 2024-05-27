@@ -21,6 +21,9 @@ const getters: GetterTree<UtilState, RootState> = {
   getSelectedSegment(state) {
     return state.selectedSegment
   },
+  getPickupGroups(state) {
+    return state.pickupGroups
+  },
 }
 
 export default getters;

@@ -24,7 +24,8 @@ const utilModule: Module<UtilState, RootState> = {
       list: [],
       isScrollable: true
     },
-    selectedSegment: ""
+    selectedSegment: "",
+    pickupGroups: []
   },
   getters,
   actions,

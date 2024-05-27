@@ -27,7 +27,8 @@ const updateFacility = async (payload: any): Promise <any>  => {
 const fetchFacilityGroups = async (payload: any): Promise <any>  => {
   return api({
     url: `productStores/${payload.productStoreId}/facilityGroups`,
-    method: "GET"
+    method: "GET",
+    params: payload
   });
 }
 
@@ -39,10 +40,20 @@ const fetchFacilitiesOrderCount = async (payload: any): Promise <any>  => {
   });
 }
 
+const fetchPickupGroupFacilities = async (payload: any): Promise <any>  => {
+  return api({
+    url: `facilityGroups/${payload.facilityGroupId}/facilities`,
+    method: "GET",
+    params: payload
+  });
+}
+
+
 export const UtilService = {
   fetchFacilities,
   fetchFacilitiesOrderCount,
   updateFacility,
   fetchFacilityGroups,
   fetchFacets,
+  fetchPickupGroupFacilities
 }
