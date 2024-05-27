@@ -134,10 +134,15 @@ const actions: ActionTree<UtilState, RootState> = {
 
       if(!hasError(resp)) {
         groups = resp.data;
-        await Promise.allSettled(groups.map(async (group: any) => {
+        const responses = await Promise.allSettled(groups.map(async (group: any) => {
           const facilities = await dispatch("fetchPickGroupFacilities", group.facilityGroupId)
           pickGroupFacilities[group.facilityGroupId] = facilities
         }))
+
+        const hasFailedResponse = responses.some((response: any) => response.status === 'rejected')
+        if (hasFailedResponse) {
+          logger.error("Failed to fetch facilities for some pickup group.")
+        }
       } else {
         throw resp.data
       }

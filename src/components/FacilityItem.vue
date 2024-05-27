@@ -7,7 +7,7 @@
 
     <ion-item lines="none" v-for="group in pickupGroups" :key="group.facilityGroupId">
       <ion-icon :icon="storefrontOutline" slot="start" />
-      <ion-toggle :checked="isPickupAllowed(group)" @click.prevent="updatePickupAllowed($event, group)">{{ group.facilityGroupName }}</ion-toggle>
+      <ion-toggle :checked="isPickupAllowed(group)" @click.prevent="updatePickupAllowed($event, group)">{{ group.facilityGroupName ? group.facilityGroupName : group.facilityGroupId }}</ion-toggle>
     </ion-item>
   </ion-card>
 
