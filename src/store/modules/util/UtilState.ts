@@ -5,4 +5,5 @@ export default interface UtilState {
   facilities: any;
   selectedSegment: any;
   pickupGroups: any;
+  pickupGroupFacilities: any;
 }

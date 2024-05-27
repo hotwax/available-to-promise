@@ -48,6 +48,13 @@ const fetchPickupGroupFacilities = async (payload: any): Promise <any>  => {
   });
 }
 
+const updateFacilityAssociationWithPickupGroup = async (payload: any): Promise <any>  => {
+  return api({
+    url: `facilityGroups/${payload.facilityGroupId}/facilities/${payload.facilityId}/association`,
+    method: "POST",
+    data: payload
+  });
+}
 
 export const UtilService = {
   fetchFacilities,
@@ -55,5 +62,6 @@ export const UtilService = {
   updateFacility,
   fetchFacilityGroups,
   fetchFacets,
-  fetchPickupGroupFacilities
+  fetchPickupGroupFacilities,
+  updateFacilityAssociationWithPickupGroup
 }

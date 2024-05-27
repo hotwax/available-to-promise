@@ -110,6 +110,10 @@ async function fetchRules() {
   emitter.emit("presentLoader");
   store.dispatch("rule/updateIsReorderActive", false)
   if(!selectedSegment.value || (selectedSegment.value !== 'RG_PICKUP_FACILITY' && selectedSegment.value !== 'RG_PICKUP_CHANNEL' && selectedSegment.value !== 'PICKUP_FACILITY')) store.dispatch("util/updateSelectedSegment", "RG_PICKUP_FACILITY");
+  if(selectedSegment.value === 'PICKUP_FACILITY') {
+    await fetchFacilities();
+    store.dispatch("util/fetchPickupGroups")
+  }
   await Promise.allSettled([store.dispatch('rule/fetchRules', { groupTypeEnumId: selectedSegment.value, pageSize: 50 }), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilityGroups")])
   emitter.emit("dismissLoader");
 }

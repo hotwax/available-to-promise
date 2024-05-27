@@ -125,16 +125,19 @@ const actions: ActionTree<UtilState, RootState> = {
     return facilitiesData;
   },
 
-  async fetchPickupGroups({ commit }) {
+  async fetchPickupGroups({ commit, dispatch }) {
     let groups = [] as any;
+    const pickGroupFacilities = {} as any;
 
     try {
       const resp = await UtilService.fetchFacilityGroups({ facilityGroupTypeId: 'PICKUP', productStoreId: store.state.user.currentEComStore.productStoreId, pageSize: 100 })
 
       if(!hasError(resp)) {
         groups = resp.data;
-        console.log(resp.data);
-        
+        await Promise.allSettled(groups.map(async (group: any) => {
+          const facilities = await dispatch("fetchPickGroupFacilities", group.facilityGroupId)
+          pickGroupFacilities[group.facilityGroupId] = facilities
+        }))
       } else {
         throw resp.data
       }
@@ -142,18 +145,24 @@ const actions: ActionTree<UtilState, RootState> = {
       logger.error(error)
     }
     commit(types.UTIL_PICKUP_GROUPS_UPDATED , groups);
+    commit(types.UTIL_PICKUP_GROUP_FACILITIES , pickGroupFacilities);
   },
 
-  async fetchPickGroupFacilities({ commit, state }) {
-    let pickupGroupFacilities = {} as any;
-    const pickupGroups = state.pickupGroups.length ? JSON.parse(JSON.stringify(state.pickupGroups)) : [];
+  async fetchPickGroupFacilities({ commit }, facilityGroupId) {
+    let pickupGroupFacilities = [] as any;
 
     try {
-      const resp = await UtilService.fetchPickupGroupFacilities({ facilityGroupId:  , pageSize: 100 })
+      const resp = await UtilService.fetchPickupGroupFacilities({ 
+        facilityGroupId,
+        pageSize: 100,
+        parentFacilityTypeId: 'VIRTUAL_FACILITY',
+        parentFacilityTypeId_not: 'Y',
+        facilityTypeId: 'VIRTUAL_FACILITY',
+        facilityTypeId_not: 'Y',
+      })
 
       if(!hasError(resp)) {
-        groups = resp.data;
-        console.log(resp.data);
+        pickupGroupFacilities = resp.data;
         
       } else {
         throw resp.data
@@ -161,7 +170,11 @@ const actions: ActionTree<UtilState, RootState> = {
     } catch(error) {
       logger.error(error)
     }
-    commit(types.UTIL_PICKUP_GROUPS_UPDATED , groups);
+    return pickupGroupFacilities;
+  },
+
+  async updatePickupGroupFacilities({ commit }, payload) {
+    commit(types.UTIL_PICKUP_GROUP_FACILITIES , payload);
   },
 
   async updateFacilities({ commit, state }, payload) {

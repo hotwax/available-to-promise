@@ -5,9 +5,9 @@
       <ion-card-title>{{ facility.facilityName }}</ion-card-title>
     </ion-card-header>
 
-    <ion-item lines="none">
+    <ion-item lines="none" v-for="group in pickupGroups" :key="group.facilityGroupId">
       <ion-icon :icon="storefrontOutline" slot="start" />
-      <ion-toggle>{{ translate("Store pickup") }}</ion-toggle>
+      <ion-toggle :checked="isPickupAllowed(group)" @click.prevent="updatePickupAllowed($event, group)">{{ group.facilityGroupName }}</ion-toggle>
     </ion-item>
   </ion-card>
 
@@ -45,6 +45,7 @@ import { hasError, showToast } from '@/utils';
 import logger from '@/logger';
 import { useStore } from 'vuex';
 import emitter from '@/event-bus';
+import { DateTime } from 'luxon';
 
 const router = useRouter();
 const store = useStore();
@@ -56,6 +57,8 @@ const selectedPage = ref({
 
 const props = defineProps(["facility"]);
 const facilities = computed(() => store.getters["util/getFacilities"]);
+const pickupGroups = computed(() => store.getters["util/getPickupGroups"]);
+const pickupGroupFacilities = computed(() => store.getters["util/getPickupGroupFacilities"]);
 
 onMounted(() => {
     selectedPage.value.path = router.currentRoute.value.path
@@ -104,5 +107,53 @@ async function updateFacility(maximumOrderLimit: number | string) {
     logger.error("Failed to update facility", err)
   }
   emitter.emit("dismissLoader");
+}
+
+function isPickupAllowed(group: any) {
+  const facilities = pickupGroupFacilities.value[group.facilityGroupId]
+  return facilities.find((facility: any) => facility.facilityId === props.facility.facilityId);
+}
+
+async function updatePickupAllowed(event: Event, group: any) {
+  event.stopImmediatePropagation();
+
+  let payload = {} as any;
+  const isPickupActive = isPickupAllowed(group);
+
+  if(isPickupAllowed(group)) {
+    console.log('allowed');
+    const facilities = pickupGroupFacilities.value[group.facilityGroupId]
+    payload = facilities.find((facility: any) => facility.facilityId === props.facility.facilityId)
+    payload = {
+      ...payload,
+      thruDate: DateTime.now().toMillis()
+    }
+  } else {
+    payload = {
+      facilityId: props.facility.facilityId,
+      facilityGroupId: group.facilityGroupId,
+      fromDate: DateTime.now().toMillis()
+    }
+  }
+
+  try {
+    const resp = await UtilService.updateFacilityAssociationWithPickupGroup(payload)
+    if(!hasError(resp)) {
+      const facilitiesByPickupGroup = JSON.parse(JSON.stringify(pickupGroupFacilities.value));
+      if(isPickupActive) {
+        facilitiesByPickupGroup[group.facilityGroupId] = facilitiesByPickupGroup[group.facilityGroupId].filter((record: any) => record.facilityId !== props.facility.facilityId);
+      } else {
+        facilitiesByPickupGroup[group.facilityGroupId].push(payload)
+      }
+      store.dispatch("util/updatePickupGroupFacilities", facilitiesByPickupGroup);
+      showToast(translate("Facility association updated successfully with pickup group."))
+    } else {
+      throw resp.data;
+    }
+  } catch(error: any) {
+    logger.error(error);
+    showToast(translate("Failed to update facility association with pickup group."));
+  }
+  
 }
 </script>
