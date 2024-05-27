@@ -13,7 +13,7 @@
   <ion-content>
     <ion-list v-if="groupHistory.length">
     <template v-for="history in groupHistory" :key="history.jobRunId">
-      <ion-item v-if="history.endTime">
+      <ion-item v-if="history.startTime">
         <ion-label>
           <h3>{{ getTime(history.startTime) }}</h3>
           <p>{{ getDate(history.startTime) }}</p>
