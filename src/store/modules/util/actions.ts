@@ -125,6 +125,63 @@ const actions: ActionTree<UtilState, RootState> = {
     return facilitiesData;
   },
 
+  async fetchPickupGroups({ commit, dispatch }) {
+    let groups = [] as any;
+    const pickGroupFacilities = {} as any;
+
+    try {
+      const resp = await UtilService.fetchFacilityGroups({ facilityGroupTypeId: 'PICKUP', productStoreId: store.state.user.currentEComStore.productStoreId, pageSize: 100 })
+
+      if(!hasError(resp)) {
+        groups = resp.data;
+        const responses = await Promise.allSettled(groups.map(async (group: any) => {
+          const facilities = await dispatch("fetchPickGroupFacilities", group.facilityGroupId)
+          pickGroupFacilities[group.facilityGroupId] = facilities
+        }))
+
+        const hasFailedResponse = responses.some((response: any) => response.status === 'rejected')
+        if (hasFailedResponse) {
+          logger.error("Failed to fetch facilities for some pickup group.")
+        }
+      } else {
+        throw resp.data
+      }
+    } catch(error) {
+      logger.error(error)
+    }
+    commit(types.UTIL_PICKUP_GROUPS_UPDATED , groups);
+    commit(types.UTIL_PICKUP_GROUP_FACILITIES , pickGroupFacilities);
+  },
+
+  async fetchPickGroupFacilities({ commit }, facilityGroupId) {
+    let pickupGroupFacilities = [] as any;
+
+    try {
+      const resp = await UtilService.fetchPickupGroupFacilities({ 
+        facilityGroupId,
+        pageSize: 100,
+        parentFacilityTypeId: 'VIRTUAL_FACILITY',
+        parentFacilityTypeId_not: 'Y',
+        facilityTypeId: 'VIRTUAL_FACILITY',
+        facilityTypeId_not: 'Y',
+      })
+
+      if(!hasError(resp)) {
+        pickupGroupFacilities = resp.data;
+        
+      } else {
+        throw resp.data
+      }
+    } catch(error) {
+      logger.error(error)
+    }
+    return pickupGroupFacilities;
+  },
+
+  async updatePickupGroupFacilities({ commit }, payload) {
+    commit(types.UTIL_PICKUP_GROUP_FACILITIES , payload);
+  },
+
   async updateFacilities({ commit, state }, payload) {
     commit(types.UTIL_FACILITY_LIST_UPDATED , { facilities: payload.facilities, isScrollable: state.facilities.isScrollable });
   },

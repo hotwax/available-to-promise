@@ -12,11 +12,9 @@
           <ion-segment-button value="RG_PICKUP_CHANNEL">
             <ion-label>{{ translate("Product and channel") }}</ion-label>
           </ion-segment-button>
-          <!-- Hidden Facility segment for now as it is not functionality -->
-          <!-- Todo: add functionality to the Facility segment -->
-          <!-- <ion-segment-button value="PICKUP_FACILITY">
+          <ion-segment-button value="PICKUP_FACILITY">
             <ion-label>{{ translate("Facility") }}</ion-label>
-          </ion-segment-button> -->
+          </ion-segment-button>
         </ion-segment>
       </ion-toolbar>
     </ion-header>
@@ -112,6 +110,10 @@ async function fetchRules() {
   emitter.emit("presentLoader");
   store.dispatch("rule/updateIsReorderActive", false)
   if(!selectedSegment.value || (selectedSegment.value !== 'RG_PICKUP_FACILITY' && selectedSegment.value !== 'RG_PICKUP_CHANNEL' && selectedSegment.value !== 'PICKUP_FACILITY')) store.dispatch("util/updateSelectedSegment", "RG_PICKUP_FACILITY");
+  if(selectedSegment.value === 'PICKUP_FACILITY') {
+    await fetchFacilities();
+    store.dispatch("util/fetchPickupGroups")
+  }
   await Promise.allSettled([store.dispatch('rule/fetchRules', { groupTypeEnumId: selectedSegment.value, pageSize: 50 }), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilityGroups")])
   emitter.emit("dismissLoader");
 }
@@ -157,10 +159,11 @@ async function updateSegment(event: any) {
   store.dispatch("util/updateSelectedSegment", event.detail.value);
 
   emitter.emit("presentLoader");
-  if(selectedSegment.value === 'facility') {
+  if(selectedSegment.value === 'PICKUP_FACILITY') {
     isScrollingEnabled.value = false;
     await fetchFacilities();
     store.dispatch("rule/updateIsReorderActive", false)
+    store.dispatch("util/fetchPickupGroups")
   } else {
     store.dispatch("rule/updateIsReorderActive", false)
     reorderingRules.value = []
