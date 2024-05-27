@@ -121,7 +121,6 @@ async function updatePickupAllowed(event: Event, group: any) {
   const isPickupActive = isPickupAllowed(group);
 
   if(isPickupAllowed(group)) {
-    console.log('allowed');
     const facilities = pickupGroupFacilities.value[group.facilityGroupId]
     payload = facilities.find((facility: any) => facility.facilityId === props.facility.facilityId)
     payload = {
