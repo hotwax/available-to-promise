@@ -63,11 +63,11 @@
               <ion-label>{{ translate("Product tags") }}</ion-label>
             </ion-item-divider>
 
-            <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'tags', 'in')">
+            <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'tags', 'in')" :lines="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'tags', 'not-in') ? '' : 'full'">
               <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
               <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FILTER", "tags", "in") }}</ion-label>
             </ion-item>
-            <ion-item lines="none" v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'tags', 'not-in')">
+            <ion-item lines="full" v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'tags', 'not-in')">
               <ion-icon slot="start" :icon="closeCircleOutline"/>
               <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FILTER", "tags", "not-in") }}</ion-label>
             </ion-item>
@@ -76,7 +76,7 @@
               <ion-label>{{ translate("Product features") }}</ion-label>
             </ion-item-divider>
 
-            <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'productFeatures', 'in')">
+            <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'productFeatures', 'in')" :lines="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'productFeatures', 'not-in') ? '' : 'full'">
               <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
               <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FILTER", "productFeatures", "in") }}</ion-label>
             </ion-item>

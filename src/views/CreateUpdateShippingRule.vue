@@ -3,7 +3,7 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-back-button slot="start" default-href="/shipping" />
-        <ion-title>{{ currentRule.ruleId ? translate("Edit shipping rule") : translate("New shipping rule") }}</ion-title>
+        <ion-title>{{ ruleId ? translate("Edit shipping rule") : translate("New shipping rule") }}</ion-title>
       </ion-toolbar>
     </ion-header>
     
