@@ -23,6 +23,10 @@
             </ion-card-header>
           </ion-item>
           <ion-button color="danger" @click="logout()">{{ translate("Logout") }}</ion-button>
+          <ion-button fill="outline" @click="goToLaunchpad()">
+            {{ translate("Go to Launchpad") }}
+            <ion-icon slot="end" :icon="openOutline" />
+          </ion-button>
         </ion-card>
       </div>
       <div class="section-header">
@@ -41,7 +45,7 @@
           <ion-card-content>
             {{ translate('This is the name of the OMS you are connected to right now. Make sure that you are connected to the right instance before proceeding.') }}
           </ion-card-content>
-          <ion-button @click="goToOms()" fill="clear">
+          <ion-button :disabled="!omsRedirectionInfo.token || !omsRedirectionInfo.url" @click="goToOms(omsRedirectionInfo.token, omsRedirectionInfo.url)" fill="clear">
             {{ translate('Go to OMS') }}
             <ion-icon slot="end" :icon="openOutline" />
           </ion-button>
@@ -106,17 +110,16 @@ import TimeZoneModal from '@/views/TimezoneModal.vue';
 import Image from '@/components/Image.vue'
 import { DateTime } from "luxon";
 import { translate } from '@/i18n';
-
+import { goToOms } from "@hotwax/dxp-components";
 
 const store = useStore()
-const router = useRouter()
 const appVersion = ref("")
 const appInfo = (process.env.VUE_APP_VERSION_INFO ? JSON.parse(process.env.VUE_APP_VERSION_INFO) : {}) as any
 
 const userProfile = computed(() => store.getters["user/getUserProfile"])
 const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
-const token = computed(() => store.getters["user/getUserToken"])
 const oms = computed(() => store.getters["user/getInstanceUrl"])
+const omsRedirectionInfo = computed(() => store.getters["user/getOmsRedirectionInfo"])
 
 onMounted(() => {
   appVersion.value = appInfo.branch ? (appInfo.branch + "-" + appInfo.revision) : appInfo.tag;
@@ -140,7 +143,8 @@ async function changeTimeZone() {
 
 function logout() {
   store.dispatch("user/logout").then(() => {
-    router.push("/login");
+    const redirectUrl = window.location.origin + '/login'
+    window.location.href = `${process.env.VUE_APP_LOGIN_URL}?isLoggedOut=true&redirectUrl=${redirectUrl}`
   })
 }
 
@@ -148,9 +152,8 @@ function getDateTime(time: any) {
   return time ? DateTime.fromMillis(time).toLocaleString(DateTime.DATETIME_MED) : "";
 }
 
-function goToOms() {
-  const link = (oms.value.startsWith('http') ? oms.value.replace(/\/api\/?|\/$/, "") : `https://${oms.value}.hotwax.io`) + `/qapps?token=${token.value}`
-  window.open(link, '_blank', 'noopener, noreferrer')
+function goToLaunchpad() {
+  window.location.href = `${process.env.VUE_APP_LOGIN_URL}`
 }
 </script>
 
