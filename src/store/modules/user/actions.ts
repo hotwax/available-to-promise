@@ -56,10 +56,6 @@ const actions: ActionTree<UserState, RootState> = {
    * Logout user
    */
   async logout ({ commit, dispatch }) {
-    console.log('logout');
-    
-    emitter.emit('presentLoader', { message: 'Logging out', backdropDismiss: false })
-
     const authStore = useAuthStore()
 
     // TODO add any other tasks if need
@@ -71,8 +67,6 @@ const actions: ActionTree<UserState, RootState> = {
 
     // reset plugin state on logout
     authStore.$reset()
-
-    emitter.emit('dismissLoader')
   },
 
   
