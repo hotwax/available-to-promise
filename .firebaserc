@@ -4,7 +4,7 @@
     "production": "digital-commerce-71eb8"
   },
   "targets": {
-    "hotwax-digital-commerce": {
+    "hotwax-digital-commerce-uat": {
       "hosting": {
         "dev": [
           "hotwax-atp-dev"
