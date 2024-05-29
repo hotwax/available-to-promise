@@ -3,27 +3,32 @@
     <ion-toolbar>
       <ion-buttons slot="start">
         <ion-button @click="closeModal"> 
-          <ion-icon :icon="close" />
+          <ion-icon :icon="closeOutline" />
         </ion-button>
       </ion-buttons>
-      <ion-title>{{ $t("Select time zone") }}</ion-title>
+      <ion-title>{{ translate("Select time zone") }}</ion-title>
     </ion-toolbar>
     <ion-toolbar>
-      <ion-searchbar @ionFocus="selectSearchBarText($event)" :placeholder="$t('Search time zones')"  v-model="queryString" v-on:keyup.enter="queryString = $event.target.value; findTimeZone()" />
+      <ion-searchbar @ionFocus="selectSearchBarText($event)" :placeholder="translate('Search time zones')"  v-model="queryString" v-on:keyup.enter="queryString = $event.target.value; findTimeZone()" />
     </ion-toolbar>
   </ion-header>
 
   <ion-content class="ion-padding">
-    <!-- Empty state -->
-    <div class="empty-state" v-if="filteredTimeZones.length === 0">
-      <p>{{ $t("No time zone found")}}</p>
+    <div class="empty-state" v-if="isLoading">
+      <ion-item lines="none">
+        <ion-spinner name="crescent" slot="start" />
+        {{ translate("Fetching time zones") }}
+      </ion-item>
+    </div>
+    <div class="empty-state" v-else-if="!filteredTimeZones.length">
+      <p>{{ translate("No time zone found") }}</p>
     </div>
 
     <!-- Timezones -->
     <div v-else>
       <ion-list>
         <ion-radio-group value="rd" v-model="timeZoneId">
-          <ion-item  v-bind:key="timeZone.id" v-for="timeZone in filteredTimeZones">
+          <ion-item :key="timeZone.id" v-for="timeZone in filteredTimeZones">
             <ion-radio :value="timeZone.id" label-placement="end" justify="start">{{ timeZone.label }} ({{ timeZone.id }})</ion-radio>
           </ion-item>
         </ion-radio-group>
@@ -31,14 +36,14 @@
     </div>
     
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button :disabled="!timeZoneId" @click="saveAlert">
-        <ion-icon :icon="save" />
+      <ion-fab-button :disabled="!timeZoneId" @click="setUserTimeZone">
+        <ion-icon :icon="saveOutline" />
       </ion-fab-button>
     </ion-fab>
   </ion-content>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { 
   IonButtons,
   IonButton,
@@ -48,128 +53,75 @@ import {
   IonHeader,
   IonItem,
   IonIcon,
-  IonList,
   IonRadioGroup,
   IonRadio,
+  IonList,
   IonSearchbar,
+  IonSpinner,
   IonTitle,
   IonToolbar,
   modalController,
-  alertController } from "@ionic/vue";
-import { defineComponent } from "vue";
-import { close, save } from "ionicons/icons";
+} from "@ionic/vue";
+import { onBeforeMount, ref } from "vue";
+import { closeOutline, saveOutline } from "ionicons/icons";
 import { useStore } from "@/store";
 import { UserService } from "@/services/UserService";
-import { hasError } from '@/utils'
-import { DateTime } from 'luxon';
+import { hasError } from "@/utils"
+import { DateTime } from "luxon";
+import { translate } from "@/i18n"
 
-export default defineComponent({
-  name: "TimeZoneModal",
-  components: { 
-    IonButtons,
-    IonButton,
-    IonContent,
-    IonFab,
-    IonFabButton,
-    IonHeader,
-    IonIcon,
-    IonItem,
-    IonList,
-    IonRadioGroup,
-    IonRadio,
-    IonSearchbar,
-    IonTitle,
-    IonToolbar 
-  },
-  data() {
-    return {
-      queryString: '',
-      filteredTimeZones: [],
-      timeZones: [],
-      timeZoneId: ''
-    }
-  },
-  methods: {
-    closeModal() {
-      modalController.dismiss({ dismissed: true });
-    },
-    async saveAlert() {
-      const message = this.$t("Are you sure you want to change the time zone to?", { timeZoneId: this.timeZoneId });
-      const alert = await alertController.create({
-        header: this.$t("Update time zone"),
-        message,
-        buttons: [
-          {
-            text: this.$t("Cancel"),
-          },
-          {
-            text: this.$t("Confirm"),
-            handler: () => {
-              this.setUserTimeZone();
-            }
-          }
-        ],
-      });
-      return alert.present();
-    },
-    escapeRegExp(text: string) {
-      //TODO Handle it in a better way
-      // Currently when the user types special character as it part of Regex expressions it breaks the code
-      // so removed the characters for now
-      return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
-    },
-    findTimeZone() { 
-      const regularExp = new RegExp(`${this.escapeRegExp(this.queryString)}`, 'i');
+const store = useStore();
+let queryString = ref("")
+let filteredTimeZones = ref([])
+let timeZones = ref([])
+let timeZoneId = ref("")
+let isLoading = ref(true)
 
-      this.filteredTimeZones = this.timeZones.filter((timeZone: any) => {
-        return regularExp.test(timeZone.id) || regularExp.test(timeZone.label);
-      });
-    },
-    async getAvailableTimeZones() {
-      UserService.getAvailableTimeZones().then((resp: any) => {
-        if(resp.status === 200 && !hasError(resp)) {
-          // We are filtering valid the timeZones coming with response here
-          this.timeZones = resp.data.filter((timeZone: any) => {
-            return DateTime.local().setZone(timeZone.id).isValid;
-          });
-          this.findTimeZone();
-        }
-      })
-    },
-    selectSearchBarText(event: any) {
-      event.target.getInputElement().then((element: any) => {
-        element.select();
-      })
-    },
-    async setUserTimeZone() {
-      return this.store.dispatch("user/setUserTimeZone", {
-        "tzId": this.timeZoneId
-      }).then(() => {
-        this.closeModal()
-      })
-    }
-  },
-  beforeMount () {
-    this.getAvailableTimeZones();
-  },
-  setup() {
-    const store = useStore();
-    return {
-      close,
-      save,
-      store
-    };
-  }
-});
-</script>
+onBeforeMount(() => {
+  getAvailableTimeZones();
+})
 
-<style>
-.empty-state {
-  max-width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 10px;
+function closeModal() {
+  modalController.dismiss({ dismissed: true });
 }
-</style>
+
+function escapeRegExp(text: string) {
+  //TODO Handle it in a better way
+  // Currently when the user types special character as it part of Regex expressions it breaks the code
+  // so removed the characters for now
+  return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+}
+
+function findTimeZone() { 
+  const regularExp = new RegExp(`${escapeRegExp(queryString.value)}`, "i");
+  filteredTimeZones.value = timeZones.value.filter((timeZone: any) => {
+    return regularExp.test(timeZone.id) || regularExp.test(timeZone.label);
+  });
+}
+
+function getAvailableTimeZones() {
+  UserService.getAvailableTimeZones().then((resp: any) => {
+    if (resp.status === 200 && !hasError(resp)) {
+      timeZones.value = resp.data.timeZones.filter((timeZone: any) => {
+        return DateTime.local().setZone(timeZone.id).isValid;
+      });
+      findTimeZone();
+    }
+    isLoading.value = false;
+  })
+}
+
+function selectSearchBarText(event: any) {
+  event.target.getInputElement().then((element: any) => {
+    element.select();
+  })
+}
+
+async function setUserTimeZone() {
+  return store.dispatch("user/setUserTimeZone", {
+    "tzId": timeZoneId.value
+  }).then(() => {
+    closeModal()
+  })
+}
+</script>

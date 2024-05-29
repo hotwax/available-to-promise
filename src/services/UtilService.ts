@@ -1,42 +1,67 @@
-import { api } from '@/adapter';
+import api, {client} from '@/api';
 
-const getServiceStatusDesc = async (payload: any): Promise<any> => {
+const fetchFacets = async (payload: any): Promise<any> => {
   return api({
-    url: "performFind",
-    method: "post",
-    data: payload,
-    cache: true
+    url: "solrFacets",
+    method: "GET",
+    params: payload
   });
 }
 
-const getShopifyConfig = async (payload: any): Promise <any>  => {
+const fetchFacilities = async (payload: any): Promise <any>  => {
   return api({
-    url: "performFind",
-    method: "post",
+    url: `productStores/${payload.productStoreId}/facilities`,
+    method: "GET",
+    params: payload
+  });
+}
+
+const updateFacility = async (payload: any): Promise <any>  => {
+  return api({
+    url: `facilities/${payload.facilityId}`,
+    method: "PUT",
     data: payload
   });
 }
 
-const fetchFacilitiesByProductStore = async (payload: any): Promise <any>  => {
+const fetchFacilityGroups = async (payload: any): Promise <any>  => {
   return api({
-    url: "performFind",
-    method: "post",
-    data: payload
+    url: `productStores/${payload.productStoreId}/facilityGroups`,
+    method: "GET",
+    params: payload
   });
 }
 
-
-const fetchChannels = async (payload: any): Promise<any> => {
+const fetchFacilitiesOrderCount = async (payload: any): Promise <any>  => {
   return api({
-    url: "performFind",
+    url: `facilities/orderCount`,
+    method: "GET",
+    params: payload
+  });
+}
+
+const fetchPickupGroupFacilities = async (payload: any): Promise <any>  => {
+  return api({
+    url: `facilityGroups/${payload.facilityGroupId}/facilities`,
+    method: "GET",
+    params: payload
+  });
+}
+
+const updateFacilityAssociationWithPickupGroup = async (payload: any): Promise <any>  => {
+  return api({
+    url: `facilityGroups/${payload.facilityGroupId}/facilities/${payload.facilityId}/association`,
     method: "POST",
     data: payload
-  })
+  });
 }
 
 export const UtilService = {
-  fetchFacilitiesByProductStore,
-  getServiceStatusDesc,
-  getShopifyConfig,
-  fetchChannels
+  fetchFacilities,
+  fetchFacilitiesOrderCount,
+  updateFacility,
+  fetchFacilityGroups,
+  fetchFacets,
+  fetchPickupGroupFacilities,
+  updateFacilityAssociationWithPickupGroup
 }

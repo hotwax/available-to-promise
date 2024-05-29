@@ -1,119 +1,193 @@
-import { UtilService } from '@/services/UtilService'
 import { ActionTree } from 'vuex'
 import RootState from '@/store/RootState'
+import { UtilService } from '@/services/UtilService'
+import { hasError } from '@/utils'
+import logger from '@/logger'
 import UtilState from './UtilState'
 import * as types from './mutation-types'
-import { hasError } from '@/utils'
-import logger from "@/logger";
+import store from "@/store"
+import { DateTime } from 'luxon'
+
 
 const actions: ActionTree<UtilState, RootState> = {
-  /**
-   * Status Description
-   */
-  async getServiceStatusDesc ({ commit }) {
-    try{
-      const resp = await UtilService.getServiceStatusDesc({
-        "inputFields": {
-          "statusTypeId": "SERVICE_STATUS",
-          "statusTypeId_op": "equals"
-        },
-        "entityName": "StatusItem",
-        "fieldList": ["statusId", "description"],
-        "noConditionFind": "Y",
-        "viewSize": 20
-      }) 
-      if (resp.status === 200 && !hasError(resp) && resp.data.count) {
-        commit(types.UTIL_SERVICE_STATUS_DESC_UPDATED, resp.data.docs);
-      }
-    } catch(err) {
-      logger.error(err)
-    }
-  },
-
-  async getShopifyConfig({ state, commit }, payload) {
-    // TODO: for now passing view size as 1 by considering that one product store id is associated with only
-    // one shopify config
-    const resp = await UtilService.getShopifyConfig({
-      "inputFields": {
-        "productStoreId": payload
-      },
-      "entityName": "ShopifyConfig",
-      "distinct": "Y",
-      "noConditionFind": "Y",
-      "fieldList": ["shopifyConfigId", "productStoreId"],
-      "viewSize": 1
-    })
-
-    if (resp.status === 200 && !hasError(resp) && resp.data?.docs?.length > 0) {
-      const shopifyConfig = resp.data.docs[0]
-
-      const shopifyConfigs = JSON.parse(JSON.stringify(state.shopifyConfig))
-      shopifyConfigs[shopifyConfig.productStoreId] = shopifyConfig.shopifyConfigId
-
-      commit(types.UTIL_SHOPIFY_CONFIG_UPDATED, shopifyConfigs);
-      return shopifyConfig;
-    }
-    return {};
-  },
-
-  async fetchFacilitiesByProductStore({ state, commit }, payload) {
+  async fetchConfigFacilities ({ commit }) {
+    let configFacilities = [];
 
     try {
-      const resp = await UtilService.fetchFacilitiesByProductStore(payload);
+      const resp = await UtilService.fetchFacilities({ facilityTypeId: 'CONFIGURATION', productStoreId: store.state.user.currentEComStore.productStoreId });
 
-      if (resp.status === 200 && !hasError(resp) && resp.data?.count > 0) {
-        const facilities = resp.data.docs.reduce((facilities: any, data: any) => {
-          if(!facilities[data.productStoreId]) {
-            facilities[data.productStoreId] = []
-          }
-
-          facilities[data.productStoreId].push(data.facilityId)
-          return facilities
-        }, {})
-        commit(types.UTIL_PRODUCT_STORE_FACILITY_UPDATED, {
-          ...state.facilitiesByProductStore,
-          ...facilities
-        });
-        return facilities;
-      }
-    } catch (err) {
-      logger.error(err)
-    }
-    return {};
-  },
-  
-  async fetchChannels({ commit }) {
-    let channels = []
-    const params = {
-      entityName: "FacilityGroup",
-      inputFields: {
-        facilityGroupTypeId: 'CHANNEL_FAC_GROUP'
-      },
-      noConditionFind: 'Y',
-      orderBy: "facilityGroupName ASC",
-      fieldList: ["facilityGroupId", "facilityGroupTypeId", "facilityGroupName", "description"],
-      viewSize: 50
-    }
-
-    try {
-      const resp = await UtilService.fetchChannels(params)
-      if (!hasError(resp)) {
-        channels = resp.data.docs
+      if(!hasError(resp)) {
+        configFacilities = resp.data;
       } else {
         throw resp.data
       }
-    } catch (error) {
+    } catch (err: any) {
+      logger.error(err)
+    }
+    commit(types.UTIL_CONFIG_FACILITES_UPDATED, configFacilities)
+  },
+
+  async fetchFacilityGroups ({ commit }) {
+    let facilityGroups = {};
+
+    try {
+      const resp = await UtilService.fetchFacilityGroups({ productStoreId: store.state.user.currentEComStore.productStoreId, pageSize: 100 });
+
+      if(!hasError(resp)) {
+        facilityGroups = resp.data;
+      } else {
+        throw resp.data
+      }
+    } catch (err: any) {
+      logger.error(err)
+    }
+    commit(types.UTIL_FACILITY_GROUPS_UPDATED, facilityGroups)
+  },
+
+  async updateAppliedFilters ({ commit, state }, payload) {
+    commit(types.UTIL_APPLIED_FILTERS_UPDATED, payload)
+  },
+
+  async clearUtilState({ commit }) {
+    commit(types.UTIL_CLEARED)
+  },
+
+  async clearAppliedFilters({ commit }) {
+    commit(types.UTIL_APPLIED_FILTERS_CLEARED)
+  },
+
+  async fetchFacilities({ commit, dispatch, state }, payload) {
+    const params = {
+      parentFacilityTypeId: 'VIRTUAL_FACILITY',
+      parentFacilityTypeId_not: 'Y',
+      facilityTypeId: 'VIRTUAL_FACILITY',
+      facilityTypeId_not: 'Y',
+      productStoreId: store.state.user.currentEComStore.productStoreId,
+      pageSize: payload.pageSize,
+      pageIndex: payload.pageIndex
+    }
+
+    const facilities = state.facilities.list ? JSON.parse(JSON.stringify(state.facilities.list)) : [];
+    let isScrollable = true, facilityList = [];
+
+    try {
+      const resp = await UtilService.fetchFacilities(params)
+
+      if(!hasError(resp)) {
+        if(payload.isOrderCountRequired) {
+          const facilityIds = resp.data.map((facility: any) => facility.facilityId)
+          const facilityCounts = await dispatch("fetchFacilitiesOrderCount", { facilityIds })
+
+          resp.data.map((facility: any) => {
+            if(facilityCounts[facility.facilityId]) facility.orderCount = facilityCounts[facility.facilityId]
+            else facility.orderCount = 0;
+          })
+        }
+
+        if(payload.pageIndex && payload.pageIndex > 0) {
+          facilityList = facilities.concat(resp.data)
+        } else {
+          facilityList = resp.data
+        }
+
+        if(resp.data.length == payload.pageSize) isScrollable = true
+        else isScrollable = false
+      } else {
+        throw resp.data
+      }
+    } catch(error) {
       logger.error(error)
     }
-    commit(types.UTIL_CHANNELS_UPDATED, channels)
+
+    commit(types.UTIL_FACILITY_LIST_UPDATED , { facilities: facilityList, isScrollable });
   },
 
-  async clearFacilitiesByProductStore({ commit }) {
-    commit(types.UTIL_PRODUCT_STORE_FACILITY_UPDATED, {})
+  async fetchFacilitiesOrderCount({ commit }, payload) {
+    const facilitiesData = {} as any;
+
+    try {
+      const resp = await UtilService.fetchFacilitiesOrderCount({
+        facilityId: payload.facilityIds.join(","),
+        facilityId_op: "in",
+        entryDate: DateTime.now().toFormat('yyyy-MM-dd')
+      })
+
+      if(!hasError(resp)) {
+        resp.data.map((facility: any) => {
+          facilitiesData[facility.facilityId] = facility.lastOrderCount
+        })
+      } else {
+        throw resp.data
+      }
+    } catch(error) {
+      logger.error(error)
+    }
+    return facilitiesData;
   },
 
-  async clearShopifyConfig({ commit }) {
-    commit(types.UTIL_SHOPIFY_CONFIG_UPDATED, {})
+  async fetchPickupGroups({ commit, dispatch }) {
+    let groups = [] as any;
+    const pickGroupFacilities = {} as any;
+
+    try {
+      const resp = await UtilService.fetchFacilityGroups({ facilityGroupTypeId: 'PICKUP', productStoreId: store.state.user.currentEComStore.productStoreId, pageSize: 100 })
+
+      if(!hasError(resp)) {
+        groups = resp.data;
+        const responses = await Promise.allSettled(groups.map(async (group: any) => {
+          const facilities = await dispatch("fetchPickGroupFacilities", group.facilityGroupId)
+          pickGroupFacilities[group.facilityGroupId] = facilities
+        }))
+
+        const hasFailedResponse = responses.some((response: any) => response.status === 'rejected')
+        if (hasFailedResponse) {
+          logger.error("Failed to fetch facilities for some pickup group.")
+        }
+      } else {
+        throw resp.data
+      }
+    } catch(error) {
+      logger.error(error)
+    }
+    commit(types.UTIL_PICKUP_GROUPS_UPDATED , groups);
+    commit(types.UTIL_PICKUP_GROUP_FACILITIES , pickGroupFacilities);
+  },
+
+  async fetchPickGroupFacilities({ commit }, facilityGroupId) {
+    let pickupGroupFacilities = [] as any;
+
+    try {
+      const resp = await UtilService.fetchPickupGroupFacilities({ 
+        facilityGroupId,
+        pageSize: 100,
+        parentFacilityTypeId: 'VIRTUAL_FACILITY',
+        parentFacilityTypeId_not: 'Y',
+        facilityTypeId: 'VIRTUAL_FACILITY',
+        facilityTypeId_not: 'Y',
+      })
+
+      if(!hasError(resp)) {
+        pickupGroupFacilities = resp.data;
+        
+      } else {
+        throw resp.data
+      }
+    } catch(error) {
+      logger.error(error)
+    }
+    return pickupGroupFacilities;
+  },
+
+  async updatePickupGroupFacilities({ commit }, payload) {
+    commit(types.UTIL_PICKUP_GROUP_FACILITIES , payload);
+  },
+
+  async updateFacilities({ commit, state }, payload) {
+    commit(types.UTIL_FACILITY_LIST_UPDATED , { facilities: payload.facilities, isScrollable: state.facilities.isScrollable });
+  },
+
+  async updateSelectedSegment({ commit }, payload) {
+    commit(types.UTIL_SELECTED_SEGMENT_UPDATED , payload);
   }
 }
 

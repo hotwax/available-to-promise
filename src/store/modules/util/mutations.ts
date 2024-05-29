@@ -3,19 +3,52 @@ import UtilState from './UtilState'
 import * as types from './mutation-types'
 
 const mutations: MutationTree <UtilState> = {
-  [types.UTIL_SERVICE_STATUS_DESC_UPDATED] (state, payload) {
-    payload.map((status: any) => {
-      state.statusDesc[status.statusId] = status.description;
-    })
+  [types.UTIL_CONFIG_FACILITES_UPDATED] (state, payload) {
+    state.configFacilities = payload
   },
-  [types.UTIL_SHOPIFY_CONFIG_UPDATED] (state, payload) {
-    state.shopifyConfig = payload;
+  [types.UTIL_APPLIED_FILTERS_UPDATED] (state, payload) {
+    state.appliedFilters = payload
   },
-  [types.UTIL_PRODUCT_STORE_FACILITY_UPDATED] (state, payload) {
-    state.facilitiesByProductStore = payload
+  [types.UTIL_FACILITY_GROUPS_UPDATED] (state, payload) {
+    state.facilityGroups = payload
   },
-  [types.UTIL_CHANNELS_UPDATED](state, payload) {
-    state.channels = payload
-  }
+  [types.UTIL_CLEARED] (state) {
+    state.configFacilities = [],
+    state.appliedFilters = {
+      included: {
+        tags: [],
+        productFeatures: []
+      },
+      excluded: {
+        tags: [],
+        productFeatures: []
+      }
+    }
+  },
+  [types.UTIL_APPLIED_FILTERS_CLEARED](state) {
+    state.appliedFilters = {
+      included: {
+        tags: [],
+        productFeatures: []
+      },
+      excluded: {
+        tags: [],
+        productFeatures: []
+      }
+    }
+  },
+  [types.UTIL_FACILITY_LIST_UPDATED](state, payload) {
+    state.facilities.list = payload.facilities
+    state.facilities.isScrollable = payload.isScrollable
+  },
+  [types.UTIL_SELECTED_SEGMENT_UPDATED](state, payload) {
+    state.selectedSegment = payload
+  },
+  [types.UTIL_PICKUP_GROUPS_UPDATED](state, payload) {
+    state.pickupGroups = payload
+  },
+  [types.UTIL_PICKUP_GROUP_FACILITIES](state, payload) {
+    state.pickupGroupFacilities = payload
+  },
 }
 export default mutations;

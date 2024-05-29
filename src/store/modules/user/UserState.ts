@@ -1,8 +1,10 @@
 export default interface UserState {
-    permissions: any;
-    pwaState: any;
+  token: string;
+  current: object | null;
+  instanceUrl: string;
+  currentEComStore: object;
+  omsRedirectionInfo: {
+    url: string;
     token: string;
-    current: object | null;
-    instanceUrl: string;
-    currentEComStore: object;
+  }
 }

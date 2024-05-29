@@ -2,18 +2,31 @@ import { GetterTree } from 'vuex'
 import UtilState from './UtilState'
 import RootState from '@/store/RootState'
 
-const getters: GetterTree <UtilState, RootState> = {
-  getStatusDesc: (state) => (statusId: any) => {
-    return state.statusDesc[statusId] ? state.statusDesc[statusId] : "-";
+const getters: GetterTree<UtilState, RootState> = {
+  getConfigFacilities(state) {
+    return state.configFacilities ? JSON.parse(JSON.stringify(state.configFacilities)) : []
   },
-  getShopifyConfig(state) {
-    return state.shopifyConfig
+  getAppliedFilters(state) {
+    return state.appliedFilters;
   },
-  getFacilityByProductStore(state) {
-    return state.facilitiesByProductStore
+  getFacilityGroups(state) {
+    return state.facilityGroups;
   },
-  getChannels(state) {
-    return state.channels;
-  }
+  getFacilities(state) {
+    return state.facilities.list ? JSON.parse(JSON.stringify(state.facilities.list)) : []
+  },
+  isFacilitiesScrollable(state) {
+    return state.facilities.isScrollable
+  },
+  getSelectedSegment(state) {
+    return state.selectedSegment
+  },
+  getPickupGroups(state) {
+    return state.pickupGroups
+  },
+  getPickupGroupFacilities(state) {
+    return state.pickupGroupFacilities
+  },
 }
+
 export default getters;

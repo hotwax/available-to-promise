@@ -1,6 +1,5 @@
-import { modalController, toastController } from '@ionic/vue';
-import { DateTime } from "luxon";
-import ErrorMessageModal from "@/components/ErrorMessageModal.vue";
+import { toastController } from '@ionic/vue';
+import { DateTime } from 'luxon';
 
 // TODO Use separate files for specific utilities
 
@@ -9,54 +8,152 @@ const hasError = (response: any) => {
     return typeof response.data != "object" || !!response.data._ERROR_MESSAGE_ || !!response.data._ERROR_MESSAGE_LIST_ || !!response.data.error;
 }
 
-const showToast = async (message: string, err?: any) => {
-  const config = {
-    message,
-    duration: 3000,
-    position: 'bottom'
-  } as any
-  if (err) {
-    config.buttons = [
-      {
-        text: 'view',
-        side: 'end',
-        handler: async () => {
-          const errorMessageModal = await modalController.create({
-            component: ErrorMessageModal,
-            componentProps: {
-              errorMessage: err,
-            },
-            initialBreakpoint: 0.08,
-            breakpoints: [0, 0.10, 0.5, 0.75]
-          });
-          return errorMessageModal.present();
-        }
-      }
-    ]
-  }
-  const toast = await toastController.create(config)
+const showToast = async (message: string) => {
+  const toast = await toastController
+    .create({
+      message,
+      duration: 3000,
+      position: "bottom",
+    })
   return toast.present();
 }
 
-const getFeature = (featureHierarchy: any, featureKey: string) => {
-  let featureValue = ''
-  if (featureHierarchy) {
-    const feature = featureHierarchy.find((featureItem: any) => featureItem.startsWith(featureKey))
-    const featureSplit = feature ? feature.split('/') : [];
-    featureValue = featureSplit[2] ? featureSplit[2] : '';
+function getDateAndTime(time: any) {
+  return time ? DateTime.fromMillis(time).toLocaleString(DateTime.DATETIME_MED) : "-";
+}
+
+const getTime = (time: any) => {
+  return time ? DateTime.fromMillis(time).toLocaleString(DateTime.TIME_SIMPLE) : "-";
+}
+
+function getDate(runTime: any) {
+  return DateTime.fromMillis(runTime).toLocaleString(DateTime.DATE_MED);
+}
+
+function timeTillRun(endTime: any) {
+  const timeDiff = DateTime.fromMillis(endTime).diff(DateTime.local());
+  return DateTime.local().plus(timeDiff).toRelative();
+}
+
+const generateInternalId = (name: string) => {
+  return name.trim().toUpperCase().split(' ').join('_');
+}
+
+const doReorder = (event: CustomEvent, rules: any) => {
+  const previousSeq = JSON.parse(JSON.stringify(rules))
+
+  // returns the updated sequence after reordering
+  const updatedSeq = event.detail.complete(JSON.parse(JSON.stringify(rules)));
+
+  let diffSeq = findRulesDiff(previousSeq, updatedSeq)
+
+  const updatedSeqenceNum = previousSeq.map((rule: any) => rule.sequenceNum)
+  Object.keys(diffSeq).map((key: any) => {
+    diffSeq[key].sequenceNum = updatedSeqenceNum[key]
+  })
+
+  diffSeq = Object.keys(diffSeq).map((key) => diffSeq[key])
+  return updatedSeq
+}
+
+const findRulesDiff = (previousSeq: any, updatedSeq: any) => {
+  const diffSeq: any = Object.keys(previousSeq).reduce((diff, key) => {
+    if (updatedSeq[key].ruleId === previousSeq[key].ruleId && updatedSeq[key].sequenceNum === previousSeq[key].sequenceNum) return diff
+    return {
+      ...diff,
+      [key]: updatedSeq[key]
+    }
+  }, {})
+  return diffSeq;
+}
+
+const generateRuleActions = (ruleId: string, actionTypeEnumId: string, actionValue: any, isConditionExists: boolean, ruleActions: any) => {
+  if(isConditionExists) {
+    const ruleAction = ruleActions.find((action: any) => action.actionTypeEnumId === actionTypeEnumId)
+    if(ruleAction) {
+      if(actionTypeEnumId === "ATP_THRESHOLD" || actionTypeEnumId === "ATP_SAFETY_STOCK") {
+        ruleAction.fieldValue = actionValue ? actionValue : 0;
+      } else {
+        ruleAction.fieldValue = actionValue ? "Y" : "N"
+      }
+      return [ruleAction];
+    }
   }
-  return featureValue;
+
+  let condition;
+  if(actionTypeEnumId === "ATP_THRESHOLD" || actionTypeEnumId === "ATP_SAFETY_STOCK") {
+    condition = [{
+      ruleId,
+      actionTypeEnumId,
+      "fieldName": "facility-safety-stock",
+      "fieldValue": actionValue ? actionValue : 0
+    }]
+  } else {
+    condition = [{
+      ruleId,
+      actionTypeEnumId,
+      "fieldName": actionTypeEnumId === "ATP_ALLOW_PICKUP" ? "allow-pickup" : "allow-brokering",
+      "fieldValue": actionValue ? "Y" : "N"
+    }]
+  }
+  return condition
 }
 
-const handleDateTimeInput = (dateTimeValue: any) => {
-  // TODO Handle it in a better way
-  // Remove timezone and then convert to timestamp
-  // Current date time picker picks browser timezone and there is no supprt to change it
-  const dateTime = DateTime.fromISO(dateTimeValue, { setZone: true}).toFormat("yyyy-MM-dd'T'HH:mm:ss")
-  return DateTime.fromISO(dateTime).toMillis()
+const generateRuleConditions = (ruleId: string, conditionTypeEnumId: string, appliedFilters: any, selectedFac: any) => {
+  const conditions = [];
+
+  if(conditionTypeEnumId === "ENTCT_ATP_FACILITIES") {
+    conditions.push({
+      "ruleId": ruleId,
+      conditionTypeEnumId,
+      "fieldName": "facilityId",
+      "operator": "in",
+      "fieldValue": selectedFac.length ? selectedFac.join(",") : "",
+      "multiValued": "Y"
+    })
+  } else {
+    const includedFacilityGroupIds = selectedFac.included.map((group: any) => group.facilityGroupId)  
+    if(includedFacilityGroupIds.length) {
+      conditions.push({
+        "ruleId": ruleId,
+        "conditionTypeEnumId": "ENTCT_ATP_FAC_GROUPS",
+        "fieldName": "facilityGroupId",
+        "operator": "in",
+        "fieldValue": includedFacilityGroupIds.join(","),
+        "multiValued": "Y"
+      })
+    }
+    
+    const excludedFacilityGroupIds = selectedFac.excluded.map((group: any) => group.facilityGroupId)
+    if(excludedFacilityGroupIds.length) {
+      conditions.push({
+        "ruleId": ruleId,
+        "conditionTypeEnumId": "ENTCT_ATP_FAC_GROUPS",
+        "fieldName": "facilityGroupId",
+        "operator": "not-in",
+        "fieldValue": excludedFacilityGroupIds.join(","),
+        "multiValued": "Y"
+      })
+    }
+  }
+
+  Object.entries(appliedFilters).map(([type, filters]: any) => {
+    Object.entries(filters as any).map(([filter, value]: any) => {
+      if(value.length) {
+        conditions.push({
+          "ruleId": ruleId,
+          "conditionTypeEnumId": "ENTCT_ATP_FILTER",
+          "fieldName": filter,
+          "operator": type === "included" ? "in" : "not-in",
+          "fieldValue": value.join(","),
+          "multiValued": "Y"
+        })
+      }
+    })
+  })
+
+  return conditions;
 }
 
-const getResponseError = (resp: any) => {
-  return resp.data.error || resp.data._ERROR_MESSAGE_ || resp.data._ERROR_MESSAGE_LIST_ || resp.data.errorMessage || resp.data.errorMessageList || "";
-}
-export { handleDateTimeInput, showToast, hasError, getFeature, getResponseError }
+
+export { doReorder, generateInternalId, generateRuleActions, generateRuleConditions, getDate, getDateAndTime, getTime, hasError, showToast, timeTillRun }

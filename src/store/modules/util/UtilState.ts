@@ -1,6 +1,9 @@
 export default interface UtilState {
-  statusDesc: any;
-  shopifyConfig: any;
-  facilitiesByProductStore: any;
-  channels: [];
+  configFacilities: any;
+  appliedFilters: any;
+  facilityGroups: any;
+  facilities: any;
+  selectedSegment: any;
+  pickupGroups: any;
+  pickupGroupFacilities: any;
 }

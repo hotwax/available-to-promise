@@ -1,23 +1,23 @@
 {
   "projects": {
-    "default": "hotwax-digital-commerce",
+    "default": "hotwax-digital-commerce-uat",
     "production": "digital-commerce-71eb8"
   },
   "targets": {
-    "hotwax-digital-commerce": {
+    "hotwax-digital-commerce-uat": {
       "hosting": {
         "dev": [
-          "dev-threshold-management"
+          "hotwax-atp-dev"
         ],
         "uat": [
-          "threshold-management-uat"
+          "hotwax-atp-uat"
         ]
       }
     },
     "digital-commerce-71eb8": {
       "hosting": {
         "prod": [
-          "threshold-management"
+          "hotwax-atp"
         ]
       }
     }

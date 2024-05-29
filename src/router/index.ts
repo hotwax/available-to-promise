@@ -1,21 +1,20 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
-import SelectFacility from '@/views/SelectFacility.vue'
-import SelectFacilityCSVUpload from '@/views/SelectFacilityCSVUpload.vue'
-import SelectProduct from '@/views/SelectProduct.vue'
-import SelectProductCSVUpload from '@/views/SelectProductCSVUpload.vue'
-import ThresholdUpdates from '@/views/ThresholdUpdates.vue'
 import Settings from "@/views/Settings.vue"
 import store from '@/store'
-import ScheduleThreshold from '@/views/ScheduleThreshold.vue'
-
-import { hasPermission } from '@/authorization';
-import { showToast } from '@/utils'
-import { translate } from '@/i18n'
-
-import 'vue-router'
+import Threshold from '@/views/Threshold.vue'
+import SafetyStock from '@/views/SafetyStock.vue'
+import StorePickup from '@/views/StorePickup.vue'
+import Shipping from '@/views/Shipping.vue'
+import InventoryChannels from '@/views/InventoryChannels.vue'
+import CreateUpdateThresholdRule from '@/views/CreateUpdateThresholdRule.vue';
+import CreateUpdateSafetyStockRule from '@/views/CreateUpdateSafetyStockRule.vue'
+import CreateUpdateStorePickupRule from '@/views/CreateUpdateStorePickupRule.vue'
+import CreateUpdateShippingRule from '@/views/CreateUpdateShippingRule.vue'
 import { DxpLogin, useAuthStore } from '@hotwax/dxp-components';
 import { loader } from '@/user-utils';
+
+import 'vue-router'
 
 // Defining types for the meta values
 declare module 'vue-router' {
@@ -47,50 +46,89 @@ const loginGuard = (to: any, from: any, next: any) => {
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    redirect: '/select-product'
+    redirect: '/threshold'
   },
   {
-    path: '/select-product',
-    name: 'SelectProduct',
-    component: SelectProduct,
+    path: '/threshold',
+    name: 'Threshold',
+    component: Threshold,
+    beforeEnter: authGuard
+  },
+  {
+    path: '/safety-stock',
+    name: 'Safety stock',
+    component: SafetyStock,
+    beforeEnter: authGuard
+  },
+  {
+    path: '/store-pickup',
+    name: 'Store pickup',
+    component: StorePickup,
+    beforeEnter: authGuard
+  },
+  {
+    path: '/shipping',
+    name: 'Shipping',
+    component: Shipping,
+    beforeEnter: authGuard
+  },
+  {
+    path: '/inventory-channels',
+    name: 'Inventory channels',
+    component: InventoryChannels,
+    beforeEnter: authGuard
+  },
+  {
+    path: '/create-threshold',
+    name: 'Create threshold',
+    component: CreateUpdateThresholdRule,
+    beforeEnter: authGuard
+  },
+  {
+    path: '/create-safety-stock',
+    name: 'Create safety stock',
+    component: CreateUpdateSafetyStockRule,
+    beforeEnter: authGuard
+  },
+  {
+    path: '/create-store-pickup',
+    name: 'Create store pickup',
+    component: CreateUpdateStorePickupRule,
+    beforeEnter: authGuard
+  },
+  {
+    path: '/create-shipping',
+    name: 'Create shipping',
+    component: CreateUpdateShippingRule,
+    beforeEnter: authGuard
+  },
+  {
+    path: '/update-threshold/:ruleId',
+    name: 'Update threshold',
+    component: CreateUpdateThresholdRule,
     beforeEnter: authGuard,
-    meta: {
-      permissionId: "APP_SELECT_PRODUCT_VIEW"
-    }
-  },    
-  {
-    path: '/select-product-csv-upload',
-    name: 'SelectProductCSVUpload',
-    component: SelectProductCSVUpload,
-    meta: {
-      permissionId: ""
-    }
+    props: true
   },
   {
-    path: '/select-facility',
-    name: 'SelectFacility',
-    component: SelectFacility,
+    path: '/update-safety-stock/:ruleId',
+    name: 'Update safety stock',
+    component: CreateUpdateSafetyStockRule,
     beforeEnter: authGuard,
-    meta: {
-      permissionId: ""
-    }
+    props: true
   },
   {
-    path: '/select-facility-csv-upload',
-    name: 'SelectFacilityCSVUpload',
-    component: SelectFacilityCSVUpload,
-    meta: {
-      permissionId: ""
-    }
-  },
-  {
-    path: '/threshold-updates',
-    name: 'ThresholdUpdates',
-    component: ThresholdUpdates,
+    path: '/update-store-pickup/:ruleId',
+    name: 'Update store pickup',
+    component: CreateUpdateStorePickupRule,
     beforeEnter: authGuard,
-    meta: {
-      permissionId: "APP_THRESHOLD_UPDATES_VIEW"
-    }
+    props: true
+  },
+  {
+    path: '/update-shipping/:ruleId',
+    name: 'Update shipping',
+    component: CreateUpdateShippingRule,
+    beforeEnter: authGuard,
+    props: true
   },
   {
     path: '/login',
@@ -103,35 +141,12 @@ const routes: Array<RouteRecordRaw> = [
     name: "Settings",
     component: Settings,
     beforeEnter: authGuard
-  },
-  {
-    path: '/schedule-threshold',
-    name: 'ScheduleThreshold',
-    component: ScheduleThreshold,
-    beforeEnter: authGuard,
-    meta: {
-      permissionId: "APP_SAVE_THRESHOLD_VIEW"
-    }
-  },
+  }
 ]
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes
-})
-
-router.beforeEach((to, from) => {
-  if (to.meta.permissionId && !hasPermission(to.meta.permissionId)) {
-    let redirectToPath = from.path;
-    // If the user has navigated from Login page or if it is page load, redirect user to settings page without showing any toast
-    if (redirectToPath == "/login" || redirectToPath == "/") redirectToPath = "/settings";
-    else {
-      showToast(translate('You do not have permission to access this page'));
-    }
-    return {
-      path: redirectToPath,
-    }
-  }
 })
 
 export default router
