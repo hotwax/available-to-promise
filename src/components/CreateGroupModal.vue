@@ -136,9 +136,9 @@ async function createGroup() {
     await store.dispatch("channel/fetchInventoryChannels");
     await store.dispatch("util/fetchConfigFacilities");
     modalController.dismiss();
-  } catch (error) {
+  } catch (error: any) {
     logger.error(error)
-    showToast(translate("Something went wrong."))
+    showToast(error.response?.data?.errors ? error.response.data.errors : translate("Failed to create channel group."))
   }
   modalController.dismiss()
   emitter.emit("dismissLoader");
