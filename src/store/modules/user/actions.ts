@@ -21,7 +21,6 @@ const actions: ActionTree<UserState, RootState> = {
     try {
       // TODO: implement support for permission check
 
-      // TODO: oms here is of ofbiz we need to check how to get the maarg url from here as we need to hit all apis on maarg
       const { token, oms, omsRedirectionUrl } = payload;
       dispatch("setUserInstanceUrl", oms);
 

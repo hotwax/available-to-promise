@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
 import Settings from "@/views/Settings.vue"
 import store from '@/store'
-import Login from '@/views/Login.vue'
 import Threshold from '@/views/Threshold.vue'
 import SafetyStock from '@/views/SafetyStock.vue'
 import StorePickup from '@/views/StorePickup.vue'

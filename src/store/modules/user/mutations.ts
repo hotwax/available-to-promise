@@ -21,7 +21,7 @@ const mutations: MutationTree <UserState> = {
         state.currentEComStore = payload;
     },
     [types.USER_OMS_REDIRECTION_INFO_UPDATED](state, payload) {
-    state.omsRedirectionInfo = payload;
+        state.omsRedirectionInfo = payload;
     }
 }
 export default mutations;
