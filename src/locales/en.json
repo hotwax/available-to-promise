@@ -67,6 +67,7 @@
   "Failed": "Failed",
   "Failed to associate some facilites to group.": "Failed to associate some facilites to group.",
   "Failed to create rule.": "Failed to create rule.",
+  "Failed to create channel group.": "Failed to create channel group.",
   "Failed to disable rule group.": "Failed to disable rule group.",
   "Failed to update group.": "Failed to update group.",
   "Failed to update threshold facility.": "Failed to update threshold facility.",
