@@ -35,10 +35,15 @@
         <h1 v-else-if="selectedSegment === 'RG_SHIPPING_CHANNEL'">{{ translate("Channels") }} <ion-text color="danger">*</ion-text></h1>
       </div>
 
+      <section>
+        <ion-item lines="none">
+          <ion-toggle v-model="formData.areAllSelected">{{ selectedSegment === "RG_SHIPPING_FACILITY" ? translate("All facilities selected") : translate("All channels selected") }}</ion-toggle>
+        </ion-item>
+      </section>
+
       <template v-if="selectedSegment === 'RG_SHIPPING_FACILITY'">
         <section v-if="facilityGroups.length">
-
-          <ion-card>
+          <ion-card :disabled="formData.areAllSelected">
             <ion-item lines="none">
               <ion-label>{{ translate("Included") }} <ion-text color="danger">*</ion-text></ion-label>
               <ion-button fill="clear" @click="openProductFacilityGroupModal('included')">
@@ -54,7 +59,7 @@
             </ion-card-content>
           </ion-card>
   
-          <ion-card>
+          <ion-card :disabled="formData.areAllSelected">
             <ion-item lines="none"> 
               <ion-label>{{ translate("Excluded") }}</ion-label>
               <ion-button fill="clear" @click="openProductFacilityGroupModal('excluded')">
@@ -77,7 +82,7 @@
 
       <template v-else>
         <section v-if="configFacilities.length">
-          <ion-card v-for="facility in configFacilities" :key="facility.facilityId" @click="toggleFacilitySelection(facility.facilityId)" button>
+          <ion-card v-for="facility in configFacilities" :key="facility.facilityId" @click="toggleFacilitySelection(facility.facilityId)" button :disabled="formData.areAllSelected">
             <ion-card-header>
               <div>
                 <ion-card-title>{{ facility.facilityName ? facility.facilityName : facility.facilityId }}</ion-card-title>
@@ -138,7 +143,8 @@ const formData = ref({
     included: [],
     excluded: []
   },
-  selectedConfigFacilites: []
+  selectedConfigFacilites: [],
+  areAllSelected: false
 }) as any;
 
 onIonViewDidEnter(async () => {
@@ -157,15 +163,19 @@ onIonViewDidEnter(async () => {
 
         if(selectedSegment.value === "RG_SHIPPING_FACILITY") {
           const includedGroups = currentRule.value.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS" && condition.operator === "in")
-          const includedGroupIds = includedGroups?.fieldValue ? includedGroups.fieldValue.split(",") : []
-          formData.value.selectedFacilityGroups.included = facilityGroups.value.filter((group: any) => includedGroupIds.includes(group.facilityGroupId));
+          if(includedGroups?.fieldValue === "ALL") formData.value.areAllSelected = true
+          else {
+            const includedGroupIds = includedGroups?.fieldValue ? includedGroups.fieldValue.split(",") : []
+            formData.value.selectedFacilityGroups.included = facilityGroups.value.filter((group: any) => includedGroupIds.includes(group.facilityGroupId));
+          }
 
           const excludedGroups = currentRule.value.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS" && condition.operator === "not-in")
           const excludedGroupIds = excludedGroups?.fieldValue ? excludedGroups.fieldValue.split(",") : []
           formData.value.selectedFacilityGroups.excluded = facilityGroups.value.filter((group: any) => excludedGroupIds.includes(group.facilityGroupId));
         } else if(selectedSegment.value === "RG_SHIPPING_CHANNEL") {
           const facilityCondition = currentRule.value.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FACILITIES")
-          formData.value.selectedConfigFacilites = facilityCondition?.fieldValue ?  facilityCondition.fieldValue.split(",") : [];
+          if(facilityCondition?.fieldValue === "ALL") formData.value.areAllSelected = true
+          else formData.value.selectedConfigFacilites = facilityCondition?.fieldValue ?  facilityCondition.fieldValue.split(",") : [];
         }
 
         const currentAppliedFilters = JSON.parse(JSON.stringify(appliedFilters.value))
@@ -263,7 +273,7 @@ async function createRule() {
     const rule = await RuleService.createRule(params)
     await RuleService.updateRule({
       ...params,
-      "ruleConditions": generateRuleConditions(rule.ruleId, selectedSegment.value === 'RG_SHIPPING_FACILITY' ? "ENTCT_ATP_FAC_GROUPS" : "ENTCT_ATP_FACILITIES", appliedFilters.value, selectedSegment.value === 'RG_SHIPPING_FACILITY' ? formData.value.selectedFacilityGroups : formData.value.selectedConfigFacilites),
+      "ruleConditions": generateRuleConditions(rule.ruleId, selectedSegment.value === 'RG_SHIPPING_FACILITY' ? "ENTCT_ATP_FAC_GROUPS" : "ENTCT_ATP_FACILITIES", appliedFilters.value, selectedSegment.value === 'RG_SHIPPING_FACILITY' ? formData.value.selectedFacilityGroups : formData.value.selectedConfigFacilites, formData.value.areAllSelected),
       "ruleActions": generateRuleActions(rule.ruleId, "ATP_ALLOW_BROKERING", formData.value.isBrokeringAllowed, false, [])
     }, rule.ruleId);
 
@@ -282,7 +292,7 @@ async function updateRule() {
   if(!isRuleValid()) return;
 
   const currentRuleConditions = JSON.parse(JSON.stringify(currentRule.value.ruleConditions));
-  const updatedRuleConditions = generateRuleConditions(props.ruleId, selectedSegment.value === 'RG_SHIPPING_FACILITY' ? "ENTCT_ATP_FAC_GROUPS" : "ENTCT_ATP_FACILITIES", appliedFilters.value, selectedSegment.value === 'RG_SHIPPING_FACILITY' ? formData.value.selectedFacilityGroups : formData.value.selectedConfigFacilites);
+  const updatedRuleConditions = generateRuleConditions(props.ruleId, selectedSegment.value === 'RG_SHIPPING_FACILITY' ? "ENTCT_ATP_FAC_GROUPS" : "ENTCT_ATP_FACILITIES", appliedFilters.value, selectedSegment.value === 'RG_SHIPPING_FACILITY' ? formData.value.selectedFacilityGroups : formData.value.selectedConfigFacilites, formData.value.areAllSelected);
   const conditionsToRemove = currentRuleConditions.filter((condition: any) => !updatedRuleConditions.some((updatedCondition: any) => condition.conditionTypeEnumId === updatedCondition.conditionTypeEnumId && condition.fieldName === updatedCondition.fieldName && condition.operator === updatedCondition.operator))
 
   updatedRuleConditions.map((updatedCondition: any) => {
@@ -317,10 +327,10 @@ function isRuleValid() {
     return false;
   }
 
-  if(selectedSegment.value === 'RG_SHIPPING_FACILITY' && !formData.value.selectedFacilityGroups.included.length) {
+  if(selectedSegment.value === 'RG_SHIPPING_FACILITY' && !formData.value.areAllSelected && !formData.value.selectedFacilityGroups.included.length) {
     showToast(translate("Please include atleast one facility."))
     return false;
-  } else if(selectedSegment.value === 'RG_SHIPPING_CHANNEL' && !formData.value.selectedConfigFacilites.length) {
+  } else if(selectedSegment.value === 'RG_SHIPPING_CHANNEL' && !formData.value.areAllSelected && !formData.value.selectedConfigFacilites.length) {
     showToast(translate("Please select atleast one channel."))
     return false;
   }
