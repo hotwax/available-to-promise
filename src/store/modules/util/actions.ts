@@ -44,7 +44,7 @@ const actions: ActionTree<UtilState, RootState> = {
     commit(types.UTIL_FACILITY_GROUPS_UPDATED, facilityGroups)
   },
 
-  async updateAppliedFilters ({ commit, state }, payload) {
+  async updateAppliedFilters ({ commit }, payload) {
     commit(types.UTIL_APPLIED_FILTERS_UPDATED, payload)
   },
 
