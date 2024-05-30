@@ -99,10 +99,19 @@ const generateRuleActions = (ruleId: string, actionTypeEnumId: string, actionVal
   return condition
 }
 
-const generateRuleConditions = (ruleId: string, conditionTypeEnumId: string, appliedFilters: any, selectedFac: any) => {
+const generateRuleConditions = (ruleId: string, conditionTypeEnumId: string, appliedFilters: any, selectedFac: any, areAllSelected: boolean) => {
   const conditions = [];
 
-  if(conditionTypeEnumId === "ENTCT_ATP_FACILITIES") {
+  if(areAllSelected) {
+    conditions.push({
+      "ruleId": ruleId,
+      conditionTypeEnumId,
+      "fieldName": conditionTypeEnumId === "ENTCT_ATP_FACILITIES" ? "facilityId" : "facilityGroupId",
+      "operator": "in",
+      "fieldValue": "ALL",
+      "multiValued": "Y"
+    })
+  } else if(conditionTypeEnumId === "ENTCT_ATP_FACILITIES") {
     conditions.push({
       "ruleId": ruleId,
       conditionTypeEnumId,

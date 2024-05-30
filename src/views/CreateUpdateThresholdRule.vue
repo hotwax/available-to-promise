@@ -34,8 +34,14 @@
         <h1>{{ translate("Channels") }} <ion-text color="danger">*</ion-text></h1>
       </div>
 
+      <section>
+        <ion-item lines="none">
+          <ion-toggle v-model="formData.areAllChannelsSelected">{{ translate("All channels selected") }}</ion-toggle>
+        </ion-item>
+      </section>
+
       <section v-if="configFacilities.length">
-        <ion-card v-for="facility in configFacilities" :key="facility.facilityId" @click="toggleFacilitySelection(facility.facilityId)" button>
+        <ion-card v-for="facility in configFacilities" :key="facility.facilityId" @click="toggleFacilitySelection(facility.facilityId)" button :disabled="formData.areAllChannelsSelected">
           <ion-card-header>
             <div>
               <ion-card-title>{{ facility.facilityName }}</ion-card-title>
@@ -61,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonBackButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonPage, IonNote, IonText, IonTitle, IonToolbar, onIonViewWillLeave, onIonViewDidEnter } from '@ionic/vue';
+import { IonBackButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonPage, IonNote, IonText, IonTitle, IonToggle, IonToolbar, onIonViewWillLeave, onIonViewDidEnter } from '@ionic/vue';
 import { saveOutline } from 'ionicons/icons'
 import { translate } from "@/i18n";
 import ProductFilters from '@/components/ProductFilters.vue';
@@ -77,7 +83,8 @@ const store = useStore();
 const formData = ref({
   ruleName: '',
   threshold: '',
-  selectedConfigFacilites: []
+  selectedConfigFacilites: [],
+  areAllChannelsSelected: false
 }) as any;
 const currentRule = ref({}) as any;
 const props = defineProps(["ruleId"]);
@@ -104,7 +111,8 @@ onIonViewDidEnter(async () => {
         formData.value.threshold = currentRule.value.ruleActions[0]?.fieldValue ? currentRule.value.ruleActions[0].fieldValue : ''
 
         const facilityCondition = currentRule.value.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FACILITIES")
-        formData.value.selectedConfigFacilites = facilityCondition?.fieldValue ? facilityCondition.fieldValue?.split(",") : [];
+        if(facilityCondition?.fieldValue === "ALL") formData.value.areAllChannelsSelected = true
+        else formData.value.selectedConfigFacilites = facilityCondition?.fieldValue ? facilityCondition.fieldValue?.split(",") : [];
 
         const currentAppliedFilters = JSON.parse(JSON.stringify(appliedFilters.value))
         currentRule.value.ruleConditions.map((condition: any) => {
@@ -181,7 +189,7 @@ async function createThresholdRule() {
 
     await RuleService.updateRule({
       ...params,
-      "ruleConditions": generateRuleConditions(rule.ruleId, "ENTCT_ATP_FACILITIES", appliedFilters.value, formData.value.selectedConfigFacilites),
+      "ruleConditions": generateRuleConditions(rule.ruleId, "ENTCT_ATP_FACILITIES", appliedFilters.value, formData.value.selectedConfigFacilites, formData.value.areAllChannelsSelected),
       "ruleActions": generateRuleActions(rule.ruleId, "ATP_THRESHOLD", formData.value.threshold, false, [])
     }, rule.ruleId);
 
@@ -200,7 +208,7 @@ async function updateRule() {
   if(!isRuleValid()) return;
 
   const currentRuleConditions = JSON.parse(JSON.stringify(currentRule.value.ruleConditions));
-  const updatedRuleConditions = generateRuleConditions(props.ruleId, "ENTCT_ATP_FACILITIES", appliedFilters.value, formData.value.selectedConfigFacilites);
+  const updatedRuleConditions = generateRuleConditions(props.ruleId, "ENTCT_ATP_FACILITIES", appliedFilters.value, formData.value.selectedConfigFacilites, formData.value.areAllChannelsSelected);
   const conditionsToRemove = currentRuleConditions.filter((condition: any) => !updatedRuleConditions.some((updatedCondition: any) => condition.conditionTypeEnumId === updatedCondition.conditionTypeEnumId && condition.fieldName === updatedCondition.fieldName && condition.operator === updatedCondition.operator))
 
   updatedRuleConditions.map((updatedCondition: any) => {
@@ -238,7 +246,7 @@ function isRuleValid() {
     showToast(translate("Threshold should be greater than or equal to 0."))
     return false;
   }
-  if(!formData.value.selectedConfigFacilites.length) {
+  if(!formData.value.areAllChannelsSelected && !formData.value.selectedConfigFacilites.length) {
     showToast(translate("Please select atleast one channel."))
     return false;
   }
