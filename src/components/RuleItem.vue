@@ -271,7 +271,8 @@ function getRuleConditions(conditionTypeEnumId: string, fieldName?: string, oper
   if(fieldName && operator) {
     const condition = props.rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === conditionTypeEnumId && condition.fieldName === fieldName && condition.operator === operator)
     if(condition && conditionTypeEnumId === 'ENTCT_ATP_FAC_GROUPS') {
-      if(condition.fieldValue === "ALL") return translate("All facility groups selected")
+      if(condition.fieldValue === "ALL") return translate("All facility groups selected");
+
       let facilityGroupIds = condition?.fieldValue.split(",")
         facilityGroupIds = facilityGroupIds.map((id: string) => {
           let group = facilityGroups.value.find((group: any) => group.facilityGroupId === id)
