@@ -9,7 +9,7 @@ import store from "@/store"
 
 const actions: ActionTree<ChannelState, RootState> = {
 
-  async fetchInventoryChannels ({ commit, state, dispatch }) {
+  async fetchInventoryChannels ({ commit, dispatch }) {
     let resp = {} as any;
     let inventoryChannels = [] as any
 

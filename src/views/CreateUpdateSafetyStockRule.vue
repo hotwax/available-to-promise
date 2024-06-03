@@ -35,8 +35,14 @@
         <h1>{{ translate("Facilities") }} <ion-text color="danger">*</ion-text></h1>
       </div>
 
+      <section>
+        <ion-item lines="none">
+          <ion-toggle v-model="formData.areAllFacilitiesSelected">{{ translate("Select all facilities") }}</ion-toggle>
+        </ion-item>
+      </section>
+
       <section v-if="facilityGroups.length">
-        <ion-card>
+        <ion-card :disabled="formData.areAllFacilitiesSelected">
           <ion-item lines="none">
             <ion-label>{{ translate("Included") }} <ion-text color="danger">*</ion-text></ion-label>
             <ion-button fill="clear" @click="openProductFacilityGroupModal('included')">
@@ -52,7 +58,7 @@
           </ion-card-content>
         </ion-card>
 
-        <ion-card>
+        <ion-card :disabled="formData.areAllFacilitiesSelected">
           <ion-item lines="none"> 
             <ion-label>{{ translate("Excluded") }}</ion-label>
             <ion-button fill="clear" @click="openProductFacilityGroupModal('excluded')">
@@ -84,7 +90,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonNote, IonPage, IonText, IonTitle, IonToolbar, modalController, onIonViewDidEnter  , onIonViewWillLeave } from '@ionic/vue';
+import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonNote, IonPage, IonText, IonTitle, IonToggle, IonToolbar, modalController, onIonViewDidEnter  , onIonViewWillLeave } from '@ionic/vue';
 import { addCircleOutline, closeCircle, saveOutline } from 'ionicons/icons'
 import { translate } from "@/i18n";
 import ProductFilters from '@/components/ProductFilters.vue';
@@ -106,7 +112,8 @@ const formData = ref({
   selectedFacilityGroups: {
     included: [],
     excluded: []
-  }
+  },
+  areAllFacilitiesSelected: false
 }) as any;
 const currentRule = ref({}) as any;
 const props = defineProps(["ruleId"]);
@@ -133,12 +140,15 @@ onIonViewDidEnter(async () => {
         formData.value.safetyStock = currentRule.value.ruleActions[0]?.fieldValue ? currentRule.value.ruleActions[0].fieldValue : ''
 
         const includedGroups = currentRule.value.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS" && condition.operator === "in")
-        const includedGroupIds = includedGroups?.fieldValue ? includedGroups.fieldValue.split(",") : []
-        formData.value.selectedFacilityGroups.included = facilityGroups.value.filter((group: any) => includedGroupIds.includes(group.facilityGroupId));
-        
-        const excludedGroups = currentRule.value.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS" && condition.operator === "not-in")
-        const excludedGroupIds = excludedGroups?.fieldValue ? excludedGroups.fieldValue.split(",") : []
-        formData.value.selectedFacilityGroups.excluded = facilityGroups.value.filter((group: any) => excludedGroupIds.includes(group.facilityGroupId));
+        if(includedGroups?.fieldValue === "ALL") formData.value.areAllFacilitiesSelected = true;
+        else {
+          const includedGroupIds = includedGroups?.fieldValue ? includedGroups.fieldValue.split(",") : []
+          formData.value.selectedFacilityGroups.included = facilityGroups.value.filter((group: any) => includedGroupIds.includes(group.facilityGroupId));
+
+          const excludedGroups = currentRule.value.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS" && condition.operator === "not-in")
+          const excludedGroupIds = excludedGroups?.fieldValue ? excludedGroups.fieldValue.split(",") : []
+          formData.value.selectedFacilityGroups.excluded = facilityGroups.value.filter((group: any) => excludedGroupIds.includes(group.facilityGroupId));
+        }
 
         const currentAppliedFilters = JSON.parse(JSON.stringify(appliedFilters.value))
         currentRule.value.ruleConditions.map((condition: any) => {
@@ -223,7 +233,7 @@ async function createRule() {
     const rule = await RuleService.createRule(params)
     await RuleService.updateRule({
       ...params,
-      "ruleConditions": generateRuleConditions(rule.ruleId, "ENTCT_ATP_FAC_GROUPS", appliedFilters.value, formData.value.selectedFacilityGroups),
+      "ruleConditions": generateRuleConditions(rule.ruleId, "ENTCT_ATP_FAC_GROUPS", appliedFilters.value, formData.value.selectedFacilityGroups, formData.value.areAllFacilitiesSelected),
       "ruleActions": generateRuleActions(rule.ruleId, "ATP_SAFETY_STOCK", formData.value.safetyStock, false, [])
     }, rule.ruleId);
 
@@ -242,13 +252,14 @@ async function updateRule() {
   if(!isRuleValid()) return;
 
   const currentRuleConditions = JSON.parse(JSON.stringify(currentRule.value.ruleConditions));
-  const updatedRuleConditions = generateRuleConditions(props.ruleId, "ENTCT_ATP_FAC_GROUPS", appliedFilters.value, formData.value.selectedFacilityGroups);
-  const conditionsToRemove = currentRuleConditions.filter((condition: any) => !updatedRuleConditions.some((updatedCondition: any) => condition.conditionTypeEnumId === updatedCondition.conditionTypeEnumId && condition.fieldName === updatedCondition.fieldName && condition.operator === updatedCondition.operator))
+  const updatedRuleConditions = generateRuleConditions(props.ruleId, "ENTCT_ATP_FAC_GROUPS", appliedFilters.value, formData.value.selectedFacilityGroups, formData.value.areAllFacilitiesSelected);
 
   updatedRuleConditions.map((updatedCondition: any) => {
     const current = currentRuleConditions.find((condition: any) => condition.conditionTypeEnumId === updatedCondition.conditionTypeEnumId && condition.fieldName === updatedCondition.fieldName && condition.operator === updatedCondition.operator);
     if(current) updatedCondition["conditionSeqId"] = current.conditionSeqId;
   })
+
+  const conditionsToRemove = currentRuleConditions.filter((condition: any) => !updatedRuleConditions.some((updatedCondition: any) => condition.conditionTypeEnumId === updatedCondition.conditionTypeEnumId && condition.fieldName === updatedCondition.fieldName && condition.operator === updatedCondition.operator && condition.conditionSeqId === updatedCondition.conditionSeqId))
 
   try {
     await RuleService.updateRule({
@@ -282,7 +293,7 @@ function isRuleValid() {
     return false;
   }
 
-  if(!formData.value.selectedFacilityGroups.included.length) {
+  if(!formData.value.areAllFacilitiesSelected && !formData.value.selectedFacilityGroups.included.length) {
     showToast(translate("Please include atleast one facility."))
     return false;
   }

@@ -1,4 +1,4 @@
-import api, {client} from '@/api';
+import api from '@/api';
 
 const fetchFacets = async (payload: any): Promise<any> => {
   return api({

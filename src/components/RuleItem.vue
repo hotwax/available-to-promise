@@ -45,7 +45,7 @@
           
           <template v-else>
             <ion-item-divider color="light">
-              <ion-label>{{ translate("Facility groups") }}</ion-label>
+              <ion-label>{{ translate("Facilities") }}</ion-label>
             </ion-item-divider>
             
             <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FAC_GROUPS', 'facilityGroupId', 'in')">
@@ -109,9 +109,9 @@
 </template>
 
 <script setup lang="ts">
-import { IonAccordion, IonAccordionGroup, IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonChip, IonIcon, IonItem, IonItemDivider, IonLabel, IonList, IonReorder, IonToggle, alertController } from '@ionic/vue';
+import { IonAccordion, IonAccordionGroup, IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonChip, IonIcon, IonItem, IonItemDivider, IonLabel, IonReorder, IonToggle, alertController } from '@ionic/vue';
 import { computed, defineProps, onMounted, ref } from 'vue';
-import { archiveOutline, checkmarkDoneCircleOutline, chevronDownOutline, chevronUpOutline, closeCircleOutline, globeOutline, pulseOutline, sendOutline, shirtOutline, storefrontOutline } from 'ionicons/icons';
+import { archiveOutline, checkmarkDoneCircleOutline, closeCircleOutline, globeOutline, pulseOutline, sendOutline, shirtOutline, storefrontOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
 import { translate } from '@/i18n';
 import { RuleService } from '@/services/RuleService';
@@ -127,7 +127,6 @@ const props = defineProps(["rule", "ruleIndex"])
 const total = computed(() => store.getters["rule/getTotalRulesCount"])
 const configFacilities = computed(() => store.getters["util/getConfigFacilities"])
 const facilityGroups = computed(() => store.getters["util/getFacilityGroups"])
-const rules = computed(() => store.getters["rule/getRules"]);
 const isReorderActive = computed(() => store.getters["rule/isReorderActive"]);
 const selectedSegment = computed(() => store.getters["util/getSelectedSegment"])
 
@@ -271,6 +270,8 @@ function getRuleConditions(conditionTypeEnumId: string, fieldName?: string, oper
   if(fieldName && operator) {
     const condition = props.rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === conditionTypeEnumId && condition.fieldName === fieldName && condition.operator === operator)
     if(condition && conditionTypeEnumId === 'ENTCT_ATP_FAC_GROUPS') {
+      if(condition.fieldValue === "ALL") return translate("All facility groups selected");
+
       let facilityGroupIds = condition?.fieldValue.split(",")
         facilityGroupIds = facilityGroupIds.map((id: string) => {
           let group = facilityGroups.value.find((group: any) => group.facilityGroupId === id)
@@ -284,6 +285,8 @@ function getRuleConditions(conditionTypeEnumId: string, fieldName?: string, oper
     const condition = props.rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === conditionTypeEnumId)
 
     if(condition && condition.fieldValue) {
+      if(condition.fieldValue === "ALL") return translate("All channels selected");
+
       let facilities = condition?.fieldValue.split(",")
       facilities = facilities.map((id: string) => {
         let facility = configFacilities.value.find((facility: any) => facility.facilityId === id)

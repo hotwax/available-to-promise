@@ -105,7 +105,6 @@ import {  IonAvatar, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardS
 import { computed, onMounted, ref } from 'vue';
 import { openOutline } from 'ionicons/icons'
 import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
 import TimeZoneModal from '@/views/TimezoneModal.vue';
 import Image from '@/components/Image.vue'
 import { DateTime } from "luxon";
