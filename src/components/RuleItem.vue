@@ -45,7 +45,7 @@
           
           <template v-else>
             <ion-item-divider color="light">
-              <ion-label>{{ translate("Facility groups") }}</ion-label>
+              <ion-label>{{ translate("Facilities") }}</ion-label>
             </ion-item-divider>
             
             <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FAC_GROUPS', 'facilityGroupId', 'in')">
