@@ -36,7 +36,7 @@
 
       <section>
         <ion-item lines="none">
-          <ion-toggle v-model="formData.areAllChannelsSelected">{{ translate("All channels selected") }}</ion-toggle>
+          <ion-toggle v-model="formData.areAllChannelsSelected">{{ translate("Select all channels") }}</ion-toggle>
         </ion-item>
       </section>
 
