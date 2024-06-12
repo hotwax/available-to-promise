@@ -1,6 +1,6 @@
 {
-  "appId": "co.hotwax.thresholdmanagement",
-  "appName": "Threshold Management",
+  "appId": "co.hotwax.avaiabletopromise",
+  "appName": "Available to Promise",
   "bundledWebRuntime": false,
   "npmClient": "npm",
   "webDir": "dist",
