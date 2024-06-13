@@ -17,4 +17,4 @@
  ### Contribution and Currently Important Rules Acceptance
  <!-- Please get familiar with following info -->
 
- - [ ] I read and followed [contribution rules](https://github.com/hotwax/threshold-management#contribution-guideline)
+ - [ ] I read and followed [contribution rules](https://github.com/hotwax/available-to-promise#contribution-guideline)
