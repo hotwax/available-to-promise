@@ -70,6 +70,84 @@ const actions: ActionTree<ChannelState, RootState> = {
     commit(types.CHANNEL_INVENTORY_CHANNELS_UPDATED, groups);
   },
 
+  async fetchShopifyConfigs ({ commit }) {
+    let shopifyConfigs = [] ;
+    try {
+      const payload = {
+        inputFields: {
+          productStoreId: store.state.user.currentEComStore.productStoreId,
+        },
+        fieldList: ["shopifyConfigId", "name", "shopId"],
+        entityName: "ShopifyShopAndConfig",
+        noConditionFind: "Y",
+      }
+      
+      const resp = await ChannelService.fetchShopifyConfigs(payload);
+      if (!hasError(resp)) {
+        shopifyConfigs = resp.data.docs;
+      } else {
+        throw resp.data
+      }
+    } catch(error: any) {
+      logger.error(error)
+    }
+    return shopifyConfigs;
+  },
+
+  async fetchJobs ({ commit, dispatch }) {
+    const shopifyConfigs = await dispatch("fetchShopifyConfigs");
+
+    if(!shopifyConfigs.length) {
+      return;
+    }
+
+    let params = {}, draftJob = {};
+
+    // Fetch draft job
+    params = {
+      inputFields: {
+        statusId: "SERVICE_DRAFT",
+        systemJobEnumId: "JOB_UL_INV"
+      } as any,
+      fieldList: ["systemJobEnumId", "runTime", "tempExprId", "parentJobId", "serviceName", "jobId", "jobName", "currentRetryCount", "statusId", "productStoreId", "runtimeDataId", "shopId", "description", "enumTypeId", "enumName"],
+      noConditionFind: "Y"
+    }
+
+    const draftJobs = await ChannelService.fetchJobInformation(params);
+    if(draftJobs.length) draftJob = draftJobs[0];
+
+    // Fetching pending jobs
+    params = {
+      inputFields: {
+        statusId: "SERVICE_PENDING",
+        systemJobEnumId: "JOB_UL_INV",
+        "productStoreId": store.state.user.currentEComStore.productStoreId,
+      } as any,
+      fieldList: ["systemJobEnumId", "runTime", "tempExprId", "parentJobId", "serviceName", "jobId", "jobName", "currentRetryCount", "statusId", "productStoreId", "runtimeDataId", "shopId", "description", "enumTypeId", "enumName"],
+      noConditionFind: "Y"
+    }
+
+    const pendingJobs = await ChannelService.fetchJobInformation(params);
+
+    const jobs = shopifyConfigs.map((shop: any) => {
+      const pendingJob = pendingJobs.find((job: any) => job.shopId === shop.shopId)
+
+      if(pendingJob.jobId) {
+        return {
+          ...shop,
+          ...pendingJob
+        }
+      } else {
+        return {
+          ...shop,
+          ...draftJob
+        }
+      }
+    })
+
+    commit(types.CHANNEL_JOBS_UPDATED, jobs)
+  },
+
   async clearChannelState({ commit }) {
     commit(types.CHANNEL_INVENTORY_CHANNELS_UPDATED, [])
   },

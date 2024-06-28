@@ -1,4 +1,6 @@
 import api from '@/api';
+import logger from '@/logger';
+import { hasError } from '@/utils';
 
 const fetchInventoryChannels = async (payload: any): Promise <any>  => {
   return api({
@@ -64,11 +66,45 @@ const createFacility = async (payload: any): Promise <any>  => {
   });
 }
 
+const fetchShopifyConfigs = async (payload: any): Promise<any> => {
+  return api({
+    url: "performFind",
+    method: "post",
+    data: payload,
+    useOmsRedirection: true
+  });
+}
+
+const fetchJobInformation = async (payload: any): Promise <any>  => {
+  let jobs = [];
+
+  try {
+    const resp = await api({
+      url: "findJobs",
+      method: "post",
+      data: payload,
+      useOmsRedirection: true
+    }) as any;
+
+    if(!hasError(resp)) {
+      jobs = resp.data.docs
+    } else {
+      throw resp.data;
+    }
+  } catch(error: any) {
+    logger.error(error);
+  }
+
+  return jobs;
+}
+
 export const ChannelService = {
   createFacility,
   createFacilityGroup,
   fetchGroupFacilities,
   fetchInventoryChannels,
+  fetchJobInformation,
+  fetchShopifyConfigs,
   updateFacilityAssociationWithGroup,
   updateFacilityAssociationWithProductStore,
   updateGroupAssociationWithProductStore,

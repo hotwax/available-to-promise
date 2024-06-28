@@ -10,7 +10,7 @@
             <ion-label>{{ translate("Channels") }}</ion-label>
           </ion-segment-button>
           <!-- Todo: add functionality to the Publish segment -->
-          <ion-segment-button value="publish" disabled>
+          <ion-segment-button value="publish">
             <ion-label>{{ translate("Publish") }}</ion-label>
           </ion-segment-button>
         </ion-segment>
@@ -76,13 +76,13 @@
         </section>
  
         <section v-else-if="selectedSegment === 'publish'">
-          <ion-card>
+          <ion-card v-for="job in jobs" :key="job.shopId">
             <ion-card-header>
               <div>
-                <ion-card-subtitle class="overline">{{ "SHOP CONFIG ID" }}</ion-card-subtitle>
-                <ion-card-title>{{ "Shop name" }}</ion-card-title>
+                <ion-card-subtitle class="overline">{{ job.shopifyConfigId }}</ion-card-subtitle>
+                <ion-card-title>{{ job.name ? job.name : job.shopifyConfigId }}</ion-card-title>
               </div>
-              <ion-badge color="dark">{{ "in 2 minutes" }}</ion-badge>
+              <ion-badge v-if="job.statusId = 'SERVICE_PENDING'" color="dark">{{ translate("running") }} {{ timeFromNow(job.runTime) }}</ion-badge>
             </ion-card-header>
 
             <ion-list>
@@ -139,11 +139,13 @@ import LinkThresholdFacilitiesToGroupModal from '@/components/LinkThresholdFacil
 import { useStore } from 'vuex';
 import EditGroupModal from '@/components/EditGroupModal.vue';
 import emitter from '@/event-bus';
+import { DateTime } from 'luxon';
 
 const store = useStore();
 
 const inventoryChannels = computed(() => store.getters["channel/getInventoryChannels"])
 const selectedSegment = computed(() => store.getters["util/getSelectedSegment"])
+const jobs = computed(() => store.getters["channel/getJobs"])
 
 onIonViewDidEnter(async() => {
   fetchInventoryChannels()
@@ -158,6 +160,9 @@ async function fetchInventoryChannels() {
   emitter.emit("presentLoader");
   if(!selectedSegment.value || (selectedSegment.value !== 'channels' && selectedSegment.value !== 'publish')) store.dispatch("util/updateSelectedSegment", "channels");
   await Promise.allSettled([store.dispatch("channel/fetchInventoryChannels"), store.dispatch("util/fetchConfigFacilities")]);
+  if(selectedSegment.value === "publish") {
+    await store.dispatch("channel/fetchJobs");
+  }
   emitter.emit("dismissLoader");
 }
 
@@ -216,10 +221,17 @@ function getFacilityCount(channel: any, facilityTypeId: string) {
   }
 }
 
-function updateSegment(event: any) {
-  store.dispatch("util/updateSelectedSegment", event.detail.value);
+async function updateSegment(event: any) {
+  await store.dispatch("util/updateSelectedSegment", event.detail.value);
+  if(selectedSegment.value === "publish") {
+    await store.dispatch("channel/fetchJobs");
+  }
 }
 
+function timeFromNow(time: any) {
+  const timeDiff = DateTime.fromMillis(time).diff(DateTime.local());
+  return DateTime.local().plus(timeDiff).toRelative();
+}
 </script>
 
 <style scoped>

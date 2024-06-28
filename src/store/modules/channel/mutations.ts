@@ -6,5 +6,8 @@ const mutations: MutationTree <ChannelState> = {
   [types.CHANNEL_INVENTORY_CHANNELS_UPDATED] (state, payload) {
     state.inventoryChannels = payload;
   },
+  [types.CHANNEL_JOBS_UPDATED] (state, payload) {
+    state.jobs = payload;
+  },
 }
 export default mutations;
