@@ -10,7 +10,8 @@ const channelModule: Module<ChannelState, RootState> = {
   state: {
     inventoryChannels: [],
     jobs: [],
-    statusDesc: {}
+    statusDesc: {},
+    temporalExp: []
   },
   getters,
   actions,

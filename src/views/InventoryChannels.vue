@@ -76,7 +76,7 @@
         </section>
  
         <section v-else-if="selectedSegment === 'publish'">
-          <ion-card v-for="job in jobs" :key="job.shopId">
+          <ion-card v-for="job in shopifyJobs" :key="job.shopId">
             <ion-card-header>
               <div>
                 <ion-card-subtitle class="overline">{{ job.shopifyConfigId }}</ion-card-subtitle>
@@ -95,8 +95,8 @@
 
               <ion-item lines="full">
                 <ion-icon slot="start" :icon="timerOutline"/>
-                <ion-select :label="translate('Frequency')" value="" :placeholder="translate('Select')" interface="popover">
-                  <ion-select-option value="">{{ "Every 5 minute" }}</ion-select-option>
+                <ion-select :label="translate('Frequency')" :value="getJobStatus(job)" :placeholder="translate('Select')" interface="popover" @ionDismiss="updateFrequency($event, job)">
+                  <ion-select-option v-for="freq in jobFrequencyOptions" :key="freq.id" :value="freq.id">{{ freq.description }}</ion-select-option>
                 </ion-select>
               </ion-item>
 
@@ -108,7 +108,7 @@
               </ion-item>
   
               <ion-item lines="none">
-                <ion-button fill="clear">{{ translate("Save changes") }}</ion-button>
+                <ion-button fill="clear" :disabled="!job.isUpdated">{{ translate("Save changes") }}</ion-button>
                 <ion-button color="medium" fill="clear" slot="end" @click="openShopActionsPopover($event, job)">
                   <ion-icon :icon="ellipsisVerticalOutline" slot="icon-only"/>
                 </ion-button>
@@ -129,7 +129,7 @@
 
 <script setup lang="ts">
 import { IonBadge, IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonItemDivider, IonLabel, IonList, IonMenuButton, IonPage, IonSegment, IonSegmentButton, IonSelect, IonSelectOption, IonTitle, IonToolbar, modalController, onIonViewDidEnter, onIonViewWillLeave, popoverController } from '@ionic/vue';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { addOutline, albumsOutline, businessOutline, ellipsisVerticalOutline, globeOutline, optionsOutline, storefrontOutline, timeOutline, timerOutline } from 'ionicons/icons';
 import { translate } from '@/i18n';
 import ShopActionsPopover from '@/components/ShopActionsPopover.vue'
@@ -140,12 +140,17 @@ import { useStore } from 'vuex';
 import EditGroupModal from '@/components/EditGroupModal.vue';
 import emitter from '@/event-bus';
 import { DateTime } from 'luxon';
+import CustomFrequencyModal from "@/components/CustomFrequencyModal.vue";
 
 const store = useStore();
 
 const inventoryChannels = computed(() => store.getters["channel/getInventoryChannels"])
 const selectedSegment = computed(() => store.getters["util/getSelectedSegment"])
 const jobs = computed(() => store.getters["channel/getJobs"])
+const getTemporalExpr = computed(() => store.getters["channel/getTemporalExpr"])
+
+const shopifyJobs = ref([]) as any;
+const jobFrequencyOptions = ref([]);
 
 onIonViewDidEnter(async() => {
   fetchInventoryChannels()
@@ -162,6 +167,9 @@ async function fetchInventoryChannels() {
   await Promise.allSettled([store.dispatch("channel/fetchInventoryChannels"), store.dispatch("util/fetchConfigFacilities")]);
   if(selectedSegment.value === "publish") {
     await store.dispatch("channel/fetchJobs");
+    await store.dispatch("channel/findTemporalExpression")
+    shopifyJobs.value = jobs.value.length ? JSON.parse(JSON.stringify(jobs.value)) : [];
+    generateFrequencyOptions()
   }
   emitter.emit("dismissLoader");
 }
@@ -226,12 +234,63 @@ async function updateSegment(event: any) {
   await store.dispatch("util/updateSelectedSegment", event.detail.value);
   if(selectedSegment.value === "publish") {
     await store.dispatch("channel/fetchJobs");
+    shopifyJobs.value = jobs.value.length ? JSON.parse(JSON.stringify(jobs.value)) : [];
+    await store.dispatch("channel/findTemporalExpression")
+    generateFrequencyOptions()
   }
 }
 
 function timeFromNow(time: any) {
   const timeDiff = DateTime.fromMillis(time).diff(DateTime.local());
   return DateTime.local().plus(timeDiff).toRelative();
+}
+
+function getJobStatus(job: any) {
+  return job.statusId === "SERVICE_DRAFT" ? job.statusId : job.tempExprId;
+}
+
+function updateFrequency(event: any, job: any) {
+  let selectedFrequency = event.target.value
+  if(selectedFrequency === 'CUSTOM') {
+    setCustomFrequency(job);
+    return;
+  }
+
+  const currentJob = shopifyJobs.value.find((shopifyJob: any) => shopifyJob.shopId === job.shopId)
+  currentJob.tempExprId = selectedFrequency;
+  currentJob.isUpdated = true;
+  console.log(shopifyJobs.value)
+}
+
+async function setCustomFrequency(currentJob: any) {
+  const customFrequencyModal = await modalController.create({
+    component: CustomFrequencyModal,
+  });
+  
+  await customFrequencyModal.present();
+
+  await customFrequencyModal.onDidDismiss().then((result) => {
+    const job = shopifyJobs.value.find((job: any) => job.shopId === currentJob.shopId)
+    if(result.data?.frequencyId) {
+      job.tempExprId = result.data.frequencyId
+    } else {
+      job.tempExprId = jobs.value.find((job: any) => job.shopId === currentJob.shopId)?.tempExprId
+    }
+    generateFrequencyOptions()
+  });
+}
+
+function generateFrequencyOptions() {
+  const frequencyOptions = JSON.parse(process.env.VUE_APP_SHOPIFY_JOBS_FREQUENCY_OPTIONS);
+
+  shopifyJobs.value.map((job: any) => {
+    const option = frequencyOptions.find((option: any) => option.id === job.tempExprId)
+    if(!option) {
+      const tempExpression = getTemporalExpr.value(job.tempExprId)
+      if(tempExpression) frequencyOptions.push({ id: tempExpression.tempExprId, description: tempExpression.description });
+    }
+  })
+  jobFrequencyOptions.value = frequencyOptions
 }
 </script>
 

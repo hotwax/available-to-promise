@@ -13,6 +13,9 @@ const mutations: MutationTree <ChannelState> = {
     payload.map((status: any) => {
       state.statusDesc[status.statusId] = status.description;
     })
-  }
+  },
+  [types.CHANNEL_TEMPORAL_EXPRESSION_UPDATED] (state, temporalExp) {
+    state.temporalExp = temporalExp;
+  },
 }
 export default mutations;

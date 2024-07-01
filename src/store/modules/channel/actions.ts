@@ -168,6 +168,28 @@ const actions: ActionTree<ChannelState, RootState> = {
     }
   },
 
+  async findTemporalExpression({ commit, state }){
+    let temporalExpressions = [];
+    const resp = await ChannelService.fetchTemporalExpression({
+      "inputFields": {
+        "tempExprTypeId": "FREQUENCY",
+      },
+      "viewSize": 100,
+      "fieldList": [ "tempExprId", "description","integer1", "integer2" ],
+      "entityName": "TemporalExpression",
+      "noConditionFind": "Y",
+    })
+    if (resp.status === 200 && !hasError(resp)) {
+      temporalExpressions = resp.data.docs;
+      temporalExpressions.forEach((temporalExpression: any) => {
+        state.temporalExp[temporalExpression.tempExprId] = temporalExpression;
+      })
+      // Caching it for other uses
+      commit(types.CHANNEL_TEMPORAL_EXPRESSION_UPDATED, state.temporalExp);
+    }
+    return temporalExpressions;
+  },
+
   async clearChannelState({ commit }) {
     commit(types.CHANNEL_INVENTORY_CHANNELS_UPDATED, [])
   },
