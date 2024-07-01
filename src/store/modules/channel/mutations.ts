@@ -9,5 +9,10 @@ const mutations: MutationTree <ChannelState> = {
   [types.CHANNEL_JOBS_UPDATED] (state, payload) {
     state.jobs = payload;
   },
+  [types.CHANNEL_SERVICE_STATUS_DESC_UPDATED] (state, payload) {
+    payload.map((status: any) => {
+      state.statusDesc[status.statusId] = status.description;
+    })
+  }
 }
 export default mutations;

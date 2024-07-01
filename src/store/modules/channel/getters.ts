@@ -8,6 +8,9 @@ const getters: GetterTree <ChannelState, RootState> = {
   },
   getJobs (state) {
     return state.jobs
+  },
+  getStatusDesc: (state) => (statusId: any) => {
+    return state.statusDesc[statusId] ? state.statusDesc[statusId] : "-";
   }
 }
 export default getters;

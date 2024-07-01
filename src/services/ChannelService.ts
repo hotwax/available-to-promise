@@ -98,6 +98,16 @@ const fetchJobInformation = async (payload: any): Promise <any>  => {
   return jobs;
 }
 
+const getServiceStatusDesc = async (payload: any): Promise<any> => {
+  return api({
+    url: "performFind",
+    method: "get",
+    params: payload,
+    useOmsRedirection: true,
+    cache: true
+  });
+}
+
 export const ChannelService = {
   createFacility,
   createFacilityGroup,
@@ -105,6 +115,7 @@ export const ChannelService = {
   fetchInventoryChannels,
   fetchJobInformation,
   fetchShopifyConfigs,
+  getServiceStatusDesc,
   updateFacilityAssociationWithGroup,
   updateFacilityAssociationWithProductStore,
   updateGroupAssociationWithProductStore,

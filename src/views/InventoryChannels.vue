@@ -109,7 +109,7 @@
   
               <ion-item lines="none">
                 <ion-button fill="clear">{{ translate("Save changes") }}</ion-button>
-                <ion-button color="medium" fill="clear" slot="end" @click="openShopActionsPopover($event)">
+                <ion-button color="medium" fill="clear" slot="end" @click="openShopActionsPopover($event, job)">
                   <ion-icon :icon="ellipsisVerticalOutline" slot="icon-only"/>
                 </ion-button>
               </ion-item>
@@ -166,9 +166,10 @@ async function fetchInventoryChannels() {
   emitter.emit("dismissLoader");
 }
 
-async function openShopActionsPopover(event: Event) {
+async function openShopActionsPopover(event: Event, job: any) {
   const popover = await popoverController.create({
     component: ShopActionsPopover,
+    componentProps: { job },
     showBackdrop: false,
     event
   });

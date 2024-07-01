@@ -148,6 +148,26 @@ const actions: ActionTree<ChannelState, RootState> = {
     commit(types.CHANNEL_JOBS_UPDATED, jobs)
   },
 
+  async getServiceStatusDesc ({ commit }) {
+    try{
+      const resp = await ChannelService.getServiceStatusDesc({
+        "inputFields": {
+          "statusTypeId": "SERVICE_STATUS",
+          "statusTypeId_op": "equals"
+        },
+        "entityName": "StatusItem",
+        "fieldList": ["statusId", "description"],
+        "noConditionFind": "Y",
+        "viewSize": 20
+      }) 
+      if (resp.status === 200 && !hasError(resp) && resp.data.count) {
+        commit(types.CHANNEL_SERVICE_STATUS_DESC_UPDATED, resp.data.docs);
+      }
+    } catch(err) {
+      logger.error(err)
+    }
+  },
+
   async clearChannelState({ commit }) {
     commit(types.CHANNEL_INVENTORY_CHANNELS_UPDATED, [])
   },

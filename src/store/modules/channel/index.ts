@@ -9,7 +9,8 @@ const channelModule: Module<ChannelState, RootState> = {
   namespaced: true,
   state: {
     inventoryChannels: [],
-    jobs: []
+    jobs: [],
+    statusDesc: {}
   },
   getters,
   actions,
