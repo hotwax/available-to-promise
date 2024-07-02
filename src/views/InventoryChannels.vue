@@ -82,15 +82,26 @@
                 <ion-card-subtitle class="overline">{{ job.shopifyConfigId }}</ion-card-subtitle>
                 <ion-card-title>{{ job.name ? job.name : job.shopifyConfigId }}</ion-card-title>
               </div>
-              <ion-badge v-if="job.statusId = 'SERVICE_PENDING'" color="dark">{{ translate("running") }} {{ timeFromNow(job.runTime) }}</ion-badge>
+              <ion-badge v-if="job.statusId === 'SERVICE_PENDING'" color="dark">{{ translate("running") }} {{ timeFromNow(job.runTime) }}</ion-badge>
             </ion-card-header>
 
             <ion-list>
               <ion-item lines="full">
                 <ion-icon slot="start" :icon="timeOutline"/>
-                <ion-select :label="translate('Run time')" :placeholder="translate('Select')" interface="popover">
-                  <ion-select-option value="">A</ion-select-option>
+                <ion-select :label="translate('Run time')" :placeholder="translate('Select')" interface="popover" :value="job.runTime" @ionChange="updateRunTime($event, job)">
+                  <ion-select-option v-for="runTime in jobRuntimeOptions" :key="runTime.value" :value="runTime.value">{{ runTime.label }}</ion-select-option>
                 </ion-select>
+
+                <ion-modal class="date-time-modal" :is-open="isDateTimeModalOpen" @didDismiss="() => isDateTimeModalOpen = false">
+                  <ion-content :force-overscroll="false">
+                    <ion-datetime          
+                      show-default-buttons
+                      hour-cycle="h23"
+                      :value="job.runTime ? (isCustomRunTime(job.runTime) ? getDateTime(job.runTime) : getDateTime(DateTime.now().toMillis() + job.runTime)) : getNowTimestamp()"
+                      @ionChange="updateCustomTime($event, job)"
+                    />
+                  </ion-content>
+                </ion-modal>
               </ion-item>
 
               <ion-item lines="full">
@@ -103,12 +114,12 @@
               <ion-item lines="full">
                 <ion-icon slot="start" :icon="albumsOutline"/>
                 <ion-select :label="translate('Inventory group')" value="" :placeholder="translate('Select')" interface="popover">
-                  <ion-select-option value="">{{ "Group name" }}</ion-select-option>
+                  <ion-select-option v-for="channel in inventoryChannels" :key="channel.facilityGroupId" :value="channel.facilityGroupId">{{ channel.facilityGroupName ? channel.facilityGroupName : channel.facilityGroupId }}</ion-select-option>
                 </ion-select>
               </ion-item>
   
               <ion-item lines="none">
-                <ion-button fill="clear" :disabled="!job.isUpdated">{{ translate("Save changes") }}</ion-button>
+                <ion-button fill="clear">{{ translate("Save changes") }}</ion-button>
                 <ion-button color="medium" fill="clear" slot="end" @click="openShopActionsPopover($event, job)">
                   <ion-icon :icon="ellipsisVerticalOutline" slot="icon-only"/>
                 </ion-button>
@@ -128,7 +139,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonBadge, IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonItemDivider, IonLabel, IonList, IonMenuButton, IonPage, IonSegment, IonSegmentButton, IonSelect, IonSelectOption, IonTitle, IonToolbar, modalController, onIonViewDidEnter, onIonViewWillLeave, popoverController } from '@ionic/vue';
+import { IonBadge, IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonDatetime, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonItemDivider, IonLabel, IonList, IonMenuButton, IonModal, IonPage, IonSegment, IonSegmentButton, IonSelect, IonSelectOption, IonTitle, IonToolbar, modalController, onIonViewDidEnter, onIonViewWillLeave, popoverController } from '@ionic/vue';
 import { computed, ref } from 'vue';
 import { addOutline, albumsOutline, businessOutline, ellipsisVerticalOutline, globeOutline, optionsOutline, storefrontOutline, timeOutline, timerOutline } from 'ionicons/icons';
 import { translate } from '@/i18n';
@@ -141,6 +152,7 @@ import EditGroupModal from '@/components/EditGroupModal.vue';
 import emitter from '@/event-bus';
 import { DateTime } from 'luxon';
 import CustomFrequencyModal from "@/components/CustomFrequencyModal.vue";
+import { showToast } from "@/utils";
 
 const store = useStore();
 
@@ -150,7 +162,31 @@ const jobs = computed(() => store.getters["channel/getJobs"])
 const getTemporalExpr = computed(() => store.getters["channel/getTemporalExpr"])
 
 const shopifyJobs = ref([]) as any;
+const isDateTimeModalOpen = ref(false);
 const jobFrequencyOptions = ref([]);
+const allowedRunTimes = ref([
+  {
+    "value": 0,
+    "label": "Now"
+  }, {
+    "value": 300000,
+    "label": "In 5 minutes"
+  }, {
+    "value": 900000,
+    "label": "In 15 minutes"
+  }, {
+    "value": 3600000,
+    "label": "In an hour"
+  }, {
+    "value": 86400000,
+    "label": "Tomorrow"
+  }, {
+    "value": "CUSTOM",
+    "label": "Custom"
+  }
+]);
+
+const jobRuntimeOptions = ref([]) as any;
 
 onIonViewDidEnter(async() => {
   fetchInventoryChannels()
@@ -169,7 +205,8 @@ async function fetchInventoryChannels() {
     await store.dispatch("channel/fetchJobs");
     await store.dispatch("channel/findTemporalExpression")
     shopifyJobs.value = jobs.value.length ? JSON.parse(JSON.stringify(jobs.value)) : [];
-    generateFrequencyOptions()
+    generateFrequencyOptions();
+    generateRuntimeOptions();
   }
   emitter.emit("dismissLoader");
 }
@@ -237,7 +274,12 @@ async function updateSegment(event: any) {
     shopifyJobs.value = jobs.value.length ? JSON.parse(JSON.stringify(jobs.value)) : [];
     await store.dispatch("channel/findTemporalExpression")
     generateFrequencyOptions()
+    generateRuntimeOptions();
   }
+}
+
+function isCustomRunTime(value: number) {
+  return !allowedRunTimes.value.some((runTime: any) => runTime.value === value)
 }
 
 function timeFromNow(time: any) {
@@ -258,8 +300,6 @@ function updateFrequency(event: any, job: any) {
 
   const currentJob = shopifyJobs.value.find((shopifyJob: any) => shopifyJob.shopId === job.shopId)
   currentJob.tempExprId = selectedFrequency;
-  currentJob.isUpdated = true;
-  console.log(shopifyJobs.value)
 }
 
 async function setCustomFrequency(currentJob: any) {
@@ -292,6 +332,63 @@ function generateFrequencyOptions() {
   })
   jobFrequencyOptions.value = frequencyOptions
 }
+
+function generateRuntimeOptions() {
+  const runTimeOptions = JSON.parse(JSON.stringify(allowedRunTimes.value));
+
+  shopifyJobs.value.map((job: any) => {
+    if(job.statusId === "SERVICE_PENDING") {
+      const selectedTime = runTimeOptions.find((option: any) => option.value === job.runTime);
+      if(!selectedTime) {
+        runTimeOptions.push({ label: getTime(job.runTime), value: job.runTime })
+      }
+    }
+  })
+  jobRuntimeOptions.value = runTimeOptions
+}
+
+function updateRunTime(event: CustomEvent, currentJob: any) {
+  const value = event.detail.value
+  if (value != 'CUSTOM') {
+    const job = shopifyJobs.value.find((job: any) => job.shopId === currentJob.shopId)
+    job.runTime = value
+    generateRuntimeOptions()
+  } else {
+    isDateTimeModalOpen.value = true
+  }
+}
+
+function updateCustomTime(event: CustomEvent, currentJob: any) {
+  const currTime = DateTime.now().toMillis();
+  const setTime = handleDateTimeInput(event.detail.value);
+  if(setTime > currTime) {
+    const job = shopifyJobs.value.find((job: any) => job.shopId === currentJob.shopId)
+    job.runTime = setTime
+    generateRuntimeOptions()
+  } else {
+    showToast(translate("Provide a future date and time"))
+  }
+}
+
+function handleDateTimeInput(dateTimeValue: any) {
+  // TODO Handle it in a better way
+  // Remove timezone and then convert to timestamp
+  // Current date time picker picks browser timezone and there is no supprt to change it
+  const dateTime = DateTime.fromISO(dateTimeValue, { setZone: true}).toFormat("yyyy-MM-dd'T'HH:mm:ss")
+  return DateTime.fromISO(dateTime).toMillis()
+}
+
+function getDateTime(time: any) {
+  return DateTime.fromMillis(time).toISO()
+}
+
+const getNowTimestamp = () => {
+  return DateTime.now().toISO();
+}
+
+function getTime (time: any) {
+  return DateTime.fromMillis(time).toLocaleString(DateTime.DATETIME_MED);
+}
 </script>
 
 <style scoped>
@@ -305,5 +402,11 @@ ion-card-header {
 .actions {
   display: flex;
   justify-content: space-between;
+}
+
+ion-modal.date-time-modal {
+  --width: 290px;
+  --height: 440px;
+  --border-radius: 8px;
 }
 </style>

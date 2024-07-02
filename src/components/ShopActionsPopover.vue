@@ -39,8 +39,6 @@ function closePopover() {
 }
 
 async function viewJobHistory(job: any) {
-  console.log(props.job);
-  
   const jobHistoryModal = await modalController.create({
     component: JobHistoryModal,
     componentProps: { currentJob: job }

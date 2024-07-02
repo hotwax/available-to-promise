@@ -132,7 +132,7 @@ const actions: ActionTree<ChannelState, RootState> = {
     const jobs = shopifyConfigs.map((shop: any) => {
       const pendingJob = pendingJobs.find((job: any) => job.shopId === shop.shopId)
 
-      if(pendingJob.jobId) {
+      if(pendingJob?.jobId) {
         return {
           ...shop,
           ...pendingJob
