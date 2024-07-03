@@ -72,7 +72,8 @@ const actions: ActionTree<ChannelState, RootState> = {
   },
 
   async fetchShopifyConfigs ({ commit }) {
-    let shopifyConfigs = [] ;
+    let shopifyConfigs = [];
+
     try {
       const payload = {
         inputFields: {
@@ -80,9 +81,9 @@ const actions: ActionTree<ChannelState, RootState> = {
         },
         fieldList: ["shopifyConfigId", "name", "shopId"],
         entityName: "ShopifyShopAndConfig",
-        noConditionFind: "Y",
+        noConditionFind: "Y"
       }
-      
+
       const resp = await ChannelService.fetchShopifyConfigs(payload);
       if (!hasError(resp)) {
         shopifyConfigs = resp.data.docs;
@@ -152,6 +153,8 @@ const actions: ActionTree<ChannelState, RootState> = {
   },
 
   async getServiceStatusDesc ({ commit }) {
+    let statusDescs = [];
+
     try{
       const resp = await ChannelService.getServiceStatusDesc({
         "inputFields": {
@@ -162,17 +165,22 @@ const actions: ActionTree<ChannelState, RootState> = {
         "fieldList": ["statusId", "description"],
         "noConditionFind": "Y",
         "viewSize": 20
-      }) 
-      if (resp.status === 200 && !hasError(resp) && resp.data.count) {
-        commit(types.CHANNEL_SERVICE_STATUS_DESC_UPDATED, resp.data.docs);
+      })
+
+      if(!hasError(resp)) {
+        statusDescs = resp.data.docs;
+      } else {
+        throw resp.data;
       }
     } catch(err) {
       logger.error(err)
     }
+    commit(types.CHANNEL_SERVICE_STATUS_DESC_UPDATED, statusDescs);
   },
 
   async findTemporalExpression({ commit, state }){
     let temporalExpressions = [];
+
     const resp = await ChannelService.fetchTemporalExpression({
       "inputFields": {
         "tempExprTypeId": "FREQUENCY",
@@ -182,7 +190,8 @@ const actions: ActionTree<ChannelState, RootState> = {
       "entityName": "TemporalExpression",
       "noConditionFind": "Y",
     })
-    if (resp.status === 200 && !hasError(resp)) {
+
+    if(!hasError(resp)) {
       temporalExpressions = resp.data.docs;
       temporalExpressions.forEach((temporalExpression: any) => {
         state.temporalExp[temporalExpression.tempExprId] = temporalExpression;
@@ -190,13 +199,13 @@ const actions: ActionTree<ChannelState, RootState> = {
       // Caching it for other uses
       commit(types.CHANNEL_TEMPORAL_EXPRESSION_UPDATED, state.temporalExp);
     }
+
     return temporalExpressions;
   },
 
-  async scheduleService({ dispatch, commit }, job) {
+  async scheduleService({ dispatch }, job) {
     let resp;
 
-    console.log(store.state.user.current);
     const payload = {
       'JOB_NAME': job.jobName,
       'SERVICE_NAME': job.serviceName,
@@ -226,7 +235,6 @@ const actions: ActionTree<ChannelState, RootState> = {
 
     const jobRunTimeDataKeys = job?.runtimeData ? Object.keys(job?.runtimeData) : [];
     if (jobRunTimeDataKeys.includes('shopifyConfigId') || jobRunTimeDataKeys.includes('shopId')) {
-      
       jobRunTimeDataKeys.includes('shopifyConfigId') && (payload['shopifyConfigId'] = job.shopifyConfigId);
       jobRunTimeDataKeys.includes('shopId') && (payload['shopId'] = job.shopId);
       payload['jobFields']['shopId'] = job.shopId;
@@ -241,20 +249,18 @@ const actions: ActionTree<ChannelState, RootState> = {
     try {
       resp = await ChannelService.scheduleJob({ ...payload });
       if (resp.status == 200 && !hasError(resp)) {
-        showToast(translate('Service has been scheduled'));
+        showToast(translate("Service has been scheduled."));
+        dispatch("fetchJobs");
       } else {
-        showToast(translate('Something went wrong'))
+        throw resp.data;
       }
     } catch (err) {
-      showToast(translate('Something went wrong'))
+      showToast(translate("Failed to schedule service."))
       logger.error(err)
     }
-    return {};
   },
 
-  async updateJob ({ commit, dispatch }, job) {
-    let resp;
-
+  async updateJob ({ dispatch }, job) {
     const payload = {
       'jobId': job.jobId,
       'systemJobEnumId': job.systemJobEnumId,
@@ -264,86 +270,23 @@ const actions: ActionTree<ChannelState, RootState> = {
       'runTimeEpoch': '',  // when updating a job clearning the epoch time, as job honors epoch time as runTime and the new job created also uses epoch time as runTime
       'lastModifiedByUserLogin': store.state.user.current.username
     } as any
-    
+
     job?.runTime && (payload['runTime'] = job.runTime)
     job?.sinceId && (payload['sinceId'] = job.sinceId)
     job?.jobName && (payload['jobName'] = job.jobName)
-    
+
     try {
-      resp = await ChannelService.updateJob(payload)
+      const resp = await ChannelService.updateJob(payload)
       if (!hasError(resp)) {
-        showToast(translate('Service updated successfully'))
+        showToast(translate("Service has been scheduled."))
+        await dispatch("fetchJobs");
       } else {
-        showToast(translate('Something went wrong'))
+        throw resp.data;
       }
-    } catch (err) {
-      showToast(translate('Something went wrong'))
-      logger.error(err)
+    } catch(error: any) {
+      showToast(translate("Failed to schedule service."))
+      logger.error(error)
     }
-    return resp;
-  },
-
-  async runServiceNow({ dispatch }, job) {
-    let resp;
-
-    console.log(store.state.user);
-    
-
-    const payload = {
-      'JOB_NAME': job.jobName,
-      'SERVICE_NAME': job.serviceName,
-      'SERVICE_COUNT': '0',
-      'SERVICE_TEMP_EXPR': job.jobStatus,
-      'jobFields': {
-        'productStoreId': job.status === "SERVICE_PENDING" ? job.productStoreId : this.state.user.currentEComStore.productStoreId,
-        'systemJobEnumId': job.systemJobEnumId,
-        'tempExprId': job.jobStatus, // Need to remove this as we are passing frequency in SERVICE_TEMP_EXPR, currently kept it for backward compatibility
-        'parentJobId': job.parentJobId,
-        'recurrenceTimeZone': store.state.user.current.timeZone,
-        'createdByUserLogin': store.state.user.current.username,
-        'lastModifiedByUserLogin': store.state.user.current.username
-      },
-      'statusId': "SERVICE_PENDING",
-      'systemJobEnumId': job.systemJobEnumId
-    } as any
-
-    Object.keys(job.runtimeData).map((key: any) => {
-      if(key !== "productStoreId" && key !== "shopifyConfigId" && key !== "shopId") {
-        payload[key] = job.runtimeData[key];
-      }
-    })
-
-    // checking if the runtimeData has productStoreId, and if present then adding it on root level
-    job?.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = job.status === "SERVICE_PENDING" ? job.productStoreId : store.state.user.currentEComStore.productStoreId)
-    job?.priority && (payload['SERVICE_PRIORITY'] = job.priority.toString())
-    job?.sinceId && (payload['sinceId'] = job.sinceId)
-
-    // ShopifyConfig and ShopifyShop should be set based upon runtime data
-    // If existing job is run now, copy as is else set the current shop of user
-    const jobRunTimeDataKeys = job?.runtimeData ? Object.keys(job?.runtimeData) : [];
-    if (jobRunTimeDataKeys.includes('shopifyConfigId') || jobRunTimeDataKeys.includes('shopId')) {
-      if (job.status !== "SERVICE_PENDING" && !job.shopifyConfigId) {
-        showToast(translate('Shopify configuration not found. Scheduling failed.'))
-        return;
-      }
-
-      jobRunTimeDataKeys.includes('shopifyConfigId') && (payload['shopifyConfigId'] = job.status === "SERVICE_PENDING" ? job.runtimeData?.shopifyConfigId : job.shopifyConfigId);
-      jobRunTimeDataKeys.includes('shopId') && (payload['shopId'] = job.status === "SERVICE_PENDING" ? job.runtimeData?.shopId : job?.shopId);
-      payload['jobFields']['shopId'] = job.status === "SERVICE_PENDING" ? job.shopId : job?.shopId;
-    }
-
-    try {
-      resp = await ChannelService.scheduleJob({ ...payload });
-      if (resp.status == 200 && !hasError(resp)) {
-        showToast(translate('Service has been scheduled'))
-      } else {
-        showToast(translate('Something went wrong'))
-      }
-    } catch (err) {
-      showToast(translate('Something went wrong'))
-      logger.error(err)
-    }
-    return resp;
   },
 
   async clearChannelState({ commit }) {

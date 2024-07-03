@@ -3,7 +3,7 @@
     <ion-toolbar>
       <ion-buttons slot="start">
         <ion-button @click="closeModal"> 
-          <ion-icon :icon="closeOutline" />
+          <ion-icon :icon="closeOutline" slot="icon-only" />
         </ion-button>
       </ion-buttons>
       <ion-title>{{ translate("Custom frequency") }}</ion-title>
@@ -11,13 +11,7 @@
   </ion-header>
 
   <ion-content>
-    <!-- Empty state -->
-    <div class="empty-state" v-if="customFrequencies.length === 0">
-      <p>{{ translate("No frequency found")}}</p>
-    </div>
-
-    <!-- Frequencies -->
-    <div v-else>
+    <div v-if="customFrequencies.length">
       <ion-list>
         <ion-radio-group v-model="frequencyId">
           <ion-item :key="customFrequency.tempExprId" v-for="customFrequency in customFrequencies">
@@ -26,13 +20,16 @@
         </ion-radio-group>
       </ion-list>
     </div>
-    
-    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button :disabled="!frequencyId" @click="setFrequency">
-        <ion-icon :icon="saveOutline" />
-      </ion-fab-button>
-    </ion-fab>
+    <div class="empty-state" v-else>
+      <p>{{ translate("No frequency found.")}}</p>
+    </div>
   </ion-content>
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button :disabled="!frequencyId" @click="setFrequency()">
+      <ion-icon :icon="saveOutline" />
+    </ion-fab-button>
+  </ion-fab>
 </template>
 
 <script setup lang="ts">

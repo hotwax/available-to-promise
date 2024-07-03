@@ -26,7 +26,7 @@
 import { IonContent, IonIcon, IonItem, IonLabel, IonList, IonListHeader, alertController, modalController, popoverController } from "@ionic/vue";
 import { translate } from "@/i18n";
 import { copyOutline, flashOutline, stopCircleOutline, timeOutline } from 'ionicons/icons'
-import { defineProps } from "vue";
+import { computed, defineProps } from "vue";
 import JobHistoryModal from "@/components/JobHistoryModal.vue"
 import { Plugins } from '@capacitor/core';
 import { hasError, showToast } from "@/utils";
@@ -38,6 +38,7 @@ import { useStore } from "vuex";
 const store = useStore();
 
 const props = defineProps(["job"]);
+const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
 
 function closePopover() {
   popoverController.dismiss({ dismissed: true });
@@ -71,13 +72,13 @@ async function copyJobInformation(job: any) {
 
 async function disableJob() {
   const alert = await alertController.create({
-    header: translate('Cancel job'),
-    message: translate('Canceling this job will cancel this occurrence and all following occurrences. This job will have to be re-enabled manually to run it again.'),
+    header: translate("Cancel job"),
+    message: translate("Canceling this job will cancel this occurrence and all following occurrences. This job will have to be re-enabled manually to run it again."),
     buttons: [{
       text: translate("Don't cancel"),
-      role: 'cancel'
+      role: "cancel"
     }, {
-      text: translate('Cancel'),
+      text: translate("Cancel"),
       handler: async() => {
         if(isRuntimePassed()) {
           showToast(translate("Job runtime has passed. Please refresh to get the latest job data in order to perform any action."))
@@ -110,18 +111,17 @@ async function disableJob() {
 async function runNow(job: any) {
   const jobAlert = await alertController.create({
     header: translate("Run now"),
-    message: translate('Running this job now will not replace this job. A copy of this job will be created and run immediately. You may not be able to reverse this action.', { space: '<br/><br/>' }),
+    message: translate("Running this job now will not replace this job. A copy of this job will be created and run immediately. You may not be able to reverse this action.", { space: '<br/><br/>' }),
     buttons: [
       {
         text: translate("Cancel"),
         role: 'cancel',
       },
       {
-        text: translate('Run now'),
+        text: translate("Run now"),
         handler: async() => {
           if (job) {
-            await store.dispatch('channel/runServiceNow', job)
-            closePopover();
+            runServiceNow(job);
           }
         }
       }
@@ -129,6 +129,66 @@ async function runNow(job: any) {
   });
 
   return jobAlert.present();
+}
+
+async function runServiceNow(job: any) {
+  let resp;
+
+  const payload = {
+    'JOB_NAME': job.jobName,
+    'SERVICE_NAME': job.serviceName,
+    'SERVICE_COUNT': '0',
+    'SERVICE_TEMP_EXPR': job.jobStatus,
+    'jobFields': {
+      'productStoreId': job.status === "SERVICE_PENDING" ? job.productStoreId : currentEComStore.value.productStoreId,
+      'systemJobEnumId': job.systemJobEnumId,
+      'tempExprId': job.jobStatus, // Need to remove this as we are passing frequency in SERVICE_TEMP_EXPR, currently kept it for backward compatibility
+      'parentJobId': job.parentJobId,
+      'recurrenceTimeZone': store.state.user.current.timeZone,
+      'createdByUserLogin': store.state.user.current.username,
+      'lastModifiedByUserLogin': store.state.user.current.username
+    },
+    'statusId': "SERVICE_PENDING",
+    'systemJobEnumId': job.systemJobEnumId
+  } as any
+
+  Object.keys(job.runtimeData).map((key: any) => {
+    if(key !== "productStoreId" && key !== "shopifyConfigId" && key !== "shopId") {
+      payload[key] = job.runtimeData[key];
+    }
+  })
+
+  // checking if the runtimeData has productStoreId, and if present then adding it on root level
+  job?.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = job.status === "SERVICE_PENDING" ? job.productStoreId : store.state.user.currentEComStore.productStoreId)
+  job?.priority && (payload['SERVICE_PRIORITY'] = job.priority.toString())
+  job?.sinceId && (payload['sinceId'] = job.sinceId)
+
+  // ShopifyConfig and ShopifyShop should be set based upon runtime data
+  // If existing job is run now, copy as is else set the current shop of user
+  const jobRunTimeDataKeys = job?.runtimeData ? Object.keys(job?.runtimeData) : [];
+  if (jobRunTimeDataKeys.includes('shopifyConfigId') || jobRunTimeDataKeys.includes('shopId')) {
+    if (job.status !== "SERVICE_PENDING" && !job.shopifyConfigId) {
+      showToast(translate('Shopify configuration not found. Scheduling failed.'))
+      return;
+    }
+
+    jobRunTimeDataKeys.includes('shopifyConfigId') && (payload['shopifyConfigId'] = job.status === "SERVICE_PENDING" ? job.runtimeData?.shopifyConfigId : job.shopifyConfigId);
+    jobRunTimeDataKeys.includes('shopId') && (payload['shopId'] = job.status === "SERVICE_PENDING" ? job.runtimeData?.shopId : job?.shopId);
+    payload['jobFields']['shopId'] = job.status === "SERVICE_PENDING" ? job.shopId : job?.shopId;
+  }
+
+  try {
+    resp = await ChannelService.scheduleJob({ ...payload });
+    if(!hasError(resp)) {
+      showToast(translate("Service has been scheduled."))
+      closePopover();
+    } else {
+      throw resp.data;
+    }
+  } catch(err) {
+    showToast(translate("Failed to schedule service."))
+    logger.error(err)
+  }
 }
 
 function isRuntimePassed() {

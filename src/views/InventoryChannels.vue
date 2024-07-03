@@ -117,13 +117,13 @@
                   <ion-select-option v-for="channel in inventoryChannels" :key="channel.facilityGroupId" :value="channel.facilityGroupId">{{ channel.facilityGroupName ? channel.facilityGroupName : channel.facilityGroupId }}</ion-select-option>
                 </ion-select>
               </ion-item>
-  
-              <ion-item lines="none">
+
+              <div class="actions">
                 <ion-button fill="clear" @click="saveChanges(job)">{{ translate("Save changes") }}</ion-button>
                 <ion-button color="medium" fill="clear" slot="end" @click="openShopActionsPopover($event, job)">
                   <ion-icon :icon="ellipsisVerticalOutline" slot="icon-only"/>
                 </ion-button>
-              </ion-item>
+              </div>
             </ion-list>
           </ion-card>
         </section>
@@ -215,8 +215,7 @@ async function fetchInventoryChannels() {
   if(!selectedSegment.value || (selectedSegment.value !== 'channels' && selectedSegment.value !== 'publish')) store.dispatch("util/updateSelectedSegment", "channels");
   await Promise.allSettled([store.dispatch("channel/fetchInventoryChannels"), store.dispatch("util/fetchConfigFacilities")]);
   if(selectedSegment.value === "publish") {
-    await store.dispatch("channel/fetchJobs");
-    await store.dispatch("channel/findTemporalExpression")
+    await Promise.allSettled([store.dispatch("channel/fetchJobs"), store.dispatch("channel/findTemporalExpression")]);
     generateFrequencyOptions();
     generateRuntimeOptions();
   }
@@ -299,28 +298,24 @@ function getJobStatus(job: any) {
 
 function updateFrequency(event: any, job: any) {
   let selectedFrequency = event.target.value
-  if(selectedFrequency === 'CUSTOM') {
+  if(selectedFrequency === "CUSTOM") {
     setCustomFrequency(job);
     return;
   }
 
-  const currentJob = shopifyJobs.value.find((shopifyJob: any) => shopifyJob.shopId === job.shopId)
-  currentJob.tempExprId = selectedFrequency;
+  job.tempExprId = selectedFrequency
 }
 
 async function setCustomFrequency(currentJob: any) {
   const customFrequencyModal = await modalController.create({
     component: CustomFrequencyModal,
   });
-  
+
   await customFrequencyModal.present();
 
   await customFrequencyModal.onDidDismiss().then((result) => {
-    const job = shopifyJobs.value.find((job: any) => job.shopId === currentJob.shopId)
     if(result.data?.frequencyId) {
-      job.tempExprId = result.data.frequencyId
-    } else {
-      job.tempExprId = shopifyJobs.value.find((job: any) => job.shopId === currentJob.shopId)?.tempExprId
+      currentJob.tempExprId = result.data.frequencyId
     }
     generateFrequencyOptions()
   });
@@ -377,13 +372,13 @@ function updateCustomTime(event: CustomEvent, currentJob: any) {
 async function saveChanges(job: any) {
   const alert = await alertController
     .create({
-      header: translate('Save changes'),
-      message: translate('Are you sure you want to save these changes?'),
+      header: translate("Save changes"),
+      message: translate("Are you sure you want to save these changes?"),
       buttons: [{
-        text: translate('Cancel'),
-        role: 'cancel'
+        text: translate("Cancel"),
+        role: "cancel"
       }, {
-        text: translate('Save'),
+        text: translate("Save"),
         handler: () => {
           if(isCustomRunTime(job.runTimeValue) && isRuntimePassed(job)) {
             showToast(translate("Job runtime has passed. Please refresh to get the latest job data in order to perform any action."))
@@ -412,7 +407,6 @@ async function updateJob(job: any) {
   } else if (job?.statusId === 'SERVICE_PENDING') {
     await store.dispatch('channel/updateJob', job)
   }
-  await store.dispatch("channel/fetchJobs")
   generateFrequencyOptions()
   generateRuntimeOptions()
 }
