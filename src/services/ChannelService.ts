@@ -134,6 +134,14 @@ const scheduleJob = async (payload: any): Promise <any>  => {
   });
 }
 
+const updateJob = async (payload: any): Promise <any>  => {
+  return api({
+    url: "service/updateJobSandbox",
+    method: "post",
+    data: payload
+  });
+}
+
 export const ChannelService = {
   createFacility,
   createFacilityGroup,
@@ -148,5 +156,6 @@ export const ChannelService = {
   updateFacilityAssociationWithGroup,
   updateFacilityAssociationWithProductStore,
   updateGroupAssociationWithProductStore,
-  updateGroup
+  updateGroup,
+  updateJob
 }

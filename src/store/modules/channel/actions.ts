@@ -246,7 +246,6 @@ const actions: ActionTree<ChannelState, RootState> = {
       resp = await ChannelService.scheduleJob({ ...payload });
       if (resp.status == 200 && !hasError(resp)) {
         showToast(translate('Service has been scheduled'));
-        
       } else {
         showToast(translate('Something went wrong'))
       }
@@ -255,6 +254,37 @@ const actions: ActionTree<ChannelState, RootState> = {
       logger.error(err)
     }
     return {};
+  },
+
+  async updateJob ({ commit, dispatch }, job) {
+    let resp;
+
+    const payload = {
+      'jobId': job.jobId,
+      'systemJobEnumId': job.systemJobEnumId,
+      'recurrenceTimeZone': store.state.user.current.userTimeZone,
+      'tempExprId': job.jobStatus,
+      'statusId': "SERVICE_PENDING",
+      'runTimeEpoch': '',  // when updating a job clearning the epoch time, as job honors epoch time as runTime and the new job created also uses epoch time as runTime
+      'lastModifiedByUserLogin': store.state.user.current.userLoginId
+    } as any
+
+    job?.runTime && (payload['runTime'] = job.runTime)
+    job?.sinceId && (payload['sinceId'] = job.sinceId)
+    job?.jobName && (payload['jobName'] = job.jobName)
+
+    try {
+      resp = await ChannelService.updateJob(payload)
+      if (!hasError(resp)) {
+        showToast(translate('Service updated successfully'))
+      } else {
+        showToast(translate('Something went wrong'))
+      }
+    } catch (err) {
+      showToast(translate('Something went wrong'))
+      logger.error(err)
+    }
+    return resp;
   },
 
   async clearChannelState({ commit }) {
