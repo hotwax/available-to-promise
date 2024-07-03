@@ -130,7 +130,8 @@ const scheduleJob = async (payload: any): Promise <any>  => {
   return api({
     url: "scheduleService",
     method: "post",
-    data: payload
+    data: payload,
+    useOmsRedirection: true,
   });
 }
 
@@ -138,7 +139,8 @@ const updateJob = async (payload: any): Promise <any>  => {
   return api({
     url: "service/updateJobSandbox",
     method: "post",
-    data: payload
+    data: payload,
+    useOmsRedirection: true,
   });
 }
 

@@ -385,7 +385,7 @@ async function saveChanges(job: any) {
       }, {
         text: translate('Save'),
         handler: () => {
-          if(isRuntimePassed(job)) {
+          if(isCustomRunTime(job.runTimeValue) && isRuntimePassed(job)) {
             showToast(translate("Job runtime has passed. Please refresh to get the latest job data in order to perform any action."))
             return;
           }
@@ -401,17 +401,20 @@ async function updateJob(job: any) {
   // return if job has missing data or error
   if(hasJobDataError(job)) return;
 
-  job['jobStatus'] = job.statusId !== 'SERVICE_DRAFT' ? job.tempExprId : 'HOURLY';
+  job['jobStatus'] = job.tempExprId !== 'SERVICE_DRAFT' ? job.tempExprId : 'HOURLY';
 
   // Handling the case for 'Now'. Sending the now value will fail the API as by the time
   // the job is ran, the given 'now' time would have passed. Hence, passing empty 'run time'
   job.runTime = job.runTimeValue != 0 ? (!isCustomRunTime(job.runTimeValue) ? DateTime.now().toMillis() + job.runTimeValue : job.runTimeValue) : ''
 
   if (job?.statusId === 'SERVICE_DRAFT') {
-    store.dispatch('job/scheduleService', job)
+    await store.dispatch('channel/scheduleService', job)
   } else if (job?.statusId === 'SERVICE_PENDING') {
-    store.dispatch('job/updateJob', job)
+    await store.dispatch('channel/updateJob', job)
   }
+  await store.dispatch("channel/fetchJobs")
+  generateFrequencyOptions()
+  generateRuntimeOptions()
 }
 
 function isRuntimePassed(currentJob: any) {

@@ -141,8 +141,8 @@ const actions: ActionTree<ChannelState, RootState> = {
         }
       } else {
         return {
-          ...shop,
           ...draftJob,
+          ...shop,
           runTimeValue: draftJob?.runTime
         }
       }
@@ -196,6 +196,7 @@ const actions: ActionTree<ChannelState, RootState> = {
   async scheduleService({ dispatch, commit }, job) {
     let resp;
 
+    console.log(store.state.user.current);
     const payload = {
       'JOB_NAME': job.jobName,
       'SERVICE_NAME': job.serviceName,
@@ -209,8 +210,8 @@ const actions: ActionTree<ChannelState, RootState> = {
         'maxRecurrenceCount': '-1',
         'parentJobId': job.parentJobId,
         'runAsUser': 'system', //default system, but empty in run now.  TODO Need to remove this as we are using SERVICE_RUN_AS_SYSTEM, currently kept it for backward compatibility
-        'recurrenceTimeZone': store.state.user.current.userTimeZone,
-        'createdByUserLogin': store.state.user.current.userLoginId,
+        'recurrenceTimeZone': store.state.user.current.timeZone,
+        'createdByUserLogin': store.state.user.current.userName,
         'lastModifiedByUserLogin': store.state.user.current.userLoginId,
       },
       'statusId': "SERVICE_PENDING",
@@ -225,19 +226,14 @@ const actions: ActionTree<ChannelState, RootState> = {
 
     const jobRunTimeDataKeys = job?.runtimeData ? Object.keys(job?.runtimeData) : [];
     if (jobRunTimeDataKeys.includes('shopifyConfigId') || jobRunTimeDataKeys.includes('shopId')) {
-      const shopifyConfig = this.state.user.currentShopifyConfig
-      if (Object.keys(shopifyConfig).length == 0) {
-        showToast(translate('Shopify configuration not found. Scheduling failed.'))
-        return;
-      }
-
-      jobRunTimeDataKeys.includes('shopifyConfigId') && (payload['shopifyConfigId'] = shopifyConfig?.shopifyConfigId);
-      jobRunTimeDataKeys.includes('shopId') && (payload['shopId'] = shopifyConfig?.shopId);
-      payload['jobFields']['shopId'] = shopifyConfig?.shopId;
+      
+      jobRunTimeDataKeys.includes('shopifyConfigId') && (payload['shopifyConfigId'] = job.shopifyConfigId);
+      jobRunTimeDataKeys.includes('shopId') && (payload['shopId'] = job.shopId);
+      payload['jobFields']['shopId'] = job.shopId;
     }
 
     // checking if the runtimeData has productStoreId, and if present then adding it on root level
-    job?.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = this.state.user.currentEComStore.productStoreId)
+    job?.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = job.productStoreId)
     job?.priority && (payload['SERVICE_PRIORITY'] = job.priority.toString())
     job?.runTime && (payload['SERVICE_TIME'] = job.runTime.toString())
     job?.sinceId && (payload['sinceId'] = job.sinceId)
@@ -268,11 +264,11 @@ const actions: ActionTree<ChannelState, RootState> = {
       'runTimeEpoch': '',  // when updating a job clearning the epoch time, as job honors epoch time as runTime and the new job created also uses epoch time as runTime
       'lastModifiedByUserLogin': store.state.user.current.userLoginId
     } as any
-
+    
     job?.runTime && (payload['runTime'] = job.runTime)
     job?.sinceId && (payload['sinceId'] = job.sinceId)
     job?.jobName && (payload['jobName'] = job.jobName)
-
+    
     try {
       resp = await ChannelService.updateJob(payload)
       if (!hasError(resp)) {
