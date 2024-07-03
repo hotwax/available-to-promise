@@ -113,13 +113,13 @@
 
               <ion-item lines="full">
                 <ion-icon slot="start" :icon="albumsOutline"/>
-                <ion-select :label="translate('Inventory group')" v-model="job.runtimeData.facilityGroupId" :disabled="job.statusId === 'SERVICE_DRAFT'" :placeholder="translate('Select')" interface="popover">
+                <ion-select :label="translate('Inventory group')" v-model="job.runtimeData.facilityGroupId" :disabled="job.statusId === 'SERVICE_PENDING'" :placeholder="translate('Select')" interface="popover">
                   <ion-select-option v-for="channel in inventoryChannels" :key="channel.facilityGroupId" :value="channel.facilityGroupId">{{ channel.facilityGroupName ? channel.facilityGroupName : channel.facilityGroupId }}</ion-select-option>
                 </ion-select>
               </ion-item>
   
               <ion-item lines="none">
-                <ion-button fill="clear">{{ translate("Save changes") }}</ion-button>
+                <ion-button fill="clear" @click="saveChanges(job)">{{ translate("Save changes") }}</ion-button>
                 <ion-button color="medium" fill="clear" slot="end" @click="openShopActionsPopover($event, job)">
                   <ion-icon :icon="ellipsisVerticalOutline" slot="icon-only"/>
                 </ion-button>
@@ -139,7 +139,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonBadge, IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonDatetime, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonItemDivider, IonLabel, IonList, IonMenuButton, IonModal, IonPage, IonSegment, IonSegmentButton, IonSelect, IonSelectOption, IonTitle, IonToolbar, modalController, onIonViewDidEnter, onIonViewWillLeave, popoverController } from '@ionic/vue';
+import { IonBadge, IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonDatetime, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonItemDivider, IonLabel, IonList, IonMenuButton, IonModal, IonPage, IonSegment, IonSegmentButton, IonSelect, IonSelectOption, IonTitle, IonToolbar, modalController, onIonViewDidEnter, onIonViewWillLeave, alertController, popoverController } from '@ionic/vue';
 import { computed, ref } from 'vue';
 import { addOutline, albumsOutline, businessOutline, ellipsisVerticalOutline, globeOutline, optionsOutline, storefrontOutline, timeOutline, timerOutline } from 'ionicons/icons';
 import { translate } from '@/i18n';
@@ -152,7 +152,7 @@ import EditGroupModal from '@/components/EditGroupModal.vue';
 import emitter from '@/event-bus';
 import { DateTime } from 'luxon';
 import CustomFrequencyModal from "@/components/CustomFrequencyModal.vue";
-import { showToast } from "@/utils";
+import { hasJobDataError, showToast } from "@/utils";
 
 const store = useStore();
 
@@ -372,6 +372,50 @@ function updateCustomTime(event: CustomEvent, currentJob: any) {
   } else {
     showToast(translate("Provide a future date and time"))
   }
+}
+
+async function saveChanges(job: any) {
+  const alert = await alertController
+    .create({
+      header: translate('Save changes'),
+      message: translate('Are you sure you want to save these changes?'),
+      buttons: [{
+        text: translate('Cancel'),
+        role: 'cancel'
+      }, {
+        text: translate('Save'),
+        handler: () => {
+          if(isRuntimePassed(job)) {
+            showToast(translate("Job runtime has passed. Please refresh to get the latest job data in order to perform any action."))
+            return;
+          }
+
+          updateJob(job);
+        }
+      }]
+    });
+  return alert.present();
+}
+
+async function updateJob(job: any) {
+  // return if job has missing data or error
+  if(hasJobDataError(job)) return;
+
+  job['jobStatus'] = job.statusId !== 'SERVICE_DRAFT' ? job.tempExprId : 'HOURLY';
+
+  // Handling the case for 'Now'. Sending the now value will fail the API as by the time
+  // the job is ran, the given 'now' time would have passed. Hence, passing empty 'run time'
+  job.runTime = job.runTimeValue != 0 ? (!isCustomRunTime(job.runTimeValue) ? DateTime.now().toMillis() + job.runTimeValue : job.runTimeValue) : ''
+
+  if (job?.statusId === 'SERVICE_DRAFT') {
+    store.dispatch('job/scheduleService', job)
+  } else if (job?.statusId === 'SERVICE_PENDING') {
+    store.dispatch('job/updateJob', job)
+  }
+}
+
+function isRuntimePassed(currentJob: any) {
+  return currentJob.runTimeValue <= DateTime.now().toMillis()
 }
 
 function handleDateTimeInput(dateTimeValue: any) {

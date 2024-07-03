@@ -1,5 +1,7 @@
 import { toastController } from '@ionic/vue';
 import { DateTime } from 'luxon';
+import logger from '@/logger';
+import { translate } from '@/i18n';
 
 // TODO Use separate files for specific utilities
 
@@ -164,5 +166,24 @@ const generateRuleConditions = (ruleId: string, conditionTypeEnumId: string, app
   return conditions;
 }
 
+const hasJobDataError = (job: any) => {
+  let warning = '';
+  let message = '';
 
-export { doReorder, generateInternalId, generateRuleActions, generateRuleConditions, getDate, getDateAndTime, getTime, hasError, showToast, timeTillRun }
+  if (job?.serviceName === '_NA_') {
+    warning = `${job.systemJobEnumId} :: This job does not have any service data configuration.`;
+    message = 'This job does not have any service data configuration.';
+  } else if (job?.runtimeData?._ERROR_MESSAGE_) {
+    warning = `${job.systemJobEnumId}(${job.serviceName}) has runtimeData error :: ${job.runtimeData._ERROR_MESSAGE_}`;
+    message = 'This job does not have any runtime data configuration.';
+  }
+
+  if(message) {
+    logger.warn(warning);
+    showToast(translate(message));
+    return true;
+  }
+  return false;
+}
+
+export { doReorder, generateInternalId, generateRuleActions, generateRuleConditions, getDate, getDateAndTime, getTime, hasJobDataError, hasError, showToast, timeTillRun }

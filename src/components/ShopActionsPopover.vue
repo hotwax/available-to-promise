@@ -92,6 +92,7 @@ async function disableJob() {
           if(!hasError(resp)) {
             showToast(translate("Successfully cancelled this job."))
             await store.dispatch("channel/fetchJobs");
+            closePopover();
           } else {
             throw resp.data;
           }

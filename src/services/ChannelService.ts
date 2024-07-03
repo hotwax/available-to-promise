@@ -126,6 +126,14 @@ const disableJob = async (payload: any): Promise <any> => {
   });
 }
 
+const scheduleJob = async (payload: any): Promise <any>  => {
+  return api({
+    url: "scheduleService",
+    method: "post",
+    data: payload
+  });
+}
+
 export const ChannelService = {
   createFacility,
   createFacilityGroup,
@@ -136,6 +144,7 @@ export const ChannelService = {
   fetchShopifyConfigs,
   fetchTemporalExpression,
   getServiceStatusDesc,
+  scheduleJob,
   updateFacilityAssociationWithGroup,
   updateFacilityAssociationWithProductStore,
   updateGroupAssociationWithProductStore,
