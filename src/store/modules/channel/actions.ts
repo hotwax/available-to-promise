@@ -211,8 +211,8 @@ const actions: ActionTree<ChannelState, RootState> = {
         'parentJobId': job.parentJobId,
         'runAsUser': 'system', //default system, but empty in run now.  TODO Need to remove this as we are using SERVICE_RUN_AS_SYSTEM, currently kept it for backward compatibility
         'recurrenceTimeZone': store.state.user.current.timeZone,
-        'createdByUserLogin': store.state.user.current.userName,
-        'lastModifiedByUserLogin': store.state.user.current.userLoginId,
+        'createdByUserLogin': store.state.user.current.username,
+        'lastModifiedByUserLogin': store.state.user.current.username,
       },
       'statusId': "SERVICE_PENDING",
       'systemJobEnumId': job.systemJobEnumId
@@ -262,7 +262,7 @@ const actions: ActionTree<ChannelState, RootState> = {
       'tempExprId': job.jobStatus,
       'statusId': "SERVICE_PENDING",
       'runTimeEpoch': '',  // when updating a job clearning the epoch time, as job honors epoch time as runTime and the new job created also uses epoch time as runTime
-      'lastModifiedByUserLogin': store.state.user.current.userLoginId
+      'lastModifiedByUserLogin': store.state.user.current.username
     } as any
     
     job?.runTime && (payload['runTime'] = job.runTime)
@@ -273,6 +273,69 @@ const actions: ActionTree<ChannelState, RootState> = {
       resp = await ChannelService.updateJob(payload)
       if (!hasError(resp)) {
         showToast(translate('Service updated successfully'))
+      } else {
+        showToast(translate('Something went wrong'))
+      }
+    } catch (err) {
+      showToast(translate('Something went wrong'))
+      logger.error(err)
+    }
+    return resp;
+  },
+
+  async runServiceNow({ dispatch }, job) {
+    let resp;
+
+    console.log(store.state.user);
+    
+
+    const payload = {
+      'JOB_NAME': job.jobName,
+      'SERVICE_NAME': job.serviceName,
+      'SERVICE_COUNT': '0',
+      'SERVICE_TEMP_EXPR': job.jobStatus,
+      'jobFields': {
+        'productStoreId': job.status === "SERVICE_PENDING" ? job.productStoreId : this.state.user.currentEComStore.productStoreId,
+        'systemJobEnumId': job.systemJobEnumId,
+        'tempExprId': job.jobStatus, // Need to remove this as we are passing frequency in SERVICE_TEMP_EXPR, currently kept it for backward compatibility
+        'parentJobId': job.parentJobId,
+        'recurrenceTimeZone': store.state.user.current.timeZone,
+        'createdByUserLogin': store.state.user.current.username,
+        'lastModifiedByUserLogin': store.state.user.current.username
+      },
+      'statusId': "SERVICE_PENDING",
+      'systemJobEnumId': job.systemJobEnumId
+    } as any
+
+    Object.keys(job.runtimeData).map((key: any) => {
+      if(key !== "productStoreId" && key !== "shopifyConfigId" && key !== "shopId") {
+        payload[key] = job.runtimeData[key];
+      }
+    })
+
+    // checking if the runtimeData has productStoreId, and if present then adding it on root level
+    job?.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = job.status === "SERVICE_PENDING" ? job.productStoreId : store.state.user.currentEComStore.productStoreId)
+    job?.priority && (payload['SERVICE_PRIORITY'] = job.priority.toString())
+    job?.sinceId && (payload['sinceId'] = job.sinceId)
+
+    // ShopifyConfig and ShopifyShop should be set based upon runtime data
+    // If existing job is run now, copy as is else set the current shop of user
+    const jobRunTimeDataKeys = job?.runtimeData ? Object.keys(job?.runtimeData) : [];
+    if (jobRunTimeDataKeys.includes('shopifyConfigId') || jobRunTimeDataKeys.includes('shopId')) {
+      if (job.status !== "SERVICE_PENDING" && !job.shopifyConfigId) {
+        showToast(translate('Shopify configuration not found. Scheduling failed.'))
+        return;
+      }
+
+      jobRunTimeDataKeys.includes('shopifyConfigId') && (payload['shopifyConfigId'] = job.status === "SERVICE_PENDING" ? job.runtimeData?.shopifyConfigId : job.shopifyConfigId);
+      jobRunTimeDataKeys.includes('shopId') && (payload['shopId'] = job.status === "SERVICE_PENDING" ? job.runtimeData?.shopId : job?.shopId);
+      payload['jobFields']['shopId'] = job.status === "SERVICE_PENDING" ? job.shopId : job?.shopId;
+    }
+
+    try {
+      resp = await ChannelService.scheduleJob({ ...payload });
+      if (resp.status == 200 && !hasError(resp)) {
+        showToast(translate('Service has been scheduled'))
       } else {
         showToast(translate('Something went wrong'))
       }

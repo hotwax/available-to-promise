@@ -10,7 +10,7 @@
         <ion-icon slot="start" :icon="copyOutline" />
         <ion-label>{{ translate("Copy details") }}</ion-label>
       </ion-item> 
-      <ion-item button>
+      <ion-item button @click="runNow(job)">
         <ion-icon slot="start" :icon="flashOutline" />
         <ion-label>{{ translate("Run now") }}</ion-label>
       </ion-item> 
@@ -105,6 +105,30 @@ async function disableJob() {
   });
 
   return alert.present();
+}
+
+async function runNow(job: any) {
+  const jobAlert = await alertController.create({
+    header: translate("Run now"),
+    message: translate('Running this job now will not replace this job. A copy of this job will be created and run immediately. You may not be able to reverse this action.', { space: '<br/><br/>' }),
+    buttons: [
+      {
+        text: translate("Cancel"),
+        role: 'cancel',
+      },
+      {
+        text: translate('Run now'),
+        handler: async() => {
+          if (job) {
+            await store.dispatch('channel/runServiceNow', job)
+            closePopover();
+          }
+        }
+      }
+    ]
+  });
+
+  return jobAlert.present();
 }
 
 function isRuntimePassed() {
