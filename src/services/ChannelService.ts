@@ -117,9 +117,19 @@ const fetchTemporalExpression = async (payload: any): Promise <any>  => {
   });
 }
 
+const disableJob = async (payload: any): Promise <any> => {
+  return api({
+    url: "service/cancelScheduledJob",
+    method: "post",
+    data: payload,
+    useOmsRedirection: true,
+  });
+}
+
 export const ChannelService = {
   createFacility,
   createFacilityGroup,
+  disableJob,
   fetchGroupFacilities,
   fetchInventoryChannels,
   fetchJobInformation,

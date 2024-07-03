@@ -101,7 +101,7 @@ const actions: ActionTree<ChannelState, RootState> = {
       return;
     }
 
-    let params = {}, draftJob = {};
+    let params = {}, draftJob = {} as any;
 
     // Fetch draft job
     params = {
@@ -135,12 +135,14 @@ const actions: ActionTree<ChannelState, RootState> = {
       if(pendingJob?.jobId) {
         return {
           ...shop,
-          ...pendingJob
+          ...pendingJob,
+          runTimeValue: pendingJob.runTime
         }
       } else {
         return {
           ...shop,
-          ...draftJob
+          ...draftJob,
+          runTimeValue: draftJob?.runTime
         }
       }
     })

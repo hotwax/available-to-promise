@@ -88,7 +88,7 @@
             <ion-list>
               <ion-item lines="full">
                 <ion-icon slot="start" :icon="timeOutline"/>
-                <ion-select :label="translate('Run time')" :placeholder="translate('Select')" interface="popover" :value="job.runTime" @ionChange="updateRunTime($event, job)">
+                <ion-select :label="translate('Run time')" :placeholder="translate('Select')" interface="popover" :value="job.runTimeValue" @ionChange="updateRunTime($event, job)">
                   <ion-select-option v-for="runTime in jobRuntimeOptions" :key="runTime.value" :value="runTime.value">{{ runTime.label }}</ion-select-option>
                 </ion-select>
 
@@ -97,7 +97,7 @@
                     <ion-datetime          
                       show-default-buttons
                       hour-cycle="h23"
-                      :value="job.runTime ? (isCustomRunTime(job.runTime) ? getDateTime(job.runTime) : getDateTime(DateTime.now().toMillis() + job.runTime)) : getNowTimestamp()"
+                      :value="job.runTimeValue ? (isCustomRunTime(job.runTimeValue) ? getDateTime(job.runTimeValue) : getDateTime(DateTime.now().toMillis() + job.runTimeValue)) : getNowTimestamp()"
                       @ionChange="updateCustomTime($event, job)"
                     />
                   </ion-content>
@@ -113,7 +113,7 @@
 
               <ion-item lines="full">
                 <ion-icon slot="start" :icon="albumsOutline"/>
-                <ion-select :label="translate('Inventory group')" value="" :placeholder="translate('Select')" interface="popover">
+                <ion-select :label="translate('Inventory group')" v-model="job.runtimeData.facilityGroupId" :disabled="job.statusId === 'SERVICE_DRAFT'" :placeholder="translate('Select')" interface="popover">
                   <ion-select-option v-for="channel in inventoryChannels" :key="channel.facilityGroupId" :value="channel.facilityGroupId">{{ channel.facilityGroupName ? channel.facilityGroupName : channel.facilityGroupId }}</ion-select-option>
                 </ion-select>
               </ion-item>
@@ -158,12 +158,25 @@ const store = useStore();
 
 const inventoryChannels = computed(() => store.getters["channel/getInventoryChannels"])
 const selectedSegment = computed(() => store.getters["util/getSelectedSegment"])
-const jobs = computed(() => store.getters["channel/getJobs"])
+const shopifyJobs = computed(() => store.getters["channel/getJobs"])
 const getTemporalExpr = computed(() => store.getters["channel/getTemporalExpr"])
 
-const shopifyJobs = ref([]) as any;
 const isDateTimeModalOpen = ref(false);
-const jobFrequencyOptions = ref([]);
+const allowedFrequencies = ref([
+  {
+    "id": "HOURLY",
+    "description": "Hourly"
+  }, {
+    "id": "EVERY_6_HOUR",
+    "description": "Every 6 hours"
+  }, {
+    "id": "EVERYDAY",
+    "description": "Every day"
+  }, {
+    "id": "CUSTOM",
+    "description": "Custom"
+  }
+])
 const allowedRunTimes = ref([
   {
     "value": 0,
@@ -185,7 +198,7 @@ const allowedRunTimes = ref([
     "label": "Custom"
   }
 ]);
-
+const jobFrequencyOptions = ref([]) as any;
 const jobRuntimeOptions = ref([]) as any;
 
 onIonViewDidEnter(async() => {
@@ -204,7 +217,6 @@ async function fetchInventoryChannels() {
   if(selectedSegment.value === "publish") {
     await store.dispatch("channel/fetchJobs");
     await store.dispatch("channel/findTemporalExpression")
-    shopifyJobs.value = jobs.value.length ? JSON.parse(JSON.stringify(jobs.value)) : [];
     generateFrequencyOptions();
     generateRuntimeOptions();
   }
@@ -271,7 +283,6 @@ async function updateSegment(event: any) {
   await store.dispatch("util/updateSelectedSegment", event.detail.value);
   if(selectedSegment.value === "publish") {
     await store.dispatch("channel/fetchJobs");
-    shopifyJobs.value = jobs.value.length ? JSON.parse(JSON.stringify(jobs.value)) : [];
     await store.dispatch("channel/findTemporalExpression")
     generateFrequencyOptions()
     generateRuntimeOptions();
@@ -280,11 +291,6 @@ async function updateSegment(event: any) {
 
 function isCustomRunTime(value: number) {
   return !allowedRunTimes.value.some((runTime: any) => runTime.value === value)
-}
-
-function timeFromNow(time: any) {
-  const timeDiff = DateTime.fromMillis(time).diff(DateTime.local());
-  return DateTime.local().plus(timeDiff).toRelative();
 }
 
 function getJobStatus(job: any) {
@@ -314,14 +320,14 @@ async function setCustomFrequency(currentJob: any) {
     if(result.data?.frequencyId) {
       job.tempExprId = result.data.frequencyId
     } else {
-      job.tempExprId = jobs.value.find((job: any) => job.shopId === currentJob.shopId)?.tempExprId
+      job.tempExprId = shopifyJobs.value.find((job: any) => job.shopId === currentJob.shopId)?.tempExprId
     }
     generateFrequencyOptions()
   });
 }
 
 function generateFrequencyOptions() {
-  const frequencyOptions = JSON.parse(process.env.VUE_APP_SHOPIFY_JOBS_FREQUENCY_OPTIONS);
+  const frequencyOptions = JSON.parse(JSON.stringify(allowedFrequencies.value));
 
   shopifyJobs.value.map((job: any) => {
     const option = frequencyOptions.find((option: any) => option.id === job.tempExprId)
@@ -338,9 +344,9 @@ function generateRuntimeOptions() {
 
   shopifyJobs.value.map((job: any) => {
     if(job.statusId === "SERVICE_PENDING") {
-      const selectedTime = runTimeOptions.find((option: any) => option.value === job.runTime);
+      const selectedTime = runTimeOptions.find((option: any) => option.value === job.runTimeValue);
       if(!selectedTime) {
-        runTimeOptions.push({ label: getTime(job.runTime), value: job.runTime })
+        runTimeOptions.push({ label: getTime(job.runTimeValue), value: job.runTimeValue })
       }
     }
   })
@@ -350,8 +356,7 @@ function generateRuntimeOptions() {
 function updateRunTime(event: CustomEvent, currentJob: any) {
   const value = event.detail.value
   if (value != 'CUSTOM') {
-    const job = shopifyJobs.value.find((job: any) => job.shopId === currentJob.shopId)
-    job.runTime = value
+    currentJob.runTimeValue = value
     generateRuntimeOptions()
   } else {
     isDateTimeModalOpen.value = true
@@ -362,8 +367,7 @@ function updateCustomTime(event: CustomEvent, currentJob: any) {
   const currTime = DateTime.now().toMillis();
   const setTime = handleDateTimeInput(event.detail.value);
   if(setTime > currTime) {
-    const job = shopifyJobs.value.find((job: any) => job.shopId === currentJob.shopId)
-    job.runTime = setTime
+    currentJob.runTimeValue = setTime
     generateRuntimeOptions()
   } else {
     showToast(translate("Provide a future date and time"))
@@ -388,6 +392,11 @@ const getNowTimestamp = () => {
 
 function getTime (time: any) {
   return DateTime.fromMillis(time).toLocaleString(DateTime.DATETIME_MED);
+}
+
+function timeFromNow(time: any) {
+  const timeDiff = DateTime.fromMillis(time).diff(DateTime.local());
+  return DateTime.local().plus(timeDiff).toRelative();
 }
 </script>
 

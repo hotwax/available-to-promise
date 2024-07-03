@@ -14,7 +14,7 @@
         <ion-icon slot="start" :icon="flashOutline" />
         <ion-label>{{ translate("Run now") }}</ion-label>
       </ion-item> 
-      <ion-item button lines="none" :disabled="job.statusId === 'SERVICE_DRAFT'">
+      <ion-item button lines="none" :disabled="job.statusId === 'SERVICE_DRAFT'" @click="disableJob()">
         <ion-icon slot="start" :icon="stopCircleOutline" color="danger" />
         <ion-label color="danger">{{ translate("Disable") }}</ion-label>
       </ion-item> 
@@ -30,7 +30,12 @@ import { defineProps } from "vue";
 import JobHistoryModal from "@/components/JobHistoryModal.vue"
 import { Plugins } from '@capacitor/core';
 import { hasError, showToast } from "@/utils";
+import logger from "@/logger";
+import { ChannelService } from "@/services/ChannelService";
 import { DateTime } from 'luxon';
+import { useStore } from "vuex";
+
+const store = useStore();
 
 const props = defineProps(["job"]);
 
@@ -62,5 +67,46 @@ async function copyJobInformation(job: any) {
   })
 
   closePopover();
+}
+
+async function disableJob() {
+  const alert = await alertController.create({
+    header: translate('Cancel job'),
+    message: translate('Canceling this job will cancel this occurrence and all following occurrences. This job will have to be re-enabled manually to run it again.'),
+    buttons: [{
+      text: translate("Don't cancel"),
+      role: 'cancel'
+    }, {
+      text: translate('Cancel'),
+      handler: async() => {
+        if(isRuntimePassed()) {
+          showToast(translate("Job runtime has passed. Please refresh to get the latest job data in order to perform any action."))
+          return;
+        }
+
+        try {
+          const resp = await ChannelService.disableJob({ 
+            jobId: props.job.jobId
+          })
+
+          if(!hasError(resp)) {
+            showToast(translate("Successfully cancelled this job."))
+            await store.dispatch("channel/fetchJobs");
+          } else {
+            throw resp.data;
+          }
+        } catch(error: any) {
+          showToast(translate("Failed to cancel this job."))
+          logger.error(error);
+        }
+      }
+    }],
+  });
+
+  return alert.present();
+}
+
+function isRuntimePassed() {
+  return props.job.runTime <= DateTime.now().toMillis()
 }
 </script> 
