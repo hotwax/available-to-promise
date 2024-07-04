@@ -3,10 +3,9 @@ import RootState from '@/store/RootState'
 import * as types from './mutation-types'
 import ChannelState from './ChannelState'
 import { ChannelService } from '@/services/ChannelService'
-import { hasError, showToast } from '@/utils'
+import { hasError } from '@/utils'
 import logger from '@/logger'
 import store from "@/store"
-import { translate } from '@/i18n'
 import { DateTime } from 'luxon'
 
 const actions: ActionTree<ChannelState, RootState> = {
@@ -203,92 +202,6 @@ const actions: ActionTree<ChannelState, RootState> = {
     }
 
     return temporalExpressions;
-  },
-
-  async scheduleService({ dispatch }, job) {
-    let resp;
-
-    const payload = {
-      'JOB_NAME': job.jobName,
-      'SERVICE_NAME': job.serviceName,
-      'SERVICE_COUNT': '0',
-      'SERVICE_TEMP_EXPR': job.jobStatus,
-      'SERVICE_RUN_AS_SYSTEM':'Y',
-      'jobFields': {
-        'productStoreId': store.state.user.currentEComStore.productStoreId,
-        'systemJobEnumId': job.systemJobEnumId,
-        'tempExprId': job.jobStatus, // Need to remove this as we are passing frequency in SERVICE_TEMP_EXPR, currently kept it for backward compatibility
-        'maxRecurrenceCount': '-1',
-        'parentJobId': job.parentJobId,
-        'runAsUser': 'system', //default system, but empty in run now.  TODO Need to remove this as we are using SERVICE_RUN_AS_SYSTEM, currently kept it for backward compatibility
-        'recurrenceTimeZone': store.state.user.current.timeZone,
-        'createdByUserLogin': store.state.user.current.username,
-        'lastModifiedByUserLogin': store.state.user.current.username,
-      },
-      'statusId': "SERVICE_PENDING",
-      'systemJobEnumId': job.systemJobEnumId
-    } as any
-
-    Object.keys(job.runtimeData).map((key: any) => {
-      if(key !== "productStoreId" && key !== "shopifyConfigId" && key !== "shopId") {
-        payload[key] = job.runtimeData[key];
-      }
-    })
-
-    const jobRunTimeDataKeys = job?.runtimeData ? Object.keys(job?.runtimeData) : [];
-    if (jobRunTimeDataKeys.includes('shopifyConfigId') || jobRunTimeDataKeys.includes('shopId')) {
-      jobRunTimeDataKeys.includes('shopifyConfigId') && (payload['shopifyConfigId'] = job.shopifyConfigId);
-      jobRunTimeDataKeys.includes('shopId') && (payload['shopId'] = job.shopId);
-      payload['jobFields']['shopId'] = job.shopId;
-    }
-
-    // checking if the runtimeData has productStoreId, and if present then adding it on root level
-    job?.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = job.productStoreId)
-    job?.priority && (payload['SERVICE_PRIORITY'] = job.priority.toString())
-    job?.runTime && (payload['SERVICE_TIME'] = job.runTime.toString())
-    job?.sinceId && (payload['sinceId'] = job.sinceId)
-
-    try {
-      resp = await ChannelService.scheduleJob({ ...payload });
-      if (resp.status == 200 && !hasError(resp)) {
-        showToast(translate("Service has been scheduled."));
-        await dispatch("fetchJobs");
-      } else {
-        throw resp.data;
-      }
-    } catch (err) {
-      showToast(translate("Failed to schedule service."))
-      logger.error(err)
-    }
-  },
-
-  async updateJob ({ dispatch }, job) {
-    const payload = {
-      'jobId': job.jobId,
-      'systemJobEnumId': job.systemJobEnumId,
-      'recurrenceTimeZone': store.state.user.current.userTimeZone,
-      'tempExprId': job.jobStatus,
-      'statusId': "SERVICE_PENDING",
-      'runTimeEpoch': '',  // when updating a job clearning the epoch time, as job honors epoch time as runTime and the new job created also uses epoch time as runTime
-      'lastModifiedByUserLogin': store.state.user.current.username
-    } as any
-
-    job?.runTime && (payload['runTime'] = job.runTime)
-    job?.sinceId && (payload['sinceId'] = job.sinceId)
-    job?.jobName && (payload['jobName'] = job.jobName)
-
-    try {
-      const resp = await ChannelService.updateJob(payload)
-      if (!hasError(resp)) {
-        showToast(translate("Service has been scheduled."))
-        await dispatch("fetchJobs");
-      } else {
-        throw resp.data;
-      }
-    } catch(error: any) {
-      showToast(translate("Failed to schedule service."))
-      logger.error(error)
-    }
   },
 
   async clearChannelState({ commit }) {

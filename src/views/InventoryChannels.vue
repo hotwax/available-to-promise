@@ -152,7 +152,9 @@ import EditGroupModal from '@/components/EditGroupModal.vue';
 import emitter from '@/event-bus';
 import { DateTime } from 'luxon';
 import CustomFrequencyModal from "@/components/CustomFrequencyModal.vue";
-import { hasJobDataError, showToast } from "@/utils";
+import { hasError, hasJobDataError, showToast } from "@/utils";
+import { ChannelService } from '@/services/ChannelService';
+import logger from "@/logger";
 
 const store = useStore();
 
@@ -379,36 +381,121 @@ async function saveChanges(job: any) {
         role: "cancel"
       }, {
         text: translate("Save"),
-        handler: () => {
+        handler: async() => {
           if(isCustomRunTime(job.runTimeValue) && isRuntimePassed(job)) {
             showToast(translate("Job runtime has passed. Please refresh to get the latest job data in order to perform any action."))
             return;
           }
 
-          updateJob(job);
+          // return if job has missing data or error
+          if(hasJobDataError(job)) return;
+
+          job['jobStatus'] = job.tempExprId !== 'SERVICE_DRAFT' ? job.tempExprId : 'HOURLY';
+
+          // Handling the case for 'Now'. Sending the now value will fail the API as by the time
+          // the job is ran, the given 'now' time would have passed. Hence, passing empty 'run time'
+          job.runTime = job.runTimeValue != 0 ? (!isCustomRunTime(job.runTimeValue) ? DateTime.now().toMillis() + job.runTimeValue : job.runTimeValue) : ''
+
+          if (job?.statusId === 'SERVICE_DRAFT') {
+            await scheduleService(job)
+          } else if (job?.statusId === 'SERVICE_PENDING') {
+            await updateJob(job);
+            await store.dispatch('channel/updateJob', job)
+          }
         }
       }]
     });
   return alert.present();
 }
 
-async function updateJob(job: any) {
-  // return if job has missing data or error
-  if(hasJobDataError(job)) return;
+async function scheduleService(job: any) {
+  let resp;
 
-  job['jobStatus'] = job.tempExprId !== 'SERVICE_DRAFT' ? job.tempExprId : 'HOURLY';
+  const payload = {
+    'JOB_NAME': job.jobName,
+    'SERVICE_NAME': job.serviceName,
+    'SERVICE_COUNT': '0',
+    'SERVICE_TEMP_EXPR': job.jobStatus,
+    'SERVICE_RUN_AS_SYSTEM':'Y',
+    'jobFields': {
+      'productStoreId': store.state.user.currentEComStore.productStoreId,
+      'systemJobEnumId': job.systemJobEnumId,
+      'tempExprId': job.jobStatus, // Need to remove this as we are passing frequency in SERVICE_TEMP_EXPR, currently kept it for backward compatibility
+      'maxRecurrenceCount': '-1',
+      'parentJobId': job.parentJobId,
+      'runAsUser': 'system', //default system, but empty in run now.  TODO Need to remove this as we are using SERVICE_RUN_AS_SYSTEM, currently kept it for backward compatibility
+      'recurrenceTimeZone': store.state.user.current.timeZone,
+      'createdByUserLogin': store.state.user.current.username,
+      'lastModifiedByUserLogin': store.state.user.current.username,
+    },
+    'statusId': "SERVICE_PENDING",
+    'systemJobEnumId': job.systemJobEnumId
+  } as any
 
-  // Handling the case for 'Now'. Sending the now value will fail the API as by the time
-  // the job is ran, the given 'now' time would have passed. Hence, passing empty 'run time'
-  job.runTime = job.runTimeValue != 0 ? (!isCustomRunTime(job.runTimeValue) ? DateTime.now().toMillis() + job.runTimeValue : job.runTimeValue) : ''
+  Object.keys(job.runtimeData).map((key: any) => {
+    if(key !== "productStoreId" && key !== "shopifyConfigId" && key !== "shopId") {
+      payload[key] = job.runtimeData[key];
+    }
+  })
 
-  if (job?.statusId === 'SERVICE_DRAFT') {
-    await store.dispatch('channel/scheduleService', job)
-  } else if (job?.statusId === 'SERVICE_PENDING') {
-    await store.dispatch('channel/updateJob', job)
+  const jobRunTimeDataKeys = job?.runtimeData ? Object.keys(job?.runtimeData) : [];
+  if (jobRunTimeDataKeys.includes('shopifyConfigId') || jobRunTimeDataKeys.includes('shopId')) {
+    jobRunTimeDataKeys.includes('shopifyConfigId') && (payload['shopifyConfigId'] = job.shopifyConfigId);
+    jobRunTimeDataKeys.includes('shopId') && (payload['shopId'] = job.shopId);
+    payload['jobFields']['shopId'] = job.shopId;
   }
-  generateFrequencyOptions()
-  generateRuntimeOptions()
+
+  // checking if the runtimeData has productStoreId, and if present then adding it on root level
+  job?.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = job.productStoreId)
+  job?.priority && (payload['SERVICE_PRIORITY'] = job.priority.toString())
+  job?.runTime && (payload['SERVICE_TIME'] = job.runTime.toString())
+  job?.sinceId && (payload['sinceId'] = job.sinceId)
+
+  try {
+    resp = await ChannelService.scheduleJob({ ...payload });
+    if (resp.status == 200 && !hasError(resp)) {
+      showToast(translate("Service has been scheduled."));
+      await store.dispatch("channel/fetchJobs");
+      generateFrequencyOptions();
+      generateRuntimeOptions();
+    } else {
+      throw resp.data;
+    }
+  } catch (err) {
+    showToast(translate("Failed to schedule service."))
+    logger.error(err)
+  }
+}
+
+async function updateJob(job: any) {
+  const payload = {
+    'jobId': job.jobId,
+    'systemJobEnumId': job.systemJobEnumId,
+    'recurrenceTimeZone': store.state.user.current.userTimeZone,
+    'tempExprId': job.jobStatus,
+    'statusId': "SERVICE_PENDING",
+    'runTimeEpoch': '',  // when updating a job clearning the epoch time, as job honors epoch time as runTime and the new job created also uses epoch time as runTime
+    'lastModifiedByUserLogin': store.state.user.current.username
+  } as any
+
+  job?.runTime && (payload['runTime'] = job.runTime)
+  job?.sinceId && (payload['sinceId'] = job.sinceId)
+  job?.jobName && (payload['jobName'] = job.jobName)
+
+  try {
+    const resp = await ChannelService.updateJob(payload)
+    if (!hasError(resp)) {
+      showToast(translate("Service has been scheduled."))
+      await store.dispatch("channel/fetchJobs");
+      generateFrequencyOptions();
+      generateRuntimeOptions();
+    } else {
+      throw resp.data;
+    }
+  } catch(error: any) {
+    showToast(translate("Failed to schedule service."))
+    logger.error(error)
+  }
 }
 
 function isRuntimePassed(currentJob: any) {
