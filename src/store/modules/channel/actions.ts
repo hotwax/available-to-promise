@@ -7,6 +7,7 @@ import { hasError, showToast } from '@/utils'
 import logger from '@/logger'
 import store from "@/store"
 import { translate } from '@/i18n'
+import { DateTime } from 'luxon'
 
 const actions: ActionTree<ChannelState, RootState> = {
 
@@ -144,7 +145,8 @@ const actions: ActionTree<ChannelState, RootState> = {
         return {
           ...draftJob,
           ...shop,
-          runTimeValue: draftJob?.runTime
+          runTimeValue: (draftJob?.runTime && (DateTime.fromMillis(draftJob.runTime).diff(DateTime.local()).milliseconds > 0)) ? draftJob.runTime : "",
+          tempExprId: "SERVICE_DRAFT"
         }
       }
     })
@@ -250,7 +252,7 @@ const actions: ActionTree<ChannelState, RootState> = {
       resp = await ChannelService.scheduleJob({ ...payload });
       if (resp.status == 200 && !hasError(resp)) {
         showToast(translate("Service has been scheduled."));
-        dispatch("fetchJobs");
+        await dispatch("fetchJobs");
       } else {
         throw resp.data;
       }

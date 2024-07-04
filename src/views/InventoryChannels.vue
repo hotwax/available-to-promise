@@ -412,7 +412,7 @@ async function updateJob(job: any) {
 }
 
 function isRuntimePassed(currentJob: any) {
-  return currentJob.runTimeValue <= DateTime.now().toMillis()
+  return currentJob.runTimeValue && currentJob.runTimeValue <= DateTime.now().toMillis()
 }
 
 function handleDateTimeInput(dateTimeValue: any) {
