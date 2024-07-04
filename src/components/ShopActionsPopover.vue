@@ -2,15 +2,15 @@
   <ion-content>
     <ion-list>
       <ion-list-header>{{ translate("More options") }}</ion-list-header>
-      <ion-item button @click="viewJobHistory(job)">
+      <ion-item button @click="viewJobHistory()">
         <ion-icon slot="start" :icon="timeOutline" />
         <ion-label>{{ translate("History") }}</ion-label>
       </ion-item> 
-      <ion-item button @click="copyJobInformation(job)">
+      <ion-item button @click="copyJobInformation()">
         <ion-icon slot="start" :icon="copyOutline" />
         <ion-label>{{ translate("Copy details") }}</ion-label>
       </ion-item> 
-      <ion-item button @click="runNow(job)">
+      <ion-item button @click="runNow()">
         <ion-icon slot="start" :icon="flashOutline" />
         <ion-label>{{ translate("Run now") }}</ion-label>
       </ion-item> 
@@ -44,10 +44,10 @@ function closePopover() {
   popoverController.dismiss({ dismissed: true });
 }
 
-async function viewJobHistory(job: any) {
+async function viewJobHistory() {
   const jobHistoryModal = await modalController.create({
     component: JobHistoryModal,
-    componentProps: { currentJob: job }
+    componentProps: { currentJob: props.job }
   });
 
   jobHistoryModal.onDidDismiss().then(() => {
@@ -57,7 +57,9 @@ async function viewJobHistory(job: any) {
   await jobHistoryModal.present();
 }
 
-async function copyJobInformation(job: any) {
+async function copyJobInformation() {
+  const job = props.job;
+
   const { Clipboard } = Plugins;
   const jobDetails = `jobId: ${job.jobId}, jobName: ${job.enumName}, jobDescription: ${job.description} ${job.runtimeData ? (", runtimeData: " + JSON.stringify(job.runtimeData)) : ""}`;
 
@@ -108,7 +110,7 @@ async function disableJob() {
   return alert.present();
 }
 
-async function runNow(job: any) {
+async function runNow() {
   const jobAlert = await alertController.create({
     header: translate("Run now"),
     message: translate("Running this job now will not replace this job. A copy of this job will be created and run immediately. You may not be able to reverse this action.", { space: '<br/><br/>' }),
@@ -120,8 +122,8 @@ async function runNow(job: any) {
       {
         text: translate("Run now"),
         handler: async() => {
-          if (job) {
-            runServiceNow(job);
+          if(props.job) {
+            runServiceNow(props.job);
           }
         }
       }
