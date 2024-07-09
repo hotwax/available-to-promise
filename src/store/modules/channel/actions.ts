@@ -112,7 +112,8 @@ const actions: ActionTree<ChannelState, RootState> = {
         systemJobEnumId: "JOB_UL_INV"
       } as any,
       fieldList: ["systemJobEnumId", "runTime", "tempExprId", "parentJobId", "serviceName", "jobId", "jobName", "currentRetryCount", "statusId", "productStoreId", "runtimeDataId", "shopId", "description", "enumTypeId", "enumName"],
-      noConditionFind: "Y"
+      noConditionFind: "Y",
+      viewSize: 1
     }
 
     const draftJobs = await ChannelService.fetchJobInformation(params);
