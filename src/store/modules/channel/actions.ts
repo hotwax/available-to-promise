@@ -71,7 +71,7 @@ const actions: ActionTree<ChannelState, RootState> = {
     commit(types.CHANNEL_INVENTORY_CHANNELS_UPDATED, groups);
   },
 
-  async fetchShopifyConfigs ({ commit }) {
+  async fetchShopifyConfigs () {
     let shopifyConfigs = [];
 
     try {

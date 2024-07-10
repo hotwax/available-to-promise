@@ -449,7 +449,6 @@ async function scheduleService(job: any) {
   job?.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = job.productStoreId)
   job?.priority && (payload['SERVICE_PRIORITY'] = job.priority.toString())
   job?.runTime && (payload['SERVICE_TIME'] = job.runTime.toString())
-  job?.sinceId && (payload['sinceId'] = job.sinceId)
 
   try {
     resp = await ChannelService.scheduleJob({ ...payload });
@@ -479,7 +478,6 @@ async function updateJob(job: any) {
   } as any
 
   job?.runTime && (payload['runTime'] = job.runTime)
-  job?.sinceId && (payload['sinceId'] = job.sinceId)
   job?.jobName && (payload['jobName'] = job.jobName)
 
   try {

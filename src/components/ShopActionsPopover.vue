@@ -163,7 +163,6 @@ async function runServiceNow(job: any) {
   // checking if the runtimeData has productStoreId, and if present then adding it on root level
   job?.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = job.status === "SERVICE_PENDING" ? job.productStoreId : store.state.user.currentEComStore.productStoreId)
   job?.priority && (payload['SERVICE_PRIORITY'] = job.priority.toString())
-  job?.sinceId && (payload['sinceId'] = job.sinceId)
 
   // ShopifyConfig and ShopifyShop should be set based upon runtime data
   // If existing job is run now, copy as is else set the current shop of user
