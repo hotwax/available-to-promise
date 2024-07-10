@@ -47,7 +47,7 @@ const actions: ActionTree<UserState, RootState> = {
       emitter.emit("dismissLoader")
       showToast(translate(err));
       logger.error("error", err);
-      return Promise.reject(new Error(err))
+      return Promise.reject(err instanceof Object ? err :  Error(err))
     }
   },
 
