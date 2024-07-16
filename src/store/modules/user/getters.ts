@@ -27,6 +27,9 @@ const getters: GetterTree <UserState, RootState> = {
     },
     getOmsRedirectionInfo(state) {
         return state.omsRedirectionInfo;
-    }
+    },
+    getPwaState(state) {
+        return state.pwaState;
+    },
 }
 export default getters;

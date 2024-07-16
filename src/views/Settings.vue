@@ -72,13 +72,7 @@
       </section>
       <hr />
 
-      <div class="section-header">
-        <h1>
-          {{ translate("App") }}
-          <p class="overline" >{{ translate("Version: ", { appVersion }) }}</p>
-        </h1>
-        <p class="overline">{{ translate("Built: ", { builtDateTime: getDateTime(appInfo.builtTime) }) }}</p>
-      </div>
+      <DxpAppVersionInfo />
 
       <section>
         <ion-card>
@@ -102,27 +96,20 @@
 
 <script setup lang="ts">
 import {  IonAvatar, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonHeader, IonIcon, IonItem, IonLabel, IonMenuButton, IonPage, IonSelect, IonSelectOption, IonTitle, IonToolbar, modalController } from '@ionic/vue';
-import { computed, onMounted, ref } from 'vue';
+import { computed } from 'vue';
 import { openOutline } from 'ionicons/icons'
 import { useStore } from 'vuex';
 import TimeZoneModal from '@/views/TimezoneModal.vue';
 import Image from '@/components/Image.vue'
-import { DateTime } from "luxon";
 import { translate } from '@/i18n';
 import { goToOms } from "@hotwax/dxp-components";
 
 const store = useStore()
-const appVersion = ref("")
-const appInfo = (process.env.VUE_APP_VERSION_INFO ? JSON.parse(process.env.VUE_APP_VERSION_INFO) : {}) as any
 
 const userProfile = computed(() => store.getters["user/getUserProfile"])
 const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
 const oms = computed(() => store.getters["user/getInstanceUrl"])
 const omsRedirectionInfo = computed(() => store.getters["user/getOmsRedirectionInfo"])
-
-onMounted(() => {
-  appVersion.value = appInfo.branch ? (appInfo.branch + "-" + appInfo.revision) : appInfo.tag;
-})
 
 function setEComStore(event: CustomEvent) {
   if(userProfile.value?.stores) {
@@ -145,10 +132,6 @@ function logout() {
     const redirectUrl = window.location.origin + '/login'
     window.location.href = `${process.env.VUE_APP_LOGIN_URL}?isLoggedOut=true&redirectUrl=${redirectUrl}`
   })
-}
-
-function getDateTime(time: any) {
-  return time ? DateTime.fromMillis(time).toLocaleString(DateTime.DATETIME_MED) : "";
 }
 
 function goToLaunchpad() {
