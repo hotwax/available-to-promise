@@ -98,6 +98,10 @@ const actions: ActionTree<UserState, RootState> = {
       productStore = (state.current as any).stores.find((store: any) => store.productStoreId === payload.productStoreId);
     }
     commit(types.USER_CURRENT_ECOM_STORE_UPDATED, productStore);
+  },
+
+  updatePwaState({ commit }, payload) {
+    commit(types.USER_PWA_STATE_UPDATED, payload);
   }
 }
 
