@@ -3,8 +3,6 @@ import App from './App.vue'
 import router from './router';
 import { DateTime } from 'luxon';
 import logger from './logger';
-import { dxpComponents } from '@hotwax/dxp-components';
-import localeMessages from '@/locales';
 
 
 import { IonicVue } from '@ionic/vue';
@@ -30,8 +28,10 @@ import '@ionic/vue/css/display.css';
 import './theme/variables.css';
 
 import store from './store'
+import { dxpComponents } from "@hotwax/dxp-components"
 import { login, logout, loader } from "@/user-utils";
 import { getConfig, initialise } from '@/adapter';
+import localeMessages from './locales';
 
 
 const app = createApp(App)
