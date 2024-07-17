@@ -10,10 +10,8 @@ import { DateTime } from 'luxon'
 
 
 const actions: ActionTree<UtilState, RootState> = {
-  async fetchConfigFacilities ({ commit, state }) {
-    let configFacilities = JSON.parse(JSON.stringify(state.configFacilities))
-
-    if(configFacilities.length && configFacilities[0].productStoreId === store.state.user.currentEComStore.productStoreId) return;
+  async fetchConfigFacilities ({ commit }) {
+    let configFacilities = [];
 
     try {
       const resp = await UtilService.fetchFacilities({ facilityTypeId: 'CONFIGURATION', productStoreId: store.state.user.currentEComStore.productStoreId });
@@ -29,12 +27,11 @@ const actions: ActionTree<UtilState, RootState> = {
     commit(types.UTIL_CONFIG_FACILITES_UPDATED, configFacilities)
   },
 
-  async fetchFacilityGroups ({ commit, state }) {
-    let facilityGroups = JSON.parse(JSON.stringify(state.facilityGroups))
+  async fetchFacilityGroups ({ commit }) {
+    let facilityGroups = {};
 
-    if(facilityGroups.length && facilityGroups[0].productStoreId === store.state.user.currentEComStore.productStoreId) return;
     try {
-      const resp = await UtilService.fetchFacilityGroups({ productStoreId: store.state.user.currentEComStore.productStoreId });
+      const resp = await UtilService.fetchFacilityGroups({ productStoreId: store.state.user.currentEComStore.productStoreId, pageSize: 100 });
 
       if(!hasError(resp)) {
         facilityGroups = resp.data;
@@ -47,7 +44,7 @@ const actions: ActionTree<UtilState, RootState> = {
     commit(types.UTIL_FACILITY_GROUPS_UPDATED, facilityGroups)
   },
 
-  async updateAppliedFilters ({ commit, state }, payload) {
+  async updateAppliedFilters ({ commit }, payload) {
     commit(types.UTIL_APPLIED_FILTERS_UPDATED, payload)
   },
 
@@ -128,8 +125,69 @@ const actions: ActionTree<UtilState, RootState> = {
     return facilitiesData;
   },
 
+  async fetchPickupGroups({ commit, dispatch }) {
+    let groups = [] as any;
+    const pickGroupFacilities = {} as any;
+
+    try {
+      const resp = await UtilService.fetchFacilityGroups({ facilityGroupTypeId: 'PICKUP', productStoreId: store.state.user.currentEComStore.productStoreId, pageSize: 100 })
+
+      if(!hasError(resp)) {
+        groups = resp.data;
+        const responses = await Promise.allSettled(groups.map(async (group: any) => {
+          const facilities = await dispatch("fetchPickGroupFacilities", group.facilityGroupId)
+          pickGroupFacilities[group.facilityGroupId] = facilities
+        }))
+
+        const hasFailedResponse = responses.some((response: any) => response.status === 'rejected')
+        if (hasFailedResponse) {
+          logger.error("Failed to fetch facilities for some pickup group.")
+        }
+      } else {
+        throw resp.data
+      }
+    } catch(error) {
+      logger.error(error)
+    }
+    commit(types.UTIL_PICKUP_GROUPS_UPDATED , groups);
+    commit(types.UTIL_PICKUP_GROUP_FACILITIES , pickGroupFacilities);
+  },
+
+  async fetchPickGroupFacilities({ commit }, facilityGroupId) {
+    let pickupGroupFacilities = [] as any;
+
+    try {
+      const resp = await UtilService.fetchPickupGroupFacilities({ 
+        facilityGroupId,
+        pageSize: 100,
+        parentFacilityTypeId: 'VIRTUAL_FACILITY',
+        parentFacilityTypeId_not: 'Y',
+        facilityTypeId: 'VIRTUAL_FACILITY',
+        facilityTypeId_not: 'Y',
+      })
+
+      if(!hasError(resp)) {
+        pickupGroupFacilities = resp.data;
+        
+      } else {
+        throw resp.data
+      }
+    } catch(error) {
+      logger.error(error)
+    }
+    return pickupGroupFacilities;
+  },
+
+  async updatePickupGroupFacilities({ commit }, payload) {
+    commit(types.UTIL_PICKUP_GROUP_FACILITIES , payload);
+  },
+
   async updateFacilities({ commit, state }, payload) {
     commit(types.UTIL_FACILITY_LIST_UPDATED , { facilities: payload.facilities, isScrollable: state.facilities.isScrollable });
+  },
+
+  async updateSelectedSegment({ commit }, payload) {
+    commit(types.UTIL_SELECTED_SEGMENT_UPDATED , payload);
   }
 }
 

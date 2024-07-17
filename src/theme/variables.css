@@ -317,8 +317,12 @@ hr {
 }
 
 .rule-inputs {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.rule-inputs>* {
+  flex: 1 0 350px;
 }
 
 .section-header {
@@ -342,6 +346,10 @@ ion-content>section {
 
 .empty-state > p {
   text-align: center; 
+}
+
+ion-toolbar > ion-segment {
+  width: unset;
 }
 
 @media (min-width: 700px) {
@@ -398,9 +406,5 @@ ion-content>section {
 
   .sort > div > :first-child{
     border-bottom: unset;
-  }
-
-  ion-header {
-    display: flex;
   }
 }

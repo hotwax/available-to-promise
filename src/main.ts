@@ -30,6 +30,8 @@ import '@ionic/vue/css/display.css';
 import './theme/variables.css';
 
 import store from './store'
+import { login, logout, loader } from "@/user-utils";
+import { getConfig, initialise } from '@/adapter';
 
 
 const app = createApp(App)
@@ -42,7 +44,16 @@ const app = createApp(App)
   })
   .use(router)
   .use(store)
-  .use(dxpComponents, { localeMessages });
+  .use(dxpComponents, {
+    defaultImgUrl: require("@/assets/images/defaultImage.png"),
+    login,
+    logout,
+    loader,
+    appLoginUrl: process.env.VUE_APP_LOGIN_URL as string,
+    getConfig,
+    initialise,
+    localeMessages
+  });
 
 // Filters are removed in Vue 3 and global filter introduced https://v3.vuejs.org/guide/migration/filters.html#global-filters
 app.config.globalProperties.$filters = {

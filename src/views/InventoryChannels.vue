@@ -3,15 +3,14 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-menu-button slot="start" />
-        <ion-title>{{ translate("Inventory channels") }}</ion-title>
-      </ion-toolbar>
+        <ion-title slot="start">{{ translate("Inventory channels") }}</ion-title>
 
-      <ion-toolbar>
-        <ion-segment v-model="selectedSegment">
+        <ion-segment :value="selectedSegment" @ionChange="updateSegment($event)" slot="end">
           <ion-segment-button value="channels">
             <ion-label>{{ translate("Channels") }}</ion-label>
           </ion-segment-button>
-          <ion-segment-button value="publish">
+          <!-- Todo: add functionality to the Publish segment -->
+          <ion-segment-button value="publish" disabled>
             <ion-label>{{ translate("Publish") }}</ion-label>
           </ion-segment-button>
         </ion-segment>
@@ -21,53 +20,59 @@
     <ion-content>
       <main>
         <section v-if="selectedSegment === 'channels'">
-          <ion-card v-for="channel in inventoryChannels" :key="channel.facilityGroupId">
-            <ion-card-header>
-              <div>
-                <ion-card-subtitle class="overline">{{ channel.facilityGroupId }}</ion-card-subtitle>
-                <ion-card-title>{{ channel.facilityGroupName }}</ion-card-title>
-                <ion-card-subtitle>{{ channel.description }}</ion-card-subtitle>
-              </div>
-            </ion-card-header>
-
-            <ion-item lines="full">
-              <ion-icon slot="start" :icon="globeOutline"/>
-              <ion-label>
-                {{ channel.selectedConfigFacility?.facilityName }}
-                <p>{{ channel.selectedConfigFacility?.facilityId }}</p>
-              </ion-label>
-              <ion-button slot="end" fill="clear" color="medium" @click="openLinkThresholdFacilitiesToGroupModal(channel)">
-                <ion-icon :icon="optionsOutline" slot="icon-only" />
-              </ion-button>
-            </ion-item>
-
-            <ion-list>
-              <ion-item-divider color="light">
-                <ion-label>{{ translate("Facilities") }}</ion-label>
-                <ion-button slot="end" fill="clear" color="medium" @click="openLinkFacilitiesToGroupModal(channel)">
+          <template v-if="inventoryChannels.length">
+            <ion-card v-for="channel in inventoryChannels" :key="channel.facilityGroupId">
+              <ion-card-header>
+                <div>
+                  <ion-card-subtitle class="overline">{{ channel.facilityGroupId }}</ion-card-subtitle>
+                  <ion-card-title>{{ channel.facilityGroupName }}</ion-card-title>
+                  <ion-card-subtitle v-html="channel.description.replace(/(?:\n|\n)/g, '<br />')"></ion-card-subtitle>
+                </div>
+              </ion-card-header>
+  
+              <ion-item lines="full">
+                <ion-icon slot="start" :icon="globeOutline"/>
+                <ion-label>
+                  {{ channel.selectedConfigFacility?.facilityName }}
+                  <p>{{ channel.selectedConfigFacility?.facilityId }}</p>
+                </ion-label>
+                <ion-button slot="end" fill="clear" color="medium" @click="openLinkThresholdFacilitiesToGroupModal(channel)">
                   <ion-icon :icon="optionsOutline" slot="icon-only" />
                 </ion-button>
-              </ion-item-divider>
-
-              <ion-item>
-                <ion-icon slot="start" :icon="storefrontOutline"/>
-                <ion-label>{{ translate("retail facilities", { count: getFacilityCount(channel, "RETAIL_STORE") })}}</ion-label>
-              </ion-item>
-
-              <ion-item lines="full">
-                <ion-icon slot="start" :icon="businessOutline"/>
-                <ion-label>{{ translate("warehouse", { count: getFacilityCount(channel, "WAREHOUSE") })}}</ion-label>
               </ion-item>
   
-              <ion-item lines="none">
-                <ion-button fill="clear" size="default" @click="openEditGroupModal(channel)">{{ translate("Edit group") }}</ion-button>
-                <!-- Functionality is not defined for this button hence commented it for now. -->
-                <!-- <ion-button color="medium" fill="clear" slot="end">
-                  <ion-icon :icon="ellipsisVerticalOutline" slot="icon-only"/>
-                </ion-button> -->
-              </ion-item>
-            </ion-list>
-          </ion-card>
+              <ion-list>
+                <ion-item-divider color="light">
+                  <ion-label>{{ translate("Facilities") }}</ion-label>
+                  <ion-button slot="end" fill="clear" color="medium" @click="openLinkFacilitiesToGroupModal(channel)">
+                    <ion-icon :icon="optionsOutline" slot="icon-only" />
+                  </ion-button>
+                </ion-item-divider>
+  
+                <ion-item>
+                  <ion-icon slot="start" :icon="storefrontOutline"/>
+                  <ion-label>{{ translate("retail facilities", { count: getFacilityCount(channel, "STORE") })}}</ion-label>
+                </ion-item>
+  
+                <ion-item lines="full">
+                  <ion-icon slot="start" :icon="businessOutline"/>
+                  <ion-label>{{ translate("warehouse", { count: getFacilityCount(channel, "WAREHOUSE") })}}</ion-label>
+                </ion-item>
+    
+                <div class="actions">
+                  <ion-button fill="clear" @click="openEditGroupModal(channel)">{{ translate("Edit group") }}</ion-button>
+                  <!-- Functionality is not defined for this button hence commented it for now. -->
+                  <!-- <ion-button color="medium" fill="clear" slot="end">
+                    <ion-icon :icon="ellipsisVerticalOutline" slot="icon-only"/>
+                  </ion-button> -->
+                </div>
+              </ion-list>
+            </ion-card>
+          </template>
+
+          <div class="empty-state" v-else>
+            <p>{{ translate("No inventory channel found.") }}</p>
+          </div>
         </section>
  
         <section v-else-if="selectedSegment === 'publish'">
@@ -114,7 +119,7 @@
       </main>
     </ion-content>
 
-    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab v-if="selectedSegment === 'channels'" vertical="bottom" horizontal="end" slot="fixed">
       <ion-fab-button @click="openCreateGroupModal()">
         <ion-icon :icon="addOutline" />
       </ion-fab-button>
@@ -123,8 +128,8 @@
 </template>
 
 <script setup lang="ts">
-import { IonBadge, IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonItemDivider, IonLabel, IonList, IonMenuButton, IonPage, IonSegment, IonSegmentButton, IonSelect, IonSelectOption, IonTitle, IonToolbar, modalController, popoverController } from '@ionic/vue';
-import { computed, onMounted, ref } from 'vue';
+import { IonBadge, IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonItemDivider, IonLabel, IonList, IonMenuButton, IonPage, IonSegment, IonSegmentButton, IonSelect, IonSelectOption, IonTitle, IonToolbar, modalController, onIonViewDidEnter, onIonViewWillLeave, popoverController } from '@ionic/vue';
+import { computed } from 'vue';
 import { addOutline, albumsOutline, businessOutline, ellipsisVerticalOutline, globeOutline, optionsOutline, storefrontOutline, timeOutline, timerOutline } from 'ionicons/icons';
 import { translate } from '@hotwax/dxp-components';
 import ShopActionsPopover from '@/components/ShopActionsPopover.vue'
@@ -137,15 +142,24 @@ import emitter from '@/event-bus';
 
 const store = useStore();
 
-const selectedSegment = ref("channels")
-
 const inventoryChannels = computed(() => store.getters["channel/getInventoryChannels"])
+const selectedSegment = computed(() => store.getters["util/getSelectedSegment"])
 
-onMounted(async () => {
+onIonViewDidEnter(async() => {
+  fetchInventoryChannels()
+  emitter.on("productStoreOrConfigChanged", fetchInventoryChannels);
+})
+
+onIonViewWillLeave(() => {
+  emitter.off("productStoreOrConfigChanged", fetchInventoryChannels);
+})
+
+async function fetchInventoryChannels() {
   emitter.emit("presentLoader");
+  if(!selectedSegment.value || (selectedSegment.value !== 'channels' && selectedSegment.value !== 'publish')) store.dispatch("util/updateSelectedSegment", "channels");
   await Promise.allSettled([store.dispatch("channel/fetchInventoryChannels"), store.dispatch("util/fetchConfigFacilities")]);
   emitter.emit("dismissLoader");
-})
+}
 
 async function openShopActionsPopover(event: Event) {
   const popover = await popoverController.create({
@@ -192,8 +206,18 @@ async function openLinkThresholdFacilitiesToGroupModal(group: any) {
   return popover.present();
 }
 
-function getFacilityCount(group: any, facilityTypeId: string) {
-  return group.selectedFacilities?.length ? group.selectedFacilities.filter((facility: any) => facility.facilityTypeId === facilityTypeId).length : 0;
+function getFacilityCount(channel: any, facilityTypeId: string) {
+  if(!channel.selectedFacilities?.length) return 0;
+
+  if(facilityTypeId === 'STORE') {
+    return channel.selectedFacilities.filter((facility: any) => facility.facilityTypeId === "RETAIL_STORE" || facility.facilityTypeId === "OUTLET_STORE").length;
+  } else {
+    return channel.selectedFacilities.filter((facility: any) => facility.facilityTypeId === "WAREHOUSE" || facility.facilityTypeId === "OUTLET_WAREHOUSE").length;
+  }
+}
+
+function updateSegment(event: any) {
+  store.dispatch("util/updateSelectedSegment", event.detail.value);
 }
 
 </script>
@@ -204,5 +228,10 @@ ion-card-header {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
 }
 </style>

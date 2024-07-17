@@ -1,8 +1,8 @@
 {
-  "name": "threshold-management",
-  "version": "2.8.0",
+  "name": "available-to-promise",
+  "version": "3.0.2",
   "private": true,
-  "description": "Threshold Management",
+  "description": "Available to Promise",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
@@ -19,6 +19,7 @@
     "@hotwax/app-version-info": "^1.0.0",
     "@hotwax/apps-theme": "^1.2.6",
     "@hotwax/dxp-components": "^1.13.0",
+    "@hotwax/oms-api": "^1.14.0",
     "@ionic/core": "7.6.0",
     "@ionic/vue": "7.6.0",
     "@ionic/vue-router": "7.6.0",

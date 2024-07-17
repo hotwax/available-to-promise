@@ -7,15 +7,19 @@
         </ion-button>
       </ion-buttons>
       <ion-title>{{ type === "included" ? translate("Include facility groups") : translate("Exclude facility groups") }}</ion-title>
+      <ion-buttons slot="end">
+        <!-- Clear button should be disabled till no group is selected -->
+        <ion-button fill="clear" color="danger" :disabled="!selectedGroups.length" @click="selectedGroups = []">{{ translate("Clear All") }}</ion-button>
+      </ion-buttons>
     </ion-toolbar>
   </ion-header>
 
   <ion-content>
     <ion-list v-if="facilityGroups.length">
-      <ion-item v-for="group in facilityGroups" :key="group.facilityGroupId"  @click="updateSelectedGroups(group)">
+      <ion-item v-for="group in facilityGroups" :key="group.facilityGroupId"  @click="!isAlreadyApplied(group.facilityGroupId) ? updateSelectedGroups(group) : null">
         <ion-label v-if="isAlreadyApplied(group.facilityGroupId)">{{ group.facilityGroupName }}</ion-label>
         <ion-checkbox v-if="!isAlreadyApplied(group.facilityGroupId)" :checked="isAlreadySelected(group.facilityGroupId)">
-          {{ group.facilityGroupName }}
+          {{ group.facilityGroupName ? group.facilityGroupName : group.facilityGroupId }}
         </ion-checkbox>
         <ion-note v-else slot="end" color="danger">{{ type === 'included' ? translate("excluded") : translate("included") }}</ion-note>
       </ion-item>

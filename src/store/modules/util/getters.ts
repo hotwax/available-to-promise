@@ -18,6 +18,15 @@ const getters: GetterTree<UtilState, RootState> = {
   isFacilitiesScrollable(state) {
     return state.facilities.isScrollable
   },
+  getSelectedSegment(state) {
+    return state.selectedSegment
+  },
+  getPickupGroups(state) {
+    return state.pickupGroups
+  },
+  getPickupGroupFacilities(state) {
+    return state.pickupGroupFacilities
+  },
 }
 
 export default getters;

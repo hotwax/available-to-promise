@@ -2,7 +2,7 @@ import api from '@/api';
 
 const fetchInventoryChannels = async (payload: any): Promise <any>  => {
   return api({
-    url: 'facilityGroups',
+    url: `productStores/${payload.productStoreId}/facilityGroups`,
     method: "GET",
     params: payload
   });

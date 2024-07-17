@@ -11,6 +11,9 @@ const getters: GetterTree <RuleState, RootState> = {
   },
   getRuleGroup (state) {
     return state.ruleGroup
+  },
+  isReorderActive (state) {
+    return state.isReorderActive
   }
 }
 export default getters;

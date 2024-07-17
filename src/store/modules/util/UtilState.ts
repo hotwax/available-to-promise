@@ -3,4 +3,7 @@ export default interface UtilState {
   appliedFilters: any;
   facilityGroups: any;
   facilities: any;
+  selectedSegment: any;
+  pickupGroups: any;
+  pickupGroupFacilities: any;
 }

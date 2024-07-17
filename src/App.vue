@@ -9,16 +9,35 @@
 
 <script setup lang="ts">
 import { IonApp, IonRouterOutlet, IonSplitPane, loadingController } from '@ionic/vue';
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed, onBeforeMount, onMounted, onUnmounted, ref } from 'vue';
 import emitter from "@/event-bus"
 import { Settings } from 'luxon'
 import Menu from '@/components/Menu.vue';
 import store from "./store";
 import { translate } from '@hotwax/dxp-components';
+import { initialise, resetConfig } from '@/adapter'
 
+
+const userProfile = computed(() => store.getters["user/getUserProfile"])
+const userToken = computed(() => store.getters["user/getUserToken"])
+const instanceUrl = computed(() => store.getters["user/getInstanceUrl"])
 
 const loader = ref(null) as any
-const userProfile = computed(() => store.getters["user/getUserProfile"])
+const maxAge = process.env.VUE_APP_CACHE_MAX_AGE ? parseInt(process.env.VUE_APP_CACHE_MAX_AGE) : 0
+
+initialise({
+  token: userToken.value,
+  instanceUrl: instanceUrl.value,
+  cacheMaxAge: maxAge,
+  events: {
+    responseError: () => {
+      setTimeout(() => dismissLoader(), 100);
+    },
+    queueTask: (payload: any) => {
+      emitter.emit("queueTask", payload);
+    }
+  }
+})
 
 async function presentLoader(options = { message: '', backdropDismiss: true }) {
   // When having a custom message remove already existing loader
@@ -42,16 +61,12 @@ function dismissLoader() {
   }
 }
 
-onMounted(async () => {
-  loader.value = await loadingController
-    .create({
-      message: translate("Click the backdrop to dismiss."),
-      translucent: true,
-      backdropDismiss: true
-    });
+onBeforeMount(() => {
   emitter.on('presentLoader', presentLoader);
   emitter.on('dismissLoader', dismissLoader);
+})
 
+onMounted(async () => {
   // Handles case when user resumes or reloads the app
   // Luxon timezzone should be set with the user's selected timezone
   if (userProfile.value && userProfile.value.timeZone) {
@@ -62,6 +77,8 @@ onMounted(async () => {
 onUnmounted(() => {
   emitter.off("presentLoader", presentLoader);
   emitter.off("dismissLoader", dismissLoader);
+
+  resetConfig()
 })
 </script>
 <style>

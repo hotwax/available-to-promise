@@ -41,5 +41,14 @@ const mutations: MutationTree <UtilState> = {
     state.facilities.list = payload.facilities
     state.facilities.isScrollable = payload.isScrollable
   },
+  [types.UTIL_SELECTED_SEGMENT_UPDATED](state, payload) {
+    state.selectedSegment = payload
+  },
+  [types.UTIL_PICKUP_GROUPS_UPDATED](state, payload) {
+    state.pickupGroups = payload
+  },
+  [types.UTIL_PICKUP_GROUP_FACILITIES](state, payload) {
+    state.pickupGroupFacilities = payload
+  },
 }
 export default mutations;

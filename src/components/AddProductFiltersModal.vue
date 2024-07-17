@@ -8,7 +8,8 @@
       </ion-buttons>
       <ion-title>{{ type === "included" ? translate("Include", { label }) : translate("Exclude", { label }) }}</ion-title>
       <ion-buttons slot="end">
-        <ion-button fill="clear" color="danger" @click="selectedValues = []">{{ translate("Clear All") }}</ion-button>
+        <!-- Clear all button should be disabled if no facetOptions are available to select or if no filter is selected. -->
+        <ion-button fill="clear" color="danger" :disabled="!facetOptions.length || !selectedValues.length" @click="selectedValues = []">{{ translate("Clear All") }}</ion-button>
       </ion-buttons>
     </ion-toolbar>
   </ion-header>
@@ -16,8 +17,8 @@
   <ion-content>
     <ion-searchbar :placeholder="translate('Search', { label })" v-model="queryString" @keyup.enter="search()"/>
 
-    <ion-list>
-      <ion-item v-for="option in facetOptions" :key="option.id"  @click="updateSelectedValues(option.id)">
+    <ion-list v-if="facetOptions.length">
+      <ion-item v-for="option in facetOptions" :key="option.id"  @click="!isAlreadyApplied(option.id) ? updateSelectedValues(option.id) : null">
         <ion-label v-if="isAlreadyApplied(option.id)">{{ option.label }}</ion-label>
         <ion-checkbox v-if="!isAlreadyApplied(option.id)" :checked="selectedValues.includes(option.id)">
           {{ option.label }}
@@ -25,6 +26,12 @@
         <ion-note v-else slot="end" color="danger">{{ type === 'included' ? translate("excluded") : translate("included") }}</ion-note>
       </ion-item>
     </ion-list>
+    <div class="empty-state" v-else-if="!queryString">
+      <p>{{ translate("Search for to find results", { label }) }}</p>
+    </div>
+    <div class="empty-state" v-else>
+      <p>{{ translate("No result found for", { label: queryString }) }}</p>
+    </div>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
       <ion-fab-button @click="saveFilters()">
@@ -91,7 +98,7 @@ function search() {
 async function getFilters(vSize?: any, vIndex?: any) {
   const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
   const viewIndex = vIndex ? vIndex : 0;
-
+  
   const payload = {
     facetToSelect: props.facetToSelect,
     docType: 'PRODUCT',

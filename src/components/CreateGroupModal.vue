@@ -6,7 +6,7 @@
           <ion-icon slot="icon-only" :icon="closeOutline" />
         </ion-button>
       </ion-buttons>
-      <ion-title>{{ translate("Create group") }}</ion-title>
+      <ion-title>{{ translate("Create channel group") }}</ion-title>
     </ion-toolbar>
   </ion-header>
 
@@ -21,7 +21,7 @@
         <ion-input :label="translate('ID')" labelPlacement="floating" ref="facilityGroupId" v-model="formData.facilityGroupId" @ionInput="validateFacilityGroupId" @ionBlur="markFacilityGroupIdTouched" :error-text="translate('Internal ID cannot be more than 20 characters.')" />
       </ion-item>
       <ion-item>
-        <ion-textarea :label="translate('Description')" v-model="formData.description" labelPlacement="floating" />
+        <ion-textarea :label="translate('Description')" v-model="formData.description" labelPlacement="floating" :maxlength="255" />
       </ion-item>
       <ion-item>
         <ion-label>{{ translate("Product store") }}</ion-label>
@@ -73,7 +73,7 @@ function closeModal() {
 
 async function createGroup() {
   if (!formData.value.facilityGroupName?.trim()) {
-    showToast(translate("Please fill in all the required fields"))
+    showToast(translate("Please fill in all the required fields."))
     return;
   }
 
@@ -113,16 +113,16 @@ async function createGroup() {
           ...selectedConfigFacility,
           facilityId: resp.data.facilityId
         }
+
+        // Associating the config facility with the product store.
+        resp = await ChannelService.updateFacilityAssociationWithProductStore({productStoreId: eComStore.value.productStoreId, facilityId: selectedConfigFacility.facilityId})
+        if(hasError(resp)) throw resp.data;
       } else {
         throw resp.data;
       }
     } else {
       selectedConfigFacility = configFacilities.value.find((facility: any) => facility.facilityId === selectedConfigFacilityId.value)
     }
-
-    // Associating the config facility with the product store.
-    resp = await ChannelService.updateFacilityAssociationWithProductStore({productStoreId: eComStore.value.productStoreId, facilityId: selectedConfigFacility.facilityId})
-    if(hasError(resp)) throw resp.data;
 
     // Associating the facility group with the product store.
     resp = await ChannelService.updateGroupAssociationWithProductStore({productStoreId: eComStore.value.productStoreId, facilityGroupId: formData.value.facilityGroupId})
@@ -136,9 +136,9 @@ async function createGroup() {
     await store.dispatch("channel/fetchInventoryChannels");
     await store.dispatch("util/fetchConfigFacilities");
     modalController.dismiss();
-  } catch (error) {
+  } catch (error: any) {
     logger.error(error)
-    showToast(translate("Something went wrong."))
+    showToast(error.response?.data?.errors ? error.response.data.errors : translate("Failed to create channel group."))
   }
   modalController.dismiss()
   emitter.emit("dismissLoader");
