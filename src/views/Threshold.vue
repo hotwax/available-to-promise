@@ -42,7 +42,7 @@ import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
 import { useRouter } from 'vue-router';
 import { computed, ref } from 'vue';
 import { useStore } from 'vuex';
-import { translate } from '@/i18n';
+import { translate } from '@hotwax/dxp-components';
 import emitter from '@/event-bus';
 import { RuleService } from '@/services/RuleService';
 import { doReorder, showToast } from '@/utils';

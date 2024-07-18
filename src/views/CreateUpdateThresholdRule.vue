@@ -69,7 +69,7 @@
 <script setup lang="ts">
 import { IonBackButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonPage, IonNote, IonText, IonTitle, IonToggle, IonToolbar, onIonViewWillLeave, onIonViewDidEnter } from '@ionic/vue';
 import { saveOutline } from 'ionicons/icons'
-import { translate } from "@/i18n";
+import { translate } from "@hotwax/dxp-components";
 import ProductFilters from '@/components/ProductFilters.vue';
 import { computed, defineProps, ref } from 'vue';
 import { useStore } from 'vuex';

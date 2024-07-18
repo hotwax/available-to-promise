@@ -46,7 +46,7 @@
 <script setup lang="ts">
 import { IonButton, IonButtons, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonList, IonSelect, IonSelectOption, IonText, IonTextarea, IonTitle, IonToolbar, modalController } from "@ionic/vue";
 import { closeOutline, checkmarkDone } from "ionicons/icons";
-import { translate } from "@/i18n";
+import { translate } from '@hotwax/dxp-components';
 import { useStore } from "vuex";
 import { computed, ref } from "vue";
 import { generateInternalId, hasError, showToast } from "@/utils";

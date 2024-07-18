@@ -3,7 +3,7 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-menu-button slot="start" />
-        <ion-title>{{ $t("Safety stock") }}</ion-title>
+        <ion-title>{{ translate("Safety stock") }}</ion-title>
       </ion-toolbar>
     </ion-header>
 
@@ -42,7 +42,7 @@ import { useRouter } from "vue-router";
 import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
 import { useStore } from 'vuex';
 import { computed, ref } from 'vue';
-import { translate } from '@/i18n';
+import { translate } from '@hotwax/dxp-components';
 import emitter from '@/event-bus';
 import { RuleService } from '@/services/RuleService';
 import { doReorder, showToast } from '@/utils';

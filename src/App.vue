@@ -14,7 +14,7 @@ import emitter from "@/event-bus"
 import { Settings } from 'luxon'
 import Menu from '@/components/Menu.vue';
 import store from "./store";
-import { translate } from './i18n';
+import { translate } from '@hotwax/dxp-components';
 import { initialise, resetConfig } from '@/adapter'
 
 
