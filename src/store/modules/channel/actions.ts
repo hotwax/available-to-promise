@@ -9,12 +9,12 @@ import store from "@/store"
 
 const actions: ActionTree<ChannelState, RootState> = {
 
-  async fetchInventoryChannels ({ commit, state, dispatch }) {
+  async fetchInventoryChannels ({ commit, dispatch }) {
     let resp = {} as any;
     let inventoryChannels = [] as any
 
     try {
-      resp = await ChannelService.fetchInventoryChannels({ facilityGroupTypeId: "CHANNEL_FAC_GROUP", productStoreId: store.state.user.currentEComStore.productStoreId });
+      resp = await ChannelService.fetchInventoryChannels({ facilityGroupTypeId: "CHANNEL_FAC_GROUP", productStoreId: store.state.user.currentEComStore.productStoreId, pageSize: 50 });
 
       if(!hasError(resp)) {
         inventoryChannels = resp?.data;

@@ -13,7 +13,9 @@
   <ion-content>
     <ion-list>
       <ion-item>
-        <ion-input :label="translate('Name')" labelPlacement="floating" v-model="formData.facilityGroupName"/>
+        <ion-input labelPlacement="floating" v-model="formData.facilityGroupName">
+          <div slot="label">{{ translate("Name") }} <ion-text color="danger">*</ion-text></div>
+        </ion-input>
       </ion-item>
       <ion-item>
         <ion-textarea :label="translate('Description')" labelPlacement="floating" v-model="formData.description" :maxlength="255" />
@@ -29,9 +31,9 @@
 </template>
 
 <script setup lang="ts">
-import { IonButton, IonButtons, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonList, IonTextarea, IonTitle, IonToolbar, modalController } from "@ionic/vue";
+import { IonButton, IonButtons, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonList, IonText, IonTextarea, IonTitle, IonToolbar, modalController } from "@ionic/vue";
 import { closeOutline, saveOutline } from "ionicons/icons";
-import { translate } from "@/i18n";
+import { translate } from '@hotwax/dxp-components';
 import { defineProps, onMounted, ref } from "vue";
 import logger from "@/logger";
 import { hasError, showToast } from "@/utils";
@@ -55,6 +57,11 @@ function isGroupUpdated() {
 }
 
 async function updateGroup() {
+  if (!formData.value.facilityGroupName?.trim()) {
+    showToast(translate("Please fill in all the required fields."))
+    return;
+  }
+
   emitter.emit("presentLoader");
   try {
     const resp = await ChannelService.updateGroup({...formData.value, facilityGroupId: props.group.facilityGroupId})

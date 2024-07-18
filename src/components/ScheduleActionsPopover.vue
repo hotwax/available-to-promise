@@ -20,7 +20,7 @@
 
 <script setup lang="ts">
 import { IonContent, IonIcon, IonItem, IonLabel, IonList, IonListHeader, alertController, modalController } from "@ionic/vue";
-import { translate } from "@/i18n";
+import { translate } from '@hotwax/dxp-components';
 import { flashOutline, stopCircleOutline, timeOutline } from 'ionicons/icons'
 import { useStore } from "vuex";
 import { computed } from "vue";
@@ -109,6 +109,7 @@ async function runNow() {
               const resp = await RuleService.runNow(ruleGroup.value.ruleGroupId)
               if(!hasError(resp) && resp.data.jobRunId) {
                 showToast(translate("Service has been scheduled"))
+                await store.dispatch('rule/fetchRules', { groupTypeEnumId: ruleGroup.value.groupTypeEnumId, pageSize: 50 })
                 popoverController.dismiss();
               } else {
                 throw resp.data
@@ -123,6 +124,7 @@ async function runNow() {
       ]
     });
 
-  return scheduleAlert.present();
+  await scheduleAlert.present();
+  popoverController.dismiss()
 }
 </script> 

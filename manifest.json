@@ -1,6 +1,6 @@
 {
-    "name": "HotWax Commerce Threshold Management",
-    "short_name": "Threshold Management",
+    "name": "HotWax Commerce Available to Promise",
+    "short_name": "Available to Promise",
     "theme_color": "#FFFFFF",
     "icons": [{
             "src": "public/img/icons/favicon-16x16.png",

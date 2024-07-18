@@ -24,6 +24,6 @@
 
 <script setup lang="ts">
 import { IonContent, IonIcon, IonItem, IonLabel, IonList, IonListHeader } from "@ionic/vue";
-import { translate } from "@/i18n";
+import { translate } from '@hotwax/dxp-components';
 import { copyOutline, flashOutline, stopCircleOutline, timeOutline } from 'ionicons/icons'
 </script> 

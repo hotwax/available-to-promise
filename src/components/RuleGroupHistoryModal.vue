@@ -6,25 +6,30 @@
           <ion-icon slot="icon-only" :icon="closeOutline" />
         </ion-button>
       </ion-buttons>
-      <ion-title>{{ translate("Group history") }}</ion-title>
+      <ion-title>{{ translate("Execution history") }}</ion-title>
     </ion-toolbar>
   </ion-header>
   
   <ion-content>
-    <ion-list>
-      <ion-item v-for="history in groupHistory" :key="history.jobRunId">
-        <ion-label>
-          <h3>{{ getTime(history.startTime) }}</h3>
-          <p>{{ getDate(history.startTime) }}</p>
-        </ion-label>
-        <ion-badge color="dark" v-if="history.endTime">{{ timeTillRun(history.endTime) }}</ion-badge>
-      </ion-item>
+    <ion-list v-if="groupHistory.length">
+      <template v-for="history in groupHistory" :key="history.jobRunId">
+        <ion-item v-if="history.startTime">
+          <ion-label>
+            <h3>{{ getTime(history.startTime) }}</h3>
+            <p>{{ getDate(history.startTime) }}</p>
+          </ion-label>
+          <ion-badge color="dark" v-if="history.endTime">{{ timeTillRun(history.endTime) }}</ion-badge>
+        </ion-item>
+      </template>
     </ion-list>
+    <div class="empty-state" v-else>
+      <p>{{ translate("No available history for rule.", { name: router.currentRoute.value.name?.toString().toLowerCase() }) }}</p>
+    </div>
   </ion-content>
 </template>
 
 <script setup lang="ts">
-import { translate } from "@/i18n";
+import { translate } from '@hotwax/dxp-components';
 import {
   IonBadge,
   IonButton,
@@ -45,7 +50,9 @@ import { getDate, getTime, timeTillRun, hasError } from "@/utils";
 import { useStore } from "vuex";
 import { RuleService } from "@/services/RuleService";
 import logger from "@/logger";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const store = useStore();
 const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
 

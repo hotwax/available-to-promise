@@ -4,7 +4,6 @@ import OfflineHelper from "@/offline-helper"
 import emitter from "@/event-bus"
 import store from "@/store";
 import { StatusCodes } from "http-status-codes";
-import router from "@/router"
 
 axios.interceptors.request.use((config: any) => {
   // TODO: pass csrf token
@@ -46,7 +45,9 @@ axios.interceptors.response.use(function (response: any) {
     const { status } = error.response;
     if (status === StatusCodes.UNAUTHORIZED) {
       store.dispatch("user/logout");
-      router.push("/login")
+      const redirectUrl = window.location.origin + '/login';
+      // Explicitly passing isLoggedOut as in case of maarg apps we need to call the logout api in launchpad
+      window.location.href = `${process.env.VUE_APP_LOGIN_URL}?redirectUrl=${redirectUrl}&isLoggedOut=true`;
     }
   }
   // Any status codes that falls outside the range of 2xx cause this function to trigger

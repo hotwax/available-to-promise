@@ -59,12 +59,14 @@
     IonSelectOption,
     IonTitle,
     IonToolbar,
+    alertController,
+    SelectCustomEvent
   } from "@ionic/vue";
   import { computed } from "vue";
   import { useStore } from "@/store";
   import { useRouter } from "vue-router";
   import { cloudUploadOutline, globeOutline, settingsOutline, sendOutline, storefrontOutline, pulseOutline } from 'ionicons/icons';
-  import { translate } from "@/i18n";
+  import { translate } from "@hotwax/dxp-components";
   import emitter from "@/event-bus";
 
   const store = useStore();
@@ -73,28 +75,28 @@
         {
           title: "Threshold",
           url: "/threshold",
-          childRoutes: ["/create-threshold"],
+          childRoutes: ["/create-threshold", "/update-threshold/"],
           iosIcon: globeOutline,
           mdIcon: globeOutline
         },
         {
           title: "Safety stock",
           url: "/safety-stock",
-          childRoutes: ["/create-safety-stock"],
+          childRoutes: ["/create-safety-stock", "/update-safety-stock/"],
           iosIcon: pulseOutline,
           mdIcon: pulseOutline
         },
         {
           title: "Store pickup",
           url: "/store-pickup",
-          childRoutes: ["/create-store-pickup"],
+          childRoutes: ["/create-store-pickup", "update-store-pickup/"],
           iosIcon: storefrontOutline,
           mdIcon: storefrontOutline
         },
         {
           title: "Shipping",
           url: "/shipping",
-          childRoutes: ["/create-shipping"],
+          childRoutes: ["/create-shipping", "/update-shipping/"],
           iosIcon: sendOutline,
           mdIcon: sendOutline
         },
@@ -121,15 +123,45 @@
     return appPages.findIndex((screen) => screen.url === path || screen.childRoutes?.includes(path) || screen.childRoutes?.some((route) => path.includes(route)));
   });
 
-  function setEComStore(event: CustomEvent) {
+  async function setEComStore(event: SelectCustomEvent) {
+    const createUpdateRoute = ["/create-threshold", "/update-threshold/", "/create-safety-stock", "/update-safety-stock/", "/create-store-pickup", "update-store-pickup/", "/create-shipping", "/update-shipping/"]
+    const path = router.currentRoute.value.path;
     if(userProfile.value?.stores) {
-      store.dispatch("user/setEcomStore", {
-        "productStoreId": event.detail.value
-      })
-      emitter.emit("productStoreOrConfigChanged")
+      if(createUpdateRoute.some((route) => path.includes(route))) {
+        const alert = await alertController.create({
+          header: translate("Leave page"),
+          message: translate("Any page made on this page will be lost. You will not be able to reverse this action."),
+          buttons: [
+            {
+              text: translate("No"),
+              role: "cancel",
+              handler: async () => {
+                // Reverting the selected ecomStore in ion-select if user select no to change product store.
+                event.target.value = eComStore.value.productStoreId
+              }
+            },
+            {
+              text: translate("Yes"),
+              handler: async () => {
+                await store.dispatch("user/setEcomStore", {
+                  "productStoreId": event.detail.value
+                })
+                emitter.emit("productStoreOrConfigChanged")
+              }
+            }
+          ]
+        })
+
+        alert.present();
+      } else {
+        store.dispatch("user/setEcomStore", {
+          "productStoreId": event.detail.value
+        })
+        emitter.emit("productStoreOrConfigChanged")
+      }
     }
   }
-  </script>
+</script>
   
   <style scoped>
   ion-menu.md ion-item.selected ion-icon {

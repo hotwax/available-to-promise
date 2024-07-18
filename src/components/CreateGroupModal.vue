@@ -46,7 +46,7 @@
 <script setup lang="ts">
 import { IonButton, IonButtons, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonList, IonSelect, IonSelectOption, IonText, IonTextarea, IonTitle, IonToolbar, modalController } from "@ionic/vue";
 import { closeOutline, checkmarkDone } from "ionicons/icons";
-import { translate } from "@/i18n";
+import { translate } from '@hotwax/dxp-components';
 import { useStore } from "vuex";
 import { computed, ref } from "vue";
 import { generateInternalId, hasError, showToast } from "@/utils";
@@ -73,7 +73,7 @@ function closeModal() {
 
 async function createGroup() {
   if (!formData.value.facilityGroupName?.trim()) {
-    showToast(translate("Please fill in all the required fields"))
+    showToast(translate("Please fill in all the required fields."))
     return;
   }
 
@@ -136,9 +136,9 @@ async function createGroup() {
     await store.dispatch("channel/fetchInventoryChannels");
     await store.dispatch("util/fetchConfigFacilities");
     modalController.dismiss();
-  } catch (error) {
+  } catch (error: any) {
     logger.error(error)
-    showToast(translate("Something went wrong."))
+    showToast(error.response?.data?.errors ? error.response.data.errors : translate("Failed to create channel group."))
   }
   modalController.dismiss()
   emitter.emit("dismissLoader");

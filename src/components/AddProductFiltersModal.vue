@@ -22,14 +22,8 @@
       </ion-chip>
     </ion-row>
 
-    <div class="empty-state" v-if="isLoading">
-      <ion-item lines="none">
-        <ion-spinner name="crescent" slot="start" />
-        {{ translate("Fetching", { label }) }}
-      </ion-item>
-    </div>
-    <ion-list v-else-if="facetOptions.length">
-      <ion-item v-for="option in facetOptions" :key="option.id"  @click="updateSelectedValues(option.id)">
+    <ion-list v-if="facetOptions.length">
+      <ion-item v-for="option in facetOptions" :key="option.id"  @click="!isAlreadyApplied(option.id) ? updateSelectedValues(option.id) : null">
         <ion-label v-if="isAlreadyApplied(option.id)">{{ option.label }}</ion-label>
         <ion-checkbox v-if="!isAlreadyApplied(option.id)" :checked="selectedValues.includes(option.id)">
           {{ option.label }}
@@ -76,7 +70,6 @@ import {
   IonNote,
   IonRow,
   IonSearchbar,
-  IonSpinner,
   IonTitle,
   IonToolbar,
   modalController
@@ -84,14 +77,13 @@ import {
 import { closeOutline, saveOutline } from 'ionicons/icons';
 import { useStore } from "vuex";
 import { UtilService } from "@/services/UtilService";
-import { translate } from "@/i18n";
+import { translate } from '@hotwax/dxp-components';
 import { hasError } from "@/utils";
 
 const queryString = ref('');
 const facetOptions = ref([]) as any;
 const isScrollable = ref(true);
 const selectedValues = ref([]) as any;
-let isLoading = ref(false)
 
 const props = defineProps(["label", "facetToSelect", "searchfield", "type"]);
 const store = useStore();
@@ -111,7 +103,6 @@ function search() {
 }
 
 async function getFilters(vSize?: any, vIndex?: any) {
-  isLoading.value = true;
   const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
   const viewIndex = vIndex ? vIndex : 0;
   
@@ -138,7 +129,6 @@ async function getFilters(vSize?: any, vIndex?: any) {
     facetOptions.value = [];
     isScrollable.value = false;
   }
-  isLoading.value = false;
 }
 
 async function loadMoreFilters(event: any){

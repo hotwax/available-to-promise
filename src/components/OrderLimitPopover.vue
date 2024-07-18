@@ -31,7 +31,7 @@ import {
 } from "@ionic/vue";
 import { defineProps, ref } from "vue";
 import { lockClosedOutline, lockOpenOutline } from 'ionicons/icons'
-import { translate } from '@/i18n';
+import { translate } from '@hotwax/dxp-components';
 import { showToast } from '@/utils';
 
 const props = defineProps(["fulfillmentOrderLimit"]);
@@ -65,6 +65,7 @@ async function showOrderLimitAlert(header: string, message: string, showInput: b
       name: "setLimit",
       placeholder: translate("Order fulfillment capacity"),
       type: "number",
+      value: props.fulfillmentOrderLimit,
       min: 0
     }] : [],
     buttons: [{
@@ -92,6 +93,6 @@ async function showOrderLimitAlert(header: string, message: string, showInput: b
       }
     }]
   })
-  await alert.present()
+  alert.present()
 }
 </script>

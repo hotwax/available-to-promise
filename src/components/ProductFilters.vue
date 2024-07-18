@@ -79,7 +79,7 @@
 <script setup lang="ts">
 import { IonButton, IonCard, IonCardContent, IonChip, IonIcon, IonItem, IonLabel, modalController } from '@ionic/vue';
 import { addCircleOutline, closeCircle } from 'ionicons/icons'
-import { translate } from '@/i18n';
+import { translate } from '@hotwax/dxp-components';
 import AddProductFiltersModal from '@/components/AddProductFiltersModal.vue';
 import { computed } from 'vue';
 import { useStore } from 'vuex';
