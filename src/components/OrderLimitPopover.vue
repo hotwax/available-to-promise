@@ -31,7 +31,7 @@ import {
 } from "@ionic/vue";
 import { defineProps, ref } from "vue";
 import { lockClosedOutline, lockOpenOutline } from 'ionicons/icons'
-import { translate } from '@/i18n';
+import { translate } from '@hotwax/dxp-components';
 import { showToast } from '@/utils';
 
 const props = defineProps(["fulfillmentOrderLimit"]);

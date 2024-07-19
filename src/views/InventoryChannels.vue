@@ -26,7 +26,7 @@
                 <div>
                   <ion-card-subtitle class="overline">{{ channel.facilityGroupId }}</ion-card-subtitle>
                   <ion-card-title>{{ channel.facilityGroupName }}</ion-card-title>
-                  <ion-card-subtitle>{{ channel.description }}</ion-card-subtitle>
+                  <ion-card-subtitle v-html="channel.description.replace(/(?:\n|\n)/g, '<br />')"></ion-card-subtitle>
                 </div>
               </ion-card-header>
   
@@ -142,7 +142,7 @@
 import { IonBadge, IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonDatetime, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonItemDivider, IonLabel, IonList, IonMenuButton, IonModal, IonPage, IonSegment, IonSegmentButton, IonSelect, IonSelectOption, IonTitle, IonToolbar, modalController, onIonViewDidEnter, onIonViewWillLeave, alertController, popoverController } from '@ionic/vue';
 import { computed, ref } from 'vue';
 import { addOutline, albumsOutline, businessOutline, ellipsisVerticalOutline, globeOutline, optionsOutline, storefrontOutline, timeOutline, timerOutline } from 'ionicons/icons';
-import { translate } from '@/i18n';
+import { translate } from '@hotwax/dxp-components';
 import ShopActionsPopover from '@/components/ShopActionsPopover.vue'
 import CreateGroupModal from '@/components/CreateGroupModal.vue'
 import LinkFacilitiesToGroupModal from '@/components/LinkFacilitiesToGroupModal.vue'

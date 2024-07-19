@@ -1,7 +1,7 @@
 import { toastController } from '@ionic/vue';
 import { DateTime } from 'luxon';
 import logger from '@/logger';
-import { translate } from '@/i18n';
+import { translate } from '@hotwax/dxp-components';
 
 // TODO Use separate files for specific utilities
 

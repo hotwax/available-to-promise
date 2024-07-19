@@ -4,7 +4,7 @@ import RootState from '@/store/RootState'
 import UserState from './UserState'
 import * as types from './mutation-types'
 import { showToast } from '@/utils'
-import { translate } from '@/i18n'
+import { translate } from '@hotwax/dxp-components';
 import logger from "@/logger";
 import emitter from '@/event-bus'
 import { Settings } from "luxon"
@@ -47,7 +47,7 @@ const actions: ActionTree<UserState, RootState> = {
       emitter.emit("dismissLoader")
       showToast(translate(err));
       logger.error("error", err);
-      return Promise.reject(new Error(err))
+      return Promise.reject(err instanceof Object ? err :  Error(err))
     }
   },
 
@@ -98,6 +98,10 @@ const actions: ActionTree<UserState, RootState> = {
       productStore = (state.current as any).stores.find((store: any) => store.productStoreId === payload.productStoreId);
     }
     commit(types.USER_CURRENT_ECOM_STORE_UPDATED, productStore);
+  },
+
+  updatePwaState({ commit }, payload) {
+    commit(types.USER_PWA_STATE_UPDATED, payload);
   }
 }
 

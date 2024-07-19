@@ -58,7 +58,7 @@ import {
 } from "@ionic/vue";
 import { closeOutline, saveOutline } from 'ionicons/icons';
 import { useStore } from "vuex";
-import { translate } from "@/i18n";
+import { translate } from '@hotwax/dxp-components';
 
 const selectedGroups = ref([]) as any;
 

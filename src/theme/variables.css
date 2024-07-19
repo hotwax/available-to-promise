@@ -317,8 +317,12 @@ hr {
 }
 
 .rule-inputs {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.rule-inputs>* {
+  flex: 1 0 350px;
 }
 
 .section-header {

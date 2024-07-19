@@ -44,7 +44,7 @@
 <script setup lang="ts">
 import { IonButton, IonButtons, IonCheckbox, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonSearchbar, IonSpinner, IonTitle, IonToolbar, modalController } from "@ionic/vue";
 import { closeOutline, saveOutline } from "ionicons/icons";
-import { translate } from '@/i18n'
+import { translate } from '@hotwax/dxp-components';
 import { defineProps, onMounted, ref } from "vue";
 import { useStore } from "vuex";
 import { DateTime } from "luxon";

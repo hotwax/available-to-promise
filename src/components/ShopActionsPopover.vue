@@ -24,7 +24,7 @@
 
 <script setup lang="ts">
 import { IonContent, IonIcon, IonItem, IonLabel, IonList, IonListHeader, alertController, modalController, popoverController } from "@ionic/vue";
-import { translate } from "@/i18n";
+import { translate } from '@hotwax/dxp-components';
 import { copyOutline, flashOutline, stopCircleOutline, timeOutline } from 'ionicons/icons'
 import { computed, defineProps } from "vue";
 import JobHistoryModal from "@/components/JobHistoryModal.vue"

@@ -31,7 +31,7 @@
 
 <script setup lang="ts">
 import { IonBadge, IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonTitle, IonToolbar, modalController } from '@ionic/vue';
-import { translate } from '@/i18n';
+import { translate } from '@hotwax/dxp-components';
 import { closeOutline } from 'ionicons/icons';
 import { computed, defineProps, onMounted, ref } from "vue";
 import { DateTime } from 'luxon';

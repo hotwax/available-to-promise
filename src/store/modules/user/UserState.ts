@@ -7,4 +7,5 @@ export default interface UserState {
     url: string;
     token: string;
   }
+  pwaState: any;
 }
