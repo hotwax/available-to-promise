@@ -139,13 +139,13 @@ onIonViewDidEnter(async () => {
         formData.value.ruleName = currentRule.value.ruleName;
         formData.value.safetyStock = currentRule.value.ruleActions[0]?.fieldValue ? currentRule.value.ruleActions[0].fieldValue : ''
 
-        const includedGroups = currentRule.value.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS" && condition.operator === "in")
+        const includedGroups = currentRule.value.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS" && condition.operator === "contains")
         if(includedGroups?.fieldValue === "ALL") formData.value.areAllFacilitiesSelected = true;
         else {
           const includedGroupIds = includedGroups?.fieldValue ? includedGroups.fieldValue.split(",") : []
           formData.value.selectedFacilityGroups.included = facilityGroups.value.filter((group: any) => includedGroupIds.includes(group.facilityGroupId));
 
-          const excludedGroups = currentRule.value.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS" && condition.operator === "not-in")
+          const excludedGroups = currentRule.value.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === "ENTCT_ATP_FAC_GROUPS" && condition.operator === "not-contains")
           const excludedGroupIds = excludedGroups?.fieldValue ? excludedGroups.fieldValue.split(",") : []
           formData.value.selectedFacilityGroups.excluded = facilityGroups.value.filter((group: any) => excludedGroupIds.includes(group.facilityGroupId));
         }
@@ -153,7 +153,7 @@ onIonViewDidEnter(async () => {
         const currentAppliedFilters = JSON.parse(JSON.stringify(appliedFilters.value))
         currentRule.value.ruleConditions.map((condition: any) => {
           if(condition.conditionTypeEnumId === "ENTCT_ATP_FILTER") {
-            if(condition.operator === "in") {
+            if(condition.operator === "contains") {
               currentAppliedFilters["included"][condition.fieldName] = condition.fieldValue ? condition.fieldValue.split(",") : []
             } else {
               currentAppliedFilters["excluded"][condition.fieldName] = condition.fieldValue ? condition.fieldValue.split(",") : []

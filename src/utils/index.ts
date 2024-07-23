@@ -107,18 +107,16 @@ const generateRuleConditions = (ruleId: string, conditionTypeEnumId: string, app
       "ruleId": ruleId,
       conditionTypeEnumId,
       "fieldName": conditionTypeEnumId === "ENTCT_ATP_FACILITIES" ? "facilityId" : "facilityGroupId",
-      "operator": "in",
-      "fieldValue": "ALL",
-      "multiValued": "Y"
+      "operator": "contains",
+      "fieldValue": "ALL"
     })
   } else if(conditionTypeEnumId === "ENTCT_ATP_FACILITIES") {
     conditions.push({
       "ruleId": ruleId,
       conditionTypeEnumId,
       "fieldName": "facilityId",
-      "operator": "in",
-      "fieldValue": selectedFac.length ? selectedFac.join(",") : "",
-      "multiValued": "Y"
+      "operator": "contains",
+      "fieldValue": selectedFac.length ? selectedFac.join(",") : ""
     })
   } else {
     const includedFacilityGroupIds = selectedFac.included.map((group: any) => group.facilityGroupId)  
@@ -127,9 +125,8 @@ const generateRuleConditions = (ruleId: string, conditionTypeEnumId: string, app
         "ruleId": ruleId,
         "conditionTypeEnumId": "ENTCT_ATP_FAC_GROUPS",
         "fieldName": "facilityGroupId",
-        "operator": "in",
-        "fieldValue": includedFacilityGroupIds.join(","),
-        "multiValued": "Y"
+        "operator": "contains",
+        "fieldValue": includedFacilityGroupIds.join(",")
       })
     }
     
@@ -139,9 +136,8 @@ const generateRuleConditions = (ruleId: string, conditionTypeEnumId: string, app
         "ruleId": ruleId,
         "conditionTypeEnumId": "ENTCT_ATP_FAC_GROUPS",
         "fieldName": "facilityGroupId",
-        "operator": "not-in",
-        "fieldValue": excludedFacilityGroupIds.join(","),
-        "multiValued": "Y"
+        "operator": "not-contains",
+        "fieldValue": excludedFacilityGroupIds.join(",")
       })
     }
   }
@@ -153,9 +149,8 @@ const generateRuleConditions = (ruleId: string, conditionTypeEnumId: string, app
           "ruleId": ruleId,
           "conditionTypeEnumId": "ENTCT_ATP_FILTER",
           "fieldName": filter,
-          "operator": type === "included" ? "in" : "not-in",
-          "fieldValue": value.join(","),
-          "multiValued": "Y"
+          "operator": type === "included" ? "contains" : "not-contains",
+          "fieldValue": value.join(",")
         })
       }
     })

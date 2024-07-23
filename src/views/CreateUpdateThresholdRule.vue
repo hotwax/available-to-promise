@@ -117,7 +117,7 @@ onIonViewDidEnter(async () => {
         const currentAppliedFilters = JSON.parse(JSON.stringify(appliedFilters.value))
         currentRule.value.ruleConditions.map((condition: any) => {
           if(condition.conditionTypeEnumId === "ENTCT_ATP_FILTER") {
-            if(condition.operator === "in") {
+            if(condition.operator === "contains") {
               currentAppliedFilters["included"][condition.fieldName] = condition.fieldValue ? condition.fieldValue.split(",") : []
             } else {
               currentAppliedFilters["excluded"][condition.fieldName] = condition.fieldValue ? condition.fieldValue.split(",") : []
