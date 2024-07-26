@@ -10,14 +10,8 @@ let apiConfig = {} as any
 axios.interceptors.request.use((config: any) => {
   // TODO: pass csrf token
   const token = store.getters["user/getUserToken"];
-  if (token && !apiConfig.useOmsRedirection) {
+  if (token) {
     config.headers["api_key"] =  token;
-    config.headers["Content-Type"] = "application/json";
-  }
-
-  const omsRedirectionInfo = store.getters["user/getOmsRedirectionInfo"]
-  if (apiConfig.useOmsRedirection && omsRedirectionInfo.token) {
-    config.headers["Authorization"] =  `Bearer ${omsRedirectionInfo.token}`;
     config.headers["Content-Type"] = "application/json";
   }
 
@@ -125,7 +119,7 @@ const api = async (customConfig: any) => {
  * @return {Promise} Response from API as returned by Axios
  */
 const client = (config: any) => {
-  return axios.request(config);
+  return axios.create().request(config);
 }
 
 export { api as default, client, axios };
