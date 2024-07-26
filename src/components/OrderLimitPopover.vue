@@ -65,7 +65,7 @@ async function showOrderLimitAlert(header: string, message: string, showInput: b
       name: "setLimit",
       placeholder: translate("Order fulfillment capacity"),
       type: "number",
-      value: props.fulfillmentOrderLimit,
+      value: props.fulfillmentOrderLimit.toString(),
       min: 0
     }] : [],
     buttons: [{
