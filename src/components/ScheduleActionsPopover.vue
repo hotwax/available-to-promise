@@ -108,14 +108,14 @@ async function runNow() {
             try {
               const resp = await RuleService.runNow(ruleGroup.value.ruleGroupId)
               if(!hasError(resp) && resp.data.jobRunId) {
-                showToast(translate("Service has been scheduled"))
+                showToast(translate("Service has been scheduled."))
                 await store.dispatch('rule/fetchRules', { groupTypeEnumId: ruleGroup.value.groupTypeEnumId, pageSize: 50 })
                 popoverController.dismiss();
               } else {
                 throw resp.data
               }
             } catch(err) {
-              showToast(translate("Failed to schedule service"))
+              showToast(translate("Failed to schedule service."))
               logger.error(err)
             }
             emitter.emit("dismissLoader");

@@ -5,6 +5,8 @@ import emitter from "@/event-bus"
 import store from "@/store";
 import { StatusCodes } from "http-status-codes";
 
+let apiConfig = {} as any
+
 axios.interceptors.request.use((config: any) => {
   // TODO: pass csrf token
   const token = store.getters["user/getUserToken"];
@@ -77,6 +79,8 @@ const axiosCache = setupCache({
  * @return {Promise} Response from API as returned by Axios
  */
 const api = async (customConfig: any) => {
+  apiConfig = customConfig
+
   // Prepare configuration
   const config: any = {
     url: customConfig.url,
@@ -87,7 +91,14 @@ const api = async (customConfig: any) => {
   }
 
   const baseURL = store.getters["user/getInstanceUrl"];
-  if (baseURL) config.baseURL = baseURL.startsWith('http') ? baseURL.includes('/rest/s1/available-to-promise') ? baseURL : `${baseURL}/rest/s1/available-to-promise/` : `https://${baseURL}.hotwax.io/rest/s1/available-to-promise/`;
+  const omsRedirectionInfo = store.getters["user/getOmsRedirectionInfo"]
+
+  if(customConfig.useOmsRedirection) {
+    config.baseURL = omsRedirectionInfo.url.startsWith('http') ? omsRedirectionInfo.url.includes('/api') ? omsRedirectionInfo.url : `${omsRedirectionInfo.url}/api/` : `https://${omsRedirectionInfo.url}.hotwax.io/api/`;
+  } else if (baseURL) {
+    config.baseURL = baseURL.startsWith('http') ? baseURL.includes('/rest/s1/available-to-promise') ? baseURL : `${baseURL}/rest/s1/available-to-promise/` : `https://${baseURL}.hotwax.io/rest/s1/available-to-promise/`;
+  }
+
   if(customConfig.cache) config.adapter = axiosCache.adapter;
   const networkStatus =  await OfflineHelper.getNetworkStatus();
   if (customConfig.queue && !networkStatus.connected) {
@@ -108,7 +119,7 @@ const api = async (customConfig: any) => {
  * @return {Promise} Response from API as returned by Axios
  */
 const client = (config: any) => {
-  return axios.request(config);
+  return axios.create().request(config);
 }
 
 export { api as default, client, axios };
