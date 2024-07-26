@@ -75,18 +75,9 @@ const actions: ActionTree<ChannelState, RootState> = {
     let shopifyConfigs = [];
 
     try {
-      const payload = {
-        inputFields: {
-          productStoreId: store.state.user.currentEComStore.productStoreId,
-        },
-        fieldList: ["shopifyConfigId", "name", "shopId"],
-        entityName: "ShopifyShopAndConfig",
-        noConditionFind: "Y"
-      }
-
-      const resp = await ChannelService.fetchShopifyConfigs(payload);
+      const resp = await ChannelService.fetchShopifyConfigs({ productStoreId: store.state.user.currentEComStore.productStoreId });
       if (!hasError(resp)) {
-        shopifyConfigs = resp.data.docs;
+        shopifyConfigs = resp.data;
       } else {
         throw resp.data
       }

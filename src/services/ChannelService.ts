@@ -68,18 +68,10 @@ const createFacility = async (payload: any): Promise <any>  => {
 }
 
 const fetchShopifyConfigs = async (payload: any): Promise<any> => {
-  const omsRedirectionInfo = store.getters["user/getOmsRedirectionInfo"]
-  const baseURL = omsRedirectionInfo.url.startsWith('http') ? omsRedirectionInfo.url.includes('/api') ? omsRedirectionInfo.url : `${omsRedirectionInfo.url}/api/` : `https://${omsRedirectionInfo.url}.hotwax.io/api/`;
-
-  return client({
-    url: "performFind",
-    method: "post",
-    baseURL,
-    data: payload,
-    headers: {
-      "Authorization":  'Bearer ' + omsRedirectionInfo.token,
-      'Content-Type': 'application/json'
-    }
+  return api({
+    url: "shopifyShops",
+    method: "get",
+    params: payload
   });
 }
 
