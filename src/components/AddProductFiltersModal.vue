@@ -88,7 +88,7 @@ import { translate } from '@hotwax/dxp-components';
 const queryString = ref('');
 const selectedValues = ref([]) as any;
 const filteredOptions = ref([]) as any;
-const pageSize = process.env.VUE_APP_VIEW_SIZE;
+const pageSize = process.env.VUE_APP_VIEW_SIZE || 0;
 const currentPage = ref(0);
 
 const isScrollable = ref(true);
@@ -124,6 +124,11 @@ function search() {
 }
 
 async function loadMoreFilters(event: any){
+  // Added this check here as if added on infinite-scroll component the Loading content does not gets displayed
+  if(!(isScrollingEnabled.value && isScrollable.value)) {
+    await event.target.complete();
+  }
+
   getFilters().then(() => {
     event.target.complete();
   })

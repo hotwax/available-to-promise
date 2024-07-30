@@ -179,7 +179,7 @@ const actions: ActionTree<UtilState, RootState> = {
   },
 
   async fetchProductFilters({ commit }, params) {
-    let filters = [], total = 0;
+    let filters = [];
 
     const payload = {
       facetToSelect: params.facetToSelect,
@@ -198,7 +198,6 @@ const actions: ActionTree<UtilState, RootState> = {
       const resp = await UtilService.fetchFacets(payload);
       if(!hasError(resp)) {
         filters = resp.data.facetResponse.response
-        total = filters.length
       } else {
         throw resp.data;
       }
