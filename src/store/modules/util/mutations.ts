@@ -23,7 +23,8 @@ const mutations: MutationTree <UtilState> = {
         tags: [],
         productFeatures: []
       }
-    }
+    },
+    state.facetOptions = []
   },
   [types.UTIL_APPLIED_FILTERS_CLEARED](state) {
     state.appliedFilters = {
