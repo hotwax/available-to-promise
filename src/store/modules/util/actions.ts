@@ -178,6 +178,37 @@ const actions: ActionTree<UtilState, RootState> = {
     return pickupGroupFacilities;
   },
 
+  async fetchProductFilters({ commit }, params) {
+    let filters = [], total = 0;
+
+    const payload = {
+      facetToSelect: params.facetToSelect,
+      docType: 'PRODUCT',
+      coreName: 'enterpriseSearch',
+      searchfield: params.searchfield,
+      jsonQuery: '{"query":"*:*","filter":["docType:PRODUCT"]}',
+      noConditionFind: 'N',
+      limit: -1,
+      q: "",
+      term: "",
+      offset: 0,
+    }
+
+    try {
+      const resp = await UtilService.fetchFacets(payload);
+      if(!hasError(resp)) {
+        filters = resp.data.facetResponse.response
+        total = filters.length
+      } else {
+        throw resp.data;
+      }
+    } catch(error: any) {
+      logger.error(error);
+    }
+
+    commit(types.UTIL_FACET_OPTIONS_UPDATED, filters);
+  },
+
   async updatePickupGroupFacilities({ commit }, payload) {
     commit(types.UTIL_PICKUP_GROUP_FACILITIES , payload);
   },

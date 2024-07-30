@@ -50,5 +50,8 @@ const mutations: MutationTree <UtilState> = {
   [types.UTIL_PICKUP_GROUP_FACILITIES](state, payload) {
     state.pickupGroupFacilities = payload
   },
+  [types.UTIL_FACET_OPTIONS_UPDATED](state, payload) {
+    state.facetOptions = payload
+  },
 }
 export default mutations;

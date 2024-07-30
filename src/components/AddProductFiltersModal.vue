@@ -22,8 +22,14 @@
       </ion-chip>
     </ion-row>
 
-    <ion-list v-if="facetOptions.length">
-      <ion-item v-for="option in facetOptions" :key="option.id"  @click="!isAlreadyApplied(option.id) ? updateSelectedValues(option.id) : null">
+    <div class="empty-state" v-if="isLoading">
+      <ion-item lines="none">
+        <ion-spinner name="crescent" slot="start" />
+        {{ translate("Fetching filters") }}
+      </ion-item>
+    </div>
+    <ion-list v-else-if="filteredOptions.length">
+      <ion-item v-for="option in filteredOptions" :key="option.id"  @click="!isAlreadyApplied(option.id) ? updateSelectedValues(option.id) : null">
         <ion-label v-if="isAlreadyApplied(option.id)">{{ option.label }}</ion-label>
         <ion-checkbox v-if="!isAlreadyApplied(option.id)" :checked="selectedValues.includes(option.id)">
           {{ option.label }}
@@ -70,28 +76,36 @@ import {
   IonNote,
   IonRow,
   IonSearchbar,
+  IonSpinner,
   IonTitle,
   IonToolbar,
   modalController
 } from "@ionic/vue";
 import { closeOutline, saveOutline } from 'ionicons/icons';
 import { useStore } from "vuex";
-import { UtilService } from "@/services/UtilService";
 import { translate } from '@hotwax/dxp-components';
-import { hasError } from "@/utils";
 
 const queryString = ref('');
-const facetOptions = ref([]) as any;
 const isScrollable = ref(true);
 const selectedValues = ref([]) as any;
+const isLoading = ref(false);
+const filteredOptions = ref([]) as any;
+
+const pageSize = process.env.VUE_APP_VIEW_SIZE;
+const currentPage = ref(0);
 
 const props = defineProps(["label", "facetToSelect", "searchfield", "type"]);
 const store = useStore();
 
 const appliedFilters = computed(() => store.getters["util/getAppliedFilters"]);
+const facetOptions = computed(() => store.getters["util/getFacetOptions"]);
 
-onMounted(() => {
+onMounted(async() => {
+  isLoading.value = true;
+  await store.dispatch("util/fetchProductFilters", { facetToSelect: props.facetToSelect, searchfield: props.searchfield })
+  getFilters();
   selectedValues.value = JSON.parse(JSON.stringify(appliedFilters.value[props.type][props.searchfield]))
+  isLoading.value = false;
 })
 
 function closeModal() {
@@ -99,45 +113,32 @@ function closeModal() {
 }
 
 function search() {
+  isScrollable.value = true;
+  currentPage.value = 0;
+  filteredOptions.value = []
+
   getFilters();
 }
 
-async function getFilters(vSize?: any, vIndex?: any) {
-  const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
-  const viewIndex = vIndex ? vIndex : 0;
-  
-  const payload = {
-    facetToSelect: props.facetToSelect,
-    docType: 'PRODUCT',
-    coreName: 'enterpriseSearch',
-    searchfield: props.searchfield,
-    jsonQuery: '{"query":"*:*","filter":["docType:PRODUCT"]}',
-    noConditionFind: 'N',
-    limit: viewSize,
-    q: queryString.value,
-    term: queryString.value,
-    offset: viewSize * viewIndex,
-  }
-
-  const resp = await UtilService.fetchFacets(payload);
-  if(!hasError(resp)) {
-    const results = resp.data.facetResponse.response
-    facetOptions.value = viewIndex === 0 ? results : [...facetOptions.value , ...results];
-    isScrollable.value = (facetOptions.value.length % process.env.VUE_APP_VIEW_SIZE) === 0;
-
-  } else {
-    facetOptions.value = [];
-    isScrollable.value = false;
-  }
-}
-
 async function loadMoreFilters(event: any){
-  getFilters(
-    undefined,
-    Math.ceil(facetOptions.value.length / process.env.VUE_APP_VIEW_SIZE).toString() 
-  ).then(() => {
+  getFilters().then(() => {
     event.target.complete();
   })
+}
+
+async function getFilters() {
+  let options = facetOptions.value
+  if(queryString.value) {
+    options = facetOptions.value.filter((option: any) => option.label.toLowerCase().includes(queryString.value.toLowerCase()))
+  }
+
+  const nextPageItems = options.slice(currentPage.value * pageSize, (currentPage.value + 1) * pageSize);
+  filteredOptions.value = filteredOptions.value.concat(nextPageItems);
+  currentPage.value += 1;
+
+  if(filteredOptions.value.length >= facetOptions.value.length) {
+    isScrollable.value = false;
+  }
 }
 
 function updateSelectedValues(value: string) {

@@ -27,6 +27,9 @@ const getters: GetterTree<UtilState, RootState> = {
   getPickupGroupFacilities(state) {
     return state.pickupGroupFacilities
   },
+  getFacetOptions(state) {
+    return state.facetOptions
+  }
 }
 
 export default getters;
