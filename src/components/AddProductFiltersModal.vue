@@ -14,7 +14,7 @@
     </ion-toolbar>
   </ion-header>
 
-  <ion-content>
+  <ion-content ref="contentRef" :scroll-events="true" @ionScroll="enableScrolling()">
     <ion-searchbar :placeholder="translate('Search', { label })" v-model="queryString" @keyup.enter="search()"/>
     <ion-row>
       <ion-chip v-for="filter in selectedValues" outline :key="filter.id">
@@ -50,7 +50,7 @@
       </ion-fab-button>
     </ion-fab>
 
-    <ion-infinite-scroll @ionInfinite="loadMoreFilters($event)" threshold="100px" :disabled="!isScrollable">
+    <ion-infinite-scroll @ionInfinite="loadMoreFilters($event)" threshold="100px" v-show="isScrollable" ref="infiniteScrollRef">
       <ion-infinite-scroll-content loading-spinner="crescent" :loading-text="translate('Loading')"/>
     </ion-infinite-scroll>
   </ion-content>
@@ -86,13 +86,16 @@ import { useStore } from "vuex";
 import { translate } from '@hotwax/dxp-components';
 
 const queryString = ref('');
-const isScrollable = ref(true);
 const selectedValues = ref([]) as any;
-const isLoading = ref(false);
 const filteredOptions = ref([]) as any;
-
 const pageSize = process.env.VUE_APP_VIEW_SIZE;
 const currentPage = ref(0);
+
+const isScrollable = ref(true);
+const isLoading = ref(false);
+const isScrollingEnabled = ref(false);
+const contentRef = ref({}) as any;
+const infiniteScrollRef = ref({}) as any;
 
 const props = defineProps(["label", "facetToSelect", "searchfield", "type"]);
 const store = useStore();
@@ -156,6 +159,18 @@ async function saveFilters() {
 
   await store.dispatch('util/updateAppliedFilters', selectedFilters)
   modalController.dismiss()
+}
+
+function enableScrolling() {
+  const parentElement = contentRef.value.$el
+  const scrollEl = parentElement.shadowRoot.querySelector("main[part='scroll']")
+  let scrollHeight = scrollEl.scrollHeight, infiniteHeight = infiniteScrollRef.value.$el.offsetHeight, scrollTop = scrollEl.scrollTop, threshold = 100, height = scrollEl.offsetHeight
+  const distanceFromInfinite = scrollHeight - infiniteHeight - scrollTop - threshold - height
+  if(distanceFromInfinite < 0) {
+    isScrollingEnabled.value = false;
+  } else {
+    isScrollingEnabled.value = true;
+  }
 }
 </script>
 
