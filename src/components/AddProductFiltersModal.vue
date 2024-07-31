@@ -89,6 +89,7 @@ const facetOptions = ref([]) as any;
 const queryString = ref('');
 const selectedValues = ref([]) as any;
 const filteredOptions = ref([]) as any;
+const availableOptions = ref([]) as any;
 const pageSize = process.env.VUE_APP_VIEW_SIZE || 0;
 const currentPage = ref(0);
 
@@ -108,6 +109,7 @@ onMounted(async() => {
   isLoading.value = true;
   await store.dispatch("util/fetchProductFilters", { facetToSelect: props.facetToSelect, searchfield: props.searchfield })
   facetOptions.value = getFacetOptions.value(props.searchfield);
+  availableOptions.value = JSON.parse(JSON.stringify(facetOptions.value))
   getFilters();
   selectedValues.value = JSON.parse(JSON.stringify(appliedFilters.value[props.type][props.searchfield]))
   isLoading.value = false;
@@ -122,6 +124,11 @@ function search() {
   currentPage.value = 0;
   filteredOptions.value = []
 
+  if(queryString.value.trim()) {
+    availableOptions.value = facetOptions.value.filter((option: any) => option.label.toLowerCase().includes(queryString.value.trim().toLowerCase()))
+  } else {
+    availableOptions.value = JSON.parse(JSON.stringify(facetOptions.value))
+  }
   getFilters();
 }
 
@@ -137,12 +144,7 @@ async function loadMoreFilters(event: any){
 }
 
 async function getFilters() {
-  let options = facetOptions.value
-  if(queryString.value) {
-    options = facetOptions.value.filter((option: any) => option.label.toLowerCase().includes(queryString.value.toLowerCase()))
-  }
-
-  const nextPageItems = options.slice(currentPage.value * pageSize, (currentPage.value + 1) * pageSize);
+  const nextPageItems = availableOptions.value.slice(currentPage.value * pageSize, (currentPage.value + 1) * pageSize);
   filteredOptions.value = filteredOptions.value.concat(nextPageItems);
   currentPage.value += 1;
 
