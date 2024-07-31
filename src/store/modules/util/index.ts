@@ -27,7 +27,7 @@ const utilModule: Module<UtilState, RootState> = {
     selectedSegment: "",
     pickupGroups: [],
     pickupGroupFacilities: {},
-    facetOptions: []
+    facetOptions: {}
   },
   getters,
   actions,

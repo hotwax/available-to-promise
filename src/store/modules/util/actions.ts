@@ -178,8 +178,10 @@ const actions: ActionTree<UtilState, RootState> = {
     return pickupGroupFacilities;
   },
 
-  async fetchProductFilters({ commit }, params) {
-    let filters = [];
+  async fetchProductFilters({ commit, state }, params) {
+    const filters = JSON.parse(JSON.stringify(state.facetOptions));
+
+    if(filters[params.searchfield]) return;
 
     const payload = {
       facetToSelect: params.facetToSelect,
@@ -197,14 +199,13 @@ const actions: ActionTree<UtilState, RootState> = {
     try {
       const resp = await UtilService.fetchFacets(payload);
       if(!hasError(resp)) {
-        filters = resp.data.facetResponse.response
+        filters[params.searchfield] = resp.data.facetResponse.response
       } else {
         throw resp.data;
       }
     } catch(error: any) {
       logger.error(error);
     }
-
     commit(types.UTIL_FACET_OPTIONS_UPDATED, filters);
   },
 

@@ -85,6 +85,7 @@ import { closeOutline, saveOutline } from 'ionicons/icons';
 import { useStore } from "vuex";
 import { translate } from '@hotwax/dxp-components';
 
+const facetOptions = ref([]) as any;
 const queryString = ref('');
 const selectedValues = ref([]) as any;
 const filteredOptions = ref([]) as any;
@@ -101,11 +102,12 @@ const props = defineProps(["label", "facetToSelect", "searchfield", "type"]);
 const store = useStore();
 
 const appliedFilters = computed(() => store.getters["util/getAppliedFilters"]);
-const facetOptions = computed(() => store.getters["util/getFacetOptions"]);
+const getFacetOptions = computed(() => store.getters["util/getFacetOptions"]);
 
 onMounted(async() => {
   isLoading.value = true;
   await store.dispatch("util/fetchProductFilters", { facetToSelect: props.facetToSelect, searchfield: props.searchfield })
+  facetOptions.value = getFacetOptions.value(props.searchfield);
   getFilters();
   selectedValues.value = JSON.parse(JSON.stringify(appliedFilters.value[props.type][props.searchfield]))
   isLoading.value = false;
