@@ -148,7 +148,7 @@ async function getFilters() {
   filteredOptions.value = filteredOptions.value.concat(nextPageItems);
   currentPage.value += 1;
 
-  if(filteredOptions.value.length >= facetOptions.value.length) {
+  if(filteredOptions.value.length >= availableOptions.value.length) {
     isScrollable.value = false;
   }
 }
