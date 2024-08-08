@@ -187,13 +187,10 @@ const actions: ActionTree<UtilState, RootState> = {
       facetToSelect: params.facetToSelect,
       docType: 'PRODUCT',
       coreName: 'enterpriseSearch',
-      searchfield: params.searchfield,
       jsonQuery: '{"query":"*:*","filter":["docType:PRODUCT"]}',
       noConditionFind: 'N',
       limit: -1,
-      q: "",
       term: "",
-      offset: 0,
     }
 
     try {
