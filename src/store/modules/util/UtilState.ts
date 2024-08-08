@@ -6,4 +6,5 @@ export default interface UtilState {
   selectedSegment: any;
   pickupGroups: any;
   pickupGroupFacilities: any;
+  facetOptions: any;
 }

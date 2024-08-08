@@ -27,6 +27,9 @@ const getters: GetterTree<UtilState, RootState> = {
   getPickupGroupFacilities(state) {
     return state.pickupGroupFacilities
   },
+  getFacetOptions: (state) => (searchField: any) => {
+    return state.facetOptions[searchField].length ? state.facetOptions[searchField] : [];
+  },
 }
 
 export default getters;
