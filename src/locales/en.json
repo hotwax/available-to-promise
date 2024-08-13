@@ -153,6 +153,7 @@
   "No sequence has been changed.": "No sequence has been changed.",
   "No safety stock rule found.": "No safety stock rule found.",
   "No shipping rule found.": "No shipping rule found.",
+  "No store pickup group found linked with current product store.": "No store pickup group found linked with current product store.",
   "No store pickup rule found.": "No store pickup rule found.",
   "No threshold rule found. Invalid job": "No threshold rule found. Invalid job",
   "No threshold rule found.": "No threshold rule found.",

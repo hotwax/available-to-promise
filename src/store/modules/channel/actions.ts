@@ -91,6 +91,7 @@ const actions: ActionTree<ChannelState, RootState> = {
     const shopifyConfigs = await dispatch("fetchShopifyConfigs");
 
     if(!shopifyConfigs.length) {
+      commit(types.CHANNEL_JOBS_UPDATED, [])
       return;
     }
 
