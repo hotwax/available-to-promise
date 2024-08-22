@@ -76,56 +76,62 @@
         </section>
  
         <section v-else-if="selectedSegment === 'publish'">
-          <ion-card v-for="job in shopifyJobs" :key="job.shopId">
-            <ion-card-header>
-              <div>
-                <ion-card-subtitle class="overline">{{ job.shopifyConfigId }}</ion-card-subtitle>
-                <ion-card-title>{{ job.name ? job.name : job.shopifyConfigId }}</ion-card-title>
-              </div>
-              <ion-badge v-if="job.statusId === 'SERVICE_PENDING'" color="dark">{{ translate("running") }} {{ timeFromNow(job.runTime) }}</ion-badge>
-            </ion-card-header>
+          <template v-if="shopifyJobs.length">
+            <ion-card v-for="job in shopifyJobs" :key="job.shopId">
+              <ion-card-header>
+                <div>
+                  <ion-card-subtitle class="overline">{{ job.shopifyConfigId }}</ion-card-subtitle>
+                  <ion-card-title>{{ job.name ? job.name : job.shopifyConfigId }}</ion-card-title>
+                </div>
+                <ion-badge v-if="job.statusId === 'SERVICE_PENDING'" color="dark">{{ translate("running") }} {{ timeFromNow(job.runTime) }}</ion-badge>
+              </ion-card-header>
 
-            <ion-list>
-              <ion-item lines="full">
-                <ion-icon slot="start" :icon="timeOutline"/>
-                <ion-select :label="translate('Run time')" :placeholder="translate('Select')" interface="popover" :value="job.runTimeValue" @ionChange="updateRunTime($event, job)">
-                  <ion-select-option v-for="runTime in jobRuntimeOptions" :key="runTime.value" :value="runTime.value">{{ runTime.label }}</ion-select-option>
-                </ion-select>
+              <ion-list>
+                <ion-item lines="full">
+                  <ion-icon slot="start" :icon="timeOutline"/>
+                  <ion-select :label="translate('Run time')" :placeholder="translate('Select')" interface="popover" :value="job.runTimeValue" @ionChange="updateRunTime($event, job)">
+                    <ion-select-option v-for="runTime in jobRuntimeOptions" :key="runTime.value" :value="runTime.value">{{ runTime.label }}</ion-select-option>
+                  </ion-select>
 
-                <ion-modal class="date-time-modal" :is-open="isDateTimeModalOpen" @didDismiss="() => isDateTimeModalOpen = false">
-                  <ion-content :force-overscroll="false">
-                    <ion-datetime          
-                      show-default-buttons
-                      hour-cycle="h23"
-                      :value="job.runTimeValue ? (isCustomRunTime(job.runTimeValue) ? getDateTime(job.runTimeValue) : getDateTime(DateTime.now().toMillis() + job.runTimeValue)) : getNowTimestamp()"
-                      @ionChange="updateCustomTime($event, job)"
-                    />
-                  </ion-content>
-                </ion-modal>
-              </ion-item>
+                  <ion-modal class="date-time-modal" :is-open="isDateTimeModalOpen" @didDismiss="() => isDateTimeModalOpen = false">
+                    <ion-content :force-overscroll="false">
+                      <ion-datetime          
+                        show-default-buttons
+                        hour-cycle="h23"
+                        :value="job.runTimeValue ? (isCustomRunTime(job.runTimeValue) ? getDateTime(job.runTimeValue) : getDateTime(DateTime.now().toMillis() + job.runTimeValue)) : getNowTimestamp()"
+                        @ionChange="updateCustomTime($event, job)"
+                      />
+                    </ion-content>
+                  </ion-modal>
+                </ion-item>
 
-              <ion-item lines="full">
-                <ion-icon slot="start" :icon="timerOutline"/>
-                <ion-select :label="translate('Frequency')" :value="getJobStatus(job)" :placeholder="translate('Select')" interface="popover" @ionDismiss="updateFrequency($event, job)">
-                  <ion-select-option v-for="freq in jobFrequencyOptions" :key="freq.id" :value="freq.id">{{ freq.description }}</ion-select-option>
-                </ion-select>
-              </ion-item>
+                <ion-item lines="full">
+                  <ion-icon slot="start" :icon="timerOutline"/>
+                  <ion-select :label="translate('Frequency')" :value="getJobStatus(job)" :placeholder="translate('Select')" interface="popover" @ionDismiss="updateFrequency($event, job)">
+                    <ion-select-option v-for="freq in jobFrequencyOptions" :key="freq.id" :value="freq.id">{{ freq.description }}</ion-select-option>
+                  </ion-select>
+                </ion-item>
 
-              <ion-item lines="full">
-                <ion-icon slot="start" :icon="albumsOutline"/>
-                <ion-select :label="translate('Inventory group')" v-model="job.runtimeData.facilityGroupId" :disabled="job.statusId === 'SERVICE_PENDING'" :placeholder="translate('Select')" interface="popover">
-                  <ion-select-option v-for="channel in inventoryChannels" :key="channel.facilityGroupId" :value="channel.facilityGroupId">{{ channel.facilityGroupName ? channel.facilityGroupName : channel.facilityGroupId }}</ion-select-option>
-                </ion-select>
-              </ion-item>
+                <ion-item lines="full">
+                  <ion-icon slot="start" :icon="albumsOutline"/>
+                  <ion-select :label="translate('Inventory group')" v-model="job.runtimeData.facilityGroupId" :disabled="job.statusId === 'SERVICE_PENDING'" :placeholder="translate('Select')" interface="popover">
+                    <ion-select-option v-for="channel in inventoryChannels" :key="channel.facilityGroupId" :value="channel.facilityGroupId">{{ channel.facilityGroupName ? channel.facilityGroupName : channel.facilityGroupId }}</ion-select-option>
+                  </ion-select>
+                </ion-item>
 
-              <div class="actions">
-                <ion-button fill="clear" @click="saveChanges(job)">{{ translate("Save changes") }}</ion-button>
-                <ion-button color="medium" fill="clear" slot="end" @click="openShopActionsPopover($event, job)">
-                  <ion-icon :icon="ellipsisVerticalOutline" slot="icon-only"/>
-                </ion-button>
-              </div>
-            </ion-list>
-          </ion-card>
+                <div class="actions">
+                  <ion-button fill="clear" @click="saveChanges(job)">{{ translate("Save changes") }}</ion-button>
+                  <ion-button color="medium" fill="clear" slot="end" @click="openShopActionsPopover($event, job)">
+                    <ion-icon :icon="ellipsisVerticalOutline" slot="icon-only"/>
+                  </ion-button>
+                </div>
+              </ion-list>
+            </ion-card>
+          </template>
+
+          <div class="empty-state" v-else>
+            <p>{{ translate("No job found.") }}</p>
+          </div>
         </section>
       </main>
     </ion-content>
