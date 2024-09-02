@@ -196,7 +196,7 @@ const actions: ActionTree<UtilState, RootState> = {
     try {
       const resp = await UtilService.fetchFacets(payload);
       if(!hasError(resp)) {
-        filters[params.searchfield] = resp.data.facetResponse.response
+        filters[params.searchfield] = resp.data.facetResponse ? resp.data.facetResponse.response : resp.data.response 
       } else {
         throw resp.data;
       }
