@@ -48,13 +48,13 @@
               <ion-label>{{ translate("Facilities") }}</ion-label>
             </ion-item-divider>
             
-            <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FAC_GROUPS', 'facilityGroupId', 'contains')">
+            <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FAC_GROUPS', 'facilityGroupId', 'in')">
               <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
-              <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FAC_GROUPS", "facilityGroupId", "contains") }}</ion-label>
+              <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FAC_GROUPS", "facilityGroupId", "in") }}</ion-label>
             </ion-item>
-            <ion-item lines="full" v-if="isRuleConditionAvailable('ENTCT_ATP_FAC_GROUPS', 'facilityGroupId', 'not-contains')">
+            <ion-item lines="full" v-if="isRuleConditionAvailable('ENTCT_ATP_FAC_GROUPS', 'facilityGroupId', 'not-in')">
               <ion-icon slot="start" :icon="closeCircleOutline"/>
-              <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FAC_GROUPS", "facilityGroupId", "not-contains") }}</ion-label>
+              <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FAC_GROUPS", "facilityGroupId", "not-in") }}</ion-label>
             </ion-item>
           </template>
 

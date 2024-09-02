@@ -109,7 +109,7 @@ const generateRuleConditions = (ruleId: string, conditionTypeEnumId: string, app
       "ruleId": ruleId,
       conditionTypeEnumId,
       "fieldName": conditionTypeEnumId === "ENTCT_ATP_FACILITIES" ? "facilityId" : "facilityGroupId",
-      "operator": "contains",
+      "operator": "in",
       "fieldValue": "ALL"
     })
   } else if(conditionTypeEnumId === "ENTCT_ATP_FACILITIES") {
@@ -117,7 +117,7 @@ const generateRuleConditions = (ruleId: string, conditionTypeEnumId: string, app
       "ruleId": ruleId,
       conditionTypeEnumId,
       "fieldName": "facilityId",
-      "operator": "contains",
+      "operator": "in",
       "fieldValue": selectedFac.length ? selectedFac.join(",") : ""
     })
   } else {
@@ -127,7 +127,7 @@ const generateRuleConditions = (ruleId: string, conditionTypeEnumId: string, app
         "ruleId": ruleId,
         "conditionTypeEnumId": "ENTCT_ATP_FAC_GROUPS",
         "fieldName": "facilityGroupId",
-        "operator": "contains",
+        "operator": "in",
         "fieldValue": includedFacilityGroupIds.join(",")
       })
     }
@@ -138,7 +138,7 @@ const generateRuleConditions = (ruleId: string, conditionTypeEnumId: string, app
         "ruleId": ruleId,
         "conditionTypeEnumId": "ENTCT_ATP_FAC_GROUPS",
         "fieldName": "facilityGroupId",
-        "operator": "not-contains",
+        "operator": "not-in",
         "fieldValue": excludedFacilityGroupIds.join(",")
       })
     }
