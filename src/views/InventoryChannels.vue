@@ -26,7 +26,7 @@
                 <div>
                   <ion-card-subtitle class="overline">{{ channel.facilityGroupId }}</ion-card-subtitle>
                   <ion-card-title>{{ channel.facilityGroupName }}</ion-card-title>
-                  <ion-card-subtitle v-html="channel.description.replace(/(?:\n|\n)/g, '<br />')"></ion-card-subtitle>
+                  <ion-card-subtitle v-if="channel.description" v-html="channel.description.replace(/(?:\n|\n)/g, '<br />')"></ion-card-subtitle>
                 </div>
               </ion-card-header>
   
