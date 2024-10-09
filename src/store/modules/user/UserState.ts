@@ -8,4 +8,5 @@ export default interface UserState {
     token: string;
   }
   pwaState: any;
+  permissions: any;
 }

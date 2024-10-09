@@ -8,6 +8,7 @@ import userModule from './modules/user';
 import utilModule from './modules/util';
 import ruleModule from './modules/rule';
 import channelModule from "./modules/channel"
+import { setPermissions } from "@/authorization"
 
 
 // TODO check how to register it from the components only
@@ -38,6 +39,8 @@ const store = createStore<RootState>({
         'channel': channelModule
     },
 })
+
+setPermissions(store.getters['user/getUserPermissions']);
 
 export default store
 export function useStore(): typeof store {

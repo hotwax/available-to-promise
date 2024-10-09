@@ -10,11 +10,16 @@ let apiConfig = {} as any
 axios.interceptors.request.use((config: any) => {
   // TODO: pass csrf token
   const token = store.getters["user/getUserToken"];
-  if (token) {
+  if (token && !apiConfig.useOmsRedirection) {
     config.headers["api_key"] =  token;
     config.headers["Content-Type"] = "application/json";
   }
-
+  
+  const omsRedirectionInfo = store.getters["user/getOmsRedirectionInfo"]
+  if (apiConfig.useOmsRedirection && omsRedirectionInfo.token) {
+    config.headers["Authorization"] =  `Bearer ${omsRedirectionInfo.token}`;
+    config.headers["Content-Type"] = "application/json";
+  }
   return config;
 });
 

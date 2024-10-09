@@ -31,5 +31,8 @@ const getters: GetterTree <UserState, RootState> = {
     getPwaState(state) {
         return state.pwaState;
     },
+    getUserPermissions (state) {
+        return state.permissions;
+    },
 }
 export default getters;
