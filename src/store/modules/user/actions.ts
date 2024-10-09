@@ -64,9 +64,6 @@ const actions: ActionTree<UserState, RootState> = {
         Settings.defaultZone = userProfile.timeZone;
       }
 
-      if(omsRedirectionUrl && token) {
-        dispatch("setOmsRedirectionInfo", { url: omsRedirectionUrl, token })
-      }
       setPermissions(appPermissions);
       commit(types.USER_TOKEN_CHANGED, { newToken: api_key })
       emitter.emit("dismissLoader")
