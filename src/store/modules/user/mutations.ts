@@ -10,6 +10,7 @@ const mutations: MutationTree <UserState> = {
       state.token = ''
       state.current = {}
       state.currentEComStore = {}
+      state.permissions = []
     },
     [types.USER_INFO_UPDATED] (state, payload) {
         state.current = payload
@@ -27,5 +28,8 @@ const mutations: MutationTree <UserState> = {
         state.pwaState.registration = payload.registration;
         state.pwaState.updateExists = payload.updateExists;
     },
+    [types.USER_PERMISSIONS_UPDATED] (state, payload) {
+        state.permissions = payload
+    }
 }
 export default mutations;

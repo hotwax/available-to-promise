@@ -16,6 +16,7 @@ const userModule: Module<UserState, RootState> = {
         url: "",
         token: ""
       },
+      permissions: [],
       pwaState: {
         updateExists: false,
         registration: null,

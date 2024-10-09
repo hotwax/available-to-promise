@@ -32,6 +32,9 @@ import { dxpComponents } from "@hotwax/dxp-components"
 import { login, logout, loader } from "@/user-utils";
 import { getConfig, initialise } from '@/adapter';
 import localeMessages from './locales';
+import permissionPlugin from '@/authorization';
+import permissionRules from '@/authorization/Rules';
+import permissionActions from '@/authorization/Actions';
 
 
 const app = createApp(App)
@@ -44,6 +47,10 @@ const app = createApp(App)
   })
   .use(router)
   .use(store)
+  .use(permissionPlugin, {
+    rules: permissionRules,
+    actions: permissionActions
+  })
   .use(dxpComponents, {
     defaultImgUrl: require("@/assets/images/defaultImage.png"),
     login,
