@@ -5,23 +5,18 @@ import emitter from "@/event-bus"
 import store from "@/store";
 import { StatusCodes } from "http-status-codes";
 
-let apiConfig = {} as any
 
 axios.interceptors.request.use((config: any) => {
   // TODO: pass csrf token
   const token = store.getters["user/getUserToken"];
-  if (token && !apiConfig.useOmsRedirection) {
+  if (token) {
     config.headers["api_key"] =  token;
     config.headers["Content-Type"] = "application/json";
   }
-  
-  const omsRedirectionInfo = store.getters["user/getOmsRedirectionInfo"]
-  if (apiConfig.useOmsRedirection && omsRedirectionInfo.token) {
-    config.headers["Authorization"] =  `Bearer ${omsRedirectionInfo.token}`;
-    config.headers["Content-Type"] = "application/json";
-  }
+
   return config;
 });
+
 
 // TODO: need to update this as per the changes in the Moqui response format, if required.
 axios.interceptors.response.use(function (response: any) {
@@ -50,12 +45,12 @@ axios.interceptors.response.use(function (response: any) {
   if (error.response) {
     // TODO Handle case for failed queue request
     const { status } = error.response;
-    if (status === StatusCodes.UNAUTHORIZED) {
-      store.dispatch("user/logout");
-      const redirectUrl = window.location.origin + '/login';
-      // Explicitly passing isLoggedOut as in case of maarg apps we need to call the logout api in launchpad
-      window.location.href = `${process.env.VUE_APP_LOGIN_URL}?redirectUrl=${redirectUrl}&isLoggedOut=true`;
-    }
+    // if (status === StatusCodes.UNAUTHORIZED) {
+    //   store.dispatch("user/logout");
+    //   const redirectUrl = window.location.origin + '/login';
+    //   // Explicitly passing isLoggedOut as in case of maarg apps we need to call the logout api in launchpad
+    //   window.location.href = `${process.env.VUE_APP_LOGIN_URL}?redirectUrl=${redirectUrl}&isLoggedOut=true`;
+    // }
   }
   // Any status codes that falls outside the range of 2xx cause this function to trigger
   // Do something with response error
@@ -84,7 +79,6 @@ const axiosCache = setupCache({
  * @return {Promise} Response from API as returned by Axios
  */
 const api = async (customConfig: any) => {
-  apiConfig = customConfig
 
   // Prepare configuration
   const config: any = {
@@ -96,11 +90,8 @@ const api = async (customConfig: any) => {
   }
 
   const baseURL = store.getters["user/getInstanceUrl"];
-  const omsRedirectionInfo = store.getters["user/getOmsRedirectionInfo"]
 
-  if(customConfig.useOmsRedirection) {
-    config.baseURL = omsRedirectionInfo.url.startsWith('http') ? omsRedirectionInfo.url.includes('/api') ? omsRedirectionInfo.url : `${omsRedirectionInfo.url}/api/` : `https://${omsRedirectionInfo.url}.hotwax.io/api/`;
-  } else if (baseURL) {
+  if (baseURL) {
     config.baseURL = baseURL.startsWith('http') ? baseURL.includes('/rest/s1/available-to-promise') ? baseURL : `${baseURL}/rest/s1/available-to-promise/` : `https://${baseURL}.hotwax.io/rest/s1/available-to-promise/`;
   }
 
