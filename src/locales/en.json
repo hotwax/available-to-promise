@@ -112,7 +112,7 @@
   "included": "included",
   "Include": "Include {label}",
   "Info": "Info",
-  "Inventory group": "Inventory group",
+  "Inventory channel": "Inventory channel",
   "Job runtime has passed. Please refresh to get the latest job data in order to perform any action.": "Job runtime has passed. Please refresh to get the latest job data in order to perform any action.",
   "Jobs sequence updated successfully": "Jobs sequence updated successfully",
   "Keep editing": "Keep editing",

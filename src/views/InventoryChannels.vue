@@ -114,7 +114,7 @@
 
                 <ion-item lines="full">
                   <ion-icon slot="start" :icon="albumsOutline"/>
-                  <ion-select :label="translate('Inventory group')" v-model="job.runtimeData.facilityGroupId" :disabled="job.statusId === 'SERVICE_PENDING'" :placeholder="translate('Select')" interface="popover">
+                  <ion-select :label="translate('Inventory channel')" v-model="job.runtimeData.facilityGroupId" :disabled="job.statusId === 'SERVICE_PENDING'" :placeholder="translate('Select')" interface="popover">
                     <ion-select-option v-for="channel in inventoryChannels" :key="channel.facilityGroupId" :value="channel.facilityGroupId">{{ channel.facilityGroupName ? channel.facilityGroupName : channel.facilityGroupId }}</ion-select-option>
                   </ion-select>
                 </ion-item>
