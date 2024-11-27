@@ -23,6 +23,7 @@
       <main v-if="selectedSegment !== 'SHIPPING_FACILITY'">
         <template v-if="ruleGroup.ruleGroupId && rules.length">
           <ScheduleRuleItem />
+          <ArchivedRuleItem v-if="archivedRules?.length" />
 
           <section>
             <ion-reorder-group :disabled="false" @ionItemReorder="updateReorderingRules($event)">
@@ -79,6 +80,7 @@ import { useStore } from 'vuex';
 import emitter from '@/event-bus';
 import { RuleService } from '@/services/RuleService';
 import { doReorder, showToast } from '@/utils';
+import ArchivedRuleItem from '@/components/ArchivedRuleItem.vue';
 
 const store = useStore();
 const router = useRouter()
@@ -89,6 +91,7 @@ const isScrollable = computed(() => store.getters["util/isFacilitiesScrollable"]
 const facilities = computed(() => store.getters["util/getFacilities"]);
 const selectedSegment = computed(() => store.getters["util/getSelectedSegment"]);
 const isReorderActive = computed(() => store.getters["rule/isReorderActive"]);
+const archivedRules = computed(() => store.getters["rule/getArchivedRules"]);
 const reorderingRules = ref([]);
 
 const isScrollingEnabled = ref(false);
@@ -110,6 +113,7 @@ async function fetchRules() {
   store.dispatch("rule/updateIsReorderActive", false)
   if(!selectedSegment.value || (selectedSegment.value !== 'RG_SHIPPING_FACILITY' && selectedSegment.value !== 'RG_SHIPPING_CHANNEL' && selectedSegment.value !== 'SHIPPING_FACILITY')) store.dispatch("util/updateSelectedSegment", "RG_SHIPPING_FACILITY");
   await Promise.allSettled([store.dispatch('rule/fetchRules', { groupTypeEnumId: selectedSegment.value, pageSize: 50 }), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilityGroups")])
+  await store.dispatch('rule/fetchArchivedRules')
   if(selectedSegment.value === 'SHIPPING_FACILITY') fetchFacilities();
   emitter.emit("dismissLoader");
 }
@@ -164,6 +168,7 @@ async function updateSegment(event: any) {
     store.dispatch("rule/updateIsReorderActive", false)
     reorderingRules.value = []
     await store.dispatch('rule/fetchRules', { groupTypeEnumId: selectedSegment.value, pageSize: 50 })
+    await store.dispatch('rule/fetchArchivedRules')
   }
   emitter.emit("dismissLoader");
 }

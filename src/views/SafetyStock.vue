@@ -10,6 +10,7 @@
     <ion-content>
       <main v-if="ruleGroup.ruleGroupId && rules.length">
         <ScheduleRuleItem />
+        <ArchivedRuleItem v-if="archivedRules?.length" />
 
         <section>
           <ion-reorder-group :disabled="false" @ionItemReorder="updateReorderingRules($event)">
@@ -46,6 +47,7 @@ import { translate } from '@hotwax/dxp-components';
 import emitter from '@/event-bus';
 import { RuleService } from '@/services/RuleService';
 import { doReorder, showToast } from '@/utils';
+import ArchivedRuleItem from '@/components/ArchivedRuleItem.vue';
 
 const store = useStore();
 const router = useRouter()
@@ -53,6 +55,7 @@ const router = useRouter()
 const rules = computed(() => store.getters["rule/getRules"]);
 const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
 const isReorderActive = computed(() => store.getters["rule/isReorderActive"]);
+const archivedRules = computed(() => store.getters["rule/getArchivedRules"]);
 const reorderingRules = ref([]);
 
 onIonViewDidEnter(async() => {
@@ -70,6 +73,7 @@ async function fetchRules() {
   store.dispatch("util/updateSelectedSegment", "");
   store.dispatch("rule/updateIsReorderActive", false)
   await Promise.allSettled([store.dispatch('rule/fetchRules', { groupTypeEnumId: 'RG_SAFETY_STOCK', pageSize: 50 }), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilityGroups")]);
+  await store.dispatch('rule/fetchArchivedRules')
   emitter.emit("dismissLoader");
 }
 

@@ -10,6 +10,7 @@
     <ion-content>
       <main v-if="ruleGroup.ruleGroupId && rules.length">
         <ScheduleRuleItem />
+        <ArchivedRuleItem v-if="archivedRules?.length" />
 
         <section>
           <ion-reorder-group :disabled="false" @ionItemReorder="updateReorderingRules($event)">
@@ -39,6 +40,7 @@ import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonMenuButton, Io
 import { addOutline, balloonOutline, saveOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue'
 import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
+import ArchivedRuleItem from '@/components/ArchivedRuleItem.vue';
 import { useRouter } from 'vue-router';
 import { computed, ref } from 'vue';
 import { useStore } from 'vuex';
@@ -53,6 +55,7 @@ const router = useRouter()
 const rules = computed(() => store.getters["rule/getRules"]);
 const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
 const isReorderActive = computed(() => store.getters["rule/isReorderActive"]);
+const archivedRules = computed(() => store.getters["rule/getArchivedRules"]);
 const reorderingRules = ref([]);
 
 onIonViewDidEnter(async() => {
@@ -70,6 +73,7 @@ async function fetchRules() {
   store.dispatch("util/updateSelectedSegment", "");
   store.dispatch("rule/updateIsReorderActive", false)
   await Promise.allSettled([store.dispatch('rule/fetchRules', { groupTypeEnumId: 'RG_THRESHOLD', pageSize: 50 }), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilityGroups")]);
+  await store.dispatch('rule/fetchArchivedRules')
   emitter.emit("dismissLoader");
 }
 

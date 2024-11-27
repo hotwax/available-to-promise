@@ -37,17 +37,21 @@ const actions: ActionTree<RuleState, RootState> = {
 
   async fetchRules({ commit, dispatch }, payload) {
     let rules = [] as any;
+    let ruleGroupId = payload.ruleGroupId;
 
     try {
-      const ruleGroup = await dispatch('fetchRuleGroup', payload)
+      if(!ruleGroupId) {
+        const ruleGroup = await dispatch('fetchRuleGroup', payload)
+        ruleGroupId = ruleGroup.ruleGroupId
+      }
 
-      if(!ruleGroup.ruleGroupId) {
+      if(!ruleGroupId) {
         throw new Error("No rule founds")
         return;
       }
 
       const resp = await RuleService.fetchRules({ 
-        "ruleGroupId": ruleGroup.ruleGroupId,
+        ruleGroupId,
         "statusId": "ATP_RULE_ACTIVE",
         "orderByField": "sequenceNum"
       })
@@ -63,6 +67,33 @@ const actions: ActionTree<RuleState, RootState> = {
     commit(types.RULE_RULES_UPDATED, { list: rules, total: rules.length});
   },
   
+  async fetchArchivedRules({ commit }) {
+    const ruleGroup = await store.getters["rule/getRuleGroup"]
+    let archivedRules = [] as any;
+
+    try {
+      if(!ruleGroup.ruleGroupId) {
+        return;
+      }
+
+      const resp = await RuleService.fetchRules({ 
+        "ruleGroupId": ruleGroup.ruleGroupId,
+        "statusId": "ATP_RULE_ARCHIVED",
+        "orderByField": "sequenceNum",
+        "pageSize": 200
+      })
+
+      if(!hasError(resp)) {
+        archivedRules = resp.data;
+      } else {
+        throw resp.data
+      }
+    } catch(err: any) {
+      logger.error(err);
+    }
+    commit(types.RULE_ARCHIVED_RULES_UPDATED, archivedRules);
+  },
+
   updateRuleData({ commit, state }, payload) {
     const rules = JSON.parse(JSON.stringify(state.rules.list))
 
