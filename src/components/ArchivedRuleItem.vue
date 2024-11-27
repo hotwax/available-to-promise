@@ -45,10 +45,9 @@ async function openArchivedRuleModal() {
       const responses = await Promise.allSettled(rulesToUnarchive.map(async (rule: any) => {
         rule.statusId = "ATP_RULE_ACTIVE"
         await RuleService.updateRule(rule, rule.ruleId)
-        
       }))
-      
-      const hasFailedResponses = responses.some((response: any) => response.status === "rejected")
+
+      const hasFailedResponses = responses.some((response: any) => response.status !== "fulfilled")
       if(hasFailedResponses) {
         showToast(translate("Failed to unarchive some rules."))
       }
