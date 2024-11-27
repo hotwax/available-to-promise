@@ -24,17 +24,17 @@
   </ion-content>
 
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button :disabled="!rulesToUnarchive?.length" @click="save()">
-        <ion-icon :icon="saveOutline" />
-      </ion-fab-button>
-    </ion-fab>
+    <ion-fab-button :disabled="!rulesToUnarchive?.length" @click="save()">
+      <ion-icon :icon="saveOutline" />
+    </ion-fab-button>
+  </ion-fab>
 </template>
 
 <script setup lang="ts">
+import { IonButton, IonButtons, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonNote, IonTitle, IonToolbar, modalController } from '@ionic/vue';
 import { translate } from '@hotwax/dxp-components';
 import { defineProps, onMounted, ref } from 'vue';
 import { closeOutline, saveOutline } from "ionicons/icons";
-import { modalController } from '@ionic/vue';
 
 const props = defineProps(["archivedRules"])
 

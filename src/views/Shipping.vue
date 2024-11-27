@@ -113,7 +113,6 @@ async function fetchRules() {
   store.dispatch("rule/updateIsReorderActive", false)
   if(!selectedSegment.value || (selectedSegment.value !== 'RG_SHIPPING_FACILITY' && selectedSegment.value !== 'RG_SHIPPING_CHANNEL' && selectedSegment.value !== 'SHIPPING_FACILITY')) store.dispatch("util/updateSelectedSegment", "RG_SHIPPING_FACILITY");
   await Promise.allSettled([store.dispatch('rule/fetchRules', { groupTypeEnumId: selectedSegment.value, pageSize: 50 }), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilityGroups")])
-  await store.dispatch('rule/fetchArchivedRules')
   if(selectedSegment.value === 'SHIPPING_FACILITY') fetchFacilities();
   emitter.emit("dismissLoader");
 }
@@ -168,7 +167,6 @@ async function updateSegment(event: any) {
     store.dispatch("rule/updateIsReorderActive", false)
     reorderingRules.value = []
     await store.dispatch('rule/fetchRules', { groupTypeEnumId: selectedSegment.value, pageSize: 50 })
-    await store.dispatch('rule/fetchArchivedRules')
   }
   emitter.emit("dismissLoader");
 }

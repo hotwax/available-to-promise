@@ -37,6 +37,7 @@ const actions: ActionTree<RuleState, RootState> = {
 
   async fetchRules({ commit, dispatch }, payload) {
     let rules = [] as any;
+    let archivedRules = [] as any;
     let ruleGroupId = payload.ruleGroupId;
 
     try {
@@ -52,45 +53,22 @@ const actions: ActionTree<RuleState, RootState> = {
 
       const resp = await RuleService.fetchRules({ 
         ruleGroupId,
-        "statusId": "ATP_RULE_ACTIVE",
+        "statusId": ["ATP_RULE_ACTIVE", "ATP_RULE_ARCHIVED"],
+        "statusId_op": "in",
         "orderByField": "sequenceNum"
       })
 
       if(!hasError(resp)) {
-        rules = resp.data;
+        rules = resp.data.filter((rule: any) => rule.statusId === "ATP_RULE_ACTIVE")
+        archivedRules = resp.data.filter((rule: any) => rule.statusId === "ATP_RULE_ARCHIVED")
       } else {
         throw resp.data
       }
     } catch(err: any) {
       logger.error(err);
     }
+
     commit(types.RULE_RULES_UPDATED, { list: rules, total: rules.length});
-  },
-  
-  async fetchArchivedRules({ commit }) {
-    const ruleGroup = await store.getters["rule/getRuleGroup"]
-    let archivedRules = [] as any;
-
-    try {
-      if(!ruleGroup.ruleGroupId) {
-        return;
-      }
-
-      const resp = await RuleService.fetchRules({ 
-        "ruleGroupId": ruleGroup.ruleGroupId,
-        "statusId": "ATP_RULE_ARCHIVED",
-        "orderByField": "sequenceNum",
-        "pageSize": 200
-      })
-
-      if(!hasError(resp)) {
-        archivedRules = resp.data;
-      } else {
-        throw resp.data
-      }
-    } catch(err: any) {
-      logger.error(err);
-    }
     commit(types.RULE_ARCHIVED_RULES_UPDATED, archivedRules);
   },
 

@@ -121,7 +121,6 @@ async function fetchRules() {
     await Promise.allSettled([fetchFacilities(), store.dispatch("util/fetchPickupGroups")]) ;
   } else {
     await Promise.allSettled([store.dispatch('rule/fetchRules', { groupTypeEnumId: selectedSegment.value, pageSize: 50 }), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilityGroups")])
-    await store.dispatch('rule/fetchArchivedRules')
   }
   emitter.emit("dismissLoader");
 }
@@ -176,7 +175,6 @@ async function updateSegment(event: any) {
     store.dispatch("rule/updateIsReorderActive", false)
     reorderingRules.value = []
     await store.dispatch('rule/fetchRules', { groupTypeEnumId: selectedSegment.value, pageSize: 50 })
-    await store.dispatch('rule/fetchArchivedRules')
   }
   emitter.emit("dismissLoader");
 }

@@ -315,7 +315,6 @@ async function archiveRule() {
           try {
             await RuleService.updateRule(rule, props.rule.ruleId)
             await store.dispatch('rule/archiveRule', { rule })
-            await store.dispatch('rule/fetchArchivedRules')
             showToast(translate("Rule archived successfully."))
             alertController.dismiss()
           } catch(err: any) {

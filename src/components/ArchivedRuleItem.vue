@@ -3,7 +3,7 @@
     <ion-accordion value="false">
       <div slot="header" @click="$event.stopImmediatePropagation()"></div>
 
-      <ion-card slot="content" v-if="archivedRules?.length">
+      <ion-card slot="content">
         <ion-item button lines="full" @click="openArchivedRuleModal()">
           <ion-label>{{ translate("Archived") }}</ion-label>
           <ion-badge slot="end" color="medium">{{ archivedRules.length }} {{ translate(archivedRules.length === 1 ? "rule" : "rules") }}</ion-badge>
@@ -52,7 +52,6 @@ async function openArchivedRuleModal() {
         showToast(translate("Failed to unarchive some rules."))
       }
       await store.dispatch("rule/fetchRules", { ruleGroupId: ruleGroup.value.ruleGroupId })
-      store.dispatch('rule/fetchArchivedRules')
       emitter.emit("dismissLoader")
     }
   })
