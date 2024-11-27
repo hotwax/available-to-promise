@@ -21,11 +21,11 @@
 
     <ion-content ref="contentRef" :scroll-events="true" @ionScroll="enableScrolling()">
       <main v-if="selectedSegment !== 'SHIPPING_FACILITY'">
-        <template v-if="ruleGroup.ruleGroupId && rules.length">
-          <ScheduleRuleItem />
+        <template v-if="ruleGroup.ruleGroupId && (rules.length || archivedRules.length)">
+          <ScheduleRuleItem v-if="rules.length" />
           <ArchivedRuleItem v-if="archivedRules?.length" />
 
-          <section>
+          <section v-if="rules.length">
             <ion-reorder-group :disabled="false" @ionItemReorder="updateReorderingRules($event)">
               <RuleItem v-for="(rule, ruleIndex) in (isReorderActive ? reorderingRules : rules)" :rule="rule" :ruleIndex="ruleIndex" :key="rule.ruleId" />
             </ion-reorder-group>
