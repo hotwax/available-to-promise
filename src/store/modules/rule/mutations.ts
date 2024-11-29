@@ -13,6 +13,9 @@ const mutations: MutationTree <RuleState> = {
   [types.RULE_REORDER_ACTIVE_UPDATED] (state, payload) {
     state.isReorderActive = payload;
   },
+  [types.RULE_ARCHIVED_RULES_UPDATED] (state, payload) {
+    state.archivedRules = payload;
+  },
   [types.RULE_CLEARED](state) {
     state.rules = {
       list: [],

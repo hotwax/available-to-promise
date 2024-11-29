@@ -37,32 +37,41 @@ const actions: ActionTree<RuleState, RootState> = {
 
   async fetchRules({ commit, dispatch }, payload) {
     let rules = [] as any;
+    let archivedRules = [] as any;
+    let ruleGroupId = payload.ruleGroupId;
 
     try {
-      const ruleGroup = await dispatch('fetchRuleGroup', payload)
+      if(!ruleGroupId) {
+        const ruleGroup = await dispatch('fetchRuleGroup', payload)
+        ruleGroupId = ruleGroup.ruleGroupId
+      }
 
-      if(!ruleGroup.ruleGroupId) {
+      if(!ruleGroupId) {
         throw new Error("No rule founds")
         return;
       }
 
       const resp = await RuleService.fetchRules({ 
-        "ruleGroupId": ruleGroup.ruleGroupId,
-        "statusId": "ATP_RULE_ACTIVE",
+        ruleGroupId,
+        "statusId": ["ATP_RULE_ACTIVE", "ATP_RULE_ARCHIVED"],
+        "statusId_op": "in",
         "orderByField": "sequenceNum"
       })
 
       if(!hasError(resp)) {
-        rules = resp.data;
+        rules = resp.data.filter((rule: any) => rule.statusId === "ATP_RULE_ACTIVE")
+        archivedRules = resp.data.filter((rule: any) => rule.statusId === "ATP_RULE_ARCHIVED")
       } else {
         throw resp.data
       }
     } catch(err: any) {
       logger.error(err);
     }
+
     commit(types.RULE_RULES_UPDATED, { list: rules, total: rules.length});
+    commit(types.RULE_ARCHIVED_RULES_UPDATED, archivedRules);
   },
-  
+
   updateRuleData({ commit, state }, payload) {
     const rules = JSON.parse(JSON.stringify(state.rules.list))
 
@@ -80,16 +89,6 @@ const actions: ActionTree<RuleState, RootState> = {
 
   updateRules({commit}, payload) {
     commit(types.RULE_RULES_UPDATED, { list: payload.rules, total: payload.rules.length});
-  },
-
-  archiveRule({ commit, state }, { rule }) {
-    const rules = JSON.parse(JSON.stringify(state.rules.list))
-
-    const index = rules.findIndex((currRule: any) => currRule.ruleId === rule.ruleId);
-    if (index !== -1) {
-      rules.splice(index, 1);
-    }
-    commit(types.RULE_RULES_UPDATED, { list: rules, total: state.rules.total - 1 });
   },
 
   async clearRuleState({ commit }) {

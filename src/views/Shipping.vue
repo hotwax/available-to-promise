@@ -21,10 +21,11 @@
 
     <ion-content ref="contentRef" :scroll-events="true" @ionScroll="enableScrolling()">
       <main v-if="selectedSegment !== 'SHIPPING_FACILITY'">
-        <template v-if="ruleGroup.ruleGroupId && rules.length">
-          <ScheduleRuleItem />
+        <template v-if="ruleGroup.ruleGroupId && (rules.length || archivedRules.length)">
+          <ScheduleRuleItem v-if="rules.length" />
+          <ArchivedRuleItem v-if="archivedRules?.length" />
 
-          <section>
+          <section v-if="rules.length">
             <ion-reorder-group :disabled="false" @ionItemReorder="updateReorderingRules($event)">
               <RuleItem v-for="(rule, ruleIndex) in (isReorderActive ? reorderingRules : rules)" :rule="rule" :ruleIndex="ruleIndex" :key="rule.ruleId" />
             </ion-reorder-group>
@@ -79,6 +80,7 @@ import { useStore } from 'vuex';
 import emitter from '@/event-bus';
 import { RuleService } from '@/services/RuleService';
 import { doReorder, showToast } from '@/utils';
+import ArchivedRuleItem from '@/components/ArchivedRuleItem.vue';
 
 const store = useStore();
 const router = useRouter()
@@ -89,6 +91,7 @@ const isScrollable = computed(() => store.getters["util/isFacilitiesScrollable"]
 const facilities = computed(() => store.getters["util/getFacilities"]);
 const selectedSegment = computed(() => store.getters["util/getSelectedSegment"]);
 const isReorderActive = computed(() => store.getters["rule/isReorderActive"]);
+const archivedRules = computed(() => store.getters["rule/getArchivedRules"]);
 const reorderingRules = ref([]);
 
 const isScrollingEnabled = ref(false);

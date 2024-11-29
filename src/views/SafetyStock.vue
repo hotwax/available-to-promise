@@ -8,10 +8,11 @@
     </ion-header>
 
     <ion-content>
-      <main v-if="ruleGroup.ruleGroupId && rules.length">
-        <ScheduleRuleItem />
+      <main v-if="ruleGroup.ruleGroupId && (rules.length || archivedRules.length)">
+        <ScheduleRuleItem v-if="rules.length" />
+        <ArchivedRuleItem v-if="archivedRules?.length" />
 
-        <section>
+        <section v-if="rules.length">
           <ion-reorder-group :disabled="false" @ionItemReorder="updateReorderingRules($event)">
             <RuleItem v-for="(rule, ruleIndex) in (isReorderActive ? reorderingRules : rules)" :rule="rule" :ruleIndex="ruleIndex" :key="rule.ruleId" />
           </ion-reorder-group>
@@ -46,6 +47,7 @@ import { translate } from '@hotwax/dxp-components';
 import emitter from '@/event-bus';
 import { RuleService } from '@/services/RuleService';
 import { doReorder, showToast } from '@/utils';
+import ArchivedRuleItem from '@/components/ArchivedRuleItem.vue';
 
 const store = useStore();
 const router = useRouter()
@@ -53,6 +55,7 @@ const router = useRouter()
 const rules = computed(() => store.getters["rule/getRules"]);
 const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
 const isReorderActive = computed(() => store.getters["rule/isReorderActive"]);
+const archivedRules = computed(() => store.getters["rule/getArchivedRules"]);
 const reorderingRules = ref([]);
 
 onIonViewDidEnter(async() => {
