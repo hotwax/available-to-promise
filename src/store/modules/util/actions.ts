@@ -183,26 +183,36 @@ const actions: ActionTree<UtilState, RootState> = {
 
     if(filters[params.searchfield]) return;
 
-    const payload = {
-      facetToSelect: params.facetToSelect,
-      docType: 'PRODUCT',
-      coreName: 'enterpriseSearch',
-      jsonQuery: '{"query":"*:*","filter":["docType:PRODUCT"]}',
-      noConditionFind: 'N',
-      limit: -1,
-      term: "",
-    }
+    let allFacets = [] as any;
+    let offset = 0;
+    let currentFacets = [];
 
     try {
-      const resp = await UtilService.fetchFacets(payload);
-      if(!hasError(resp)) {
-        filters[params.searchfield] = resp.data.facetResponse ? resp.data.facetResponse.response : resp.data.response 
-      } else {
-        throw resp.data;
-      }
-    } catch(error: any) {
+      do {
+        const payload = {
+          facetToSelect: params.facetToSelect,
+          docType: 'PRODUCT',
+          coreName: 'enterpriseSearch',
+          jsonQuery: '{"query":"*:*","filter":["docType:PRODUCT"]}',
+          noConditionFind: 'N',
+          limit: 50,
+          offset,
+          term: "",
+        }
+        const resp = await UtilService.fetchFacets(payload);
+        if (!hasError(resp)) {
+          currentFacets = resp.data.facetResponse ? resp.data.facetResponse.response : resp.data.response
+          allFacets = allFacets.concat(currentFacets)
+          offset = offset + payload.limit
+        } else {
+          throw resp.data;
+        }
+      } while (currentFacets.length);
+
+    } catch(error) {
       logger.error(error);
     }
+    filters[params.searchfield] = allFacets 
     commit(types.UTIL_FACET_OPTIONS_UPDATED, filters);
   },
 
