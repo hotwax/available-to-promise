@@ -5,7 +5,7 @@ import store from '@/store';
 
 const fetchInventoryChannels = async (payload: any): Promise <any>  => {
   return api({
-    url: `productStores/${payload.productStoreId}/facilityGroups`,
+    url: `admin/productStores/${payload.productStoreId}/facilityGroups`,
     method: "GET",
     params: payload
   });
@@ -13,7 +13,7 @@ const fetchInventoryChannels = async (payload: any): Promise <any>  => {
 
 const fetchGroupFacilities = async (payload: any): Promise <any>  => {
   return api({
-    url: `facilityGroups/${payload.facilityGroupId}/facilities`,
+    url: `admin/facilityGroups/${payload.facilityGroupId}/facilities`,
     method: "GET",
     params: payload
   });
@@ -21,7 +21,7 @@ const fetchGroupFacilities = async (payload: any): Promise <any>  => {
 
 const updateGroup = async (payload: any): Promise <any>  => {
   return api({
-    url: `facilityGroups/${payload.facilityGroupId}`,
+    url: `admin/facilityGroups/${payload.facilityGroupId}`,
     method: "PUT",
     params: payload
   });
@@ -29,7 +29,7 @@ const updateGroup = async (payload: any): Promise <any>  => {
 
 const updateFacilityAssociationWithGroup = async (payload: any): Promise <any>  => {
   return api({
-    url: `facilityGroups/${payload.facilityGroupId}/facilities/${payload.facilityId}/association`,
+    url: `admin/facilityGroups/${payload.facilityGroupId}/facilities/${payload.facilityId}/association`,
     method: "POST",
     data: payload
   });
@@ -37,7 +37,7 @@ const updateFacilityAssociationWithGroup = async (payload: any): Promise <any>  
 
 const updateFacilityAssociationWithProductStore = async (payload: any): Promise <any>  => {
   return api({
-    url: `/productStores/${payload.productStoreId}/facilities/${payload.facilityId}/association`,
+    url: `admin/productStores/${payload.productStoreId}/facilities/${payload.facilityId}/association`,
     method: "POST",
     data: payload
   });
@@ -45,7 +45,7 @@ const updateFacilityAssociationWithProductStore = async (payload: any): Promise 
 
 const updateGroupAssociationWithProductStore = async (payload: any): Promise <any>  => {
   return api({
-    url: `/productStores/${payload.productStoreId}/facilityGroups/${payload.facilityGroupId}/association`,
+    url: `admin/productStores/${payload.productStoreId}/facilityGroups/${payload.facilityGroupId}/association`,
     method: "POST",
     data: payload
   });
@@ -53,7 +53,7 @@ const updateGroupAssociationWithProductStore = async (payload: any): Promise <an
 
 const createFacilityGroup = async (payload: any): Promise <any>  => {
   return api({
-    url: "facilityGroups",
+    url: "admin/facilityGroups",
     method: "POST",
     data: payload
   });
@@ -61,7 +61,7 @@ const createFacilityGroup = async (payload: any): Promise <any>  => {
 
 const createFacility = async (payload: any): Promise <any>  => {
   return api({
-    url: "facilities",
+    url: "admin/facilities",
     method: "POST",
     data: payload
   });
@@ -69,7 +69,7 @@ const createFacility = async (payload: any): Promise <any>  => {
 
 const fetchShopifyConfigs = async (payload: any): Promise<any> => {
   return api({
-    url: "shopifyShops",
+    url: "admin/shopifyShops",
     method: "get",
     params: payload
   });
@@ -77,7 +77,7 @@ const fetchShopifyConfigs = async (payload: any): Promise<any> => {
 
 const fetchJobInformation = async (payload: any): Promise <any>  => {
   const omsRedirectionInfo = store.getters["user/getOmsRedirectionInfo"]
-  const baseURL = omsRedirectionInfo.url.startsWith('http') ? omsRedirectionInfo.url.includes('/api') ? omsRedirectionInfo.url : `${omsRedirectionInfo.url}/api/` : `https://${omsRedirectionInfo.url}.hotwax.io/api/`;
+  const baseURL = store.getters["user/getOmsBaseUrl"]
 
   let jobs = [];
 
@@ -107,7 +107,7 @@ const fetchJobInformation = async (payload: any): Promise <any>  => {
 
 const getServiceStatusDesc = async (payload: any): Promise<any> => {
   const omsRedirectionInfo = store.getters["user/getOmsRedirectionInfo"]
-  const baseURL = omsRedirectionInfo.url.startsWith('http') ? omsRedirectionInfo.url.includes('/api') ? omsRedirectionInfo.url : `${omsRedirectionInfo.url}/api/` : `https://${omsRedirectionInfo.url}.hotwax.io/api/`;
+  const baseURL = store.getters["user/getOmsBaseUrl"]
 
   return client({
     url: "performFind",
@@ -124,7 +124,7 @@ const getServiceStatusDesc = async (payload: any): Promise<any> => {
 
 const fetchTemporalExpression = async (payload: any): Promise <any>  => {
   const omsRedirectionInfo = store.getters["user/getOmsRedirectionInfo"]
-  const baseURL = omsRedirectionInfo.url.startsWith('http') ? omsRedirectionInfo.url.includes('/api') ? omsRedirectionInfo.url : `${omsRedirectionInfo.url}/api/` : `https://${omsRedirectionInfo.url}.hotwax.io/api/`;
+  const baseURL = store.getters["user/getOmsBaseUrl"]
 
   return client({
     url: "performFind",
@@ -140,7 +140,7 @@ const fetchTemporalExpression = async (payload: any): Promise <any>  => {
 
 const disableJob = async (payload: any): Promise <any> => {
   const omsRedirectionInfo = store.getters["user/getOmsRedirectionInfo"]
-  const baseURL = omsRedirectionInfo.url.startsWith('http') ? omsRedirectionInfo.url.includes('/api') ? omsRedirectionInfo.url : `${omsRedirectionInfo.url}/api/` : `https://${omsRedirectionInfo.url}.hotwax.io/api/`;
+  const baseURL = store.getters["user/getOmsBaseUrl"]
 
   return client({
     url: "service/cancelScheduledJob",
@@ -156,7 +156,7 @@ const disableJob = async (payload: any): Promise <any> => {
 
 const scheduleJob = async (payload: any): Promise <any>  => {
   const omsRedirectionInfo = store.getters["user/getOmsRedirectionInfo"]
-  const baseURL = omsRedirectionInfo.url.startsWith('http') ? omsRedirectionInfo.url.includes('/api') ? omsRedirectionInfo.url : `${omsRedirectionInfo.url}/api/` : `https://${omsRedirectionInfo.url}.hotwax.io/api/`;
+  const baseURL = store.getters["user/getOmsBaseUrl"]
 
   return client({
     url: "scheduleService",
@@ -172,7 +172,7 @@ const scheduleJob = async (payload: any): Promise <any>  => {
 
 const updateJob = async (payload: any): Promise <any>  => {
   const omsRedirectionInfo = store.getters["user/getOmsRedirectionInfo"]
-  const baseURL = omsRedirectionInfo.url.startsWith('http') ? omsRedirectionInfo.url.includes('/api') ? omsRedirectionInfo.url : `${omsRedirectionInfo.url}/api/` : `https://${omsRedirectionInfo.url}.hotwax.io/api/`;
+  const baseURL = store.getters["user/getOmsBaseUrl"]
 
   return client({
     url: "service/updateJobSandbox",

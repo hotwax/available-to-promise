@@ -3,13 +3,13 @@ import store from "@/store";
 import { hasError } from "@/utils";
 
 const login = async (token: string): Promise <any> => {
-  const url = store.getters["user/getBaseUrl"]
-  const baseURL = url.startsWith('http') ? url.includes('/rest/s1/available-to-promise') ? url : `${url}/rest/s1/available-to-promise/` : `https://${url}.hotwax.io/rest/s1/available-to-promise/`;
+  const baseURL = store.getters["user/getBaseUrl"]
+  
   let api_key = ""
 
   try {
     const resp = await client({
-      url: "login", 
+      url: "admin/login", 
       method: "post",
       baseURL,
       params: {
@@ -122,11 +122,10 @@ const getUserPermissions = async (payload: any, url: string, token: any): Promis
 }
 
 const getUserProfile = async (token: any): Promise<any> => {
-  const url = store.getters["user/getBaseUrl"];
-  const baseURL = url.startsWith('http') ? url.includes('/rest/s1/available-to-promise') ? url : `${url}/rest/s1/available-to-promise/` : `https://${url}.hotwax.io/rest/s1/available-to-promise/`;
+  const baseURL = store.getters["user/getBaseUrl"];
   try {
     const resp = await client({
-      url: "user/profile",
+      url: "admin/user/profile",
       method: "GET",
       baseURL,
       headers: {
@@ -143,26 +142,17 @@ const getUserProfile = async (token: any): Promise<any> => {
 
 const getAvailableTimeZones = async (): Promise <any>  => {
   return api({
-    url: "user/getAvailableTimeZones",
+    url: "admin/user/getAvailableTimeZones",
     method: "get",
     cache: true
   });
 }
 
-const setUserTimeZone = async (payload: any): Promise <any>  => {
-  return api({
-    url: "setUserTimeZone",
-    method: "post",
-    data: payload
-  });
-}
-
 const getEComStores = async (token: any): Promise<any> => {
   try {
-    const url = store.getters["user/getBaseUrl"];
-    const baseURL = url.startsWith('http') ? url.includes('/rest/s1/available-to-promise') ? url : `${url}/rest/s1/available-to-promise/` : `https://${url}.hotwax.io/rest/s1/available-to-promise/`;
+    const baseURL = store.getters["user/getBaseUrl"];
     const resp = await client({
-      url: "user/productStore",
+      url: "admin/user/productStore",
       method: "GET",
       baseURL,
       headers: {
@@ -186,6 +176,5 @@ export const UserService = {
   getEComStores,
   getUserProfile,
   getUserPermissions,
-  login,
-  setUserTimeZone
+  login
 }
