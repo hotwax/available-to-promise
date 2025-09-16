@@ -10,7 +10,7 @@ const fetchFacets = async (payload: any): Promise<any> => {
 
 const fetchFacilities = async (payload: any): Promise <any>  => {
   return api({
-    url: `productStores/${payload.productStoreId}/facilities`,
+    url: `admin/productStores/${payload.productStoreId}/facilities`,
     method: "GET",
     params: payload
   });
@@ -18,7 +18,7 @@ const fetchFacilities = async (payload: any): Promise <any>  => {
 
 const updateFacility = async (payload: any): Promise <any>  => {
   return api({
-    url: `facilities/${payload.facilityId}`,
+    url: `admin/facilities/${payload.facilityId}`,
     method: "PUT",
     data: payload
   });
@@ -26,7 +26,7 @@ const updateFacility = async (payload: any): Promise <any>  => {
 
 const fetchFacilityGroups = async (payload: any): Promise <any>  => {
   return api({
-    url: `productStores/${payload.productStoreId}/facilityGroups`,
+    url: `admin/productStores/${payload.productStoreId}/facilityGroups`,
     method: "GET",
     params: payload
   });
@@ -34,7 +34,7 @@ const fetchFacilityGroups = async (payload: any): Promise <any>  => {
 
 const fetchFacilitiesOrderCount = async (payload: any): Promise <any>  => {
   return api({
-    url: `facilities/orderCount`,
+    url: `admin/facilities/orderCount`,
     method: "GET",
     params: payload
   });
@@ -42,7 +42,7 @@ const fetchFacilitiesOrderCount = async (payload: any): Promise <any>  => {
 
 const fetchPickupGroupFacilities = async (payload: any): Promise <any>  => {
   return api({
-    url: `facilityGroups/${payload.facilityGroupId}/facilities`,
+    url: `admin/facilityGroups/${payload.facilityGroupId}/facilities`,
     method: "GET",
     params: payload
   });
@@ -50,7 +50,7 @@ const fetchPickupGroupFacilities = async (payload: any): Promise <any>  => {
 
 const updateFacilityAssociationWithPickupGroup = async (payload: any): Promise <any>  => {
   return api({
-    url: `facilityGroups/${payload.facilityGroupId}/facilities/${payload.facilityId}/association`,
+    url: `admin/facilityGroups/${payload.facilityGroupId}/facilities/${payload.facilityId}/association`,
     method: "POST",
     data: payload
   });

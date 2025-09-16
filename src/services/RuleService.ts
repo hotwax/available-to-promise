@@ -4,7 +4,7 @@ import { hasError } from '@/utils';
 
 const fetchRuleGroup = async (payload: any): Promise <any>  => {
   return api({
-    url: "ruleGroups",
+    url: "available-to-promise/ruleGroups",
     method: "GET",
     params: payload
   });
@@ -12,7 +12,7 @@ const fetchRuleGroup = async (payload: any): Promise <any>  => {
 
 const fetchRules = async (payload: any): Promise <any>  => {
   return api({
-    url: `decisionRules`,
+    url: "available-to-promise/decisionRules",
     method: "GET",
     params: payload
   });
@@ -22,7 +22,7 @@ const createRuleGroup = async (payload: any): Promise <any>  => {
   let ruleGroup = {}
   try {
     const resp = await api({
-      url: "ruleGroups",
+      url: "available-to-promise/ruleGroups",
       method: "POST",
       data: payload
     }) as any;
@@ -43,7 +43,7 @@ const createRule = async (payload: any): Promise <any>  => {
   let rule = {}
   try {
     const resp = await api({
-      url: "decisionRules",
+      url: "available-to-promise/decisionRules",
       method: "POST",
       data: payload
     }) as any;
@@ -63,7 +63,7 @@ const createRule = async (payload: any): Promise <any>  => {
 const updateRule = async (payload: any, ruleId: string): Promise <any>  => {
   try {
     const resp = await api({
-      url: `decisionRules/${ruleId}`,
+      url: `available-to-promise/decisionRules/${ruleId}`,
       method: "POST",
       data: payload
     }) as any;
@@ -80,14 +80,14 @@ const updateRule = async (payload: any, ruleId: string): Promise <any>  => {
 
 const fetchRuleScheduleInformation = async (ruleGroupId: string): Promise<any> => {
   return api({
-    url: `ruleGroups/${ruleGroupId}/schedule`,
+    url: `available-to-promise/ruleGroups/${ruleGroupId}/schedule`,
     method: "GET"
   });
 }
 
 const scheduleRuleGroup = async (payload: any): Promise<any> => {
   return api({
-    url: `ruleGroups/${payload.ruleGroupId}/schedule`,
+    url: `available-to-promise/ruleGroups/${payload.ruleGroupId}/schedule`,
     method: "POST",
     data: payload
   });
@@ -95,7 +95,7 @@ const scheduleRuleGroup = async (payload: any): Promise<any> => {
 
 const fetchRuleGroupHistory = async (payload: any): Promise<any> => {
   return api({
-    url: `serviceJobRuns/${payload.jobName}`,
+    url: `admin/serviceJobs/${payload.jobName}/runs`,
     method: "GET",
     params: payload
   });
@@ -103,14 +103,14 @@ const fetchRuleGroupHistory = async (payload: any): Promise<any> => {
 
 const runNow = async (ruleGroupId: any): Promise<any> => {
   return api({
-    url: `ruleGroups/${ruleGroupId}/runNow`,
+    url: `available-to-promise/ruleGroups/${ruleGroupId}/runNow`,
     method: "POST"
   });
 }
 
 const deleteCondition = async (payload: any): Promise<any> => {
   return api({
-    url: `decisionRules/${payload.ruleId}/conditions`,
+    url: `available-to-promise/decisionRules/${payload.ruleId}/conditions`,
     method: "delete",
     data: payload
   });

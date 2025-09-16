@@ -4,8 +4,12 @@ import RootState from '@/store/RootState'
 
 const getters: GetterTree <UserState, RootState> = {
     getBaseUrl (state) {
-        const baseURL = state.instanceUrl;
-        return baseURL.startsWith('http') ? baseURL : `https://${baseURL}.hotwax.io/rest/s1/available-to-promise/`;
+      const baseURL = state.instanceUrl;
+      return  baseURL.startsWith('http') ? baseURL.includes('/rest/s1') ? baseURL : `${baseURL}/rest/s1/` : `https://${baseURL}.hotwax.io/rest/s1/`;
+    },
+    getOmsBaseUrl (state) {
+      const url = state.omsRedirectionInfo.url
+      return url.startsWith('http') ? url.includes('/api') ? url : `${url}/api/` : `https://${url}.hotwax.io/api/`;
     },
     isAuthenticated (state) {
         return !!state.token;
