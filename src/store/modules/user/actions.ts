@@ -55,7 +55,7 @@ const actions: ActionTree<UserState, RootState> = {
       const userProfile = await UserService.getUserProfile(api_key);
       
       // TODO: fetch only associated product stores for user, currently api does not support this
-      userProfile.stores = await UserService.getEComStores(api_key);
+      userProfile.stores = await UserService.getProductStores(api_key);
       
       if (userProfile.timeZone) {
         Settings.defaultZone = userProfile.timeZone;
@@ -69,7 +69,7 @@ const actions: ActionTree<UserState, RootState> = {
       emitter.emit("dismissLoader")
       commit(types.USER_INFO_UPDATED, userProfile);
       commit(types.USER_PERMISSIONS_UPDATED, appPermissions);
-      commit(types.USER_CURRENT_ECOM_STORE_UPDATED, userProfile.stores.length ? userProfile.stores[0] : {});
+      commit(types.USER_CURRENT_PRODUCT_STORE_UPDATED, userProfile.stores.length ? userProfile.stores[0] : {});
     } catch (err: any) {
       emitter.emit("dismissLoader")
       showToast(translate(err));
@@ -119,12 +119,12 @@ const actions: ActionTree<UserState, RootState> = {
     commit(types.USER_OMS_REDIRECTION_INFO_UPDATED, payload)
   },
 
-  setEcomStore({ commit, state }, payload) {
+  setProductStore({ commit, state }, payload) {
     let productStore = payload.productStore;
     if(!productStore) {
       productStore = (state.current as any).stores.find((store: any) => store.productStoreId === payload.productStoreId);
     }
-    commit(types.USER_CURRENT_ECOM_STORE_UPDATED, productStore);
+    commit(types.USER_CURRENT_PRODUCT_STORE_UPDATED, productStore);
   },
 
   updatePwaState({ commit }, payload) {

@@ -26,8 +26,8 @@ const getters: GetterTree <UserState, RootState> = {
     getInstanceUrl (state) {
         return state.instanceUrl;
     },
-    getCurrentEComStore(state) {
-        return state.currentEComStore
+    getCurrentProductStore(state) {
+        return state.currentProductStore
     },
     getOmsRedirectionInfo(state) {
         return state.omsRedirectionInfo;

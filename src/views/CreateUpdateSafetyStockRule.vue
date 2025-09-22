@@ -121,7 +121,7 @@ const props = defineProps(["ruleId"]);
 const appliedFilters = computed(() => store.getters["util/getAppliedFilters"]);
 const rules = computed(() => store.getters["rule/getRules"]);
 const total = computed(() => store.getters["rule/getTotalRulesCount"])
-const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
+const currentProductStore = computed(() => store.getters["user/getCurrentProductStore"])
 const facilityGroups = computed(() => store.getters["util/getFacilityGroups"])
 
 onIonViewDidEnter(async () => {
@@ -218,7 +218,7 @@ async function createRule() {
     if(!ruleGroup.ruleGroupId) {
       ruleGroup = await RuleService.createRuleGroup({
         "groupTypeEnumId": "RG_SAFETY_STOCK",
-        "productStoreId": currentEComStore.value.productStoreId,
+        "productStoreId": currentProductStore.value.productStoreId,
         "statusId": "ATP_RG_ACTIVE"
       })
     }

@@ -14,7 +14,7 @@ const actions: ActionTree<UtilState, RootState> = {
     let configFacilities = [];
 
     try {
-      const resp = await UtilService.fetchFacilities({ facilityTypeId: 'CONFIGURATION', productStoreId: store.state.user.currentEComStore.productStoreId });
+      const resp = await UtilService.fetchFacilities({ facilityTypeId: 'CONFIGURATION', productStoreId: store.state.user.currentProductStore.productStoreId });
 
       if(!hasError(resp)) {
         configFacilities = resp.data;
@@ -31,7 +31,7 @@ const actions: ActionTree<UtilState, RootState> = {
     let facilityGroups = {};
 
     try {
-      const resp = await UtilService.fetchFacilityGroups({ productStoreId: store.state.user.currentEComStore.productStoreId, pageSize: 100 });
+      const resp = await UtilService.fetchFacilityGroups({ productStoreId: store.state.user.currentProductStore.productStoreId, pageSize: 100 });
 
       if(!hasError(resp)) {
         facilityGroups = resp.data;
@@ -62,7 +62,7 @@ const actions: ActionTree<UtilState, RootState> = {
       parentFacilityTypeId_not: 'Y',
       facilityTypeId: 'VIRTUAL_FACILITY',
       facilityTypeId_not: 'Y',
-      productStoreId: store.state.user.currentEComStore.productStoreId,
+      productStoreId: store.state.user.currentProductStore.productStoreId,
       pageSize: payload.pageSize,
       pageIndex: payload.pageIndex
     }
@@ -130,7 +130,7 @@ const actions: ActionTree<UtilState, RootState> = {
     const pickGroupFacilities = {} as any;
 
     try {
-      const resp = await UtilService.fetchFacilityGroups({ facilityGroupTypeId: 'PICKUP', productStoreId: store.state.user.currentEComStore.productStoreId, pageSize: 100 })
+      const resp = await UtilService.fetchFacilityGroups({ facilityGroupTypeId: 'PICKUP', productStoreId: store.state.user.currentProductStore.productStoreId, pageSize: 100 })
 
       if(!hasError(resp)) {
         groups = resp.data;

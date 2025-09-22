@@ -29,13 +29,13 @@
           <ion-note slot="end">{{ userProfile?.timeZone }}</ion-note>
         </ion-item>
         <ion-item v-if="userProfile?.stores?.length > 1" lines="none">
-          <ion-select interface="popover" :value="eComStore.productStoreId" @ionChange="setEComStore($event)">
+          <ion-select interface="popover" :value="productStore.productStoreId" @ionChange="setProductStore($event)">
             <ion-select-option v-for="store in (userProfile?.stores ? userProfile.stores : [])" :key="store.productStoreId" :value="store.productStoreId" >{{ store.storeName ? store.storeName : store.productStoreId }}</ion-select-option>
           </ion-select>
         </ion-item>
         <ion-item v-else lines="none">
           <ion-label class="ion-text-wrap">
-            {{ eComStore.storeName ? eComStore.storeName : eComStore.productStoreId }}
+            {{ productStore.storeName ? productStore.storeName : productStore.productStoreId }}
           </ion-label>
         </ion-item>
       </ion-toolbar>
@@ -116,14 +116,14 @@
 
   const userProfile = computed(() => store.getters["user/getUserProfile"])
   const isUserAuthenticated = computed(() => store.getters["user/isUserAuthenticated"])
-  const eComStore = computed(() => store.getters["user/getCurrentEComStore"])
+  const productStore = computed(() => store.getters["user/getCurrentProductStore"])
   const instanceUrl = computed(() => store.getters["user/getInstanceUrl"])
   const selectedIndex = computed(() => {
     const path = router.currentRoute.value.path;
     return appPages.findIndex((screen) => screen.url === path || screen.childRoutes?.includes(path) || screen.childRoutes?.some((route) => path.includes(route)));
   });
 
-  async function setEComStore(event: SelectCustomEvent) {
+  async function setProductStore(event: SelectCustomEvent) {
     const createUpdateRoute = ["/create-threshold", "/update-threshold/", "/create-safety-stock", "/update-safety-stock/", "/create-store-pickup", "update-store-pickup/", "/create-shipping", "/update-shipping/"]
     const path = router.currentRoute.value.path;
     if(userProfile.value?.stores) {
@@ -136,14 +136,14 @@
               text: translate("No"),
               role: "cancel",
               handler: async () => {
-                // Reverting the selected ecomStore in ion-select if user select no to change product store.
-                event.target.value = eComStore.value.productStoreId
+                // Reverting the selected productStore in ion-select if user select no to change product store.
+                event.target.value = productStore.value.productStoreId
               }
             },
             {
               text: translate("Yes"),
               handler: async () => {
-                await store.dispatch("user/setEcomStore", {
+                await store.dispatch("user/setProductStore", {
                   "productStoreId": event.detail.value
                 })
                 emitter.emit("productStoreOrConfigChanged")
@@ -154,7 +154,7 @@
 
         alert.present();
       } else {
-        store.dispatch("user/setEcomStore", {
+        store.dispatch("user/setProductStore", {
           "productStoreId": event.detail.value
         })
         emitter.emit("productStoreOrConfigChanged")

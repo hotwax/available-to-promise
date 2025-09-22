@@ -424,7 +424,7 @@ async function scheduleService(job: any) {
     'SERVICE_TEMP_EXPR': job.jobStatus,
     'SERVICE_RUN_AS_SYSTEM':'Y',
     'jobFields': {
-      'productStoreId': store.state.user.currentEComStore.productStoreId,
+      'productStoreId': store.state.user.currentProductStore.productStoreId,
       'systemJobEnumId': job.systemJobEnumId,
       'tempExprId': job.jobStatus, // Need to remove this as we are passing frequency in SERVICE_TEMP_EXPR, currently kept it for backward compatibility
       'maxRecurrenceCount': '-1',

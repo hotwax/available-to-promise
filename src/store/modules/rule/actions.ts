@@ -10,7 +10,7 @@ import store from '@/store'
 
 const actions: ActionTree<RuleState, RootState> = {
   async fetchRuleGroup({ commit }, payload) {
-    const productStore = await store.getters['user/getCurrentEComStore']
+    const productStore = await store.getters['user/getCurrentProductStore']
     let ruleGroup = {} as any;
     let resp;
 
