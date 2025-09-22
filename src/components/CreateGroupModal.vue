@@ -25,7 +25,7 @@
       </ion-item>
       <ion-item>
         <ion-label>{{ translate("Product store") }}</ion-label>
-        <ion-label slot="end">{{ eComStore.storeName ? eComStore.storeName : eComStore.productStoreId }}</ion-label>
+        <ion-label slot="end">{{ productStore.storeName ? productStore.storeName : productStore.productStoreId }}</ion-label>
       </ion-item>
       <ion-item>
         <ion-select :label="translate('Group level configurations')" v-model="selectedConfigFacilityId" interface="popover">
@@ -64,7 +64,7 @@ const formData = ref({
 const selectedConfigFacilityId = ref("new");
 const facilityGroupId = ref("") as any;
 
-const eComStore = computed(() => store.getters["user/getCurrentEComStore"])
+const productStore = computed(() => store.getters["user/getCurrentProductStore"])
 const configFacilities = computed(() => store.getters["util/getConfigFacilities"])
 
 function closeModal() {
@@ -115,7 +115,7 @@ async function createGroup() {
         }
 
         // Associating the config facility with the product store.
-        resp = await ChannelService.updateFacilityAssociationWithProductStore({productStoreId: eComStore.value.productStoreId, facilityId: selectedConfigFacility.facilityId})
+        resp = await ChannelService.updateFacilityAssociationWithProductStore({productStoreId: productStore.value.productStoreId, facilityId: selectedConfigFacility.facilityId})
         if(hasError(resp)) throw resp.data;
       } else {
         throw resp.data;
@@ -125,7 +125,7 @@ async function createGroup() {
     }
 
     // Associating the facility group with the product store.
-    resp = await ChannelService.updateGroupAssociationWithProductStore({productStoreId: eComStore.value.productStoreId, facilityGroupId: formData.value.facilityGroupId})
+    resp = await ChannelService.updateGroupAssociationWithProductStore({productStoreId: productStore.value.productStoreId, facilityGroupId: formData.value.facilityGroupId})
     if(hasError(resp)) throw resp.data;
 
     // Associating the config facility with the group.

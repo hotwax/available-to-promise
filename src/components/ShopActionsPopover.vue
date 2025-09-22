@@ -38,7 +38,7 @@ import { useStore } from "vuex";
 const store = useStore();
 
 const props = defineProps(["job"]);
-const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
+const currentProductStore = computed(() => store.getters["user/getCurrentProductStore"])
 
 function closePopover() {
   popoverController.dismiss({ dismissed: true });
@@ -142,7 +142,7 @@ async function runServiceNow(job: any) {
     'SERVICE_COUNT': '0',
     'SERVICE_TEMP_EXPR': job.jobStatus,
     'jobFields': {
-      'productStoreId': job.status === "SERVICE_PENDING" ? job.productStoreId : currentEComStore.value.productStoreId,
+      'productStoreId': job.status === "SERVICE_PENDING" ? job.productStoreId : currentProductStore.value.productStoreId,
       'systemJobEnumId': job.systemJobEnumId,
       'tempExprId': job.jobStatus, // Need to remove this as we are passing frequency in SERVICE_TEMP_EXPR, currently kept it for backward compatibility
       'parentJobId': job.parentJobId,
@@ -161,7 +161,7 @@ async function runServiceNow(job: any) {
   })
 
   // checking if the runtimeData has productStoreId, and if present then adding it on root level
-  job?.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = job.status === "SERVICE_PENDING" ? job.productStoreId : store.state.user.currentEComStore.productStoreId)
+  job?.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = job.status === "SERVICE_PENDING" ? job.productStoreId : store.state.user.currentProductStore.productStoreId)
   job?.priority && (payload['SERVICE_PRIORITY'] = job.priority.toString())
 
   // ShopifyConfig and ShopifyShop should be set based upon runtime data

@@ -148,7 +148,7 @@ const getAvailableTimeZones = async (): Promise <any>  => {
   });
 }
 
-const getEComStores = async (token: any): Promise<any> => {
+const getProductStores = async (token: any): Promise<any> => {
   try {
     const baseURL = store.getters["user/getBaseUrl"];
     const resp = await client({
@@ -173,7 +173,7 @@ const getEComStores = async (token: any): Promise<any> => {
 
 export const UserService = {
   getAvailableTimeZones,
-  getEComStores,
+  getProductStores,
   getUserProfile,
   getUserPermissions,
   login

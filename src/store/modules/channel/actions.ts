@@ -15,7 +15,7 @@ const actions: ActionTree<ChannelState, RootState> = {
     let inventoryChannels = [] as any
 
     try {
-      resp = await ChannelService.fetchInventoryChannels({ facilityGroupTypeId: "CHANNEL_FAC_GROUP", productStoreId: store.state.user.currentEComStore.productStoreId, pageSize: 50 });
+      resp = await ChannelService.fetchInventoryChannels({ facilityGroupTypeId: "CHANNEL_FAC_GROUP", productStoreId: store.state.user.currentProductStore.productStoreId, pageSize: 50 });
 
       if(!hasError(resp)) {
         inventoryChannels = resp?.data;
@@ -75,7 +75,7 @@ const actions: ActionTree<ChannelState, RootState> = {
     let shopifyConfigs = [];
 
     try {
-      const resp = await ChannelService.fetchShopifyConfigs({ productStoreId: store.state.user.currentEComStore.productStoreId });
+      const resp = await ChannelService.fetchShopifyConfigs({ productStoreId: store.state.user.currentProductStore.productStoreId });
       if (!hasError(resp)) {
         shopifyConfigs = resp.data;
       } else {
@@ -116,7 +116,7 @@ const actions: ActionTree<ChannelState, RootState> = {
       inputFields: {
         statusId: "SERVICE_PENDING",
         systemJobEnumId: "JOB_UL_INV",
-        "productStoreId": store.state.user.currentEComStore.productStoreId,
+        "productStoreId": store.state.user.currentProductStore.productStoreId,
       } as any,
       fieldList: ["systemJobEnumId", "runTime", "tempExprId", "parentJobId", "serviceName", "jobId", "jobName", "currentRetryCount", "statusId", "productStoreId", "runtimeDataId", "shopId", "description", "enumTypeId", "enumName"],
       noConditionFind: "Y"

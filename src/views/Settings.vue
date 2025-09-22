@@ -64,7 +64,7 @@
             {{ translate('A store repesents a company or a unique catalog of products. If your OMS is connected to multiple eCommerce stores sellling different collections of products, you may have multiple Product Stores set up in HotWax Commerce.') }}
           </ion-card-content>
           <ion-item lines="none">
-            <ion-select :label="translate('Select store')" interface="popover" :value="currentEComStore.productStoreId" @ionChange="setEComStore($event)">
+            <ion-select :label="translate('Select store')" interface="popover" :value="currentProductStore.productStoreId" @ionChange="setProductStore($event)">
               <ion-select-option v-for="store in (userProfile ? userProfile.stores : [])" :key="store.productStoreId" :value="store.productStoreId" >{{ store.storeName ? store.storeName : store.productStoreId }}</ion-select-option>
             </ion-select>
           </ion-item>
@@ -106,13 +106,13 @@ import { goToOms, translate } from "@hotwax/dxp-components";
 const store = useStore()
 
 const userProfile = computed(() => store.getters["user/getUserProfile"])
-const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
+const currentProductStore = computed(() => store.getters["user/getCurrentProductStore"])
 const oms = computed(() => store.getters["user/getInstanceUrl"])
 const omsRedirectionInfo = computed(() => store.getters["user/getOmsRedirectionInfo"])
 
-function setEComStore(event: CustomEvent) {
+function setProductStore(event: CustomEvent) {
   if(userProfile.value?.stores) {
-    store.dispatch("user/setEcomStore", {
+    store.dispatch("user/setProductStore", {
       "productStoreId": event.detail.value
     })
     store.dispatch("rule/clearRuleState")
