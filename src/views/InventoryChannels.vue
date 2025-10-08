@@ -36,7 +36,7 @@
                   {{ channel.selectedConfigFacility?.facilityName }}
                   <p>{{ channel.selectedConfigFacility?.facilityId }}</p>
                 </ion-label>
-                <ion-button slot="end" fill="clear" color="medium" @click="openLinkThresholdFacilitiesToGroupModal(channel)">
+                <ion-button size="default" slot="end" fill="clear" color="medium" @click="openLinkThresholdFacilitiesToGroupModal(channel)">
                   <ion-icon :icon="optionsOutline" slot="icon-only" />
                 </ion-button>
               </ion-item>
@@ -44,7 +44,7 @@
               <ion-list>
                 <ion-item-divider color="light">
                   <ion-label>{{ translate("Facilities") }}</ion-label>
-                  <ion-button slot="end" fill="clear" color="medium" @click="openLinkFacilitiesToGroupModal(channel)">
+                  <ion-button size="default" slot="end" fill="clear" color="medium" @click="openLinkFacilitiesToGroupModal(channel)">
                     <ion-icon :icon="optionsOutline" slot="icon-only" />
                   </ion-button>
                 </ion-item-divider>
