@@ -137,7 +137,7 @@ async function fetchFacilities(vSize?: any, vIndex?: any) {
 
 function enableScrolling() {
   const parentElement = contentRef.value.$el
-  const scrollEl = parentElement.shadowRoot.querySelector("main[part='scroll']")
+  const scrollEl = parentElement.shadowRoot.querySelector("div[part='scroll']")
   let scrollHeight = scrollEl.scrollHeight, infiniteHeight = infiniteScrollRef.value.$el.offsetHeight, scrollTop = scrollEl.scrollTop, threshold = 100, height = scrollEl.offsetHeight
   const distanceFromInfinite = scrollHeight - infiniteHeight - scrollTop - threshold - height
   if(distanceFromInfinite < 0) {
