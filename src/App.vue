@@ -81,8 +81,3 @@ onUnmounted(() => {
   resetConfig()
 })
 </script>
-<style>
-  ion-split-pane {
-    --side-width: 304px;
-  }
-</style>
