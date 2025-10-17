@@ -2,7 +2,7 @@ import api from '@/api';
 
 const fetchFacets = async (payload: any): Promise<any> => {
   return api({
-    url: "solrFacets",
+    url: "admin/solrFacets",
     method: "GET",
     params: payload
   });
