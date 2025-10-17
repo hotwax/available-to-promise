@@ -102,6 +102,7 @@ import { useStore } from 'vuex';
 import TimeZoneModal from '@/views/TimezoneModal.vue';
 import Image from '@/components/Image.vue'
 import { goToOms, translate } from "@hotwax/dxp-components";
+import { hasPermission, Actions } from '@/authorization';
 
 const store = useStore()
 
