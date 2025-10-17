@@ -13,28 +13,44 @@
     </ion-toolbar>
   </ion-header>
 
-  <ion-content class="ion-padding">
-    <div class="empty-state" v-if="isLoading">
-      <ion-item lines="none">
-        <ion-spinner name="crescent" slot="start" />
-        {{ translate("Fetching time zones") }}
-      </ion-item>
-    </div>
-    <div class="empty-state" v-else-if="!filteredTimeZones.length">
-      <p>{{ translate("No time zone found") }}</p>
-    </div>
-
-    <!-- Timezones -->
-    <div v-else>
-      <ion-list>
-        <ion-radio-group value="rd" v-model="timeZoneId">
-          <ion-item :key="timeZone.id" v-for="timeZone in filteredTimeZones">
-            <ion-radio :value="timeZone.id" label-placement="end" justify="start">{{ timeZone.label }} ({{ timeZone.id }})</ion-radio>
+  <ion-content>
+    <ion-radio-group  value="rd" v-model="timeZoneId">
+      <ion-list v-if="showBrowserTimeZone">
+          <ion-list-header>{{ translate("Browser time zone") }}</ion-list-header>
+          <ion-item>
+            <ion-radio label-placement="end" justify="start" :value="browserTimeZone.id">
+              <ion-label>
+                {{ browserTimeZone.label }} ({{ browserTimeZone.id }})
+                <p v-if="showDateTime">{{ getCurrentTime(browserTimeZone.id, dateTimeFormat) }}</p>
+              </ion-label>
+            </ion-radio>
           </ion-item>
-        </ion-radio-group>
       </ion-list>
-    </div>
-    
+      <ion-list>
+        <ion-list-header v-if="showBrowserTimeZone">{{ translate("Select a different time zone") }}</ion-list-header>
+        <div class="empty-state" v-if="isLoading">
+          <ion-item lines="none">
+            <ion-spinner name="crescent" slot="start" />
+            {{ translate("Fetching time zones") }}
+          </ion-item>
+        </div>
+        <div class="empty-state" v-else-if="!filteredTimeZones.length">
+          <p>{{ translate("No time zone found") }}</p>
+        </div>
+
+        <!-- Timezones -->
+        <div v-else>
+          <ion-item :key="timeZone.id" v-for="timeZone in filteredTimeZones">
+            <ion-radio :value="timeZone.id" label-placement="end" justify="start">
+              <ion-label>
+                {{ timeZone.label }} ({{ timeZone.id }})
+                <p v-if="showDateTime">{{ getCurrentTime(timeZone.id, dateTimeFormat) }}</p>
+              </ion-label>
+            </ion-radio>
+          </ion-item>
+        </div>
+      </ion-list>
+    </ion-radio-group>
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
       <ion-fab-button :disabled="!timeZoneId" @click="setUserTimeZone">
         <ion-icon :icon="saveOutline" />
@@ -55,60 +71,75 @@ import {
   IonIcon,
   IonRadioGroup,
   IonRadio,
+  IonLabel,
   IonList,
+  IonListHeader,
   IonSearchbar,
   IonSpinner,
   IonTitle,
   IonToolbar,
   modalController,
 } from "@ionic/vue";
-import { onBeforeMount, ref } from "vue";
+import { onBeforeMount, ref ,computed,defineProps } from "vue";
 import { closeOutline, saveOutline } from "ionicons/icons";
 import { useStore } from "@/store";
-import { UserService } from "@/services/UserService";
-import { hasError } from "@/utils"
-import { DateTime } from "luxon";
-import { translate } from '@hotwax/dxp-components';
+import { getCurrentTime } from "@/utils";
+import { translate,useUserStore } from '@hotwax/dxp-components';
 
 const store = useStore();
+const userStore=useUserStore()
 let queryString = ref("")
 let filteredTimeZones = ref([])
-let timeZones = ref([])
+let timeZones = computed(() => userStore.getTimeZones)
 let timeZoneId = ref("")
 let isLoading = ref(true)
+const userProfile = computed(() => store.getters["user/getUserProfile"])
+const browserTimeZone = ref({
+  label: '',
+  id: Intl.DateTimeFormat().resolvedOptions().timeZone
+})
 
-onBeforeMount(() => {
-  getAvailableTimeZones();
+const props = defineProps({
+  showBrowserTimeZone: {
+    type: Boolean,
+    default: true
+  },
+  showDateTime: {
+    type: Boolean,
+    default: true
+  },
+  dateTimeFormat: {
+    type: String,
+    default: 't ZZZZ'
+  }
+});
+
+onBeforeMount(async() => {
+  isLoading.value = true;
+  await userStore.getAvailableTimeZones();
+  if(userProfile.value && userProfile.value.timeZone) {
+    userStore.currentTimeZoneId = userProfile.value.timeZone
+    timeZoneId.value = userProfile.value.timeZone
+  }
+
+  if(props.showBrowserTimeZone) {
+    browserTimeZone.value.label = timeZones.value.find((timeZone: any) => timeZone.id.toLowerCase().match(browserTimeZone.value.id.toLowerCase()))?.label
+  }
+  findTimeZone();
+  isLoading.value = false;
 })
 
 function closeModal() {
   modalController.dismiss({ dismissed: true });
 }
 
-function escapeRegExp(text: string) {
-  //TODO Handle it in a better way
-  // Currently when the user types special character as it part of Regex expressions it breaks the code
-  // so removed the characters for now
-  return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
-}
-
 function findTimeZone() { 
-  const regularExp = new RegExp(`${escapeRegExp(queryString.value)}`, "i");
-  filteredTimeZones.value = timeZones.value.filter((timeZone: any) => {
-    return regularExp.test(timeZone.id) || regularExp.test(timeZone.label);
-  });
-}
+  const searchedString = queryString.value.toLowerCase();
+  filteredTimeZones.value = timeZones.value.filter((timeZone: any) => timeZone.id.toLowerCase().match(searchedString) || timeZone.label.toLowerCase().match(searchedString));
 
-function getAvailableTimeZones() {
-  UserService.getAvailableTimeZones().then((resp: any) => {
-    if (resp.status === 200 && !hasError(resp)) {
-      timeZones.value = resp.data.timeZones.filter((timeZone: any) => {
-        return DateTime.local().setZone(timeZone.id).isValid;
-      });
-      findTimeZone();
-    }
-    isLoading.value = false;
-  })
+  if(props.showBrowserTimeZone) {
+    filteredTimeZones.value = filteredTimeZones.value.filter((timeZone: any) => !timeZone.id.toLowerCase().match(browserTimeZone.value.id.toLowerCase()));
+  }
 }
 
 function selectSearchBarText(event: any) {
