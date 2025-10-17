@@ -39,16 +39,16 @@ initialise({
   }
 })
 
-async function presentLoader(options = { message: '', backdropDismiss: true }) {
+async function presentLoader(options = { message: '', backdropDismiss: false }) {
   // When having a custom message remove already existing loader
   if(options.message && loader.value) dismissLoader();
 
   if (!loader.value) {
     loader.value = await loadingController
     .create({
-      message: options.message ? translate(options.message) : translate("Click the backdrop to dismiss."),
+      message: options.message ? translate(options.message) : (options.backdropDismiss ? translate("Click the backdrop to dismiss.") : translate("Loading...")),
       translucent: true,
-      backdropDismiss: options.backdropDismiss
+      backdropDismiss: options.backdropDismiss || false
     });
   }
   loader.value.present();
