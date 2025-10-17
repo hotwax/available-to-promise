@@ -23,7 +23,7 @@
             </ion-card-header>
           </ion-item>
           <ion-button color="danger" @click="logout()">{{ translate("Logout") }}</ion-button>
-          <ion-button fill="outline" @click="goToLaunchpad()">
+          <ion-button :standalone-hidden="!hasPermission(Actions.APP_PWA_STANDALONE_ACCESS)" fill="outline" @click="goToLaunchpad()">
             {{ translate("Go to Launchpad") }}
             <ion-icon slot="end" :icon="openOutline" />
           </ion-button>
@@ -114,6 +114,7 @@ import TimeZoneModal from '@/views/TimezoneModal.vue';
 import Image from '@/components/Image.vue'
 import { goToOms, translate } from "@hotwax/dxp-components";
 import {getCurrentTime} from "../utils"
+import { hasPermission, Actions } from '@/authorization';
 
 const store = useStore()
 
@@ -190,5 +191,11 @@ function goToLaunchpad() {
     justify-content: space-between;
     align-items: center;
     padding: var(--spacer-xs) 10px 0px;
+  }
+  /* Added conditional hiding in standalone mode that respects user permissions */
+  @media (display-mode: standalone) {
+    [standalone-hidden] {
+      display: none;
+    }
   }
 </style>

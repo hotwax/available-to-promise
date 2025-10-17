@@ -1,3 +1,4 @@
 export default {
-  "ATP_APP_VIEW": "ATP_APP_VIEW"
+  "ATP_APP_VIEW": "ATP_APP_VIEW",
+  "APP_PWA_STANDALONE_ACCESS": "COMMON_ADMIN"
 } as any
