@@ -9,7 +9,7 @@
       <ion-title>{{ translate("Select time zone") }}</ion-title>
     </ion-toolbar>
     <ion-toolbar>
-      <ion-searchbar @ionFocus="selectSearchBarText($event)" :placeholder="translate('Search time zones')"  v-model="queryString" v-on:keyup.enter="queryString = $event.target.value; findTimeZone()" />
+      <ion-searchbar @ionFocus="selectSearchBarText($event)" :placeholder="translate('Search time zones')"  v-model="queryString" v-on:keyup.enter="queryString = $event.target.value; findTimeZone()" @keydown="preventSpecialCharacters($event)"/>
     </ion-toolbar>
   </ion-header>
 
@@ -89,7 +89,7 @@ import { translate,useUserStore } from '@hotwax/dxp-components';
 const store = useStore();
 const userStore=useUserStore()
 let queryString = ref("")
-let filteredTimeZones = ref([])
+let filteredTimeZones = ref<any[]>([])
 let timeZones = computed(() => userStore.getTimeZones)
 let timeZoneId = ref("")
 let isLoading = ref(true)
@@ -154,5 +154,10 @@ async function setUserTimeZone() {
   }).then(() => {
     closeModal()
   })
+}
+
+function preventSpecialCharacters($event: any) {
+  // Searching special characters fails the API, hence, they must be omitted
+  if(/[`!@#$%^&*()_+\-=\\|,.<>?~]/.test($event.key)) $event.preventDefault();
 }
 </script>
