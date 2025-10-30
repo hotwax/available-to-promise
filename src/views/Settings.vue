@@ -84,8 +84,19 @@
           <ion-card-content>
             {{ translate('The timezone you select is used to ensure automations you schedule are always accurate to the time you select.') }}
           </ion-card-content>
+          <ion-item v-if="showBrowserTimeZone">
+            <ion-label>
+              <p class="overline">{{ translate("Browser TimeZone") }}</p>
+              {{ browserTimeZone.id }}
+              <p v-if="showDateTime">{{ getCurrentTime(browserTimeZone.id, dateTimeFormat) }}</p>
+            </ion-label>
+          </ion-item>
           <ion-item lines="none">
-            <ion-label> {{ userProfile && userProfile.timeZone ? userProfile.timeZone : '-' }} </ion-label>
+            <ion-label>
+              <p class="overline">{{ translate("Selected TimeZone") }}</p>
+              {{ currentTimeZoneId }}
+              <p v-if="showDateTime">{{ getCurrentTime(currentTimeZoneId, dateTimeFormat) }}</p>
+            </ion-label>
             <ion-button @click="changeTimeZone()" slot="end" fill="outline" color="dark">{{ translate("Change") }}</ion-button>
           </ion-item>
         </ion-card>
@@ -96,12 +107,13 @@
 
 <script setup lang="ts">
 import {  IonAvatar, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonHeader, IonIcon, IonItem, IonLabel, IonMenuButton, IonPage, IonSelect, IonSelectOption, IonTitle, IonToolbar, modalController } from '@ionic/vue';
-import { computed } from 'vue';
+import { computed ,defineProps,ref} from 'vue';
 import { openOutline } from 'ionicons/icons'
 import { useStore } from 'vuex';
 import TimeZoneModal from '@/views/TimezoneModal.vue';
 import Image from '@/components/Image.vue'
 import { goToOms, translate } from "@hotwax/dxp-components";
+import {getCurrentTime} from "../utils"
 import { hasPermission, Actions } from '@/authorization';
 
 const store = useStore()
@@ -110,6 +122,25 @@ const userProfile = computed(() => store.getters["user/getUserProfile"])
 const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
 const oms = computed(() => store.getters["user/getInstanceUrl"])
 const omsRedirectionInfo = computed(() => store.getters["user/getOmsRedirectionInfo"])
+const currentTimeZoneId = computed(() => userProfile.value.timeZone)
+const browserTimeZone = ref({
+  label: '',
+  id: Intl.DateTimeFormat().resolvedOptions().timeZone
+})
+const props = defineProps({
+  showBrowserTimeZone: {
+    type: Boolean,
+    default: true
+  },
+  showDateTime: {
+    type: Boolean,
+    default: true
+  },
+  dateTimeFormat: {
+    type: String,
+    default: 't ZZZZ'
+  }
+})
 
 function setEComStore(event: CustomEvent) {
   if(userProfile.value?.stores) {

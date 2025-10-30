@@ -9,6 +9,9 @@ import { translate } from '@hotwax/dxp-components';
 const hasError = (response: any) => {
     return typeof response.data != "object" || !!response.data._ERROR_MESSAGE_ || !!response.data._ERROR_MESSAGE_LIST_ || !!response.data.error;
 }
+const getCurrentTime = (zone: string, format = 't ZZZZ') => {
+  return DateTime.now().setZone(zone).toFormat(format)
+}
 
 const showToast = async (message: string) => {
   const toast = await toastController
@@ -181,4 +184,4 @@ const hasJobDataError = (job: any) => {
   return false;
 }
 
-export { doReorder, generateInternalId, generateRuleActions, generateRuleConditions, getDate, getDateAndTime, getTime, hasJobDataError, hasError, showToast, timeTillRun }
+export {getCurrentTime, doReorder, generateInternalId, generateRuleActions, generateRuleConditions, getDate, getDateAndTime, getTime, hasJobDataError, hasError, showToast, timeTillRun }
