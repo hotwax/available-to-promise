@@ -194,7 +194,7 @@ function goToLaunchpad() {
   }
   /* Added conditional hiding in standalone mode that respects user permissions */
   @media (display-mode: standalone) {
-    [standalone-hidden] {
+    [standalone-hidden="true"] {
       display: none;
     }
   }
