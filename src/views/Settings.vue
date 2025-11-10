@@ -192,10 +192,4 @@ function goToLaunchpad() {
     align-items: center;
     padding: var(--spacer-xs) 10px 0px;
   }
-  /* Added conditional hiding in standalone mode that respects user permissions */
-  @media (display-mode: standalone) {
-    [standalone-hidden="true"] {
-      display: none;
-    }
-  }
 </style>
