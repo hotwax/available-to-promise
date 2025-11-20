@@ -409,6 +409,13 @@ ion-card-header {
   align-items: center;
 }
 
+ion-card-header div {
+  word-break: break-word;
+}
+ion-card-header ion-item {
+  flex: 0 0 auto;
+}
+
 .actions {
   display: flex;
   justify-content: space-between;
