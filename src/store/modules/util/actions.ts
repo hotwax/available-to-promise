@@ -209,7 +209,7 @@ const actions: ActionTree<UtilState, RootState> = {
         } else {
           throw resp.data;
         }
-      } while(currentFacets.length && allFacets.length < process.env.VUE_APP_FACET_MAX_FACETS)
+      } while(currentFacets.length && allFacets.length < process.env.VUE_APP_MAX_FACETS)
     } catch(error) {
       logger.error(error);
     }
