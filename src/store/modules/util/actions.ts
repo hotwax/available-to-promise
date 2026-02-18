@@ -181,7 +181,7 @@ const actions: ActionTree<UtilState, RootState> = {
   async fetchProductFilters({ commit, state }, params) {
     const filters = JSON.parse(JSON.stringify(state.facetOptions));
 
-    if(filters[params.searchfield] && !params.queryString) return;
+    if(filters[params.searchfield]?.length && !params.queryString) return;
 
     let allFacets = [] as any;
 
@@ -194,9 +194,9 @@ const actions: ActionTree<UtilState, RootState> = {
         noConditionFind: 'N',
         limit: 500,
         offset: 0,
-        searchfield: "tags",
-        term: params.queryString,
-        q: params.queryString
+        searchField: "tags",
+        term: params.queryString || "",
+        q: params.queryString || ""
       }
       const resp = await UtilService.fetchFacets(payload);
       if (!hasError(resp)) {
