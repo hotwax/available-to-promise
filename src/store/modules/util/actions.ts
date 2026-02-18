@@ -181,7 +181,7 @@ const actions: ActionTree<UtilState, RootState> = {
   async fetchProductFilters({ commit, state }, params) {
     const filters = JSON.parse(JSON.stringify(state.facetOptions));
 
-    if(filters[params.searchfield]) return;
+    if(filters[params.searchfield]?.length && !params.queryString) return;
 
     let allFacets = [] as any;
     let offset = 0;
@@ -195,9 +195,11 @@ const actions: ActionTree<UtilState, RootState> = {
           coreName: 'enterpriseSearch',
           jsonQuery: '{"query":"*:*","filter":["docType:PRODUCT"]}',
           noConditionFind: 'N',
-          limit: 50,
+          limit: 1000,
           offset,
-          term: "",
+          searchfield: "tags",
+          term: params.queryString || "",
+          q: params.queryString || ""
         }
         const resp = await UtilService.fetchFacets(payload);
         if (!hasError(resp)) {
@@ -207,8 +209,7 @@ const actions: ActionTree<UtilState, RootState> = {
         } else {
           throw resp.data;
         }
-      } while (currentFacets.length);
-
+      } while(currentFacets.length && allFacets.length < process.env.VUE_APP_MAX_FACETS)
     } catch(error) {
       logger.error(error);
     }
