@@ -184,26 +184,34 @@ const actions: ActionTree<UtilState, RootState> = {
     if(filters[params.searchfield]?.length && !params.queryString) return;
 
     let allFacets = [] as any;
+    let offset = 0;
+    let currentFacets = [];
+    let currentPage = 0;
 
     try {
-      const payload = {
-        facetToSelect: params.facetToSelect,
-        docType: 'PRODUCT',
-        coreName: 'enterpriseSearch',
-        jsonQuery: '{"query":"*:*","filter":["docType:PRODUCT"]}',
-        noConditionFind: 'N',
-        limit: 500,
-        offset: 0,
-        searchField: "tags",
-        term: params.queryString || "",
-        q: params.queryString || ""
-      }
-      const resp = await UtilService.fetchFacets(payload);
-      if (!hasError(resp)) {
-        allFacets = resp.data.facetResponse ? resp.data.facetResponse.response : resp.data.response
-      } else {
-        throw resp.data;
-      }
+      do {
+        const payload = {
+          facetToSelect: params.facetToSelect,
+          docType: 'PRODUCT',
+          coreName: 'enterpriseSearch',
+          jsonQuery: '{"query":"*:*","filter":["docType:PRODUCT"]}',
+          noConditionFind: 'N',
+          limit: 1000,
+          offset,
+          searchfield: "tags",
+          term: params.queryString || "",
+          q: params.queryString || ""
+        }
+        const resp = await UtilService.fetchFacets(payload);
+        if (!hasError(resp)) {
+          currentFacets = resp.data.facetResponse ? resp.data.facetResponse.response : resp.data.response
+          allFacets = allFacets.concat(currentFacets)
+          offset = offset + payload.limit
+          currentPage++;
+        } else {
+          throw resp.data;
+        }
+      } while(currentFacets.length && currentPage < process.env.VUE_APP_FACET_MAX_OFFSET)
     } catch(error) {
       logger.error(error);
     }
