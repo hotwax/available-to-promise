@@ -186,7 +186,6 @@ const actions: ActionTree<UtilState, RootState> = {
     let allFacets = [] as any;
     let offset = 0;
     let currentFacets = [];
-    let currentPage = 0;
 
     try {
       do {
@@ -207,11 +206,10 @@ const actions: ActionTree<UtilState, RootState> = {
           currentFacets = resp.data.facetResponse ? resp.data.facetResponse.response : resp.data.response
           allFacets = allFacets.concat(currentFacets)
           offset = offset + payload.limit
-          currentPage++;
         } else {
           throw resp.data;
         }
-      } while(currentFacets.length && currentPage < process.env.VUE_APP_FACET_MAX_OFFSET)
+      } while(currentFacets.length && allFacets.length < process.env.VUE_APP_FACET_MAX_FACETS)
     } catch(error) {
       logger.error(error);
     }
