@@ -104,7 +104,7 @@ const generateRuleActions = (ruleId: string, actionTypeEnumId: string, actionVal
   return condition
 }
 
-const generateRuleConditions = (ruleId: string, conditionTypeEnumId: string, appliedFilters: any, selectedFac: any, areAllSelected: boolean) => {
+const generateRuleConditions = (ruleId: string, conditionTypeEnumId: string, appliedFilters: any, selectedFac: any, areAllSelected: boolean, appliedFiltersOperator?: any) => {
   const conditions = [];
 
   if(areAllSelected) {
@@ -155,6 +155,7 @@ const generateRuleConditions = (ruleId: string, conditionTypeEnumId: string, app
           "conditionTypeEnumId": "ENTCT_ATP_FILTER",
           "fieldName": filter,
           "operator": type === "included" ? "contains" : "not-contains",
+          "joinOperator": appliedFiltersOperator?.[type]?.[filter] || "",
           "fieldValue": value.join(",")
         })
       }

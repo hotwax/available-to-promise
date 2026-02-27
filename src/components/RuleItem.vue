@@ -65,11 +65,17 @@
 
             <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'tags', 'contains')" :lines="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'tags', 'not-contains') ? '' : 'full'">
               <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
-              <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FILTER", "tags", "contains") }}</ion-label>
+              <ion-label class="ion-text-wrap">
+                {{ getRuleConditions("ENTCT_ATP_FILTER", "tags", "contains") }}
+                <p v-if="getRuleConditionOperator('ENTCT_ATP_FILTER', 'tags', 'contains')">{{ "Operator: " }}{{ getRuleConditionOperator("ENTCT_ATP_FILTER", "tags", "contains") }}</p>
+              </ion-label>
             </ion-item>
             <ion-item lines="full" v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'tags', 'not-contains')">
               <ion-icon slot="start" :icon="closeCircleOutline"/>
-              <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FILTER", "tags", "not-contains") }}</ion-label>
+              <ion-label class="ion-text-wrap">
+                {{ getRuleConditions("ENTCT_ATP_FILTER", "tags", "not-contains") }}
+                <p v-if="getRuleConditionOperator('ENTCT_ATP_FILTER', 'tags', 'not-contains')">{{ "Operator: " }}{{ getRuleConditionOperator("ENTCT_ATP_FILTER", "tags", "not-contains") }}</p>
+              </ion-label>
             </ion-item>
 
             <ion-item-divider color="light" v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'productFeatures', 'contains') || isRuleConditionAvailable('ENTCT_ATP_FILTER', 'productFeatures', 'not-contains')">
@@ -78,11 +84,17 @@
 
             <ion-item v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'productFeatures', 'contains')" :lines="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'productFeatures', 'not-contains') ? '' : 'full'">
               <ion-icon slot="start" :icon="checkmarkDoneCircleOutline"/>
-              <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FILTER", "productFeatures", "contains") }}</ion-label>
+              <ion-label class="ion-text-wrap">
+                {{ getRuleConditions("ENTCT_ATP_FILTER", "productFeatures", "contains") }}
+                <p v-if="getRuleConditionOperator('ENTCT_ATP_FILTER', 'productFeatures', 'contains')">{{ "Operator: " }}{{ getRuleConditionOperator("ENTCT_ATP_FILTER", "productFeatures", "contains") }}</p>
+              </ion-label>
             </ion-item>
             <ion-item lines="full" v-if="isRuleConditionAvailable('ENTCT_ATP_FILTER', 'productFeatures', 'not-contains')">
               <ion-icon slot="start" :icon="closeCircleOutline"/>
-              <ion-label class="ion-text-wrap">{{ getRuleConditions("ENTCT_ATP_FILTER", "productFeatures", "not-contains") }}</ion-label>
+              <ion-label class="ion-text-wrap">
+                {{ getRuleConditions("ENTCT_ATP_FILTER", "productFeatures", "not-contains") }}
+                <p v-if="getRuleConditionOperator('ENTCT_ATP_FILTER', 'productFeatures', 'not-contains')">{{ "Operator: " }}{{ getRuleConditionOperator("ENTCT_ATP_FILTER", "productFeatures", "not-contains") }}</p>
+              </ion-label>
             </ion-item>
           </template>
           <template v-else>
@@ -262,6 +274,14 @@ async function editSafetyStock() {
   })
 
   await alert.present()
+}
+
+function getRuleConditionOperator(conditionTypeEnumId: string, fieldName?: string, operator? : string) {
+  if(fieldName && operator) {
+    const condition = props.rule.ruleConditions.find((condition: any) => condition.conditionTypeEnumId === conditionTypeEnumId && condition.fieldName === fieldName && condition.operator === operator)
+    return condition?.joinOperator || "";
+  }
+  return ""
 }
 
 function getRuleConditions(conditionTypeEnumId: string, fieldName?: string, operator? : string) {
