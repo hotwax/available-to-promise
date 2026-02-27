@@ -5,12 +5,18 @@
 
   <section>
     <ion-card>
-      <ion-item lines="none">
+      <ion-item lines="full">
         <ion-label>{{ translate("Included") }}</ion-label>
         <ion-button fill="clear" @click="openProductFilterModal('tags', 'tagsFacet', 'tags', 'included')">
           {{ translate("Add") }}
           <ion-icon :icon="addCircleOutline" slot="end" />
         </ion-button>
+      </ion-item>
+      <ion-item lines="none">
+        <ion-select interface="popover" label="Operator" :value="conditionAppliedFiltersOperator['included']['tags'] || 'or'" @ionChange="updateFiltersOperator('included', 'tags', $event.detail.value)">
+          <ion-select-option value="and">{{ translate("AND") }}</ion-select-option>
+          <ion-select-option value="or">{{ translate("OR") }}</ion-select-option>
+        </ion-select>
       </ion-item>
       <ion-card-content>
         <ion-chip outline v-for="(tag, index) in appliedFilters['included']['tags']" :key="index">
@@ -21,12 +27,18 @@
     </ion-card>
 
     <ion-card>
-      <ion-item lines="none"> 
+      <ion-item lines="full">
         <ion-label>{{ translate("Excluded") }}</ion-label>
         <ion-button fill="clear" @click="openProductFilterModal('tags', 'tagsFacet', 'tags', 'excluded')">
           {{ translate("Add") }}
           <ion-icon :icon="addCircleOutline" slot="end" />
         </ion-button>
+      </ion-item>
+      <ion-item lines="none">
+        <ion-select interface="popover" label="Operator" :value="conditionAppliedFiltersOperator['excluded']['tags'] || 'and'" @ionChange="updateFiltersOperator('excluded', 'tags', $event.detail.value)">
+          <ion-select-option value="and">{{ translate("AND") }}</ion-select-option>
+          <ion-select-option value="or">{{ translate("OR") }}</ion-select-option>
+        </ion-select>
       </ion-item>
       <ion-card-content>
         <ion-chip outline v-for="(tag, index) in appliedFilters['excluded']['tags']" :key="index">
@@ -43,12 +55,18 @@
 
   <section>
     <ion-card>
-      <ion-item lines="none">
+      <ion-item lines="full">
         <ion-label>{{ translate("Included") }}</ion-label>
         <ion-button fill="clear" @click="openProductFilterModal('product features', 'productFeaturesFacet', 'productFeatures', 'included')">
           {{ translate("Add") }}
           <ion-icon :icon="addCircleOutline" slot="end" />
         </ion-button>
+      </ion-item>
+      <ion-item lines="none">
+        <ion-select interface="popover" label="Operator" :value="conditionAppliedFiltersOperator['included']['productFeatures'] || 'or'" @ionChange="updateFiltersOperator('included', 'productFeatures', $event.detail.value)">
+          <ion-select-option value="and">{{ translate("AND") }}</ion-select-option>
+          <ion-select-option value="or">{{ translate("OR") }}</ion-select-option>
+        </ion-select>
       </ion-item>
       <ion-card-content>
         <ion-chip outline v-for="(feature, index) in appliedFilters['included']['productFeatures']" :key="index">
@@ -59,12 +77,18 @@
     </ion-card>
 
     <ion-card>
-      <ion-item lines="none"> 
+      <ion-item lines="full"> 
         <ion-label>{{ translate("Excluded") }}</ion-label>
         <ion-button fill="clear" @click="openProductFilterModal('product features', 'productFeaturesFacet', 'productFeatures', 'excluded')">
           {{ translate("Add") }}
           <ion-icon :icon="addCircleOutline" slot="end" />
         </ion-button>
+      </ion-item>
+      <ion-item lines="none">
+        <ion-select interface="popover" label="Operator" :value="conditionAppliedFiltersOperator['excluded']['productFeatures'] || 'and'" @ionChange="updateFiltersOperator('excluded', 'productFeatures', $event.detail.value)">
+          <ion-select-option value="and">{{ translate("AND") }}</ion-select-option>
+          <ion-select-option value="or">{{ translate("OR") }}</ion-select-option>
+        </ion-select>
       </ion-item>
       <ion-card-content>
         <ion-chip outline v-for="(feature, index) in appliedFilters['excluded']['productFeatures']" :key="index">
@@ -77,7 +101,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonButton, IonCard, IonCardContent, IonChip, IonIcon, IonItem, IonLabel, modalController } from '@ionic/vue';
+import { IonButton, IonCard, IonCardContent, IonChip, IonIcon, IonSelect, IonSelectOption, IonItem, IonLabel, modalController } from '@ionic/vue';
 import { addCircleOutline, closeCircle } from 'ionicons/icons'
 import { translate } from '@hotwax/dxp-components';
 import AddProductFiltersModal from '@/components/AddProductFiltersModal.vue';
@@ -87,6 +111,9 @@ import { useStore } from 'vuex';
 const store = useStore();
 
 const appliedFilters = computed(() => store.getters["util/getAppliedFilters"]);
+const appliedFiltersOperator = computed(() => store.getters["util/getAppliedFiltersOperator"]);
+
+const conditionAppliedFiltersOperator = JSON.parse(JSON.stringify(appliedFiltersOperator.value))
 
 async function openProductFilterModal(label: string, facetToSelect: string, searchfield: string, type: string) {
   const modal = await modalController.create({
@@ -107,5 +134,10 @@ async function removeFilters(type: string, id: string, value: string) {
   selectedFilters[type][id] = selectedFilters[type][id].filter((filter: any) => filter !== value)
 
   await store.dispatch('util/updateAppliedFilters', selectedFilters)
+}
+
+async function updateFiltersOperator(type: string, id: string, value: string) {
+  conditionAppliedFiltersOperator[type][id] = value
+  await store.dispatch('util/updateAppliedFiltersOperator', conditionAppliedFiltersOperator)
 }
 </script>

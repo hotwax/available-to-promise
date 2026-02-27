@@ -9,6 +9,9 @@ const mutations: MutationTree <UtilState> = {
   [types.UTIL_APPLIED_FILTERS_UPDATED] (state, payload) {
     state.appliedFilters = payload
   },
+  [types.UTIL_APPLIED_FILTERS_OPERATOR_UPDATED] (state, payload) {
+    state.appliedFiltersOperator = payload
+  },
   [types.UTIL_FACILITY_GROUPS_UPDATED] (state, payload) {
     state.facilityGroups = payload
   },
@@ -24,6 +27,16 @@ const mutations: MutationTree <UtilState> = {
         productFeatures: []
       }
     },
+    state.appliedFiltersOperator = {
+      included: {
+        tags: "",
+        productFeatures: ""
+      },
+      excluded: {
+        tags: "",
+        productFeatures: ""
+      }
+    },
     state.facetOptions = {}
   },
   [types.UTIL_APPLIED_FILTERS_CLEARED](state) {
@@ -35,6 +48,18 @@ const mutations: MutationTree <UtilState> = {
       excluded: {
         tags: [],
         productFeatures: []
+      }
+    }
+  },
+  [types.UTIL_APPLIED_FILTERS_OPERATOR_CLEARED](state) {
+    state.appliedFiltersOperator = {
+      included: {
+        tags: "",
+        productFeatures: ""
+      },
+      excluded: {
+        tags: "",
+        productFeatures: ""
       }
     }
   },
