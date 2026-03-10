@@ -48,12 +48,20 @@ const actions: ActionTree<UtilState, RootState> = {
     commit(types.UTIL_APPLIED_FILTERS_UPDATED, payload)
   },
 
+  async updateAppliedFiltersOperator ({ commit }, payload) {
+    commit(types.UTIL_APPLIED_FILTERS_OPERATOR_UPDATED, payload)
+  },
+
   async clearUtilState({ commit }) {
     commit(types.UTIL_CLEARED)
   },
 
   async clearAppliedFilters({ commit }) {
     commit(types.UTIL_APPLIED_FILTERS_CLEARED)
+  },
+
+  async clearAppliedFiltersOperator({ commit }) {
+    commit(types.UTIL_APPLIED_FILTERS_OPERATOR_CLEARED)
   },
 
   async fetchFacilities({ commit, dispatch, state }, payload) {

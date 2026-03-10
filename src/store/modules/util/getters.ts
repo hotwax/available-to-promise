@@ -9,6 +9,9 @@ const getters: GetterTree<UtilState, RootState> = {
   getAppliedFilters(state) {
     return state.appliedFilters;
   },
+  getAppliedFiltersOperator(state) {
+    return state.appliedFiltersOperator;
+  },
   getFacilityGroups(state) {
     return state.facilityGroups;
   },

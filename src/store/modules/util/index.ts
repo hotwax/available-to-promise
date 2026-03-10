@@ -20,6 +20,16 @@ const utilModule: Module<UtilState, RootState> = {
         productFeatures: []
       }
     },
+    appliedFiltersOperator: {
+      included: {
+        tags: "",
+        productFeatures: ""
+      },
+      excluded: {
+        tags: "",
+        productFeatures: ""
+      }
+    },
     facilities: {
       list: [],
       isScrollable: true
