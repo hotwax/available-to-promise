@@ -69,7 +69,7 @@ export const useUserStore = defineStore('user', {
         const { token, oms, omsRedirectionUrl } = payload;
         this.setUserInstanceUrl(oms);
 
-        const permissionId = process.env.VUE_APP_PERMISSION_ID;
+        const permissionId = import.meta.env.VITE_PERMISSION_ID;
         const serverPermissionsFromRules = getServerPermissionsFromRules();
         if (permissionId) serverPermissionsFromRules.push(permissionId);
         

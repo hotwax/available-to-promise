@@ -51,7 +51,7 @@ axios.interceptors.response.use(function (response: any) {
       userStore.logout();
       const redirectUrl = window.location.origin + '/login';
       // Explicitly passing isLoggedOut as in case of maarg apps we need to call the logout api in launchpad
-      window.location.href = `${process.env.VUE_APP_LOGIN_URL}?redirectUrl=${redirectUrl}&isLoggedOut=true`;
+      window.location.href = `${import.meta.env.VITE_LOGIN_URL}?redirectUrl=${redirectUrl}&isLoggedOut=true`;
     }
   }
   // Any status codes that falls outside the range of 2xx cause this function to trigger
@@ -59,7 +59,7 @@ axios.interceptors.response.use(function (response: any) {
   return Promise.reject(error);
 });
 
-const maxAge = process.env.VUE_APP_CACHE_MAX_AGE ? parseInt(process.env.VUE_APP_CACHE_MAX_AGE) : 0;
+const maxAge = import.meta.env.VITE_CACHE_MAX_AGE ? parseInt(import.meta.env.VITE_CACHE_MAX_AGE) : 0;
 const axiosCache = setupCache({
   maxAge: maxAge * 1000
 })

@@ -23,7 +23,7 @@ const userToken = computed(() => userStore.getUserToken)
 const instanceUrl = computed(() => userStore.getInstanceUrl)
 
 const loader = ref(null) as any
-const maxAge = process.env.VUE_APP_CACHE_MAX_AGE ? parseInt(process.env.VUE_APP_CACHE_MAX_AGE) : 0
+const maxAge = import.meta.env.VITE_CACHE_MAX_AGE ? parseInt(import.meta.env.VITE_CACHE_MAX_AGE) : 0
 
 initialise({
   token: userToken.value,

@@ -307,7 +307,7 @@ export const useUtilStore = defineStore('util', {
           } else {
             throw resp.data;
           }
-        } while (currentFacets.length && allFacets.length < (process.env.VUE_APP_MAX_FACETS as any))
+        } while (currentFacets.length && allFacets.length < (import.meta.env.VITE_MAX_FACETS as any))
       } catch (error) {
         logger.error(error);
       }

@@ -119,7 +119,7 @@ async function fetchRules() {
 }
 
 async function fetchFacilities(vSize?: any, vIndex?: any) {
-  const pageSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
+  const pageSize = vSize ? vSize : import.meta.env.VITE_VIEW_SIZE;
   const pageIndex = vIndex ? vIndex : 0;
   const payload = {
     pageSize,
@@ -149,7 +149,7 @@ async function loadMoreFacilities(event: any) {
   fetchFacilities(
     undefined,
     Math.ceil(
-      facilities.value?.length / (process.env.VUE_APP_VIEW_SIZE as any)
+      facilities.value?.length / (import.meta.env.VITE_VIEW_SIZE as any)
     ).toString()
   ).then(async () => {
     await event.target.complete();

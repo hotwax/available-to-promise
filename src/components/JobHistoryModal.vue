@@ -76,7 +76,7 @@ async function fetchJobHistory() {
     },
     "fieldList": ["runTime", "statusId"],
     "noConditionFind": "Y",
-    "viewSize": process.env.VUE_APP_VIEW_SIZE,
+    "viewSize": import.meta.env.VITE_VIEW_SIZE,
     "orderBy": "runTime DESC"
   })
 }

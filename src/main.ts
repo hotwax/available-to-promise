@@ -47,7 +47,7 @@ const app = createApp(App)
     innerHTMLTemplatesEnabled: true
   })
   .use(logger, {
-    level: process.env.VUE_APP_DEFAULT_LOG_LEVEL
+    level: import.meta.env.VITE_DEFAULT_LOG_LEVEL
   })
   .use(router)
   .use(pinia)
@@ -56,11 +56,11 @@ const app = createApp(App)
     actions: permissionActions
   })
   .use(dxpComponents, {
-    defaultImgUrl: require("@/assets/images/defaultImage.png"),
+    defaultImgUrl: new URL("@/assets/images/defaultImage.png", import.meta.url).href,
     login,
     logout,
     loader,
-    appLoginUrl: process.env.VUE_APP_LOGIN_URL as string,
+    appLoginUrl: import.meta.env.VITE_LOGIN_URL as string,
     getConfig,
     initialise,
     localeMessages,
