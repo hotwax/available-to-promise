@@ -112,29 +112,32 @@
 import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonNote, IonPage, IonText, IonTitle, IonToggle, IonToolbar, modalController, onIonViewDidEnter, onIonViewWillLeave } from '@ionic/vue';
 import { addCircleOutline, closeCircle, saveOutline, storefrontOutline } from 'ionicons/icons'
 import { translate } from "@hotwax/dxp-components";
-import { computed, defineProps, ref } from 'vue';
+import { computed, ref } from 'vue';
 import ProductFilters from '@/components/ProductFilters.vue';
 import { useRouter } from 'vue-router';
 import AddProductFacilityGroupModal from '@/components/AddProductFacilityGroupModal.vue';
-import { useStore } from 'vuex';
-import { RuleService } from '@/services/RuleService';
+import { useUserStore } from '@/store/user';
+import { useUtilStore } from '@/store/util';
+import { useRuleStore } from '@/store/rule';
 import { generateRuleActions, generateRuleConditions, hasError, showToast } from '@/utils';
 import logger from '@/logger';
 import emitter from '@/event-bus';
 
-const store = useStore();
+const userStore = useUserStore();
+const utilStore = useUtilStore();
+const ruleStore = useRuleStore();
 const router = useRouter();
 
 const currentRule = ref({}) as any;
 const props = defineProps(["ruleId"]);
 
-const configFacilities = computed(() => store.getters["util/getConfigFacilities"])
-const appliedFilters = computed(() => store.getters["util/getAppliedFilters"])
-const rules = computed(() => store.getters["rule/getRules"]);
-const total = computed(() => store.getters["rule/getTotalRulesCount"])
-const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
-const selectedSegment = computed(() => store.getters["util/getSelectedSegment"]);
-const facilityGroups = computed(() => store.getters["util/getFacilityGroups"])
+const configFacilities = computed(() => utilStore.getConfigFacilities)
+const appliedFilters = computed(() => utilStore.getAppliedFilters)
+const rules = computed(() => ruleStore.getRules);
+const total = computed(() => ruleStore.getTotalRulesCount)
+const currentEComStore = computed(() => userStore.getCurrentEComStore)
+const selectedSegment = computed(() => utilStore.getSelectedSegment);
+const facilityGroups = computed(() => utilStore.getFacilityGroups)
 
 const formData = ref({
   ruleName: '',
@@ -150,11 +153,11 @@ const formData = ref({
 onIonViewDidEnter(async () => {
   emitter.on("productStoreOrConfigChanged", redirectLink);
   emitter.emit("presentLoader");
-  await Promise.allSettled([store.dispatch("util/fetchFacilityGroups"), store.dispatch("util/fetchConfigFacilities")]);
+  await Promise.allSettled([utilStore.fetchFacilityGroups(), utilStore.fetchConfigFacilities()]);
   
   if(props.ruleId) {
     try {
-      const resp = await RuleService.fetchRules({ ruleId: props.ruleId })
+      const resp = await ruleStore.fetchRulesDirect({ ruleId: props.ruleId }) as any;
       
       if(!hasError(resp)) {
         currentRule.value = resp.data[0];
@@ -189,7 +192,7 @@ onIonViewDidEnter(async () => {
             }
           }
         })
-        await store.dispatch('util/updateAppliedFilters', currentAppliedFilters)
+        await utilStore.updateAppliedFilters(currentAppliedFilters)
       } else {
         throw resp.data
       }
@@ -210,7 +213,7 @@ onIonViewWillLeave(() => {
     },
     selectedConfigFacilites: []
   }
-  store.dispatch("util/clearAppliedFilters")
+  utilStore.clearAppliedFilters()
   emitter.off("productStoreOrConfigChanged", redirectLink);
 })
 
@@ -253,11 +256,11 @@ async function createRule() {
 
   emitter.emit("presentLoader");
 
-  let ruleGroup = await store.dispatch("rule/fetchRuleGroup", { groupTypeEnumId: selectedSegment.value });
+  let ruleGroup = await ruleStore.fetchRuleGroup({ groupTypeEnumId: selectedSegment.value });
 
   try {
     if(!ruleGroup.ruleGroupId) {
-      ruleGroup = await RuleService.createRuleGroup({
+      ruleGroup = await ruleStore.createRuleGroup({
         "groupTypeEnumId": selectedSegment.value,
         "productStoreId": currentEComStore.value.productStoreId,
         "statusId": "ATP_RG_ACTIVE"
@@ -271,16 +274,16 @@ async function createRule() {
       "sequenceNum": total.value ? rules.value[total.value-1].sequenceNum + 1 : 1
     }
 
-    const rule = await RuleService.createRule(params)
-    await RuleService.updateRule({
+    const rule = await ruleStore.createRule(params)
+    await ruleStore.updateRuleApi({
       ...params,
       "ruleConditions": generateRuleConditions(rule.ruleId, selectedSegment.value === 'RG_PICKUP_FACILITY' ? "ENTCT_ATP_FAC_GROUPS" : "ENTCT_ATP_FACILITIES", appliedFilters.value, selectedSegment.value === 'RG_PICKUP_FACILITY' ? formData.value.selectedFacilityGroups : formData.value.selectedConfigFacilites, formData.value.areAllSelected),
       "ruleActions": generateRuleActions(rule.ruleId, "ATP_ALLOW_PICKUP", formData.value.isPickupAllowed, false, [])
     }, rule.ruleId);
 
     showToast(translate("Rule created successfully."))
-    store.dispatch("rule/clearRuleState")
-    store.dispatch("util/clearAppliedFilters")
+    ruleStore.clearRuleState()
+    utilStore.clearAppliedFilters()
     router.push("/store-pickup");
   } catch(err: any) {
     logger.error(err);
@@ -303,7 +306,7 @@ async function updateRule() {
   const conditionsToRemove = currentRuleConditions.filter((condition: any) => !updatedRuleConditions.some((updatedCondition: any) => condition.conditionTypeEnumId === updatedCondition.conditionTypeEnumId && condition.fieldName === updatedCondition.fieldName && condition.operator === updatedCondition.operator && condition.conditionSeqId === updatedCondition.conditionSeqId))
 
   try {
-    await RuleService.updateRule({
+    await ruleStore.updateRuleApi({
       ...currentRule.value,
       "ruleName": formData.value.ruleName,
       "ruleConditions": updatedRuleConditions,
@@ -311,12 +314,12 @@ async function updateRule() {
     }, props.ruleId);
     showToast(translate("Rule updated successfully."))
 
-    const removeResponses = await Promise.allSettled(conditionsToRemove.map(async (condition: any) => await RuleService.deleteCondition({ ...condition, ruleId: props.ruleId})));
+    const removeResponses = await Promise.allSettled(conditionsToRemove.map(async (condition: any) => await ruleStore.deleteCondition({ ...condition, ruleId: props.ruleId})));
     const hasFailedResponse = removeResponses.some((response: any) => response.status === 'rejected');
     if(hasFailedResponse) logger.error("Failed to delete some rule conditions.")
 
-    store.dispatch("rule/clearRuleState")
-    store.dispatch("util/clearAppliedFilters")
+    ruleStore.clearRuleState()
+    utilStore.clearAppliedFilters()
     router.push('/store-pickup');
   } catch(err: any) {
     logger.error(err);

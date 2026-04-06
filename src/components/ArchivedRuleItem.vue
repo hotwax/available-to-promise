@@ -1,5 +1,5 @@
 <template>
-  <ion-accordion-group :value="isReorderActive">
+  <ion-accordion-group :value="isReorderActive.toString()">
     <ion-accordion value="false">
       <div slot="header" @click="$event.stopImmediatePropagation()"></div>
 
@@ -17,17 +17,16 @@
 import { IonAccordion, IonAccordionGroup, IonCard, IonBadge, IonItem, IonLabel, modalController } from '@ionic/vue';
 import ArchivedRuleModal from "@/components/ArchivedRuleModal.vue";
 import { computed } from 'vue';
-import { useStore } from 'vuex';
+import { useRuleStore } from '@/store/rule';
 import { translate } from '@hotwax/dxp-components';
-import { RuleService } from '@/services/RuleService';
 import { showToast } from '@/utils';
 import emitter from '@/event-bus';
 
-const store = useStore();
+const ruleStore = useRuleStore();
 
-const archivedRules = computed(() => store.getters["rule/getArchivedRules"]);
-const isReorderActive = computed(() => store.getters["rule/isReorderActive"]);
-const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
+const archivedRules = computed(() => ruleStore.getArchivedRules);
+const isReorderActive = computed(() => ruleStore.isReorderActive);
+const ruleGroup = computed(() => ruleStore.getRuleGroup);
 
 async function openArchivedRuleModal() {
   const archivedRuleModal = await modalController.create({
@@ -44,14 +43,14 @@ async function openArchivedRuleModal() {
       
       const responses = await Promise.allSettled(rulesToUnarchive.map(async (rule: any) => {
         rule.statusId = "ATP_RULE_ACTIVE"
-        await RuleService.updateRule(rule, rule.ruleId)
+        await ruleStore.updateRuleApi(rule, rule.ruleId)
       }))
 
       const hasFailedResponses = responses.some((response: any) => response.status !== "fulfilled")
       if(hasFailedResponses) {
         showToast(translate("Failed to unarchive some rules."))
       }
-      await store.dispatch("rule/fetchRules", { ruleGroupId: ruleGroup.value.ruleGroupId })
+      await ruleStore.fetchRules({ ruleGroupId: ruleGroup.value.ruleGroupId })
       emitter.emit("dismissLoader")
     }
   })

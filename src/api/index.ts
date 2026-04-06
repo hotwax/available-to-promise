@@ -2,13 +2,14 @@ import axios from "axios";
 import { setupCache } from "axios-cache-adapter"
 import OfflineHelper from "@/offline-helper"
 import emitter from "@/event-bus"
-import store from "@/store";
+import { useUserStore } from "@/store/user";
 import { StatusCodes } from "http-status-codes";
 
 
 axios.interceptors.request.use((config: any) => {
   // TODO: pass csrf token
-  const token = store.getters["user/getUserToken"];
+  const userStore = useUserStore();
+  const token = userStore.getUserToken;
   if (token) {
     config.headers["api_key"] =  token;
     config.headers["Content-Type"] = "application/json";
@@ -45,12 +46,13 @@ axios.interceptors.response.use(function (response: any) {
   if (error.response) {
     // TODO Handle case for failed queue request
     const { status } = error.response;
-    // if (status === StatusCodes.UNAUTHORIZED) {
-    //   store.dispatch("user/logout");
-    //   const redirectUrl = window.location.origin + '/login';
-    //   // Explicitly passing isLoggedOut as in case of maarg apps we need to call the logout api in launchpad
-    //   window.location.href = `${process.env.VUE_APP_LOGIN_URL}?redirectUrl=${redirectUrl}&isLoggedOut=true`;
-    // }
+    if (status === StatusCodes.UNAUTHORIZED) {
+      const userStore = useUserStore();
+      userStore.logout();
+      const redirectUrl = window.location.origin + '/login';
+      // Explicitly passing isLoggedOut as in case of maarg apps we need to call the logout api in launchpad
+      window.location.href = `${process.env.VUE_APP_LOGIN_URL}?redirectUrl=${redirectUrl}&isLoggedOut=true`;
+    }
   }
   // Any status codes that falls outside the range of 2xx cause this function to trigger
   // Do something with response error
@@ -89,7 +91,8 @@ const api = async (customConfig: any) => {
     // withCredentials: true
   }
 
-  const baseURL = store.getters["user/getInstanceUrl"];
+  const userStore = useUserStore();
+  const baseURL = userStore.getInstanceUrl;
 
   if (baseURL) {
     config.baseURL = baseURL.startsWith('http') ? baseURL.includes('/rest/s1') ? baseURL : `${baseURL}/rest/s1/` : `https://${baseURL}.hotwax.io/rest/s1/`;

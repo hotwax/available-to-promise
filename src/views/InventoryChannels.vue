@@ -153,21 +153,24 @@ import ShopActionsPopover from '@/components/ShopActionsPopover.vue'
 import CreateGroupModal from '@/components/CreateGroupModal.vue'
 import LinkFacilitiesToGroupModal from '@/components/LinkFacilitiesToGroupModal.vue'
 import LinkThresholdFacilitiesToGroupModal from '@/components/LinkThresholdFacilitiesToGroupModal.vue'
-import { useStore } from 'vuex';
+import { useUserStore } from '@/store/user';
+import { useUtilStore } from '@/store/util';
+import { useChannelStore } from '@/store/channel';
 import EditGroupModal from '@/components/EditGroupModal.vue';
 import emitter from '@/event-bus';
 import { DateTime } from 'luxon';
 import CustomFrequencyModal from "@/components/CustomFrequencyModal.vue";
 import { hasError, hasJobDataError, showToast } from "@/utils";
-import { ChannelService } from '@/services/ChannelService';
 import logger from "@/logger";
 
-const store = useStore();
+const userStore = useUserStore();
+const utilStore = useUtilStore();
+const channelStore = useChannelStore();
 
-const inventoryChannels = computed(() => store.getters["channel/getInventoryChannels"])
-const selectedSegment = computed(() => store.getters["util/getSelectedSegment"])
-const shopifyJobs = computed(() => store.getters["channel/getJobs"])
-const getTemporalExpr = computed(() => store.getters["channel/getTemporalExpr"])
+const inventoryChannels = computed(() => channelStore.getInventoryChannels)
+const selectedSegment = computed(() => utilStore.getSelectedSegment)
+const shopifyJobs = computed(() => channelStore.getJobs)
+const getTemporalExpr = computed(() => channelStore.getTemporalExpr)
 
 const isDateTimeModalOpen = ref(false);
 const allowedFrequencies = ref([
@@ -220,10 +223,10 @@ onIonViewWillLeave(() => {
 
 async function fetchInventoryChannels() {
   emitter.emit("presentLoader");
-  if(!selectedSegment.value || (selectedSegment.value !== 'channels' && selectedSegment.value !== 'publish')) store.dispatch("util/updateSelectedSegment", "channels");
-  await Promise.allSettled([store.dispatch("channel/fetchInventoryChannels"), store.dispatch("util/fetchConfigFacilities")]);
+  if(!selectedSegment.value || (selectedSegment.value !== 'channels' && selectedSegment.value !== 'publish')) utilStore.updateSelectedSegment("channels");
+  await Promise.allSettled([channelStore.fetchInventoryChannels(), utilStore.fetchConfigFacilities()]);
   if(selectedSegment.value === "publish") {
-    await Promise.allSettled([store.dispatch("channel/fetchJobs"), store.dispatch("channel/findTemporalExpression")]);
+    await Promise.allSettled([channelStore.fetchJobs(), channelStore.findTemporalExpression()]);
     generateFrequencyOptions();
     generateRuntimeOptions();
   }
@@ -287,10 +290,10 @@ function getFacilityCount(channel: any, facilityTypeId: string) {
 }
 
 async function updateSegment(event: any) {
-  await store.dispatch("util/updateSelectedSegment", event.detail.value);
+  await utilStore.updateSelectedSegment(event.detail.value);
   if(selectedSegment.value === "publish") {
-    await store.dispatch("channel/fetchJobs");
-    await store.dispatch("channel/findTemporalExpression")
+    await channelStore.fetchJobs();
+    await channelStore.findTemporalExpression()
     generateFrequencyOptions()
     generateRuntimeOptions();
   }
@@ -335,7 +338,7 @@ function generateFrequencyOptions() {
   shopifyJobs.value.map((job: any) => {
     const option = frequencyOptions.find((option: any) => option.id === job.tempExprId)
     if(!option) {
-      const tempExpression = getTemporalExpr.value(job.tempExprId)
+      const tempExpression = (getTemporalExpr.value as any)(job.tempExprId)
       if(tempExpression) frequencyOptions.push({ id: tempExpression.tempExprId, description: tempExpression.description });
     }
   })
@@ -406,7 +409,7 @@ async function saveChanges(job: any) {
             await scheduleService(job)
           } else if (job?.statusId === 'SERVICE_PENDING') {
             await updateJob(job);
-            await store.dispatch('channel/updateJob', job)
+            await channelStore.updateJob(job);
           }
         }
       }]
@@ -424,15 +427,15 @@ async function scheduleService(job: any) {
     'SERVICE_TEMP_EXPR': job.jobStatus,
     'SERVICE_RUN_AS_SYSTEM':'Y',
     'jobFields': {
-      'productStoreId': store.state.user.currentEComStore.productStoreId,
+      'productStoreId': userStore.currentEComStore.productStoreId,
       'systemJobEnumId': job.systemJobEnumId,
       'tempExprId': job.jobStatus, // Need to remove this as we are passing frequency in SERVICE_TEMP_EXPR, currently kept it for backward compatibility
       'maxRecurrenceCount': '-1',
       'parentJobId': job.parentJobId,
       'runAsUser': 'system', //default system, but empty in run now.  TODO Need to remove this as we are using SERVICE_RUN_AS_SYSTEM, currently kept it for backward compatibility
-      'recurrenceTimeZone': store.state.user.current.timeZone,
-      'createdByUserLogin': store.state.user.current.username,
-      'lastModifiedByUserLogin': store.state.user.current.username,
+      'recurrenceTimeZone': userStore.current.timeZone,
+      'createdByUserLogin': userStore.current.username,
+      'lastModifiedByUserLogin': userStore.current.username,
     },
     'statusId': "SERVICE_PENDING",
     'systemJobEnumId': job.systemJobEnumId
@@ -457,10 +460,10 @@ async function scheduleService(job: any) {
   job?.runTime && (payload['SERVICE_TIME'] = job.runTime.toString())
 
   try {
-    resp = await ChannelService.scheduleJob({ ...payload });
-    if (resp.status == 200 && !hasError(resp)) {
+    resp = await channelStore.scheduleJob({ ...payload }) as any;
+    if (resp && resp.status == 200 && !hasError(resp)) {
       showToast(translate("Service has been scheduled."));
-      await store.dispatch("channel/fetchJobs");
+      await channelStore.fetchJobs();
       generateFrequencyOptions();
       generateRuntimeOptions();
     } else {
@@ -476,21 +479,21 @@ async function updateJob(job: any) {
   const payload = {
     'jobId': job.jobId,
     'systemJobEnumId': job.systemJobEnumId,
-    'recurrenceTimeZone': store.state.user.current.userTimeZone,
+    'recurrenceTimeZone': userStore.current.userTimeZone,
     'tempExprId': job.jobStatus,
     'statusId': "SERVICE_PENDING",
     'runTimeEpoch': '',  // when updating a job clearning the epoch time, as job honors epoch time as runTime and the new job created also uses epoch time as runTime
-    'lastModifiedByUserLogin': store.state.user.current.username
+    'lastModifiedByUserLogin': userStore.current.username
   } as any
 
   job?.runTime && (payload['runTime'] = job.runTime)
   job?.jobName && (payload['jobName'] = job.jobName)
 
   try {
-    const resp = await ChannelService.updateJob(payload)
-    if (!hasError(resp)) {
+    const resp = await channelStore.updateJobApi(payload) as any;
+    if (resp && !hasError(resp)) {
       showToast(translate("Service has been scheduled."))
-      await store.dispatch("channel/fetchJobs");
+      await channelStore.fetchJobs();
       generateFrequencyOptions();
       generateRuntimeOptions();
     } else {

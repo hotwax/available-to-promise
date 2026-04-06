@@ -22,17 +22,16 @@
 import { IonContent, IonIcon, IonItem, IonLabel, IonList, IonListHeader, alertController, modalController } from "@ionic/vue";
 import { translate } from '@hotwax/dxp-components';
 import { flashOutline, stopCircleOutline, timeOutline } from 'ionicons/icons'
-import { useStore } from "vuex";
 import { computed } from "vue";
-import { RuleService } from "@/services/RuleService";
 import { hasError, showToast } from "@/utils";
 import logger from "@/logger";
 import RuleGroupHistoryModal from '@/components/RuleGroupHistoryModal.vue';
 import { popoverController } from "@ionic/core";
 import emitter from "@/event-bus";
+import { useRuleStore } from "@/store/rule";
 
-const store = useStore();
-const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
+const ruleStore = useRuleStore();
+const ruleGroup = computed(() => ruleStore.getRuleGroup);
 
 async function disableRuleGroup() {
   const payload = {
@@ -43,11 +42,11 @@ async function disableRuleGroup() {
 
   emitter.emit("presentLoader");
   try {
-    const resp = await RuleService.scheduleRuleGroup(payload)
+    const resp = await ruleStore.scheduleRuleGroup(payload)
     if(!hasError(resp)){
       const ruleGroupValue = JSON.parse(JSON.stringify(ruleGroup.value))
       ruleGroupValue.schedule.paused = "Y"
-      store.dispatch("rule/updateRuleGroup", ruleGroupValue)
+      ruleStore.updateRuleGroup(ruleGroupValue)
       showToast(translate("Rule group disabled successfully."))
       popoverController.dismiss();
     } else {
@@ -94,7 +93,7 @@ async function runNow() {
               }
 
               try {
-                const resp = await RuleService.scheduleRuleGroup(payload)
+                const resp = await ruleStore.scheduleRuleGroup(payload)
                 if(hasError(resp)) {
                   throw resp.data
                 }
@@ -106,10 +105,10 @@ async function runNow() {
             }
 
             try {
-              const resp = await RuleService.runNow(ruleGroup.value.ruleGroupId)
+              const resp = await ruleStore.runNow(ruleGroup.value.ruleGroupId)
               if(!hasError(resp) && resp.data.jobRunId) {
                 showToast(translate("Service has been scheduled."))
-                await store.dispatch('rule/fetchRules', { groupTypeEnumId: ruleGroup.value.groupTypeEnumId, pageSize: 50 })
+                await ruleStore.fetchRules({ groupTypeEnumId: ruleGroup.value.groupTypeEnumId, pageSize: 50 })
                 popoverController.dismiss();
               } else {
                 throw resp.data

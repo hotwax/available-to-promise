@@ -53,7 +53,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineProps, onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import {
   IonButton,
   IonButtons,
@@ -76,7 +76,7 @@ import {
   modalController
 } from "@ionic/vue";
 import { closeOutline, saveOutline } from 'ionicons/icons';
-import { useStore } from "vuex";
+import { useUtilStore } from "@/store/util";
 import { translate } from '@hotwax/dxp-components';
 
 const facetOptions = ref([]) as any;
@@ -87,15 +87,14 @@ const filteredOptions = ref([]) as any;
 const isLoading = ref(false);
 
 const props = defineProps(["label", "facetToSelect", "searchfield", "type"]);
-const store = useStore();
+const utilStore = useUtilStore();
 
-const appliedFilters = computed(() => store.getters["util/getAppliedFilters"]);
-const getFacetOptions = computed(() => store.getters["util/getFacetOptions"]);
+const appliedFilters = computed(() => utilStore.getAppliedFilters);
 
 onMounted(async() => {
   isLoading.value = true;
-  await store.dispatch("util/fetchProductFilters", { facetToSelect: props.facetToSelect, searchfield: props.searchfield })
-  facetOptions.value = getFacetOptions.value(props.searchfield);
+  await utilStore.fetchProductFilters({ facetToSelect: props.facetToSelect, searchfield: props.searchfield })
+  facetOptions.value = utilStore.getFacetOptions(props.searchfield);
   filteredOptions.value = JSON.parse(JSON.stringify(facetOptions.value))
   selectedValues.value = JSON.parse(JSON.stringify(appliedFilters.value[props.type][props.searchfield]))
   isLoading.value = false;
@@ -110,11 +109,11 @@ async function search() {
 
   if(queryString.value.trim()) {
     isLoading.value = true;
-    await store.dispatch("util/fetchProductFilters", { facetToSelect: props.facetToSelect, searchfield: props.searchfield, queryString: queryString.value.trim() })
-    filteredOptions.value = getFacetOptions.value(props.searchfield).filter((option: any) => option.label.toLowerCase().includes(queryString.value.trim().toLowerCase()))
+    await utilStore.fetchProductFilters({ facetToSelect: props.facetToSelect, searchfield: props.searchfield, queryString: queryString.value.trim() })
+    filteredOptions.value = utilStore.getFacetOptions(props.searchfield).filter((option: any) => option.label.toLowerCase().includes(queryString.value.trim().toLowerCase()))
     isLoading.value = false;
   } else {
-    filteredOptions.value = JSON.parse(JSON.stringify(getFacetOptions.value(props.searchfield)))
+    filteredOptions.value = JSON.parse(JSON.stringify(utilStore.getFacetOptions(props.searchfield)))
   }
 }
 
@@ -131,7 +130,7 @@ async function saveFilters() {
   const selectedFilters = JSON.parse(JSON.stringify(appliedFilters.value))
   selectedFilters[props.type][props.searchfield] = selectedValues.value
 
-  await store.dispatch('util/updateAppliedFilters', selectedFilters)
+  await utilStore.updateAppliedFilters(selectedFilters)
   modalController.dismiss()
 }
 </script>

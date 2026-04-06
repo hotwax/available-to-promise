@@ -35,20 +35,19 @@
 
 <script setup lang="ts">
 import { IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonChip, IonIcon, IonItem, IonLabel, IonProgressBar, IonText, IonToggle, popoverController } from '@ionic/vue';
-import { computed, defineProps, onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { storefrontOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
 import { translate } from '@hotwax/dxp-components';
 import OrderLimitPopover from '@/components/OrderLimitPopover.vue';
-import { UtilService } from '@/services/UtilService';
 import { hasError, showToast } from '@/utils';
 import logger from '@/logger';
-import { useStore } from 'vuex';
+import { useUtilStore } from '@/store/util';
 import emitter from '@/event-bus';
 import { DateTime } from 'luxon';
 
 const router = useRouter();
-const store = useStore();
+const utilStore = useUtilStore();
 
 const selectedPage = ref({
   path: '',
@@ -56,9 +55,9 @@ const selectedPage = ref({
 }) as any
 
 const props = defineProps(["facility"]);
-const facilities = computed(() => store.getters["util/getFacilities"]);
-const pickupGroups = computed(() => store.getters["util/getPickupGroups"]);
-const pickupGroupFacilities = computed(() => store.getters["util/getPickupGroupFacilities"]);
+const facilities = computed(() => utilStore.getFacilities);
+const pickupGroups = computed(() => utilStore.getPickupGroups);
+const pickupGroupFacilities = computed(() => utilStore.getPickupGroupFacilities);
 
 onMounted(() => {
     selectedPage.value.path = router.currentRoute.value.path
@@ -87,20 +86,20 @@ async function updateFacility(maximumOrderLimit: number | string) {
   emitter.emit("presentLoader");
   
   try {
-    resp = await UtilService.updateFacility({
+    resp = await utilStore.updateFacility({
       ...props.facility,
       maximumOrderLimit
     })
 
-    if(!hasError(resp)) {
+    if(resp && !hasError(resp)) {
       const updatedFacilities = JSON.parse(JSON.stringify(facilities.value))
       const currentFacility = updatedFacilities.find((facility: any) => facility.facilityId === props.facility.facilityId)
       currentFacility.maximumOrderLimit = maximumOrderLimit;
 
       showToast(translate("Order fulfillment capacity updated successfully"))
-      await store.dispatch("util/updateFacilities", { facilities: updatedFacilities })
+      await utilStore.updateFacilities({ facilities: updatedFacilities })
     } else {
-      throw resp.data
+      throw resp ? resp.data : "Failed to update facility"
     }
   } catch(err) {
     showToast(translate("Failed to update facility"))
@@ -136,15 +135,15 @@ async function updatePickupAllowed(event: Event, group: any) {
   }
 
   try {
-    const resp = await UtilService.updateFacilityAssociationWithPickupGroup(payload)
-    if(!hasError(resp)) {
+    const resp = await utilStore.updateFacilityAssociationWithPickupGroup(payload) as any;
+    if(resp && !hasError(resp)) {
       const facilitiesByPickupGroup = JSON.parse(JSON.stringify(pickupGroupFacilities.value));
       if(isPickupActive) {
         facilitiesByPickupGroup[group.facilityGroupId] = facilitiesByPickupGroup[group.facilityGroupId].filter((record: any) => record.facilityId !== props.facility.facilityId);
       } else {
         facilitiesByPickupGroup[group.facilityGroupId].push(payload)
       }
-      store.dispatch("util/updatePickupGroupFacilities", facilitiesByPickupGroup);
+      utilStore.updatePickupGroupFacilities(facilitiesByPickupGroup);
       showToast(translate("Facility association updated successfully with pickup group."))
     } else {
       throw resp.data;
@@ -153,6 +152,5 @@ async function updatePickupAllowed(event: Event, group: any) {
     logger.error(error);
     showToast(translate("Failed to update facility association with pickup group."));
   }
-  
 }
 </script>

@@ -38,7 +38,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineProps, onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import {
   IonButton,
   IonButtons,
@@ -57,15 +57,15 @@ import {
   modalController
 } from "@ionic/vue";
 import { closeOutline, saveOutline } from 'ionicons/icons';
-import { useStore } from "vuex";
+import { useUtilStore } from "@/store/util";
 import { translate } from '@hotwax/dxp-components';
 
 const selectedGroups = ref([]) as any;
 
 const props = defineProps(["selectedFacilityGroups", "type"]);
-const store = useStore();
+const utilStore = useUtilStore();
 
-const facilityGroups = computed(() => store.getters["util/getFacilityGroups"])
+const facilityGroups = computed(() => utilStore.getFacilityGroups)
 
 onMounted(() => {
   selectedGroups.value = JSON.parse(JSON.stringify(props.selectedFacilityGroups[props.type]))

@@ -47,14 +47,13 @@ import {
 import { closeOutline } from "ionicons/icons";
 import { computed, onMounted, ref } from "vue";
 import { getDate, getTime, timeTillRun, hasError } from "@/utils";
-import { useStore } from "vuex";
-import { RuleService } from "@/services/RuleService";
+import { useRuleStore } from "@/store/rule";
 import logger from "@/logger";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
-const store = useStore();
-const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
+const ruleStore = useRuleStore();
+const ruleGroup = computed(() => ruleStore.getRuleGroup);
 
 let groupHistory = ref([]) as any
 
@@ -70,7 +69,7 @@ async function fetchGroupHistory() {
   }
 
   try {
-    const resp = await RuleService.fetchRuleGroupHistory({ jobName: ruleGroup.value.jobName, pageSize: 20, orderByField: "lastUpdatedStamp DESC" })
+    const resp = await ruleStore.fetchRuleGroupHistory({ jobName: ruleGroup.value.jobName, pageSize: 20, orderByField: "lastUpdatedStamp DESC" })
 
     if(!hasError(resp)) {
       // Sorting the history based on startTime, as we does not get the records in sorted order from api

@@ -107,21 +107,23 @@
 
 <script setup lang="ts">
 import {  IonAvatar, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonHeader, IonIcon, IonItem, IonLabel, IonMenuButton, IonPage, IonSelect, IonSelectOption, IonTitle, IonToolbar, modalController } from '@ionic/vue';
-import { computed ,defineProps,ref} from 'vue';
+import { computed, ref } from 'vue';
 import { openOutline } from 'ionicons/icons'
-import { useStore } from 'vuex';
+import { useUserStore } from '@/store/user';
+import { useRuleStore } from '@/store/rule';
 import TimeZoneModal from '@/views/TimezoneModal.vue';
 import Image from '@/components/Image.vue'
 import { goToOms, translate } from "@hotwax/dxp-components";
 import {getCurrentTime} from "../utils"
 import { hasPermission, Actions } from '@/authorization';
 
-const store = useStore()
+const userStore = useUserStore()
+const ruleStore = useRuleStore()
 
-const userProfile = computed(() => store.getters["user/getUserProfile"])
-const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
-const oms = computed(() => store.getters["user/getInstanceUrl"])
-const omsRedirectionInfo = computed(() => store.getters["user/getOmsRedirectionInfo"])
+const userProfile = computed(() => userStore.getUserProfile)
+const currentEComStore = computed(() => userStore.getCurrentEComStore)
+const oms = computed(() => userStore.getInstanceUrl)
+const omsRedirectionInfo = computed(() => userStore.getOmsRedirectionInfo)
 const currentTimeZoneId = computed(() => userProfile.value.timeZone)
 const browserTimeZone = ref({
   label: '',
@@ -144,10 +146,10 @@ const props = defineProps({
 
 function setEComStore(event: CustomEvent) {
   if(userProfile.value?.stores) {
-    store.dispatch("user/setEcomStore", {
+    userStore.setEcomStore({
       "productStoreId": event.detail.value
     })
-    store.dispatch("rule/clearRuleState")
+    ruleStore.clearRuleState()
   }
 }
 
@@ -159,7 +161,7 @@ async function changeTimeZone() {
 }
 
 function logout() {
-  store.dispatch("user/logout").then(() => {
+  userStore.logout().then(() => {
     const redirectUrl = window.location.origin + '/login'
     window.location.href = `${process.env.VUE_APP_LOGIN_URL}?isLoggedOut=true&redirectUrl=${redirectUrl}`
   })

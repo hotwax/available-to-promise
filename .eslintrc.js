@@ -1,7 +1,14 @@
 module.exports = {
   root: true,
   env: {
-    node: true
+    node: true,
+    browser: true
+  },
+  globals: {
+    defineProps: 'readonly',
+    defineEmits: 'readonly',
+    defineExpose: 'readonly',
+    withDefaults: 'readonly'
   },
   'extends': [
     'plugin:vue/vue3-essential',

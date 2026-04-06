@@ -13,14 +13,14 @@ import { computed, onBeforeMount, onMounted, onUnmounted, ref } from 'vue';
 import emitter from "@/event-bus"
 import { Settings } from 'luxon'
 import Menu from '@/components/Menu.vue';
-import store from "./store";
+import { useUserStore } from "@/store/user";
 import { translate } from '@hotwax/dxp-components';
 import { initialise, resetConfig } from '@/adapter'
 
-
-const userProfile = computed(() => store.getters["user/getUserProfile"])
-const userToken = computed(() => store.getters["user/getUserToken"])
-const instanceUrl = computed(() => store.getters["user/getInstanceUrl"])
+const userStore = useUserStore();
+const userProfile = computed(() => userStore.getUserProfile)
+const userToken = computed(() => userStore.getUserToken)
+const instanceUrl = computed(() => userStore.getInstanceUrl)
 
 const loader = ref(null) as any
 const maxAge = process.env.VUE_APP_CACHE_MAX_AGE ? parseInt(process.env.VUE_APP_CACHE_MAX_AGE) : 0

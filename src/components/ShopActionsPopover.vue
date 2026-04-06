@@ -26,19 +26,20 @@
 import { IonContent, IonIcon, IonItem, IonLabel, IonList, IonListHeader, alertController, modalController, popoverController } from "@ionic/vue";
 import { translate } from '@hotwax/dxp-components';
 import { copyOutline, flashOutline, stopCircleOutline, timeOutline } from 'ionicons/icons'
-import { computed, defineProps } from "vue";
+import { computed } from "vue";
 import JobHistoryModal from "@/components/JobHistoryModal.vue"
 import { Plugins } from '@capacitor/core';
 import { hasError, showToast } from "@/utils";
 import logger from "@/logger";
-import { ChannelService } from "@/services/ChannelService";
 import { DateTime } from 'luxon';
-import { useStore } from "vuex";
+import { useUserStore } from "@/store/user";
+import { useChannelStore } from "@/store/channel";
 
-const store = useStore();
+const userStore = useUserStore();
+const channelStore = useChannelStore();
 
 const props = defineProps(["job"]);
-const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
+const currentEComStore = computed(() => userStore.getCurrentEComStore)
 
 function closePopover() {
   popoverController.dismiss({ dismissed: true });
@@ -88,16 +89,16 @@ async function disableJob() {
         }
 
         try {
-          const resp = await ChannelService.disableJob({ 
+          const resp = await channelStore.disableJob({ 
             jobId: props.job.jobId
-          })
+          }) as any;
 
-          if(!hasError(resp)) {
+          if(resp && !hasError(resp)) {
             showToast(translate("Successfully cancelled this job."))
-            await store.dispatch("channel/fetchJobs");
+            await channelStore.fetchJobs();
             closePopover();
           } else {
-            throw resp.data;
+            throw resp ? resp.data : "Failed to cancel this job.";
           }
         } catch(error: any) {
           showToast(translate("Failed to cancel this job."))
@@ -146,9 +147,9 @@ async function runServiceNow(job: any) {
       'systemJobEnumId': job.systemJobEnumId,
       'tempExprId': job.jobStatus, // Need to remove this as we are passing frequency in SERVICE_TEMP_EXPR, currently kept it for backward compatibility
       'parentJobId': job.parentJobId,
-      'recurrenceTimeZone': store.state.user.current.timeZone,
-      'createdByUserLogin': store.state.user.current.username,
-      'lastModifiedByUserLogin': store.state.user.current.username
+      'recurrenceTimeZone': userStore.current.timeZone,
+      'createdByUserLogin': userStore.current.username,
+      'lastModifiedByUserLogin': userStore.current.username
     },
     'statusId': "SERVICE_PENDING",
     'systemJobEnumId': job.systemJobEnumId
@@ -161,7 +162,7 @@ async function runServiceNow(job: any) {
   })
 
   // checking if the runtimeData has productStoreId, and if present then adding it on root level
-  job?.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = job.status === "SERVICE_PENDING" ? job.productStoreId : store.state.user.currentEComStore.productStoreId)
+  job?.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = job.status === "SERVICE_PENDING" ? job.productStoreId : userStore.currentEComStore.productStoreId)
   job?.priority && (payload['SERVICE_PRIORITY'] = job.priority.toString())
 
   // ShopifyConfig and ShopifyShop should be set based upon runtime data
@@ -179,12 +180,12 @@ async function runServiceNow(job: any) {
   }
 
   try {
-    resp = await ChannelService.scheduleJob({ ...payload });
-    if(!hasError(resp)) {
+    resp = await channelStore.scheduleJob({ ...payload }) as any;
+    if(resp && !hasError(resp)) {
       showToast(translate("Service has been scheduled."))
       closePopover();
     } else {
-      throw resp.data;
+      throw resp ? resp.data : "Failed to schedule service.";
     }
   } catch(err) {
     showToast(translate("Failed to schedule service."))
@@ -195,4 +196,4 @@ async function runServiceNow(job: any) {
 function isRuntimePassed() {
   return props.job.runTime <= DateTime.now().toMillis()
 }
-</script> 
+</script>

@@ -106,12 +106,12 @@ import { addCircleOutline, closeCircle } from 'ionicons/icons'
 import { translate } from '@hotwax/dxp-components';
 import AddProductFiltersModal from '@/components/AddProductFiltersModal.vue';
 import { computed } from 'vue';
-import { useStore } from 'vuex';
+import { useUtilStore } from '@/store/util';
 
-const store = useStore();
+const utilStore = useUtilStore();
 
-const appliedFilters = computed(() => store.getters["util/getAppliedFilters"]);
-const appliedFiltersOperator = computed(() => store.getters["util/getAppliedFiltersOperator"]);
+const appliedFilters = computed(() => utilStore.getAppliedFilters);
+const appliedFiltersOperator = computed(() => utilStore.getAppliedFiltersOperator);
 
 const conditionAppliedFiltersOperator = JSON.parse(JSON.stringify(appliedFiltersOperator.value))
 
@@ -133,11 +133,11 @@ async function removeFilters(type: string, id: string, value: string) {
   const selectedFilters = JSON.parse(JSON.stringify(appliedFilters.value))
   selectedFilters[type][id] = selectedFilters[type][id].filter((filter: any) => filter !== value)
 
-  await store.dispatch('util/updateAppliedFilters', selectedFilters)
+  await utilStore.updateAppliedFilters(selectedFilters)
 }
 
 async function updateFiltersOperator(type: string, id: string, value: string) {
   conditionAppliedFiltersOperator[type][id] = value
-  await store.dispatch('util/updateAppliedFiltersOperator', conditionAppliedFiltersOperator)
+  await utilStore.updateAppliedFiltersOperator(conditionAppliedFiltersOperator)
 }
 </script>

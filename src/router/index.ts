@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
 import Settings from "@/views/Settings.vue"
-import store from '@/store'
+import { useUserStore } from "@/store/user";
 import Threshold from '@/views/Threshold.vue'
 import SafetyStock from '@/views/SafetyStock.vue'
 import StorePickup from '@/views/StorePickup.vue'
@@ -25,7 +25,8 @@ declare module 'vue-router' {
 
 const authGuard = async (to: any, from: any, next: any) => {
   const authStore = useAuthStore()
-  if (!authStore.isAuthenticated || !store.getters['user/isAuthenticated']) {
+  const userStore = useUserStore()
+  if (!authStore.isAuthenticated || !userStore.isAuthenticated) {
     await loader.present('Authenticating')
     // TODO use authenticate() when support is there
     const redirectUrl = window.location.origin + '/login'

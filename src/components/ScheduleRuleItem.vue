@@ -1,5 +1,5 @@
 <template>
-  <ion-accordion-group :value="isReorderActive">
+  <ion-accordion-group :value="isReorderActive.toString()">
     <ion-accordion value="false">
       <div slot="header" @click="$event.stopImmediatePropagation()"></div>
       <ion-card slot="content">
@@ -40,15 +40,14 @@ import { ellipsisVerticalOutline, timeOutline, timerOutline } from 'ionicons/ico
 import ScheduleActionsPopover from "@/components/ScheduleActionsPopover.vue";
 import { computed } from 'vue';
 import { getDateAndTime, hasError, showToast } from '@/utils'
-import { useStore } from 'vuex';
+import { useRuleStore } from '@/store/rule';
 import logger from '@/logger';
-import { RuleService } from '@/services/RuleService';
 import { DateTime } from 'luxon';
 import emitter from '@/event-bus';
 
-const store = useStore();
-const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
-const isReorderActive = computed(() => store.getters["rule/isReorderActive"]);
+const ruleStore = useRuleStore();
+const ruleGroup = computed(() => ruleStore.getRuleGroup);
+const isReorderActive = computed(() => ruleStore.isReorderActive);
 
 const cronExpressions = JSON.parse(process.env?.VUE_APP_CRON_EXPRESSIONS as string)
 
@@ -74,10 +73,10 @@ async function saveSchedule() {
 
   emitter.emit("presentLoader");
   try {
-    const resp = await RuleService.scheduleRuleGroup(payload)
+    const resp = await ruleStore.scheduleRuleGroup(payload)
     if(!hasError(resp)) {
       showToast(translate("Service has been scheduled."))
-      await store.dispatch('rule/fetchRules', { groupTypeEnumId: ruleGroup.value.groupTypeEnumId, pageSize: 50 })
+      await ruleStore.fetchRules({ groupTypeEnumId: ruleGroup.value.groupTypeEnumId, pageSize: 50 })
     } else {
       throw resp.data
     }

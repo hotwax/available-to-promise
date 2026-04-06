@@ -33,20 +33,19 @@
 import { IonBadge, IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonTitle, IonToolbar, modalController } from '@ionic/vue';
 import { translate } from '@hotwax/dxp-components';
 import { closeOutline } from 'ionicons/icons';
-import { computed, defineProps, onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { DateTime } from 'luxon';
-import { ChannelService } from '@/services/ChannelService';
-import { useStore } from "vuex";
+import { useChannelStore } from "@/store/channel";
 
-const store = useStore();
+const channelStore = useChannelStore();
 const props = defineProps(["currentJob"]);
 
 const jobHistory = ref([]) as any;
 
-const getStatusDesc = computed(() => store.getters["channel/getStatusDesc"])
+const getStatusDesc = computed(() => channelStore.getStatusDesc)
 
 onMounted(async () => {
-  await store.dispatch("channel/getServiceStatusDesc");
+  await channelStore.getServiceStatusDesc();
   fetchJobHistory();
 })
 
@@ -63,7 +62,7 @@ function getTime(runTime: any) {
 }
 
 async function fetchJobHistory() {
-  jobHistory.value = await ChannelService.fetchJobInformation({
+  jobHistory.value = await channelStore.fetchJobInformation({
     "inputFields": {
       "productStoreId": props.currentJob.productStoreId,
       "statusId": ["SERVICE_CANCELLED", "SERVICE_CRASHED", "SERVICE_FAILED", "SERVICE_FINISHED"],

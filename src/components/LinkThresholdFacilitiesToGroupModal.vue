@@ -38,19 +38,20 @@
 import { IonButton, IonButtons, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonLabel, IonRadio, IonRadioGroup, IonTitle, IonToolbar, modalController } from "@ionic/vue";
 import { closeOutline, saveOutline } from "ionicons/icons";
 import { translate } from '@hotwax/dxp-components';
-import { useStore } from "vuex";
-import { computed, defineProps, onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
+import { useUtilStore } from "@/store/util";
+import { useChannelStore } from "@/store/channel";
 import { hasError, showToast } from "@/utils";
-import { ChannelService } from '@/services/ChannelService';
 import logger from "@/logger";
 import { DateTime } from "luxon";
 import emitter from "@/event-bus";
 
-const store = useStore();
+const utilStore = useUtilStore();
+const channelStore = useChannelStore();
 const selectedFacilityId = ref("");
 const props = defineProps(["group", "selectedConfigFacilityId"]);
 
-const configFacilities = computed(() => store.getters["util/getConfigFacilities"])
+const configFacilities = computed(() => utilStore.getConfigFacilities)
 
 onMounted(() => {
   selectedFacilityId.value = props.selectedConfigFacilityId?.facilityId ? JSON.parse(JSON.stringify(props.selectedConfigFacilityId.facilityId)) : '';
@@ -71,33 +72,33 @@ async function saveFacility() {
 
   try {
     if(props.selectedConfigFacilityId?.facilityId) {
-      resp = await ChannelService.updateFacilityAssociationWithGroup({
+      resp = await channelStore.updateFacilityAssociationWithGroup({
         facilityGroupId: props.group.facilityGroupId,
         facilityId: props.selectedConfigFacilityId.facilityId,
         fromDate: props.selectedConfigFacilityId.fromDate,
         thruDate: DateTime.now().toMillis()
-      });
-      if(hasError(resp)) {
+      }) as any;
+      if(resp && hasError(resp)) {
         throw resp.data;
       }
     }
 
-    resp = await ChannelService.updateFacilityAssociationWithGroup({
+    resp = await channelStore.updateFacilityAssociationWithGroup({
       facilityGroupId: props.group.facilityGroupId,
       facilityId: selectedFacilityId.value,
       fromDate: DateTime.now().toMillis()
-    });
-    if(!hasError(resp)) {
+    }) as any;
+    if(resp && !hasError(resp)) {
       showToast(translate("Threshold facility updated successfully."))
       modalController.dismiss();
     } else {
-      throw resp.data;
+      throw resp ? resp.data : "Failed to update threshold facility.";
     }
   } catch(err: any) {
     logger.error(err)
     showToast(translate("Failed to update threshold facility."))
   }
-  await store.dispatch("channel/fetchGroupFacilities", props.group.facilityGroupId);
+  await channelStore.fetchGroupFacilities(props.group.facilityGroupId);
   emitter.emit("dismissLoader");
 }
 

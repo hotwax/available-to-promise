@@ -7,7 +7,7 @@
     </ion-header>
     <ion-content>
       <ion-list>
-        <ion-menu-toggle auto-hide="false" v-for="(page, index) in appPages" :key="index">
+        <ion-menu-toggle :auto-hide="false" v-for="(page, index) in appPages" :key="index">
           <ion-item 
             button
             router-direction="root"
@@ -63,13 +63,13 @@
     SelectCustomEvent
   } from "@ionic/vue";
   import { computed } from "vue";
-  import { useStore } from "@/store";
+  import { useUserStore } from "@/store/user";
   import { useRouter } from "vue-router";
   import { cloudUploadOutline, globeOutline, settingsOutline, sendOutline, storefrontOutline, pulseOutline } from 'ionicons/icons';
   import { translate } from "@hotwax/dxp-components";
   import emitter from "@/event-bus";
 
-  const store = useStore();
+  const userStore = useUserStore();
   const router = useRouter();
   const appPages = [
         {
@@ -114,10 +114,10 @@
         }
       ];
 
-  const userProfile = computed(() => store.getters["user/getUserProfile"])
-  const isUserAuthenticated = computed(() => store.getters["user/isUserAuthenticated"])
-  const eComStore = computed(() => store.getters["user/getCurrentEComStore"])
-  const instanceUrl = computed(() => store.getters["user/getInstanceUrl"])
+  const userProfile = computed(() => userStore.getUserProfile)
+  const isUserAuthenticated = computed(() => userStore.isUserAuthenticated)
+  const eComStore = computed(() => userStore.getCurrentEComStore)
+  const instanceUrl = computed(() => userStore.getInstanceUrl)
   const selectedIndex = computed(() => {
     const path = router.currentRoute.value.path;
     return appPages.findIndex((screen) => screen.url === path || screen.childRoutes?.includes(path) || screen.childRoutes?.some((route) => path.includes(route)));
@@ -143,7 +143,7 @@
             {
               text: translate("Yes"),
               handler: async () => {
-                await store.dispatch("user/setEcomStore", {
+                await userStore.setEcomStore({
                   "productStoreId": event.detail.value
                 })
                 emitter.emit("productStoreOrConfigChanged")
@@ -154,7 +154,7 @@
 
         alert.present();
       } else {
-        store.dispatch("user/setEcomStore", {
+        userStore.setEcomStore({
           "productStoreId": event.detail.value
         })
         emitter.emit("productStoreOrConfigChanged")

@@ -80,20 +80,20 @@ import {
   IonToolbar,
   modalController,
 } from "@ionic/vue";
-import { onBeforeMount, ref ,computed,defineProps } from "vue";
+import { onBeforeMount, ref ,computed } from "vue";
 import { closeOutline, saveOutline } from "ionicons/icons";
-import { useStore } from "@/store";
+import { useUserStore } from "@/store/user";
 import { getCurrentTime } from "@/utils";
-import { translate,useUserStore } from '@hotwax/dxp-components';
+import { translate, useUserStore as useDxpUserStore } from '@hotwax/dxp-components';
 
-const store = useStore();
-const userStore=useUserStore()
+const userStore = useUserStore();
+const dxpUserStore = useDxpUserStore();
 let queryString = ref("")
 let filteredTimeZones = ref<any[]>([])
-let timeZones = computed(() => userStore.getTimeZones)
+let timeZones = computed(() => dxpUserStore.getTimeZones)
 let timeZoneId = ref("")
 let isLoading = ref(true)
-const userProfile = computed(() => store.getters["user/getUserProfile"])
+const userProfile = computed(() => userStore.getUserProfile)
 const browserTimeZone = ref({
   label: '',
   id: Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -116,9 +116,9 @@ const props = defineProps({
 
 onBeforeMount(async() => {
   isLoading.value = true;
-  await userStore.getAvailableTimeZones();
+  await dxpUserStore.getAvailableTimeZones();
   if(userProfile.value && userProfile.value.timeZone) {
-    userStore.currentTimeZoneId = userProfile.value.timeZone
+    dxpUserStore.currentTimeZoneId = userProfile.value.timeZone
     timeZoneId.value = userProfile.value.timeZone
   }
 
@@ -149,7 +149,7 @@ function selectSearchBarText(event: any) {
 }
 
 async function setUserTimeZone() {
-  return store.dispatch("user/setUserTimeZone", {
+  return userStore.setUserTimeZone({
     "tzId": timeZoneId.value
   }).then(() => {
     closeModal()

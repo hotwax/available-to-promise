@@ -47,14 +47,17 @@
 import { IonButton, IonButtons, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonList, IonSelect, IonSelectOption, IonText, IonTextarea, IonTitle, IonToolbar, modalController } from "@ionic/vue";
 import { closeOutline, checkmarkDone } from "ionicons/icons";
 import { translate } from '@hotwax/dxp-components';
-import { useStore } from "vuex";
+import { useUserStore } from "@/store/user";
+import { useChannelStore } from "@/store/channel";
+import { useUtilStore } from "@/store/util";
 import { computed, ref } from "vue";
 import { generateInternalId, hasError, showToast } from "@/utils";
 import logger from "@/logger";
-import { ChannelService } from "@/services/ChannelService";
 import emitter from "@/event-bus";
 
-const store = useStore();
+const userStore = useUserStore();
+const channelStore = useChannelStore();
+const utilStore = useUtilStore();
 
 const formData = ref({
   facilityGroupName: "",
@@ -64,8 +67,8 @@ const formData = ref({
 const selectedConfigFacilityId = ref("new");
 const facilityGroupId = ref("") as any;
 
-const eComStore = computed(() => store.getters["user/getCurrentEComStore"])
-const configFacilities = computed(() => store.getters["util/getConfigFacilities"])
+const eComStore = computed(() => userStore.getCurrentEComStore)
+const configFacilities = computed(() => utilStore.getConfigFacilities)
 
 function closeModal() {
   modalController.dismiss();
@@ -93,8 +96,8 @@ async function createGroup() {
   let resp = {} as any;
   try {
     // Creating a new inventory channel group.
-    resp = await ChannelService.createFacilityGroup({ ...formData.value, facilityGroupTypeId : "CHANNEL_FAC_GROUP" });
-    if(hasError(resp)) {
+    resp = await channelStore.createFacilityGroup({ ...formData.value, facilityGroupTypeId : "CHANNEL_FAC_GROUP" });
+    if(resp && hasError(resp)) {
       throw resp.data;
     }
 
@@ -107,34 +110,34 @@ async function createGroup() {
         parentFacilityTypeId : "VIRTUAL_FACILITY",
       }
 
-      resp = await ChannelService.createFacility(selectedConfigFacility);
-      if(!hasError(resp)) {
+      resp = await channelStore.createFacility(selectedConfigFacility) as any;
+      if(resp && !hasError(resp)) {
         selectedConfigFacility = {
           ...selectedConfigFacility,
           facilityId: resp.data.facilityId
         }
 
         // Associating the config facility with the product store.
-        resp = await ChannelService.updateFacilityAssociationWithProductStore({productStoreId: eComStore.value.productStoreId, facilityId: selectedConfigFacility.facilityId})
-        if(hasError(resp)) throw resp.data;
+        resp = await channelStore.updateFacilityAssociationWithProductStore({productStoreId: eComStore.value.productStoreId, facilityId: selectedConfigFacility.facilityId})
+        if(resp && hasError(resp)) throw resp.data;
       } else {
-        throw resp.data;
+        throw resp ? resp.data : "Failed to create facility";
       }
     } else {
       selectedConfigFacility = configFacilities.value.find((facility: any) => facility.facilityId === selectedConfigFacilityId.value)
     }
 
     // Associating the facility group with the product store.
-    resp = await ChannelService.updateGroupAssociationWithProductStore({productStoreId: eComStore.value.productStoreId, facilityGroupId: formData.value.facilityGroupId})
-    if(hasError(resp)) throw resp.data;
+    resp = await channelStore.updateGroupAssociationWithProductStore({productStoreId: eComStore.value.productStoreId, facilityGroupId: formData.value.facilityGroupId})
+    if(resp && hasError(resp)) throw resp.data;
 
     // Associating the config facility with the group.
-    resp = await ChannelService.updateFacilityAssociationWithGroup({facilityGroupId: formData.value.facilityGroupId, facilityId: selectedConfigFacility.facilityId})
-    if(hasError(resp)) throw resp.data;
+    resp = await channelStore.updateFacilityAssociationWithGroup({facilityGroupId: formData.value.facilityGroupId, facilityId: selectedConfigFacility.facilityId})
+    if(resp && hasError(resp)) throw resp.data;
 
     showToast(translate("Group has been created successfully."));
-    await store.dispatch("channel/fetchInventoryChannels");
-    await store.dispatch("util/fetchConfigFacilities");
+    await channelStore.fetchInventoryChannels();
+    await utilStore.fetchConfigFacilities();
     modalController.dismiss();
   } catch (error: any) {
     logger.error(error)

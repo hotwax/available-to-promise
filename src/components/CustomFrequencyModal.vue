@@ -37,9 +37,9 @@ import { IonButton, IonButtons, IonContent, IonFab, IonFabButton, IonHeader, Ion
 import { onMounted, ref } from "vue";
 import { closeOutline, saveOutline } from "ionicons/icons";
 import { translate } from "@hotwax/dxp-components";
-import { useStore } from "vuex";
+import { useChannelStore } from "@/store/channel";
 
-const store = useStore();
+const channelStore = useChannelStore();
 
 const customFrequencies = ref([]) as any;
 const frequencyId = ref("");
@@ -53,7 +53,7 @@ function closeModal() {
 }
 
 async function findFrequencies() {
-  customFrequencies.value = await store.dispatch("channel/findTemporalExpression");
+  customFrequencies.value = await channelStore.findTemporalExpression();
 }
 
 async function setFrequency() {
