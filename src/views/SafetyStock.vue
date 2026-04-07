@@ -43,14 +43,13 @@ import { useRouter } from "vue-router";
 import { computed, ref } from 'vue';
 import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
 import { useRuleStore } from '@/store/rule';
-import { useUtilStore } from '@/store/util';
-import { translate } from '@hotwax/dxp-components';
-import emitter from '@/event-bus';
-import { doReorder, showToast } from '@/utils';
+import { useProductStore } from '@/store/productStore';
+import { commonUtil, emitter, translate } from '@common';
+import { ruleUtil } from '@/utils/ruleUtil';
 import ArchivedRuleItem from '@/components/ArchivedRuleItem.vue';
 
 const ruleStore = useRuleStore();
-const utilStore = useUtilStore();
+const productStore = useProductStore();
 const router = useRouter()
 
 const rules = computed(() => ruleStore.getRules);
@@ -71,9 +70,9 @@ onIonViewDidLeave(() => {
 
 async function fetchRules() {
   emitter.emit("presentLoader");
-  utilStore.updateSelectedSegment("");
+  productStore.updateSelectedSegment("");
   ruleStore.updateIsReorderActive(false)
-  await Promise.allSettled([ruleStore.fetchRules({ groupTypeEnumId: 'RG_SAFETY_STOCK', pageSize: 50 }), utilStore.fetchConfigFacilities(), utilStore.fetchFacilityGroups()]);
+  await Promise.allSettled([ruleStore.fetchRules({ groupTypeEnumId: 'RG_SAFETY_STOCK', pageSize: 50 }), productStore.fetchConfigFacilities(), productStore.fetchFacilityGroups()]);
   emitter.emit("dismissLoader");
 }
 
@@ -86,7 +85,7 @@ async function saveReorder() {
   const diffRules = reorderingRules.value.filter((reorderRule: any) => rules.value.some((rule: any) => rule.ruleId === reorderRule.ruleId && rule.sequenceNum !== reorderRule.sequenceNum))
   if(!diffRules.length) {
     ruleStore.updateIsReorderActive(false)
-    showToast(translate("No sequence has been changed."))
+    commonUtil.showToast(translate("No sequence has been changed."))
     return;
   }
 
@@ -97,9 +96,9 @@ async function saveReorder() {
 
   const isFailedToUpdateSomeRule = responses.some((response: any) => response.status === 'rejected')
   if(isFailedToUpdateSomeRule) {
-    showToast(translate("Failed to update sequence for some rules."))
+    commonUtil.showToast(translate("Failed to update sequence for some rules."))
   } else {
-    showToast(translate("Sequence for rules updated successfully."))
+    commonUtil.showToast(translate("Sequence for rules updated successfully."))
   }
   emitter.emit("dismissLoader");
   await ruleStore.updateRules({ rules: reorderingRules.value })
@@ -107,7 +106,7 @@ async function saveReorder() {
 }
 
 function updateReorderingRules(event: any) {
-  reorderingRules.value = doReorder(event, reorderingRules.value)
+  reorderingRules.value = ruleUtil.doReorder(event, reorderingRules.value)
 }
 
 function createRule() {

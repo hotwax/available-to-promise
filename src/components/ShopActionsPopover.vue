@@ -24,22 +24,23 @@
 
 <script setup lang="ts">
 import { IonContent, IonIcon, IonItem, IonLabel, IonList, IonListHeader, alertController, modalController, popoverController } from "@ionic/vue";
-import { translate } from '@hotwax/dxp-components';
+import { logger, translate } from '@common';
 import { copyOutline, flashOutline, stopCircleOutline, timeOutline } from 'ionicons/icons'
 import { computed } from "vue";
 import JobHistoryModal from "@/components/JobHistoryModal.vue"
 import { Plugins } from '@capacitor/core';
-import { hasError, showToast } from "@/utils";
-import logger from "@/logger";
+import { commonUtil } from "@common";
+import { useProductStore } from "@/store/productStore";
 import { DateTime } from 'luxon';
 import { useUserStore } from "@/store/user";
 import { useChannelStore } from "@/store/channel";
 
 const userStore = useUserStore();
 const channelStore = useChannelStore();
+const productStore = useProductStore();
 
 const props = defineProps(["job"]);
-const currentEComStore = computed(() => userStore.getCurrentEComStore)
+const currentEComStore = computed(() => productStore.getCurrentEComStore)
 
 function closePopover() {
   popoverController.dismiss({ dismissed: true });
@@ -67,7 +68,7 @@ async function copyJobInformation() {
   await Clipboard.write({
     string: jobDetails
   }).then(() => {
-    showToast(translate("Copied to clipboard"));
+    commonUtil.showToast(translate("Copied to clipboard"));
   })
 
   closePopover();
@@ -84,7 +85,7 @@ async function disableJob() {
       text: translate("Cancel"),
       handler: async() => {
         if(isRuntimePassed()) {
-          showToast(translate("Job runtime has passed. Please refresh to get the latest job data in order to perform any action."))
+          commonUtil.showToast(translate("Job runtime has passed. Please refresh to get the latest job data in order to perform any action."))
           return;
         }
 
@@ -93,15 +94,15 @@ async function disableJob() {
             jobId: props.job.jobId
           }) as any;
 
-          if(resp && !hasError(resp)) {
-            showToast(translate("Successfully cancelled this job."))
+          if(resp && !commonUtil.hasError(resp)) {
+            commonUtil.showToast(translate("Successfully cancelled this job."))
             await channelStore.fetchJobs();
             closePopover();
           } else {
             throw resp ? resp.data : "Failed to cancel this job.";
           }
         } catch(error: any) {
-          showToast(translate("Failed to cancel this job."))
+          commonUtil.showToast(translate("Failed to cancel this job."))
           logger.error(error);
         }
       }
@@ -162,7 +163,7 @@ async function runServiceNow(job: any) {
   })
 
   // checking if the runtimeData has productStoreId, and if present then adding it on root level
-  job?.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = job.status === "SERVICE_PENDING" ? job.productStoreId : userStore.currentEComStore.productStoreId)
+  job?.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = job.status === "SERVICE_PENDING" ? job.productStoreId : currentEComStore.value.productStoreId)
   job?.priority && (payload['SERVICE_PRIORITY'] = job.priority.toString())
 
   // ShopifyConfig and ShopifyShop should be set based upon runtime data
@@ -170,7 +171,7 @@ async function runServiceNow(job: any) {
   const jobRunTimeDataKeys = job?.runtimeData ? Object.keys(job?.runtimeData) : [];
   if (jobRunTimeDataKeys.includes('shopifyConfigId') || jobRunTimeDataKeys.includes('shopId')) {
     if (job.status !== "SERVICE_PENDING" && !job.shopifyConfigId) {
-      showToast(translate('Shopify configuration not found. Scheduling failed.'))
+      commonUtil.showToast(translate('Shopify configuration not found. Scheduling failed.'))
       return;
     }
 
@@ -181,14 +182,14 @@ async function runServiceNow(job: any) {
 
   try {
     resp = await channelStore.scheduleJob({ ...payload }) as any;
-    if(resp && !hasError(resp)) {
-      showToast(translate("Service has been scheduled."))
+    if(resp && !commonUtil.hasError(resp)) {
+      commonUtil.showToast(translate("Service has been scheduled."))
       closePopover();
     } else {
       throw resp ? resp.data : "Failed to schedule service.";
     }
   } catch(err) {
-    showToast(translate("Failed to schedule service."))
+    commonUtil.showToast(translate("Failed to schedule service."))
     logger.error(err)
   }
 }

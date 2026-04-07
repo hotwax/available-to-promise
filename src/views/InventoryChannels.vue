@@ -83,7 +83,7 @@
                   <ion-card-subtitle class="overline">{{ job.shopifyConfigId }}</ion-card-subtitle>
                   <ion-card-title>{{ job.name ? job.name : job.shopifyConfigId }}</ion-card-title>
                 </div>
-                <ion-badge v-if="job.statusId === 'SERVICE_PENDING'" color="dark">{{ translate("running") }} {{ timeFromNow(job.runTime) }}</ion-badge>
+                <ion-badge v-if="job.statusId === 'SERVICE_PENDING'" color="dark">{{ translate("running") }} {{ commonUtil.getRelativeTime(job.runTime) }}</ion-badge>
               </ion-card-header>
 
               <ion-list>
@@ -98,7 +98,7 @@
                       <ion-datetime          
                         show-default-buttons
                         hour-cycle="h23"
-                        :value="job.runTimeValue ? (isCustomRunTime(job.runTimeValue) ? getDateTime(job.runTimeValue) : getDateTime(DateTime.now().toMillis() + job.runTimeValue)) : getNowTimestamp()"
+                        :value="job.runTimeValue ? (isCustomRunTime(job.runTimeValue) ? DateTime.fromMillis(job.runTimeValue).toISO() : DateTime.fromMillis(DateTime.now().toMillis() + job.runTimeValue).toISO()) : DateTime.now().toISO()"
                         @ionChange="updateCustomTime($event, job)"
                       />
                     </ion-content>
@@ -148,27 +148,26 @@
 import { IonBadge, IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonDatetime, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonItemDivider, IonLabel, IonList, IonMenuButton, IonModal, IonPage, IonSegment, IonSegmentButton, IonSelect, IonSelectOption, IonTitle, IonToolbar, modalController, onIonViewDidEnter, onIonViewWillLeave, alertController, popoverController } from '@ionic/vue';
 import { computed, ref } from 'vue';
 import { addOutline, albumsOutline, businessOutline, ellipsisVerticalOutline, globeOutline, optionsOutline, storefrontOutline, timeOutline, timerOutline } from 'ionicons/icons';
-import { translate } from '@hotwax/dxp-components';
+import { emitter, logger, translate } from '@common';
 import ShopActionsPopover from '@/components/ShopActionsPopover.vue'
 import CreateGroupModal from '@/components/CreateGroupModal.vue'
 import LinkFacilitiesToGroupModal from '@/components/LinkFacilitiesToGroupModal.vue'
 import LinkThresholdFacilitiesToGroupModal from '@/components/LinkThresholdFacilitiesToGroupModal.vue'
 import { useUserStore } from '@/store/user';
-import { useUtilStore } from '@/store/util';
+import { useProductStore } from '@/store/productStore';
 import { useChannelStore } from '@/store/channel';
 import EditGroupModal from '@/components/EditGroupModal.vue';
-import emitter from '@/event-bus';
 import { DateTime } from 'luxon';
 import CustomFrequencyModal from "@/components/CustomFrequencyModal.vue";
-import { hasError, hasJobDataError, showToast } from "@/utils";
-import logger from "@/logger";
+import { ruleUtil } from "@/utils/ruleUtil";
+import { commonUtil } from "@common";
 
 const userStore = useUserStore();
-const utilStore = useUtilStore();
+const productStore = useProductStore();
 const channelStore = useChannelStore();
 
 const inventoryChannels = computed(() => channelStore.getInventoryChannels)
-const selectedSegment = computed(() => utilStore.getSelectedSegment)
+const selectedSegment = computed(() => productStore.getSelectedSegment)
 const shopifyJobs = computed(() => channelStore.getJobs)
 const getTemporalExpr = computed(() => channelStore.getTemporalExpr)
 
@@ -223,8 +222,8 @@ onIonViewWillLeave(() => {
 
 async function fetchInventoryChannels() {
   emitter.emit("presentLoader");
-  if(!selectedSegment.value || (selectedSegment.value !== 'channels' && selectedSegment.value !== 'publish')) utilStore.updateSelectedSegment("channels");
-  await Promise.allSettled([channelStore.fetchInventoryChannels(), utilStore.fetchConfigFacilities()]);
+  if(!selectedSegment.value || (selectedSegment.value !== 'channels' && selectedSegment.value !== 'publish')) productStore.updateSelectedSegment("channels");
+  await Promise.allSettled([channelStore.fetchInventoryChannels(), productStore.fetchConfigFacilities()]);
   if(selectedSegment.value === "publish") {
     await Promise.allSettled([channelStore.fetchJobs(), channelStore.findTemporalExpression()]);
     generateFrequencyOptions();
@@ -290,7 +289,7 @@ function getFacilityCount(channel: any, facilityTypeId: string) {
 }
 
 async function updateSegment(event: any) {
-  await utilStore.updateSelectedSegment(event.detail.value);
+  await productStore.updateSelectedSegment(event.detail.value);
   if(selectedSegment.value === "publish") {
     await channelStore.fetchJobs();
     await channelStore.findTemporalExpression()
@@ -351,9 +350,7 @@ function generateRuntimeOptions() {
   shopifyJobs.value.map((job: any) => {
     if(job.statusId === "SERVICE_PENDING") {
       const selectedTime = runTimeOptions.find((option: any) => option.value === job.runTimeValue);
-      if(!selectedTime) {
-        runTimeOptions.push({ label: getTime(job.runTimeValue), value: job.runTimeValue })
-      }
+        runTimeOptions.push({ label: commonUtil.getDateAndTime(job.runTimeValue), value: job.runTimeValue })
     }
   })
   jobRuntimeOptions.value = runTimeOptions
@@ -371,12 +368,12 @@ function updateRunTime(event: CustomEvent, currentJob: any) {
 
 function updateCustomTime(event: CustomEvent, currentJob: any) {
   const currTime = DateTime.now().toMillis();
-  const setTime = handleDateTimeInput(event.detail.value);
+  const setTime = commonUtil.handleDateTimeInput(event.detail.value);
   if(setTime > currTime) {
     currentJob.runTimeValue = setTime
     generateRuntimeOptions()
   } else {
-    showToast(translate("Provide a future date and time"))
+    commonUtil.showToast(translate("Provide a future date and time"))
   }
 }
 
@@ -392,12 +389,12 @@ async function saveChanges(job: any) {
         text: translate("Save"),
         handler: async() => {
           if(isCustomRunTime(job.runTimeValue) && isRuntimePassed(job)) {
-            showToast(translate("Job runtime has passed. Please refresh to get the latest job data in order to perform any action."))
+            commonUtil.showToast(translate("Job runtime has passed. Please refresh to get the latest job data in order to perform any action."))
             return;
           }
 
           // return if job has missing data or error
-          if(hasJobDataError(job)) return;
+          if(ruleUtil.hasJobDataError(job)) return;
 
           job['jobStatus'] = job.tempExprId !== 'SERVICE_DRAFT' ? job.tempExprId : 'HOURLY';
 
@@ -427,7 +424,7 @@ async function scheduleService(job: any) {
     'SERVICE_TEMP_EXPR': job.jobStatus,
     'SERVICE_RUN_AS_SYSTEM':'Y',
     'jobFields': {
-      'productStoreId': userStore.currentEComStore.productStoreId,
+      'productStoreId': productStore.currentEComStore.productStoreId,
       'systemJobEnumId': job.systemJobEnumId,
       'tempExprId': job.jobStatus, // Need to remove this as we are passing frequency in SERVICE_TEMP_EXPR, currently kept it for backward compatibility
       'maxRecurrenceCount': '-1',
@@ -461,8 +458,8 @@ async function scheduleService(job: any) {
 
   try {
     resp = await channelStore.scheduleJob({ ...payload }) as any;
-    if (resp && resp.status == 200 && !hasError(resp)) {
-      showToast(translate("Service has been scheduled."));
+    if (resp && resp.status == 200 && !commonUtil.hasError(resp)) {
+      commonUtil.showToast(translate("Service has been scheduled."));
       await channelStore.fetchJobs();
       generateFrequencyOptions();
       generateRuntimeOptions();
@@ -470,7 +467,7 @@ async function scheduleService(job: any) {
       throw resp.data;
     }
   } catch (err) {
-    showToast(translate("Failed to schedule service."))
+    commonUtil.showToast(translate("Failed to schedule service."))
     logger.error(err)
   }
 }
@@ -491,8 +488,8 @@ async function updateJob(job: any) {
 
   try {
     const resp = await channelStore.updateJobApi(payload) as any;
-    if (resp && !hasError(resp)) {
-      showToast(translate("Service has been scheduled."))
+    if (resp && !commonUtil.hasError(resp)) {
+      commonUtil.showToast(translate("Service has been scheduled."))
       await channelStore.fetchJobs();
       generateFrequencyOptions();
       generateRuntimeOptions();
@@ -500,7 +497,7 @@ async function updateJob(job: any) {
       throw resp.data;
     }
   } catch(error: any) {
-    showToast(translate("Failed to schedule service."))
+    commonUtil.showToast(translate("Failed to schedule service."))
     logger.error(error)
   }
 }
@@ -509,30 +506,7 @@ function isRuntimePassed(currentJob: any) {
   return currentJob.runTimeValue && currentJob.runTimeValue <= DateTime.now().toMillis()
 }
 
-function handleDateTimeInput(dateTimeValue: any) {
-  // TODO Handle it in a better way
-  // Remove timezone and then convert to timestamp
-  // Current date time picker picks browser timezone and there is no supprt to change it
-  const dateTime = DateTime.fromISO(dateTimeValue, { setZone: true}).toFormat("yyyy-MM-dd'T'HH:mm:ss")
-  return DateTime.fromISO(dateTime).toMillis()
-}
 
-function getDateTime(time: any) {
-  return DateTime.fromMillis(time).toISO()
-}
-
-const getNowTimestamp = () => {
-  return DateTime.now().toISO();
-}
-
-function getTime (time: any) {
-  return DateTime.fromMillis(time).toLocaleString(DateTime.DATETIME_MED);
-}
-
-function timeFromNow(time: any) {
-  const timeDiff = DateTime.fromMillis(time).diff(DateTime.local());
-  return DateTime.local().plus(timeDiff).toRelative();
-}
 </script>
 
 <style scoped>

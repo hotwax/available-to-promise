@@ -18,9 +18,7 @@ import { IonAccordion, IonAccordionGroup, IonCard, IonBadge, IonItem, IonLabel, 
 import ArchivedRuleModal from "@/components/ArchivedRuleModal.vue";
 import { computed } from 'vue';
 import { useRuleStore } from '@/store/rule';
-import { translate } from '@hotwax/dxp-components';
-import { showToast } from '@/utils';
-import emitter from '@/event-bus';
+import { commonUtil, emitter, translate } from '@common';
 
 const ruleStore = useRuleStore();
 
@@ -48,7 +46,7 @@ async function openArchivedRuleModal() {
 
       const hasFailedResponses = responses.some((response: any) => response.status !== "fulfilled")
       if(hasFailedResponses) {
-        showToast(translate("Failed to unarchive some rules."))
+        commonUtil.showToast(translate("Failed to unarchive some rules."))
       }
       await ruleStore.fetchRules({ ruleGroupId: ruleGroup.value.ruleGroupId })
       emitter.emit("dismissLoader")

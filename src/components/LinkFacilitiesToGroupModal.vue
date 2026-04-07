@@ -44,19 +44,14 @@
 <script setup lang="ts">
 import { IonButton, IonButtons, IonCheckbox, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonSearchbar, IonSpinner, IonTitle, IonToolbar, modalController } from "@ionic/vue";
 import { closeOutline, saveOutline } from "ionicons/icons";
-import { translate } from '@hotwax/dxp-components';
+import { commonUtil, emitter, logger, translate } from '@common';
 import { onMounted, ref } from "vue";
-import { useUserStore } from "@/store/user";
 import { useChannelStore } from "@/store/channel";
-import { useUtilStore } from "@/store/util";
+import { useProductStore } from "@/store/productStore";
 import { DateTime } from "luxon";
-import { hasError, showToast } from "@/utils";
-import logger from "@/logger";
-import emitter from "@/event-bus";
 
-const userStore = useUserStore();
 const channelStore = useChannelStore();
-const utilStore = useUtilStore();
+const productStore = useProductStore();
 const queryString = ref('');
 const selectedFacilityValues = ref([]) as any;
 const isLoading = ref(false);
@@ -79,7 +74,7 @@ async function fetchFacilities () {
 
   try {
     let params = {
-      productStoreId: userStore.currentEComStore.productStoreId,
+      productStoreId: productStore.currentEComStore.productStoreId,
       pageSize: 20,
       parentFacilityTypeId: 'VIRTUAL_FACILITY',
       parentFacilityTypeId_not: 'Y',
@@ -95,9 +90,9 @@ async function fetchFacilities () {
       }
     }
 
-    const resp = await utilStore.fetchFacilitiesDirect(params) as any;
+    const resp = await productStore.fetchFacilitiesDirect(params) as any;
 
-    if(resp && !hasError(resp)) {
+    if(resp && !commonUtil.hasError(resp)) {
       facilities.value = resp.data;
     } else {
       throw resp ? resp.data : "Failed to fetch facilities";
@@ -150,11 +145,11 @@ async function saveFacilities() {
 
   const hasFailedResponse = [...removeResponses, ...addResponses].some((response: any) => response.status === 'rejected')
   if(hasFailedResponse) {
-    showToast(translate("Failed to associate some facilites to group."))
+    commonUtil.showToast(translate("Failed to associate some facilites to group."))
   } else {
-    showToast(translate("Facilities associated to group successfully."))
+    commonUtil.showToast(translate("Facilities associated to group successfully."))
+    await channelStore.fetchGroupFacilities(props.group.facilityGroupId);
   }
-  await channelStore.fetchGroupFacilities(props.group.facilityGroupId);
   modalController.dismiss()  
   emitter.emit("dismissLoader");
 }

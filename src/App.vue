@@ -10,34 +10,15 @@
 <script setup lang="ts">
 import { IonApp, IonRouterOutlet, IonSplitPane, loadingController } from '@ionic/vue';
 import { computed, onBeforeMount, onMounted, onUnmounted, ref } from 'vue';
-import emitter from "@/event-bus"
 import { Settings } from 'luxon'
 import Menu from '@/components/Menu.vue';
 import { useUserStore } from "@/store/user";
-import { translate } from '@hotwax/dxp-components';
-import { initialise, resetConfig } from '@/adapter'
+import { translate, emitter } from '@common';
 
 const userStore = useUserStore();
 const userProfile = computed(() => userStore.getUserProfile)
-const userToken = computed(() => userStore.getUserToken)
-const instanceUrl = computed(() => userStore.getInstanceUrl)
 
 const loader = ref(null) as any
-const maxAge = import.meta.env.VITE_CACHE_MAX_AGE ? parseInt(import.meta.env.VITE_CACHE_MAX_AGE) : 0
-
-initialise({
-  token: userToken.value,
-  instanceUrl: instanceUrl.value,
-  cacheMaxAge: maxAge,
-  events: {
-    responseError: () => {
-      setTimeout(() => dismissLoader(), 100);
-    },
-    queueTask: (payload: any) => {
-      emitter.emit("queueTask", payload);
-    }
-  }
-})
 
 async function presentLoader(options = { message: '', backdropDismiss: true }) {
   // When having a custom message remove already existing loader
@@ -62,8 +43,8 @@ function dismissLoader() {
 }
 
 onBeforeMount(() => {
-  emitter.on('presentLoader', presentLoader);
-  emitter.on('dismissLoader', dismissLoader);
+  emitter.on('presentLoader', presentLoader as any);
+  emitter.on('dismissLoader', dismissLoader as any);
 })
 
 onMounted(async () => {
@@ -75,9 +56,7 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  emitter.off("presentLoader", presentLoader);
-  emitter.off("dismissLoader", dismissLoader);
-
-  resetConfig()
+  emitter.off("presentLoader", presentLoader as any);
+  emitter.off("dismissLoader", dismissLoader as any);
 })
 </script>

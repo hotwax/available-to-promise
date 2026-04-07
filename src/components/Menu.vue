@@ -64,12 +64,15 @@
   } from "@ionic/vue";
   import { computed } from "vue";
   import { useUserStore } from "@/store/user";
+  import { useProductStore } from "@/store/productStore";
   import { useRouter } from "vue-router";
   import { cloudUploadOutline, globeOutline, settingsOutline, sendOutline, storefrontOutline, pulseOutline } from 'ionicons/icons';
-  import { translate } from "@hotwax/dxp-components";
-  import emitter from "@/event-bus";
+  import { translate, emitter, commonUtil, cookieHelper } from "@common";
+  import { useAuth } from "@/composables/useAuth";
 
   const userStore = useUserStore();
+  const productStore = useProductStore();
+  const { isAuthenticated } = useAuth();
   const router = useRouter();
   const appPages = [
         {
@@ -115,9 +118,10 @@
       ];
 
   const userProfile = computed(() => userStore.getUserProfile)
-  const isUserAuthenticated = computed(() => userStore.isUserAuthenticated)
-  const eComStore = computed(() => userStore.getCurrentEComStore)
-  const instanceUrl = computed(() => userStore.getInstanceUrl)
+  const userToken = computed(() => cookieHelper().get("token"))
+  const isUserAuthenticated = computed(() => isAuthenticated.value)
+  const eComStore = computed(() => productStore.getCurrentEComStore)
+  const instanceUrl = computed(() => commonUtil.getOmsURL())
   const selectedIndex = computed(() => {
     const path = router.currentRoute.value.path;
     return appPages.findIndex((screen) => screen.url === path || screen.childRoutes?.includes(path) || screen.childRoutes?.some((route) => path.includes(route)));
@@ -143,7 +147,7 @@
             {
               text: translate("Yes"),
               handler: async () => {
-                await userStore.setEcomStore({
+                await productStore.setEcomStore({
                   "productStoreId": event.detail.value
                 })
                 emitter.emit("productStoreOrConfigChanged")
@@ -154,7 +158,7 @@
 
         alert.present();
       } else {
-        userStore.setEcomStore({
+        productStore.setEcomStore({
           "productStoreId": event.detail.value
         })
         emitter.emit("productStoreOrConfigChanged")

@@ -125,23 +125,22 @@ import { IonAccordion, IonAccordionGroup, IonButton, IonCard, IonCardHeader, Ion
 import { computed, onMounted, ref } from 'vue';
 import { archiveOutline, checkmarkDoneCircleOutline, closeCircleOutline, globeOutline, pulseOutline, sendOutline, shirtOutline, storefrontOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
-import { translate } from '@hotwax/dxp-components';
+import { emitter, logger, translate } from '@common';
 import { useRuleStore } from '@/store/rule';
-import { useUtilStore } from '@/store/util';
-import { showToast } from '@/utils';
-import logger from '@/logger';
-import emitter from '@/event-bus';
+import { useProductStore } from '@/store/productStore';
+import { commonUtil } from '@common';
 
 const router = useRouter();
 const ruleStore = useRuleStore();
-const utilStore = useUtilStore();
+const productStore = useProductStore();
 
 const props = defineProps(["rule", "ruleIndex"])
+const currentEComStore = computed(() => productStore.getCurrentEComStore)
 const total = computed(() => ruleStore.getTotalRulesCount)
-const configFacilities = computed(() => utilStore.getConfigFacilities)
-const facilityGroups = computed(() => utilStore.getFacilityGroups)
+const configFacilities = computed(() => productStore.getConfigFacilities)
+const facilityGroups = computed(() => productStore.getFacilityGroups)
 const isReorderActive = computed(() => ruleStore.isReorderActive);
-const selectedSegment = computed(() => utilStore.getSelectedSegment)
+const selectedSegment = computed(() => productStore.getSelectedSegment)
 
 const selectedPage = ref({
   path: '',
@@ -177,7 +176,7 @@ async function editThreshold() {
       text: translate('Update'),
       handler: async(data) => {
         if(!data.threshold || data.threshold < 0) {
-          showToast(translate("Threshold should be greater than or equal to 0."));
+          commonUtil.showToast(translate("Threshold should be greater than or equal to 0."));
           return false;
         }
 
@@ -201,10 +200,10 @@ async function editThreshold() {
         try {
           await ruleStore.updateRuleApi(rule, props.rule.ruleId)
           await ruleStore.updateRuleData({ rule })
-          showToast(translate("Threshold updated successfully."))
+          commonUtil.showToast(translate("Threshold updated successfully."))
           alertController.dismiss()
         } catch(err: any) {
-          showToast(translate("Failed to update threshold."))
+          commonUtil.showToast(translate("Failed to update threshold."))
           logger.error(err);
         }
         emitter.emit("dismissLoader");
@@ -239,7 +238,7 @@ async function editSafetyStock() {
       text: translate('Update'),
       handler: async (data: any) => {
         if(!data.safetyStock || data.safetyStock < 0) {
-          showToast(translate("Safety stock should be greater than or equal to 0."));
+          commonUtil.showToast(translate("Safety stock should be greater than or equal to 0."));
           return false;
         }
 
@@ -263,10 +262,10 @@ async function editSafetyStock() {
         try {
           await ruleStore.updateRuleApi(rule, props.rule.ruleId)
           await ruleStore.updateRuleData({ rule })
-          showToast(translate("Safety stock updated successfully."))
+          commonUtil.showToast(translate("Safety stock updated successfully."))
           alertController.dismiss()
         } catch(err: any) {
-          showToast(translate("Failed to update safety stock."))
+          commonUtil.showToast(translate("Failed to update safety stock."))
           logger.error(err);
         }
         emitter.emit("dismissLoader");
@@ -336,10 +335,10 @@ async function archiveRule() {
           try {
             await ruleStore.updateRuleApi(rule, props.rule.ruleId)
             await ruleStore.fetchRules({ ruleGroupId: props.rule.ruleGroupId })
-            showToast(translate("Rule archived successfully."))
+            commonUtil.showToast(translate("Rule archived successfully."))
             alertController.dismiss()
           } catch(err: any) {
-            showToast(translate("Failed to update threhold."))
+            commonUtil.showToast(translate("Failed to update threhold."))
             logger.error(err);
           }
           emitter.emit("dismissLoader");
@@ -370,12 +369,12 @@ async function updateRulePickup(event: any) {
     })
 
     await ruleStore.updateRuleApi(rule, props.rule.ruleId)
-    showToast(translate("Rule pickup updated successfully."))
+    commonUtil.showToast(translate("Rule pickup updated successfully."))
     await ruleStore.updateRuleData({ rule })
     event.target.checked = isChecked
   } catch(err) {
     logger.error(err)
-    showToast(translate("Failed to update rule pickup."))
+    commonUtil.showToast(translate("Failed to update rule pickup."))
   }
   emitter.emit("dismissLoader");
 }
@@ -392,12 +391,12 @@ async function updateRuleShipping(event: any) {
     })
 
     await ruleStore.updateRuleApi(rule, props.rule.ruleId)
-    showToast(translate("Rule shipping updated successfully."))
+    commonUtil.showToast(translate("Rule shipping updated successfully."))
     await ruleStore.updateRuleData({ rule })
     event.target.checked = isChecked
   } catch(err) {
     logger.error(err)
-    showToast(translate("Failed to update rule brokering."))
+    commonUtil.showToast(translate("Failed to update rule brokering."))
   }
   emitter.emit("dismissLoader");
 }

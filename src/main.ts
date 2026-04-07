@@ -2,8 +2,6 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router';
 import { DateTime } from 'luxon';
-import logger from './logger';
-
 
 import { IonicVue } from '@ionic/vue';
 
@@ -29,13 +27,8 @@ import './theme/variables.css';
 
 import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
-import { dxpComponents } from "@hotwax/dxp-components"
-import { login, logout, loader } from "@/user-utils";
-import { getConfig, initialise ,getAvailableTimeZones } from '@/adapter';
+import { createDxpI18n, logger } from "@common"
 import localeMessages from './locales';
-import permissionPlugin from '@/authorization';
-import permissionRules from '@/authorization/Rules';
-import permissionActions from '@/authorization/Actions';
 import { useUserStore } from './store/user'
 
 const pinia = createPinia();
@@ -46,26 +39,12 @@ const app = createApp(App)
     mode: 'md',
     innerHTMLTemplatesEnabled: true
   })
-  .use(logger, {
+  .use(logger as any, {
     level: import.meta.env.VITE_DEFAULT_LOG_LEVEL
   })
   .use(router)
   .use(pinia)
-  .use(permissionPlugin, {
-    rules: permissionRules,
-    actions: permissionActions
-  })
-  .use(dxpComponents, {
-    defaultImgUrl: new URL("@/assets/images/defaultImage.png", import.meta.url).href,
-    login,
-    logout,
-    loader,
-    appLoginUrl: import.meta.env.VITE_LOGIN_URL as string,
-    getConfig,
-    initialise,
-    localeMessages,
-    getAvailableTimeZones,
-  });
+  .use(createDxpI18n(localeMessages));
 
 // Filters are removed in Vue 3 and global filter introduced https://v3.vuejs.org/guide/migration/filters.html#global-filters
 app.config.globalProperties.$filters = {

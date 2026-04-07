@@ -1,8 +1,6 @@
 import { defineStore } from 'pinia'
-import api from '@/api'
-import { hasError } from '@/utils'
-import logger from '@/logger'
-import { useUserStore } from './user'
+import { api, logger, commonUtil } from '@common'
+import { useProductStore } from '@/store/productStore'
 
 export interface RuleState {
   rules: {
@@ -33,21 +31,21 @@ export const useRuleStore = defineStore('rule', {
   },
   actions: {
     async fetchRuleGroup(payload: any) {
-      const userStore = useUserStore()
+      const productStore = useProductStore()
       let ruleGroup = {} as any;
       try {
         const resp = await api({
           url: "available-to-promise/ruleGroups",
           method: "GET",
-          params: { ...payload, productStoreId: userStore.currentEComStore.productStoreId, statusId: "ATP_RG_ACTIVE" }
+          params: { ...payload, productStoreId: productStore.currentEComStore.productStoreId, statusId: "ATP_RG_ACTIVE" }
         }) as any;
-        if (resp && !hasError(resp) && resp.data.length) {
+        if (resp && !commonUtil.hasError(resp) && resp.data.length) {
           ruleGroup = resp.data[0]
           const scheduleResp = await api({
             url: `available-to-promise/ruleGroups/${ruleGroup.ruleGroupId}/schedule`,
             method: "GET"
           }) as any;
-          if (scheduleResp && !hasError(scheduleResp) && scheduleResp.data?.schedule) {
+          if (scheduleResp && !commonUtil.hasError(scheduleResp) && scheduleResp.data?.schedule) {
             ruleGroup.schedule = scheduleResp.data.schedule
           }
         } else {
@@ -85,7 +83,7 @@ export const useRuleStore = defineStore('rule', {
           }
         }) as any;
 
-        if (!hasError(resp)) {
+        if (!commonUtil.hasError(resp)) {
           rules = resp.data.filter((rule: any) => rule.statusId === "ATP_RULE_ACTIVE")
           archivedRules = resp.data.filter((rule: any) => rule.statusId === "ATP_RULE_ARCHIVED")
         } else {
@@ -132,7 +130,7 @@ export const useRuleStore = defineStore('rule', {
           data: payload
         }) as any;
         
-        if(resp && !hasError(resp)) {
+        if(resp && !commonUtil.hasError(resp)) {
           return resp.data;
         } else {
           throw resp.data
@@ -150,7 +148,7 @@ export const useRuleStore = defineStore('rule', {
           data: payload
         }) as any;
     
-        if(resp && !hasError(resp)) {
+        if(resp && !commonUtil.hasError(resp)) {
           return resp.data;
         } else {
           throw resp.data
@@ -202,7 +200,7 @@ export const useRuleStore = defineStore('rule', {
           data: payload
         }) as any;
         
-        if(resp && !hasError(resp)) {
+        if(resp && !commonUtil.hasError(resp)) {
           return resp;
         } else {
           throw resp.data

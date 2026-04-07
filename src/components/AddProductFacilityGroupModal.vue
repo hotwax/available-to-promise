@@ -57,15 +57,15 @@ import {
   modalController
 } from "@ionic/vue";
 import { closeOutline, saveOutline } from 'ionicons/icons';
-import { useUtilStore } from "@/store/util";
-import { translate } from '@hotwax/dxp-components';
+import { useProductStore } from "@/store/productStore";
+import { translate } from '@common';
 
 const selectedGroups = ref([]) as any;
 
 const props = defineProps(["selectedFacilityGroups", "type"]);
-const utilStore = useUtilStore();
+const productStore = useProductStore();
 
-const facilityGroups = computed(() => utilStore.getFacilityGroups)
+const facilityGroups = computed(() => productStore.getFacilityGroups)
 
 onMounted(() => {
   selectedGroups.value = JSON.parse(JSON.stringify(props.selectedFacilityGroups[props.type]))

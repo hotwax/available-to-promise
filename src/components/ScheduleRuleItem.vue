@@ -5,14 +5,14 @@
       <ion-card slot="content">
         <ion-card-header>
           <ion-card-title>{{ translate("Schedule") }}</ion-card-title>
-          <ion-badge :color="ruleGroup.schedule?.paused === 'Y' ? 'warning' : 'dark'">{{ ruleGroup.schedule?.paused === "Y" ? translate("Paused") : timeTillJob(ruleGroup.schedule?.nextExecutionDateTime) }}</ion-badge>
+          <ion-badge :color="ruleGroup.schedule?.paused === 'Y' ? 'warning' : 'dark'">{{ ruleGroup.schedule?.paused === "Y" ? translate("Paused") : commonUtil.getRelativeTime(ruleGroup.schedule?.nextExecutionDateTime) }}</ion-badge>
         </ion-card-header>
 
         <ion-item>
           <ion-icon slot="start" :icon="timeOutline"/>
           <ion-label>{{ translate("Run time") }}</ion-label>
           <!-- When the group is in draft status, do not display the runTime from the schedule -->
-          <ion-label slot="end">{{ ruleGroup.schedule?.paused === 'N' ? getDateAndTime(ruleGroup.schedule?.nextExecutionDateTime) : "-" }}</ion-label>
+          <ion-label slot="end">{{ ruleGroup.schedule?.paused === 'N' ? commonUtil.getDateAndTime(ruleGroup.schedule?.nextExecutionDateTime) : "-" }}</ion-label>
         </ion-item>
         <ion-item lines="full">
           <ion-icon slot="start" :icon="timerOutline"/>
@@ -35,15 +35,13 @@
 
 <script setup lang="ts">
 import { IonAccordion, IonAccordionGroup, IonBadge, IonButton, IonCard, IonCardHeader, IonCardTitle, IonIcon, IonItem, IonLabel, IonSelect, IonSelectOption, popoverController } from '@ionic/vue';
-import { translate } from '@hotwax/dxp-components';
+import { emitter, logger, translate } from '@common';
 import { ellipsisVerticalOutline, timeOutline, timerOutline } from 'ionicons/icons';
 import ScheduleActionsPopover from "@/components/ScheduleActionsPopover.vue";
 import { computed } from 'vue';
-import { getDateAndTime, hasError, showToast } from '@/utils'
+import { commonUtil } from '@common'
 import { useRuleStore } from '@/store/rule';
-import logger from '@/logger';
 import { DateTime } from 'luxon';
-import emitter from '@/event-bus';
 
 const ruleStore = useRuleStore();
 const ruleGroup = computed(() => ruleStore.getRuleGroup);
@@ -74,26 +72,20 @@ async function saveSchedule() {
   emitter.emit("presentLoader");
   try {
     const resp = await ruleStore.scheduleRuleGroup(payload)
-    if(!hasError(resp)) {
-      showToast(translate("Service has been scheduled."))
+    if(!commonUtil.hasError(resp)) {
+      commonUtil.showToast(translate("Service has been scheduled."))
       await ruleStore.fetchRules({ groupTypeEnumId: ruleGroup.value.groupTypeEnumId, pageSize: 50 })
     } else {
       throw resp.data
     }
   } catch(err) {
-    showToast(translate("Failed to schedule service."))
+    commonUtil.showToast(translate("Failed to schedule service."))
     logger.error(err)
   }
   emitter.emit("dismissLoader");
 }
 
-function timeTillJob(time: any) {
-  if(!time) {
-    return;
-  }
-  const timeDiff = DateTime.fromMillis(time).diff(DateTime.local());
-  return DateTime.local().plus(timeDiff).toRelative();
-}
+
 
 </script>
 

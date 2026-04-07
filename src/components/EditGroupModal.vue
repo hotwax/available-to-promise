@@ -33,12 +33,10 @@
 <script setup lang="ts">
 import { IonButton, IonButtons, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonList, IonText, IonTextarea, IonTitle, IonToolbar, modalController } from "@ionic/vue";
 import { closeOutline, saveOutline } from "ionicons/icons";
-import { translate } from '@hotwax/dxp-components';
+import { emitter, logger, translate } from '@common';
 import { onMounted, ref } from "vue";
-import logger from "@/logger";
-import { hasError, showToast } from "@/utils";
+import { commonUtil } from "@common";
 import { useChannelStore } from "@/store/channel";
-import emitter from "@/event-bus";
 
 const props = defineProps(["group"]);
 const channelStore = useChannelStore();
@@ -58,7 +56,7 @@ function isGroupUpdated() {
 
 async function updateGroup() {
   if (!formData.value.facilityGroupName?.trim()) {
-    showToast(translate("Please fill in all the required fields."))
+    commonUtil.showToast(translate("Please fill in all the required fields."))
     return;
   }
 
@@ -66,15 +64,15 @@ async function updateGroup() {
   try {
     const resp = await channelStore.updateGroupApi({...formData.value, facilityGroupId: props.group.facilityGroupId}) as any;
 
-    if(resp && !hasError(resp)) {
+    if(resp && !commonUtil.hasError(resp)) {
       channelStore.updateGroup({ facilityGroupId: props.group.facilityGroupId, ...formData.value })
-      showToast(translate("Group updated successfully."))
+      commonUtil.showToast(translate("Group updated successfully."))
       modalController.dismiss();
     } else {
       throw resp ? resp.data : "Failed to update group";
     }
   } catch(err) {
-    showToast(translate("Failed to update group."))
+    commonUtil.showToast(translate("Failed to update group."))
     logger.error(err);
   }
   emitter.emit("dismissLoader");

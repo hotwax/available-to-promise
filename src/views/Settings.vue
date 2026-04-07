@@ -23,7 +23,7 @@
             </ion-card-header>
           </ion-item>
           <ion-button color="danger" @click="logout()">{{ translate("Logout") }}</ion-button>
-          <ion-button :standalone-hidden="!hasPermission(Actions.APP_PWA_STANDALONE_ACCESS)" fill="outline" @click="goToLaunchpad()">
+          <ion-button :standalone-hidden="!userStore.hasPermission('COMMON_ADMIN')" fill="outline" @click="goToLaunchpad()">
             {{ translate("Go to Launchpad") }}
             <ion-icon slot="end" :icon="openOutline" />
           </ion-button>
@@ -33,23 +33,7 @@
         <h1>{{ translate('OMS') }}</h1>
       </div>
       <section>
-        <ion-card>
-          <ion-card-header>
-            <ion-card-subtitle>
-              {{ translate('OMS instance') }}
-            </ion-card-subtitle>
-            <ion-card-title>
-              {{ oms }}
-            </ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            {{ translate('This is the name of the OMS you are connected to right now. Make sure that you are connected to the right instance before proceeding.') }}
-          </ion-card-content>
-          <ion-button :disabled="!omsRedirectionInfo.token || !omsRedirectionInfo.url || !hasPermission(Actions.APP_COMMERCE_VIEW)" @click="goToOms(omsRedirectionInfo.token, omsRedirectionInfo.url)" fill="clear">
-            {{ translate('Go to OMS') }}
-            <ion-icon slot="end" :icon="openOutline" />
-          </ion-button>
-        </ion-card>
+        <DxpOmsInstanceNavigator />
 
         <ion-card>
           <ion-card-header>
@@ -75,31 +59,7 @@
       <DxpAppVersionInfo />
 
       <section>
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title>
-              {{ translate('Timezone') }}
-            </ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            {{ translate('The timezone you select is used to ensure automations you schedule are always accurate to the time you select.') }}
-          </ion-card-content>
-          <ion-item v-if="showBrowserTimeZone">
-            <ion-label>
-              <p class="overline">{{ translate("Browser TimeZone") }}</p>
-              {{ browserTimeZone.id }}
-              <p v-if="showDateTime">{{ getCurrentTime(browserTimeZone.id, dateTimeFormat) }}</p>
-            </ion-label>
-          </ion-item>
-          <ion-item lines="none">
-            <ion-label>
-              <p class="overline">{{ translate("Selected TimeZone") }}</p>
-              {{ currentTimeZoneId }}
-              <p v-if="showDateTime">{{ getCurrentTime(currentTimeZoneId, dateTimeFormat) }}</p>
-            </ion-label>
-            <ion-button @click="changeTimeZone()" slot="end" fill="outline" color="dark">{{ translate("Change") }}</ion-button>
-          </ion-item>
-        </ion-card>
+        <DxpTimeZoneSwitcher />
       </section>
     </ion-content>
   </ion-page>
@@ -111,24 +71,20 @@ import { computed, ref } from 'vue';
 import { openOutline } from 'ionicons/icons'
 import { useUserStore } from '@/store/user';
 import { useRuleStore } from '@/store/rule';
-import TimeZoneModal from '@/views/TimezoneModal.vue';
+import { useProductStore } from '@/store/productStore';
 import Image from '@/components/Image.vue'
-import { goToOms, translate } from "@hotwax/dxp-components";
-import {getCurrentTime} from "../utils"
-import { hasPermission, Actions } from '@/authorization';
+import { translate } from "@common";
+import DxpAppVersionInfo from '@/components/DxpAppVersionInfo.vue';
+import DxpOmsInstanceNavigator from '@/components/DxpOmsInstanceNavigator.vue';
+import DxpTimeZoneSwitcher from '@/components/DxpTimeZoneSwitcher.vue';
+import { useAuth } from '@/composables/useAuth';
 
 const userStore = useUserStore()
 const ruleStore = useRuleStore()
+const { logout: authLogout } = useAuth();
 
 const userProfile = computed(() => userStore.getUserProfile)
-const currentEComStore = computed(() => userStore.getCurrentEComStore)
-const oms = computed(() => userStore.getInstanceUrl)
-const omsRedirectionInfo = computed(() => userStore.getOmsRedirectionInfo)
-const currentTimeZoneId = computed(() => userProfile.value.timeZone)
-const browserTimeZone = ref({
-  label: '',
-  id: Intl.DateTimeFormat().resolvedOptions().timeZone
-})
+const currentEComStore = computed(() => useProductStore().getCurrentEComStore)
 const props = defineProps({
   showBrowserTimeZone: {
     type: Boolean,
@@ -145,26 +101,16 @@ const props = defineProps({
 })
 
 function setEComStore(event: CustomEvent) {
-  if(userProfile.value?.stores) {
-    userStore.setEcomStore({
+  if (userProfile.value?.stores) {
+    useProductStore().setEcomStore({
       "productStoreId": event.detail.value
     })
     ruleStore.clearRuleState()
   }
 }
 
-async function changeTimeZone() {
-  const timeZoneModal = await modalController.create({
-    component: TimeZoneModal,
-  });
-  return timeZoneModal.present();
-}
-
-function logout() {
-  userStore.logout().then(() => {
-    const redirectUrl = window.location.origin + '/login'
-    window.location.href = `${import.meta.env.VITE_LOGIN_URL}?isLoggedOut=true&redirectUrl=${redirectUrl}`
-  })
+async function logout() {
+  await authLogout();
 }
 
 function goToLaunchpad() {

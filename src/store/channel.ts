@@ -1,9 +1,8 @@
 import { defineStore } from 'pinia'
-import api, { client } from '@/api'
-import { hasError } from '@/utils'
-import logger from '@/logger'
-import { useUserStore } from './user'
+
+import { useProductStore } from '@/store/productStore'
 import { DateTime } from 'luxon'
+import { api, commonUtil, logger } from '@common'
 
 export interface ChannelState {
   inventoryChannels: any[];
@@ -27,15 +26,15 @@ export const useChannelStore = defineStore('channel', {
   },
   actions: {
     async fetchInventoryChannels() {
-      const userStore = useUserStore()
+      const productStore = useProductStore()
       let inventoryChannels = [] as any
       try {
         const resp = await api({
-          url: `admin/productStores/${userStore.currentEComStore.productStoreId}/facilityGroups`,
+          url: `admin/productStores/${productStore.currentEComStore.productStoreId}/facilityGroups`,
           method: "GET",
-          params: { facilityGroupTypeId: "CHANNEL_FAC_GROUP", productStoreId: userStore.currentEComStore.productStoreId, pageSize: 50 }
+          params: { facilityGroupTypeId: "CHANNEL_FAC_GROUP", productStoreId: productStore.currentEComStore.productStoreId, pageSize: 50 }
         }) as any;
-        if (!hasError(resp)) {
+        if (!commonUtil.hasError(resp)) {
           inventoryChannels = resp?.data;
         } else {
           throw resp.data
@@ -55,7 +54,7 @@ export const useChannelStore = defineStore('channel', {
             method: "GET",
             params: { facilityGroupId, pageSize: 100 }
           }) as any;
-          if (!hasError(resp)) {
+          if (!commonUtil.hasError(resp)) {
             const currentGroup = groups.find((group: any) => group.facilityGroupId === facilityGroupId)
             currentGroup.selectedConfigFacility = await resp.data.find((facility: any) => facility.facilityTypeId === "CONFIGURATION")
             currentGroup.selectedFacilities = await resp.data.filter((facility: any) => facility.parentFacilityTypeId !== "VIRTUAL_FACILITY" && facility.facilityTypeId !== "VIRTUAL_FACILITY")
@@ -73,7 +72,7 @@ export const useChannelStore = defineStore('channel', {
               method: "GET",
               params: { facilityGroupId: group.facilityGroupId, pageSize: 100 }
             }) as any;
-            if (!hasError(resp)) {
+            if (!commonUtil.hasError(resp)) {
               group.selectedConfigFacility = await resp.data.find((facility: any) => facility.facilityTypeId === "CONFIGURATION")
               group.selectedFacilities = await resp.data.filter((facility: any) => (facility.parentFacilityTypeId !== "VIRTUAL_FACILITY" && facility.facilityTypeId !== "VIRTUAL_FACILITY"))
             } else {
@@ -96,15 +95,15 @@ export const useChannelStore = defineStore('channel', {
       this.inventoryChannels = groups;
     },
     async fetchShopifyConfigs() {
-      const userStore = useUserStore()
+      const productStore = useProductStore()
       let shopifyConfigs = [];
       try {
         const resp = await api({
           url: "admin/shopifyShops",
           method: "get",
-          params: { productStoreId: userStore.currentEComStore.productStoreId }
+          params: { productStoreId: productStore.currentEComStore.productStoreId }
         }) as any;
-        if (!hasError(resp)) {
+        if (!commonUtil.hasError(resp)) {
           shopifyConfigs = resp.data;
         } else {
           throw resp.data
@@ -115,7 +114,7 @@ export const useChannelStore = defineStore('channel', {
       return shopifyConfigs;
     },
     async fetchJobs() {
-      const userStore = useUserStore()
+      const productStore = useProductStore()
       const shopifyConfigs = await this.fetchShopifyConfigs();
       if (!shopifyConfigs.length) {
         this.jobs = [];
@@ -131,20 +130,13 @@ export const useChannelStore = defineStore('channel', {
         noConditionFind: "Y",
         viewSize: 1
       }
-      const userStoreInstance = useUserStore();
-      const omsRedirectionInfo = userStoreInstance.getOmsRedirectionInfo
-      const baseURL = userStoreInstance.getOmsBaseUrl
-      
+
       const fetchJobsData = async (payload: any) => {
-        const resp = await client({
+        const resp = await api({
           url: "findJobs",
           method: "post",
-          baseURL,
-          data: payload,
-          headers: {
-            "Authorization":  'Bearer ' + omsRedirectionInfo.token,
-            'Content-Type': 'application/json'
-          }
+          baseURL: commonUtil.getOmsURL(),
+          data: payload
         }) as any;
         return resp.data?.docs || [];
       }
@@ -155,7 +147,7 @@ export const useChannelStore = defineStore('channel', {
         inputFields: {
           statusId: "SERVICE_PENDING",
           systemJobEnumId: "JOB_UL_INV",
-          "productStoreId": userStore.currentEComStore.productStoreId,
+          "productStoreId": productStore.currentEComStore.productStoreId,
         } as any,
         fieldList: ["systemJobEnumId", "runTime", "tempExprId", "parentJobId", "serviceName", "jobId", "jobName", "currentRetryCount", "statusId", "productStoreId", "runtimeDataId", "shopId", "description", "enumTypeId", "enumName"],
         noConditionFind: "Y"
@@ -179,11 +171,7 @@ export const useChannelStore = defineStore('channel', {
     async getServiceStatusDesc() {
       let statusDescs = [];
       try {
-        const userStoreInstance = useUserStore();
-        const omsRedirectionInfo = userStoreInstance.getOmsRedirectionInfo
-        const baseURL = userStoreInstance.getOmsBaseUrl
-
-        const resp = await client({
+        const resp = await api({
           url: "performFind",
           method: "post",
           data: {
@@ -196,14 +184,10 @@ export const useChannelStore = defineStore('channel', {
             "noConditionFind": "Y",
             "viewSize": 20
           },
-          baseURL,
-          headers: {
-            "Authorization":  'Bearer ' + omsRedirectionInfo.token,
-            'Content-Type': 'application/json'
-          },
+          baseURL: commonUtil.getOmsURL(),
           cache: true
         }) as any;
-        if (!hasError(resp)) {
+        if (!commonUtil.hasError(resp)) {
           statusDescs = resp.data.docs;
         } else {
           throw resp.data;
@@ -217,14 +201,11 @@ export const useChannelStore = defineStore('channel', {
     },
     async findTemporalExpression() {
       let temporalExpressions = [];
-      const userStoreInstance = useUserStore();
-      const omsRedirectionInfo = userStoreInstance.getOmsRedirectionInfo
-      const baseURL = userStoreInstance.getOmsBaseUrl
 
-      const resp = await client({
+      const resp = await api({
         url: "performFind",
         method: "post",
-        baseURL,
+        baseURL: commonUtil.getOmsURL(),
         data: {
           "inputFields": { "tempExprTypeId": "FREQUENCY" },
           "viewSize": 100,
@@ -232,12 +213,8 @@ export const useChannelStore = defineStore('channel', {
           "entityName": "TemporalExpression",
           "noConditionFind": "Y",
         },
-        headers: {
-          "Authorization":  'Bearer ' + omsRedirectionInfo.token,
-          'Content-Type': 'application/json'
-        }
       }) as any;
-      if (!hasError(resp)) {
+      if (!commonUtil.hasError(resp)) {
         temporalExpressions = resp.data.docs;
         temporalExpressions.forEach((temporalExpression: any) => {
           this.temporalExp[temporalExpression.tempExprId] = temporalExpression;
@@ -273,43 +250,28 @@ export const useChannelStore = defineStore('channel', {
       });
     },
     async disableJob(payload: any) {
-      const userStore = useUserStore();
-      return await client({
+      return await api({
         url: "service/cancelScheduledJob",
         method: "post",
-        baseURL: userStore.getOmsBaseUrl,
-        data: payload,
-        headers: {
-          "Authorization":  'Bearer ' + userStore.getOmsRedirectionInfo.token,
-          'Content-Type': 'application/json'
-        }
+        baseURL: commonUtil.getOmsURL(),
+        data: payload
       });
     },
     async fetchJobInformation(payload: any) {
-      const userStore = useUserStore();
-      const resp = await client({
+      const resp = await api({
         url: "findJobs",
         method: "post",
-        baseURL: userStore.getOmsBaseUrl,
-        data: payload,
-        headers: {
-          "Authorization":  'Bearer ' + userStore.getOmsRedirectionInfo.token,
-          'Content-Type': 'application/json'
-        }
+        baseURL: commonUtil.getOmsURL(),
+        data: payload
       }) as any;
       return resp.data?.docs || [];
     },
     async scheduleJob(payload: any) {
-      const userStore = useUserStore();
-      return await client({
+      return await api({
         url: "scheduleService",
         method: "post",
-        baseURL: userStore.getOmsBaseUrl,
-        data: payload,
-        headers: {
-          "Authorization":  'Bearer ' + userStore.getOmsRedirectionInfo.token,
-          'Content-Type': 'application/json'
-        }
+        baseURL: commonUtil.getOmsURL(),
+        data: payload
       });
     },
     async updateFacilityAssociationWithGroup(payload: any) {
@@ -341,16 +303,11 @@ export const useChannelStore = defineStore('channel', {
       });
     },
     async updateJobApi(payload: any) {
-      const userStore = useUserStore();
-      return await client({
+      return await api({
         url: "service/updateJobSandbox",
         method: "post",
-        baseURL: userStore.getOmsBaseUrl,
-        data: payload,
-        headers: {
-          "Authorization":  'Bearer ' + userStore.getOmsRedirectionInfo.token,
-          'Content-Type': 'application/json'
-        }
+        baseURL: commonUtil.getOmsURL(),
+        data: payload
       });
     }
   }

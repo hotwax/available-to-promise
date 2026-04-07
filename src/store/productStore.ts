@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia'
-import api from '@/api'
-import { hasError } from '@/utils'
-import logger from '@/logger'
+import { api, logger, commonUtil } from '@common'
 import { DateTime } from 'luxon'
-import { useUserStore } from './user'
+import { useUserStore } from '@/store/user'
 
-export interface UtilState {
+export interface ProductStoreState {
+  productStores: any[]
+  currentEComStore: any
   configFacilities: any[];
   appliedFilters: {
     included: {
@@ -38,8 +38,10 @@ export interface UtilState {
   facetOptions: any;
 }
 
-export const useUtilStore = defineStore('util', {
-  state: (): UtilState => ({
+export const useProductStore = defineStore('productStore', {
+  state: (): ProductStoreState => ({
+    productStores: [],
+    currentEComStore: {},
     configFacilities: [],
     appliedFilters: {
       included: {
@@ -72,6 +74,8 @@ export const useUtilStore = defineStore('util', {
     facetOptions: {},
   }),
   getters: {
+    getProductStores: (state) => state.productStores,
+    getCurrentEComStore: (state) => state.currentEComStore,
     getConfigFacilities: (state) => state.configFacilities ? JSON.parse(JSON.stringify(state.configFacilities)) : [],
     getAppliedFilters: (state) => state.appliedFilters,
     getAppliedFiltersOperator: (state) => state.appliedFiltersOperator,
@@ -86,16 +90,25 @@ export const useUtilStore = defineStore('util', {
     },
   },
   actions: {
+    setProductStores(productStores: any) {
+      this.productStores = productStores;
+    },
+    setEcomStore(productStore: any) {
+      if (!productStore) {
+        productStore = this.productStores.find((store: any) => store.productStoreId === productStore.productStoreId);
+      }
+      this.currentEComStore = productStore;
+    },
     async fetchConfigFacilities() {
       const userStore = useUserStore()
       let configFacilities = [];
       try {
         const resp = await api({
-          url: `admin/productStores/${userStore.currentEComStore.productStoreId}/facilities`,
+          url: `admin/productStores/${this.currentEComStore.productStoreId}/facilities`,
           method: "GET",
-          params: { facilityTypeId: 'CONFIGURATION', productStoreId: userStore.currentEComStore.productStoreId }
+          params: { facilityTypeId: 'CONFIGURATION', productStoreId: this.currentEComStore.productStoreId }
         }) as any;
-        if (!hasError(resp)) {
+        if (!commonUtil.hasError(resp)) {
           configFacilities = resp.data;
         } else {
           throw resp.data
@@ -110,11 +123,11 @@ export const useUtilStore = defineStore('util', {
       let facilityGroups = [];
       try {
         const resp = await api({
-          url: `admin/productStores/${userStore.currentEComStore.productStoreId}/facilityGroups`,
+          url: `admin/productStores/${this.currentEComStore.productStoreId}/facilityGroups`,
           method: "GET",
-          params: { productStoreId: userStore.currentEComStore.productStoreId, pageSize: 100 }
+          params: { productStoreId: this.currentEComStore.productStoreId, pageSize: 100 }
         }) as any;
-        if (!hasError(resp)) {
+        if (!commonUtil.hasError(resp)) {
           facilityGroups = resp.data;
         } else {
           throw resp.data
@@ -130,7 +143,7 @@ export const useUtilStore = defineStore('util', {
     updateAppliedFiltersOperator(payload: any) {
       this.appliedFiltersOperator = payload;
     },
-    clearUtilState() {
+    clearProductStoreState() {
       this.configFacilities = [];
       this.appliedFilters = {
         included: { tags: [], productFeatures: [] },
@@ -161,7 +174,7 @@ export const useUtilStore = defineStore('util', {
         parentFacilityTypeId_not: 'Y',
         facilityTypeId: 'VIRTUAL_FACILITY',
         facilityTypeId_not: 'Y',
-        productStoreId: userStore.currentEComStore.productStoreId,
+        productStoreId: this.currentEComStore.productStoreId,
         pageSize: payload.pageSize,
         pageIndex: payload.pageIndex
       }
@@ -173,7 +186,7 @@ export const useUtilStore = defineStore('util', {
           method: "GET",
           params
         }) as any;
-        if (!hasError(resp)) {
+        if (!commonUtil.hasError(resp)) {
           if (payload.isOrderCountRequired) {
             const facilityIds = resp.data.map((facility: any) => facility.facilityId)
             const facilityCounts = await this.fetchFacilitiesOrderCount({ facilityIds })
@@ -210,7 +223,7 @@ export const useUtilStore = defineStore('util', {
             entryDate: DateTime.now().toFormat('yyyy-MM-dd')
           }
         }) as any;
-        if (resp && !hasError(resp)) {
+        if (resp && !commonUtil.hasError(resp)) {
           resp.data.map((facility: any) => {
             facilitiesData[facility.facilityId] = facility.lastOrderCount
           })
@@ -228,11 +241,11 @@ export const useUtilStore = defineStore('util', {
       const pickGroupFacilities = {} as any;
       try {
         const resp = await api({
-          url: `admin/productStores/${userStore.currentEComStore.productStoreId}/facilityGroups`,
+          url: `admin/productStores/${this.currentEComStore.productStoreId}/facilityGroups`,
           method: "GET",
-          params: { facilityGroupTypeId: 'PICKUP', productStoreId: userStore.currentEComStore.productStoreId, pageSize: 100 }
+          params: { facilityGroupTypeId: 'PICKUP', productStoreId: this.currentEComStore.productStoreId, pageSize: 100 }
         }) as any;
-        if (resp && !hasError(resp)) {
+        if (resp && !commonUtil.hasError(resp)) {
           groups = resp.data;
           const responses = await Promise.allSettled(groups.map(async (group: any) => {
             const facilities = await this.fetchPickGroupFacilities(group.facilityGroupId)
@@ -265,7 +278,7 @@ export const useUtilStore = defineStore('util', {
             facilityTypeId_not: 'Y',
           }
         }) as any;
-        if (resp && !hasError(resp)) {
+        if (resp && !commonUtil.hasError(resp)) {
           pickupGroupFacilities = resp.data;
         } else {
           throw resp.data
@@ -300,7 +313,7 @@ export const useUtilStore = defineStore('util', {
             method: "GET",
             params: payload
           }) as any;
-          if (resp && !hasError(resp)) {
+          if (resp && !commonUtil.hasError(resp)) {
             currentFacets = resp.data.facetResponse ? resp.data.facetResponse.response : resp.data.response
             allFacets = allFacets.concat(currentFacets)
             offset = offset + payload.limit

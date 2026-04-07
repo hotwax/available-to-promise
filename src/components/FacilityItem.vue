@@ -38,16 +38,13 @@ import { IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonChip, IonIcon
 import { computed, onMounted, ref } from 'vue';
 import { storefrontOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
-import { translate } from '@hotwax/dxp-components';
+import { commonUtil, emitter, logger, translate } from '@common';
 import OrderLimitPopover from '@/components/OrderLimitPopover.vue';
-import { hasError, showToast } from '@/utils';
-import logger from '@/logger';
-import { useUtilStore } from '@/store/util';
-import emitter from '@/event-bus';
+import { useProductStore } from '@/store/productStore';
 import { DateTime } from 'luxon';
 
 const router = useRouter();
-const utilStore = useUtilStore();
+const productStore = useProductStore();
 
 const selectedPage = ref({
   path: '',
@@ -55,9 +52,9 @@ const selectedPage = ref({
 }) as any
 
 const props = defineProps(["facility"]);
-const facilities = computed(() => utilStore.getFacilities);
-const pickupGroups = computed(() => utilStore.getPickupGroups);
-const pickupGroupFacilities = computed(() => utilStore.getPickupGroupFacilities);
+const facilities = computed(() => productStore.getFacilities);
+const pickupGroups = computed(() => productStore.getPickupGroups);
+const pickupGroupFacilities = computed(() => productStore.getPickupGroupFacilities);
 
 onMounted(() => {
     selectedPage.value.path = router.currentRoute.value.path
@@ -86,23 +83,23 @@ async function updateFacility(maximumOrderLimit: number | string) {
   emitter.emit("presentLoader");
   
   try {
-    resp = await utilStore.updateFacility({
+    resp = await productStore.updateFacility({
       ...props.facility,
       maximumOrderLimit
     })
 
-    if(resp && !hasError(resp)) {
+    if(resp && !commonUtil.hasError(resp)) {
       const updatedFacilities = JSON.parse(JSON.stringify(facilities.value))
       const currentFacility = updatedFacilities.find((facility: any) => facility.facilityId === props.facility.facilityId)
       currentFacility.maximumOrderLimit = maximumOrderLimit;
 
-      showToast(translate("Order fulfillment capacity updated successfully"))
-      await utilStore.updateFacilities({ facilities: updatedFacilities })
+      commonUtil.showToast(translate("Order fulfillment capacity updated successfully"))
+      await productStore.updateFacilities({ facilities: updatedFacilities })
     } else {
       throw resp ? resp.data : "Failed to update facility"
     }
   } catch(err) {
-    showToast(translate("Failed to update facility"))
+    commonUtil.showToast(translate("Failed to update facility"))
     logger.error("Failed to update facility", err)
   }
   emitter.emit("dismissLoader");
@@ -135,22 +132,22 @@ async function updatePickupAllowed(event: Event, group: any) {
   }
 
   try {
-    const resp = await utilStore.updateFacilityAssociationWithPickupGroup(payload) as any;
-    if(resp && !hasError(resp)) {
+    const resp = await productStore.updateFacilityAssociationWithPickupGroup(payload) as any;
+    if(resp && !commonUtil.hasError(resp)) {
       const facilitiesByPickupGroup = JSON.parse(JSON.stringify(pickupGroupFacilities.value));
       if(isPickupActive) {
         facilitiesByPickupGroup[group.facilityGroupId] = facilitiesByPickupGroup[group.facilityGroupId].filter((record: any) => record.facilityId !== props.facility.facilityId);
       } else {
         facilitiesByPickupGroup[group.facilityGroupId].push(payload)
       }
-      utilStore.updatePickupGroupFacilities(facilitiesByPickupGroup);
-      showToast(translate("Facility association updated successfully with pickup group."))
+      productStore.updatePickupGroupFacilities(facilitiesByPickupGroup);
+      commonUtil.showToast(translate("Facility association updated successfully with pickup group."))
     } else {
       throw resp.data;
     }
   } catch(error: any) {
     logger.error(error);
-    showToast(translate("Failed to update facility association with pickup group."));
+    commonUtil.showToast(translate("Failed to update facility association with pickup group."));
   }
 }
 </script>

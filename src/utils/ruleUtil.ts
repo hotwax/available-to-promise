@@ -1,47 +1,14 @@
-import { toastController } from '@ionic/vue';
-import { DateTime } from 'luxon';
-import logger from '@/logger';
-import { translate } from '@hotwax/dxp-components';
+import { commonUtil, logger, translate } from '@common';
 
-// TODO Use separate files for specific utilities
-
-// TODO Remove it when HC APIs are fully REST compliant
-const hasError = (response: any) => {
-    return typeof response.data != "object" || !!response.data._ERROR_MESSAGE_ || !!response.data._ERROR_MESSAGE_LIST_ || !!response.data.error;
-}
-const getCurrentTime = (zone: string, format = 't ZZZZ') => {
-  return DateTime.now().setZone(zone).toFormat(format)
-}
-
-const showToast = async (message: string) => {
-  const toast = await toastController
-    .create({
-      message,
-      duration: 3000,
-      position: "bottom",
-    })
-  return toast.present();
-}
-
-function getDateAndTime(time: any) {
-  return time ? DateTime.fromMillis(time).toLocaleString(DateTime.DATETIME_MED) : "-";
-}
-
-const getTime = (time: any) => {
-  return time ? DateTime.fromMillis(time).toLocaleString(DateTime.TIME_SIMPLE) : "-";
-}
-
-function getDate(runTime: any) {
-  return DateTime.fromMillis(runTime).toLocaleString(DateTime.DATE_MED);
-}
-
-function timeTillRun(endTime: any) {
-  const timeDiff = DateTime.fromMillis(endTime).diff(DateTime.local());
-  return DateTime.local().plus(timeDiff).toRelative();
-}
-
-const generateInternalId = (name: string) => {
-  return name.trim().toUpperCase().split(' ').join('_');
+const findRulesDiff = (previousSeq: any, updatedSeq: any) => {
+  const diffSeq: any = Object.keys(previousSeq).reduce((diff, key) => {
+    if (updatedSeq[key].ruleId === previousSeq[key].ruleId && updatedSeq[key].sequenceNum === previousSeq[key].sequenceNum) return diff
+    return {
+      ...diff,
+      [key]: updatedSeq[key]
+    }
+  }, {})
+  return diffSeq;
 }
 
 const doReorder = (event: CustomEvent, rules: any) => {
@@ -61,22 +28,11 @@ const doReorder = (event: CustomEvent, rules: any) => {
   return updatedSeq
 }
 
-const findRulesDiff = (previousSeq: any, updatedSeq: any) => {
-  const diffSeq: any = Object.keys(previousSeq).reduce((diff, key) => {
-    if (updatedSeq[key].ruleId === previousSeq[key].ruleId && updatedSeq[key].sequenceNum === previousSeq[key].sequenceNum) return diff
-    return {
-      ...diff,
-      [key]: updatedSeq[key]
-    }
-  }, {})
-  return diffSeq;
-}
-
 const generateRuleActions = (ruleId: string, actionTypeEnumId: string, actionValue: any, isConditionExists: boolean, ruleActions: any) => {
-  if(isConditionExists) {
+  if (isConditionExists) {
     const ruleAction = ruleActions.find((action: any) => action.actionTypeEnumId === actionTypeEnumId)
-    if(ruleAction) {
-      if(actionTypeEnumId === "ATP_THRESHOLD" || actionTypeEnumId === "ATP_SAFETY_STOCK") {
+    if (ruleAction) {
+      if (actionTypeEnumId === "ATP_THRESHOLD" || actionTypeEnumId === "ATP_SAFETY_STOCK") {
         ruleAction.fieldValue = actionValue ? actionValue : 0;
       } else {
         ruleAction.fieldValue = actionValue ? "Y" : "N"
@@ -86,7 +42,7 @@ const generateRuleActions = (ruleId: string, actionTypeEnumId: string, actionVal
   }
 
   let condition;
-  if(actionTypeEnumId === "ATP_THRESHOLD" || actionTypeEnumId === "ATP_SAFETY_STOCK") {
+  if (actionTypeEnumId === "ATP_THRESHOLD" || actionTypeEnumId === "ATP_SAFETY_STOCK") {
     condition = [{
       ruleId,
       actionTypeEnumId,
@@ -107,7 +63,7 @@ const generateRuleActions = (ruleId: string, actionTypeEnumId: string, actionVal
 const generateRuleConditions = (ruleId: string, conditionTypeEnumId: string, appliedFilters: any, selectedFac: any, areAllSelected: boolean, appliedFiltersOperator?: any) => {
   const conditions = [];
 
-  if(areAllSelected) {
+  if (areAllSelected) {
     conditions.push({
       "ruleId": ruleId,
       conditionTypeEnumId,
@@ -115,7 +71,7 @@ const generateRuleConditions = (ruleId: string, conditionTypeEnumId: string, app
       "operator": "in",
       "fieldValue": "ALL"
     })
-  } else if(conditionTypeEnumId === "ENTCT_ATP_FACILITIES") {
+  } else if (conditionTypeEnumId === "ENTCT_ATP_FACILITIES") {
     conditions.push({
       "ruleId": ruleId,
       conditionTypeEnumId,
@@ -124,8 +80,8 @@ const generateRuleConditions = (ruleId: string, conditionTypeEnumId: string, app
       "fieldValue": selectedFac.length ? selectedFac.join(",") : ""
     })
   } else {
-    const includedFacilityGroupIds = selectedFac.included.map((group: any) => group.facilityGroupId)  
-    if(includedFacilityGroupIds.length) {
+    const includedFacilityGroupIds = selectedFac.included.map((group: any) => group.facilityGroupId)
+    if (includedFacilityGroupIds.length) {
       conditions.push({
         "ruleId": ruleId,
         "conditionTypeEnumId": "ENTCT_ATP_FAC_GROUPS",
@@ -134,9 +90,9 @@ const generateRuleConditions = (ruleId: string, conditionTypeEnumId: string, app
         "fieldValue": includedFacilityGroupIds.join(",")
       })
     }
-    
+
     const excludedFacilityGroupIds = selectedFac.excluded.map((group: any) => group.facilityGroupId)
-    if(excludedFacilityGroupIds.length) {
+    if (excludedFacilityGroupIds.length) {
       conditions.push({
         "ruleId": ruleId,
         "conditionTypeEnumId": "ENTCT_ATP_FAC_GROUPS",
@@ -149,7 +105,7 @@ const generateRuleConditions = (ruleId: string, conditionTypeEnumId: string, app
 
   Object.entries(appliedFilters).map(([type, filters]: any) => {
     Object.entries(filters as any).map(([filter, value]: any) => {
-      if(value.length) {
+      if (value.length) {
         conditions.push({
           "ruleId": ruleId,
           "conditionTypeEnumId": "ENTCT_ATP_FILTER",
@@ -177,12 +133,18 @@ const hasJobDataError = (job: any) => {
     message = 'This job does not have any runtime data configuration.';
   }
 
-  if(message) {
+  if (message) {
     logger.warn(warning);
-    showToast(translate(message));
+    commonUtil.showToast(translate(message));
     return true;
   }
   return false;
 }
 
-export {getCurrentTime, doReorder, generateInternalId, generateRuleActions, generateRuleConditions, getDate, getDateAndTime, getTime, hasJobDataError, hasError, showToast, timeTillRun }
+export const ruleUtil = {
+  doReorder,
+  findRulesDiff,
+  generateRuleActions,
+  generateRuleConditions,
+  hasJobDataError
+}

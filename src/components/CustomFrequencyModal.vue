@@ -36,7 +36,7 @@
 import { IonButton, IonButtons, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonList, IonRadio, IonRadioGroup, IonTitle, IonToolbar, modalController } from "@ionic/vue";
 import { onMounted, ref } from "vue";
 import { closeOutline, saveOutline } from "ionicons/icons";
-import { translate } from "@hotwax/dxp-components";
+import { translate } from "@common";
 import { useChannelStore } from "@/store/channel";
 
 const channelStore = useChannelStore();

@@ -37,21 +37,18 @@
 <script setup lang="ts">
 import { IonButton, IonButtons, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonLabel, IonRadio, IonRadioGroup, IonTitle, IonToolbar, modalController } from "@ionic/vue";
 import { closeOutline, saveOutline } from "ionicons/icons";
-import { translate } from '@hotwax/dxp-components';
+import { commonUtil, emitter, logger, translate } from '@common';
 import { computed, onMounted, ref } from "vue";
-import { useUtilStore } from "@/store/util";
+import { useProductStore } from "@/store/productStore";
 import { useChannelStore } from "@/store/channel";
-import { hasError, showToast } from "@/utils";
-import logger from "@/logger";
 import { DateTime } from "luxon";
-import emitter from "@/event-bus";
 
-const utilStore = useUtilStore();
+const productStore = useProductStore();
 const channelStore = useChannelStore();
 const selectedFacilityId = ref("");
 const props = defineProps(["group", "selectedConfigFacilityId"]);
 
-const configFacilities = computed(() => utilStore.getConfigFacilities)
+const configFacilities = computed(() => productStore.getConfigFacilities)
 
 onMounted(() => {
   selectedFacilityId.value = props.selectedConfigFacilityId?.facilityId ? JSON.parse(JSON.stringify(props.selectedConfigFacilityId.facilityId)) : '';
@@ -63,7 +60,7 @@ function closeModal() {
 
 async function saveFacility() {
   if(!selectedFacilityId.value) {
-    showToast(translate("Please select a facility to update."))
+    commonUtil.showToast(translate("Please select a facility to update."))
     return;
   }
   let resp = {} as any;
@@ -78,7 +75,7 @@ async function saveFacility() {
         fromDate: props.selectedConfigFacilityId.fromDate,
         thruDate: DateTime.now().toMillis()
       }) as any;
-      if(resp && hasError(resp)) {
+      if(resp && commonUtil.hasError(resp)) {
         throw resp.data;
       }
     }
@@ -88,15 +85,15 @@ async function saveFacility() {
       facilityId: selectedFacilityId.value,
       fromDate: DateTime.now().toMillis()
     }) as any;
-    if(resp && !hasError(resp)) {
-      showToast(translate("Threshold facility updated successfully."))
+    if(resp && !commonUtil.hasError(resp)) {
+      commonUtil.showToast(translate("Threshold facility updated successfully."))
       modalController.dismiss();
     } else {
       throw resp ? resp.data : "Failed to update threshold facility.";
     }
   } catch(err: any) {
     logger.error(err)
-    showToast(translate("Failed to update threshold facility."))
+    commonUtil.showToast(translate("Failed to update threshold facility."))
   }
   await channelStore.fetchGroupFacilities(props.group.facilityGroupId);
   emitter.emit("dismissLoader");

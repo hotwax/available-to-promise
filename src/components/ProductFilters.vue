@@ -103,15 +103,15 @@
 <script setup lang="ts">
 import { IonButton, IonCard, IonCardContent, IonChip, IonIcon, IonSelect, IonSelectOption, IonItem, IonLabel, modalController } from '@ionic/vue';
 import { addCircleOutline, closeCircle } from 'ionicons/icons'
-import { translate } from '@hotwax/dxp-components';
+import { translate } from '@common';
 import AddProductFiltersModal from '@/components/AddProductFiltersModal.vue';
 import { computed } from 'vue';
-import { useUtilStore } from '@/store/util';
+import { useProductStore } from '@/store/productStore';
 
-const utilStore = useUtilStore();
+const productStore = useProductStore();
 
-const appliedFilters = computed(() => utilStore.getAppliedFilters);
-const appliedFiltersOperator = computed(() => utilStore.getAppliedFiltersOperator);
+const appliedFilters = computed(() => productStore.getAppliedFilters);
+const appliedFiltersOperator = computed(() => productStore.getAppliedFiltersOperator);
 
 const conditionAppliedFiltersOperator = JSON.parse(JSON.stringify(appliedFiltersOperator.value))
 
@@ -133,11 +133,11 @@ async function removeFilters(type: string, id: string, value: string) {
   const selectedFilters = JSON.parse(JSON.stringify(appliedFilters.value))
   selectedFilters[type][id] = selectedFilters[type][id].filter((filter: any) => filter !== value)
 
-  await utilStore.updateAppliedFilters(selectedFilters)
+  await productStore.updateAppliedFilters(selectedFilters)
 }
 
 async function updateFiltersOperator(type: string, id: string, value: string) {
   conditionAppliedFiltersOperator[type][id] = value
-  await utilStore.updateAppliedFiltersOperator(conditionAppliedFiltersOperator)
+  await productStore.updateAppliedFiltersOperator(conditionAppliedFiltersOperator)
 }
 </script>

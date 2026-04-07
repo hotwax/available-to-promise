@@ -73,24 +73,23 @@ import { computed, ref } from 'vue';
 import { addOutline, balloonOutline, saveOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue'
 import FacilityItem from '@/components/FacilityItem.vue'
-import { translate } from '@hotwax/dxp-components';
+import { commonUtil, emitter, translate } from '@common';
 import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
 import { useRouter } from 'vue-router';
 import { useRuleStore } from '@/store/rule';
-import { useUtilStore } from '@/store/util';
-import emitter from '@/event-bus';
-import { doReorder, showToast } from '@/utils';
+import { useProductStore } from '@/store/productStore';
+import { ruleUtil } from '@/utils/ruleUtil';
 import ArchivedRuleItem from '@/components/ArchivedRuleItem.vue';
 
 const ruleStore = useRuleStore();
-const utilStore = useUtilStore();
+const productStore = useProductStore();
 const router = useRouter()
 
 const rules = computed(() => ruleStore.getRules);
 const ruleGroup = computed(() => ruleStore.getRuleGroup);
-const isScrollable = computed(() => utilStore.isFacilitiesScrollable);
-const facilities = computed(() => utilStore.getFacilities);
-const selectedSegment = computed(() => utilStore.getSelectedSegment);
+const isScrollable = computed(() => productStore.isFacilitiesScrollable);
+const facilities = computed(() => productStore.getFacilities);
+const selectedSegment = computed(() => productStore.getSelectedSegment);
 const isReorderActive = computed(() => ruleStore.isReorderActive);
 const archivedRules = computed(() => ruleStore.getArchivedRules);
 const reorderingRules = ref([]) as any;
@@ -112,8 +111,8 @@ onIonViewDidLeave(() => {
 async function fetchRules() {
   emitter.emit("presentLoader");
   ruleStore.updateIsReorderActive(false)
-  if(!selectedSegment.value || (selectedSegment.value !== 'RG_SHIPPING_FACILITY' && selectedSegment.value !== 'RG_SHIPPING_CHANNEL' && selectedSegment.value !== 'SHIPPING_FACILITY')) utilStore.updateSelectedSegment("RG_SHIPPING_FACILITY");
-  await Promise.allSettled([ruleStore.fetchRules({ groupTypeEnumId: selectedSegment.value, pageSize: 50 }), utilStore.fetchConfigFacilities(), utilStore.fetchFacilityGroups()])
+  if(!selectedSegment.value || (selectedSegment.value !== 'RG_SHIPPING_FACILITY' && selectedSegment.value !== 'RG_SHIPPING_CHANNEL' && selectedSegment.value !== 'SHIPPING_FACILITY')) productStore.updateSelectedSegment("RG_SHIPPING_FACILITY");
+  await Promise.allSettled([ruleStore.fetchRules({ groupTypeEnumId: selectedSegment.value, pageSize: 50 }), productStore.fetchConfigFacilities(), productStore.fetchFacilityGroups()])
   if(selectedSegment.value === 'SHIPPING_FACILITY') fetchFacilities();
   emitter.emit("dismissLoader");
 }
@@ -126,7 +125,7 @@ async function fetchFacilities(vSize?: any, vIndex?: any) {
     pageIndex,
     isOrderCountRequired: true
   };
-  await utilStore.fetchFacilities(payload)
+  await productStore.fetchFacilities(payload)
 }
 
 function enableScrolling() {
@@ -157,7 +156,7 @@ async function loadMoreFacilities(event: any) {
 }
 
 async function updateSegment(event: any) {
-  utilStore.updateSelectedSegment(event.detail.value);
+  productStore.updateSelectedSegment(event.detail.value);
 
   emitter.emit("presentLoader");
   if(selectedSegment.value === 'SHIPPING_FACILITY') {
@@ -182,7 +181,7 @@ async function saveReorder() {
   const diffRules = reorderingRules.value.filter((reorderRule: any) => rules.value.some((rule: any) => rule.ruleId === reorderRule.ruleId && rule.sequenceNum !== reorderRule.sequenceNum))
   if(!diffRules.length) {
     ruleStore.updateIsReorderActive(false)
-    showToast(translate("No sequence has been changed."))
+    commonUtil.showToast(translate("No sequence has been changed."))
     return;
   }
 
@@ -193,9 +192,9 @@ async function saveReorder() {
 
   const isFailedToUpdateSomeRule = responses.some((response: any) => response.status === 'rejected')
   if(isFailedToUpdateSomeRule) {
-    showToast(translate("Failed to update sequence for some rules."))
+    commonUtil.showToast(translate("Failed to update sequence for some rules."))
   } else {
-    showToast(translate("Sequence for rules updated successfully."))
+    commonUtil.showToast(translate("Sequence for rules updated successfully."))
   }
   emitter.emit("dismissLoader");
   await ruleStore.updateRules({ rules: reorderingRules.value })
@@ -203,7 +202,7 @@ async function saveReorder() {
 }
 
 function updateReorderingRules(event: any) {
-  reorderingRules.value = doReorder(event, reorderingRules.value)
+  reorderingRules.value = ruleUtil.doReorder(event, reorderingRules.value)
 }
 
 function createShipping() {
