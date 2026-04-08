@@ -65,10 +65,6 @@ export const useUserStore = defineStore("user", {
     setPermissionsState(payload: any) {
       this.permissions = payload
     },
-    setPwaState(payload: any) {
-      this.pwaState.registration = payload.registration
-      this.pwaState.updateExists = payload.updateExists
-    },
     updatePwaState(payload: any) {
       this.pwaState.registration = payload.registration;
       this.pwaState.updateExists = payload.updateExists;
