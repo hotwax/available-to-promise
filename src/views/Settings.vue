@@ -49,7 +49,7 @@
           </ion-card-content>
           <ion-item lines="none">
             <ion-select :label="translate('Select store')" interface="popover" :value="currentEComStore.productStoreId" @ionChange="setEComStore($event)">
-              <ion-select-option v-for="store in (userProfile ? userProfile.stores : [])" :key="store.productStoreId" :value="store.productStoreId" >{{ store.storeName ? store.storeName : store.productStoreId }}</ion-select-option>
+              <ion-select-option v-for="store in (productStores)" :key="store.productStoreId" :value="store.productStoreId" >{{ store.storeName ? store.storeName : store.productStoreId }}</ion-select-option>
             </ion-select>
           </ion-item>
         </ion-card>
@@ -68,6 +68,7 @@
 <script setup lang="ts">
 import {  IonAvatar, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonHeader, IonIcon, IonItem, IonLabel, IonMenuButton, IonPage, IonSelect, IonSelectOption, IonTitle, IonToolbar, modalController } from '@ionic/vue';
 import { computed, ref } from 'vue';
+import router from "@/router";
 import { openOutline } from 'ionicons/icons'
 import { useUserStore } from '@/store/user';
 import { useRuleStore } from '@/store/rule';
@@ -85,6 +86,7 @@ const { logout: authLogout } = useAuth();
 
 const userProfile = computed(() => userStore.getUserProfile)
 const currentEComStore = computed(() => useProductStore().getCurrentEComStore)
+const productStores = computed(() => useProductStore().getProductStores)
 const props = defineProps({
   showBrowserTimeZone: {
     type: Boolean,
@@ -101,7 +103,7 @@ const props = defineProps({
 })
 
 function setEComStore(event: CustomEvent) {
-  if (userProfile.value?.stores) {
+  if (productStores) {
     useProductStore().setEcomStore({
       "productStoreId": event.detail.value
     })
@@ -110,7 +112,14 @@ function setEComStore(event: CustomEvent) {
 }
 
 async function logout() {
-  await authLogout();
+  useAuth().logout({ isUserUnauthorised: false }).then((redirectionUrl) => {
+    // redirectionUrl is only present when SSO enables, thus when not present redirect user to login
+    if(!redirectionUrl) {
+      router.replace("/login");
+    } else {
+      window.location.href = redirectionUrl
+    }
+  })
 }
 
 function goToLaunchpad() {

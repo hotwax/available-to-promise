@@ -7,7 +7,6 @@ import { IonicVue } from '@ionic/vue';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/vue/css/core.css';
-import '@hotwax/apps-theme';
 
 /* Basic CSS for apps built with Ionic */
 import '@ionic/vue/css/normalize.css';
@@ -23,6 +22,8 @@ import '@ionic/vue/css/flex-utils.css';
 import '@ionic/vue/css/display.css';
 
 /* Theme variables */
+import "@common/css/settings.css"
+import "@common/css/theme.css"
 import './theme/variables.css';
 
 import { createPinia } from 'pinia'
@@ -50,7 +51,7 @@ const app = createApp(App)
 app.config.globalProperties.$filters = {
   formatDate(value: any, inFormat?: string, outFormat?: string) {
     // TODO Make default format configurable and from environment variables
-    if(inFormat){
+    if (inFormat) {
       return DateTime.fromFormat(value, inFormat).toFormat(outFormat ? outFormat : 'MM-DD-YYYY');
     }
     return DateTime.fromISO(value).toFormat(outFormat ? outFormat : 'MM-DD-YYYY');
@@ -60,11 +61,11 @@ app.config.globalProperties.$filters = {
     const userStore = useUserStore(pinia);
     const userProfile = userStore.getUserProfile;
     // TODO Fix this setDefault should set the default timezone instead of getting it everytiem and setting the tz
-    
+
     return DateTime.utc(value, inFormat).setZone(userProfile.userTimeZone).toFormat(outFormat ? outFormat : 'MM-DD-YYYY')
   },
   getFeature(featureHierarchy: any, featureKey: string) {
-    let  featureValue = ''
+    let featureValue = ''
     if (featureHierarchy) {
       const feature = featureHierarchy.find((featureItem: any) => featureItem.startsWith(featureKey))
       const featureSplit = feature ? feature.split('/') : [];

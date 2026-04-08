@@ -12,6 +12,7 @@ import CreateUpdateStorePickupRule from '@/views/CreateUpdateStorePickupRule.vue
 import CreateUpdateShippingRule from '@/views/CreateUpdateShippingRule.vue'
 import Login from '@/views/Login.vue';
 import { useAuth } from '@/composables/useAuth';
+import { cloudUploadOutline, globeOutline, settingsOutline, sendOutline, storefrontOutline, pulseOutline } from 'ionicons/icons';
 
 import 'vue-router'
 
@@ -19,27 +20,24 @@ import 'vue-router'
 declare module 'vue-router' {
   interface RouteMeta {
     permissionId?: string;
+    title?: string;
+    icon?: string;
+    menuIndex?: number;
+    childRoutes?: string[];
   }
 }
 
 const authGuard = async (to: any, from: any, next: any) => {
-  const { isAuthenticated, login: authLogin } = useAuth();
-  
-  if (to.query?.token && to.query?.oms) {
-    await authLogin(to.query.token as string, to.query.oms as string, { isTokenLogin: true });
-    next({ path: to.path, query: {}, replace: true });
-    return;
-  }
-  
+  const { isAuthenticated } = useAuth()
   if (!isAuthenticated.value) {
     next('/login');
-    return;
+  } else {
+    next()
   }
-  next()
 };
 
 const loginGuard = (to: any, from: any, next: any) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth()
   if (isAuthenticated.value && !to.query?.token && !to.query?.oms) {
     next('/')
   }
@@ -55,31 +53,60 @@ const routes: Array<RouteRecordRaw> = [
     path: '/threshold',
     name: 'Threshold',
     component: Threshold,
-    beforeEnter: authGuard
+    beforeEnter: authGuard,
+    meta: {
+      title: "Threshold",
+      icon: globeOutline,
+      menuIndex: 1,
+      childRoutes: ["/create-threshold", "/update-threshold/"]
+    }
   },
   {
     path: '/safety-stock',
     name: 'Safety stock',
     component: SafetyStock,
-    beforeEnter: authGuard
+    beforeEnter: authGuard,
+    meta: {
+      title: "Safety stock",
+      icon: pulseOutline,
+      menuIndex: 2,
+      childRoutes: ["/create-safety-stock", "/update-safety-stock/"]
+    }
   },
   {
     path: '/store-pickup',
     name: 'Store pickup',
     component: StorePickup,
-    beforeEnter: authGuard
+    beforeEnter: authGuard,
+    meta: {
+      title: "Store pickup",
+      icon: storefrontOutline,
+      menuIndex: 3,
+      childRoutes: ["/create-store-pickup", "/update-store-pickup/"]
+    }
   },
   {
     path: '/shipping',
     name: 'Shipping',
     component: Shipping,
-    beforeEnter: authGuard
+    beforeEnter: authGuard,
+    meta: {
+      title: "Shipping",
+      icon: sendOutline,
+      menuIndex: 4,
+      childRoutes: ["/create-shipping", "/update-shipping/"]
+    }
   },
   {
     path: '/inventory-channels',
     name: 'Inventory channels',
     component: InventoryChannels,
-    beforeEnter: authGuard
+    beforeEnter: authGuard,
+    meta: {
+      title: "Inventory channels",
+      icon: cloudUploadOutline,
+      menuIndex: 5
+    }
   },
   {
     path: '/create-threshold',
@@ -143,7 +170,12 @@ const routes: Array<RouteRecordRaw> = [
     path: "/settings",
     name: "Settings",
     component: Settings,
-    beforeEnter: authGuard
+    beforeEnter: authGuard,
+    meta: {
+      title: "Settings",
+      icon: settingsOutline,
+      menuIndex: 6
+    }
   }
 ]
 

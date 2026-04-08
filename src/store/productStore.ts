@@ -90,17 +90,29 @@ export const useProductStore = defineStore('productStore', {
     },
   },
   actions: {
-    setProductStores(productStores: any) {
-      this.productStores = productStores;
-    },
     setEcomStore(productStore: any) {
       if (!productStore) {
         productStore = this.productStores.find((store: any) => store.productStoreId === productStore.productStoreId);
       }
       this.currentEComStore = productStore;
     },
+    async fetchUserProductStores() {
+      try {
+        const resp = await api({
+          url: "admin/user/productStore",
+          method: "GET"
+        });
+        // Disallow login if the user is not associated with any product store
+        if (!commonUtil.hasError(resp)) {
+          this.productStores = resp.data
+        } else {
+          throw resp.data;
+        }
+      } catch (error: any) {
+        logger.error(error)
+      }
+    },
     async fetchConfigFacilities() {
-      const userStore = useUserStore()
       let configFacilities = [];
       try {
         const resp = await api({
@@ -119,7 +131,6 @@ export const useProductStore = defineStore('productStore', {
       this.configFacilities = configFacilities;
     },
     async fetchFacilityGroups() {
-      const userStore = useUserStore()
       let facilityGroups = [];
       try {
         const resp = await api({

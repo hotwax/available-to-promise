@@ -1,32 +1,120 @@
 <template>
   <ion-app>
-    <IonSplitPane content-id="main" when="lg">
-      <Menu />
-      <ion-router-outlet id="main"></ion-router-outlet>
-    </IonSplitPane>
+    <ion-split-pane content-id="main-content" when="lg">
+      <ion-menu side="start" content-id="main-content" type="overlay" :disabled="!isAuthenticated || (router.currentRoute.value.name as string) === 'Login'">
+        <ion-header>
+          <ion-toolbar>
+            <ion-title>{{ translate("Available to Promise") }}</ion-title>
+          </ion-toolbar>
+        </ion-header>
+
+        <ion-content>
+          <ion-list>
+            <ion-menu-toggle :auto-hide="false" v-for="(page, index) in menuItems" :key="index">
+              <ion-item
+                button
+                router-direction="root"
+                :router-link="page.url"
+                class="hydrated"
+                :class="{ selected: selectedIndex === index }">
+                <ion-icon slot="start" :ios="page.icon" :md="page.icon" />
+                <ion-label>{{ translate(page.title) }}</ion-label>
+              </ion-item>
+            </ion-menu-toggle>
+          </ion-list>
+        </ion-content>
+
+        <ion-footer>
+          <ion-toolbar>
+            <ion-item lines="none">
+              <ion-label class="ion-text-wrap">
+                <p class="overline">{{ instanceUrl }}</p>
+              </ion-label>
+              <ion-note slot="end">{{ userProfile?.timeZone }}</ion-note>
+            </ion-item>
+            <ion-item v-if="productStores?.length > 1" lines="none">
+              <ion-select interface="popover" :value="eComStore.productStoreId" @ionChange="setEComStore($event)">
+                <ion-select-option v-for="store in productStores" :key="store.productStoreId" :value="store.productStoreId" >{{ store.storeName ? store.storeName : store.productStoreId }}</ion-select-option>
+              </ion-select>
+            </ion-item>
+            <ion-item v-else lines="none">
+              <ion-label class="ion-text-wrap">
+                {{ eComStore.storeName ? eComStore.storeName : eComStore.productStoreId }}
+              </ion-label>
+            </ion-item>
+          </ion-toolbar>
+        </ion-footer>
+      </ion-menu>
+      <ion-router-outlet id="main-content" />
+    </ion-split-pane>
   </ion-app>
 </template>
 
 <script setup lang="ts">
-import { IonApp, IonRouterOutlet, IonSplitPane, loadingController } from '@ionic/vue';
-import { computed, onBeforeMount, onMounted, onUnmounted, ref } from 'vue';
-import { Settings } from 'luxon'
-import Menu from '@/components/Menu.vue';
+import {
+  alertController,
+  IonApp,
+  IonContent,
+  IonFooter,
+  IonHeader,
+  IonIcon,
+  IonItem,
+  IonLabel,
+  IonList,
+  IonMenu,
+  IonMenuToggle,
+  IonNote,
+  IonRouterOutlet,
+  IonSelect,
+  IonSelectOption,
+  IonSplitPane,
+  IonTitle,
+  IonToolbar,
+  loadingController,
+  SelectCustomEvent
+} from "@ionic/vue";
+import { computed, onBeforeMount, onMounted, onUnmounted, ref } from "vue";
+import { translate, emitter, commonUtil } from "@common";
+import { Settings } from "luxon";
 import { useUserStore } from "@/store/user";
-import { translate, emitter } from '@common';
+import { useProductStore } from "@/store/productStore";
+import router from './router';
+import { useAuth } from "@/composables/useAuth";
 
 const userStore = useUserStore();
-const userProfile = computed(() => userStore.getUserProfile)
+const productStore = useProductStore();
+const { isAuthenticated } = useAuth();
+const loader = ref<any>(null);
 
-const loader = ref(null) as any
+const userProfile = computed(() => userStore.getUserProfile);
+const eComStore = computed(() => productStore.getCurrentEComStore);
+const productStores = computed(() => productStore.getProductStores);
+const instanceUrl = computed(() => commonUtil.getOmsURL());
 
-async function presentLoader(options = { message: '', backdropDismiss: true }) {
-  // When having a custom message remove already existing loader
-  if(options.message && loader.value) dismissLoader();
+const menuItems = computed(() => {
+  return router.getRoutes()
+    .filter(route => route.meta && route.meta.menuIndex)
+    .filter(route => !route.meta.permissionId || (userStore as any).hasPermission(route.meta.permissionId as string))
+    .sort((a, b) => (a.meta!.menuIndex as number) - (b.meta!.menuIndex as number))
+    .map(route => ({
+      title: route.meta!.title as string,
+      url: route.path,
+      icon: route.meta!.icon as string,
+      childRoutes: route.meta!.childRoutes as string[],
+      menuIndex: route.meta!.menuIndex as number
+    }));
+});
+
+const selectedIndex = computed(() => {
+  const path = router.currentRoute.value.path;
+  return menuItems.value.findIndex((item) => item.url === path || item.childRoutes?.includes(path) || item.childRoutes?.some((route: any) => path.includes(route)));
+});
+
+async function presentLoader(options = { message: "", backdropDismiss: true }) {
+  if (options.message && loader.value) dismissLoader();
 
   if (!loader.value) {
-    loader.value = await loadingController
-    .create({
+    loader.value = await loadingController.create({
       message: options.message ? translate(options.message) : translate("Click the backdrop to dismiss."),
       translucent: true,
       backdropDismiss: options.backdropDismiss
@@ -38,25 +126,76 @@ async function presentLoader(options = { message: '', backdropDismiss: true }) {
 function dismissLoader() {
   if (loader.value) {
     loader.value.dismiss();
-    loader.value = null as any;
+    loader.value = null;
+  }
+}
+
+async function setEComStore(event: SelectCustomEvent) {
+  const createUpdateRoute = ["/create-threshold", "/update-threshold/", "/create-safety-stock", "/update-safety-stock/", "/create-store-pickup", "update-store-pickup/", "/create-shipping", "/update-shipping/"]
+  const path = router.currentRoute.value.path;
+  if(productStores.value) {
+    if(createUpdateRoute.some((route) => path.includes(route))) {
+      const alert = await alertController.create({
+        header: translate("Leave page"),
+        message: translate("Any page made on this page will be lost. You will not be able to reverse this action."),
+        buttons: [
+          {
+            text: translate("No"),
+            role: "cancel",
+            handler: async () => {
+              // Reverting the selected ecomStore in ion-select if user select no to change product store.
+              event.target.value = eComStore.value.productStoreId
+            }
+          },
+          {
+            text: translate("Yes"),
+            handler: async () => {
+              await productStore.setEcomStore({
+                "productStoreId": event.detail.value
+              })
+              emitter.emit("productStoreOrConfigChanged")
+            }
+          }
+        ]
+      })
+
+      alert.present();
+    } else {
+      productStore.setEcomStore({
+        "productStoreId": event.detail.value
+      })
+      emitter.emit("productStoreOrConfigChanged")
+    }
   }
 }
 
 onBeforeMount(() => {
-  emitter.on('presentLoader', presentLoader as any);
-  emitter.on('dismissLoader', dismissLoader as any);
-})
+  emitter.on("presentLoader", presentLoader as any);
+  emitter.on("dismissLoader", dismissLoader as any);
+});
 
-onMounted(async () => {
-  // Handles case when user resumes or reloads the app
-  // Luxon timezzone should be set with the user's selected timezone
-  if (userProfile.value && userProfile.value.timeZone) {
+onMounted(() => {
+  if (userProfile.value && userProfile.value.userTimeZone) {
     Settings.defaultZone = userProfile.value.userTimeZone;
   }
-})
+});
 
 onUnmounted(() => {
   emitter.off("presentLoader", presentLoader as any);
   emitter.off("dismissLoader", dismissLoader as any);
-})
+});
 </script>
+
+<style scoped>
+ion-menu.md ion-item.selected ion-icon {
+  color: var(--ion-color-secondary);
+}
+
+ion-menu.ios ion-item.selected ion-icon {
+  color: var(--ion-color-secondary);
+}
+
+ion-item.selected {
+  --color: var(--ion-color-secondary);
+}
+</style>

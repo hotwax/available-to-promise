@@ -53,8 +53,8 @@ export function useAuth() {
       cookieHelper().set("expirationTime", resp.data.expirationTime)
       await useUserStore().fetchUserProfile()
       await useUserStore().fetchPermissions()
-      useProductStore().setProductStores(useUserStore().getUserProfile?.stores)
-      useProductStore().setEcomStore(useUserStore().getUserProfile?.stores[0])
+      await useProductStore().fetchUserProductStores()
+      useProductStore().setEcomStore(useProductStore().getProductStores[0])
 
     } catch (err: any) {
       commonUtil.showToast(translate("Something went wrong while login. Please contact administrator."));
