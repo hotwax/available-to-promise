@@ -48,7 +48,7 @@
             {{ translate('A store repesents a company or a unique catalog of products. If your OMS is connected to multiple eCommerce stores sellling different collections of products, you may have multiple Product Stores set up in HotWax Commerce.') }}
           </ion-card-content>
           <ion-item lines="none">
-            <ion-select :label="translate('Select store')" interface="popover" :value="currentEComStore.productStoreId" @ionChange="setEComStore($event)">
+            <ion-select :label="translate('Select store')" interface="popover" :value="currentProductStore.productStoreId" @ionChange="setProductStore($event)">
               <ion-select-option v-for="store in (productStores)" :key="store.productStoreId" :value="store.productStoreId" >{{ store.storeName ? store.storeName : store.productStoreId }}</ion-select-option>
             </ion-select>
           </ion-item>
@@ -85,7 +85,7 @@ const ruleStore = useRuleStore()
 const { logout: authLogout } = useAuth();
 
 const userProfile = computed(() => userStore.getUserProfile)
-const currentEComStore = computed(() => useProductStore().getCurrentEComStore)
+const currentProductStore = computed(() => useProductStore().getCurrentProductStore)
 const productStores = computed(() => useProductStore().getProductStores)
 const props = defineProps({
   showBrowserTimeZone: {
@@ -102,9 +102,9 @@ const props = defineProps({
   }
 })
 
-function setEComStore(event: CustomEvent) {
+function setProductStore(event: CustomEvent) {
   if (productStores) {
-    useProductStore().setEcomStore({
+    useProductStore().setCurrentProductStore({
       "productStoreId": event.detail.value
     })
     ruleStore.clearRuleState()

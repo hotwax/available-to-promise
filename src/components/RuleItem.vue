@@ -135,7 +135,7 @@ const ruleStore = useRuleStore();
 const productStore = useProductStore();
 
 const props = defineProps(["rule", "ruleIndex"])
-const currentEComStore = computed(() => productStore.getCurrentEComStore)
+const currentProductStore = computed(() => productStore.getCurrentProductStore)
 const total = computed(() => ruleStore.getTotalRulesCount)
 const configFacilities = computed(() => productStore.getConfigFacilities)
 const facilityGroups = computed(() => productStore.getFacilityGroups)

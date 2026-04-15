@@ -10,8 +10,7 @@ interface UserState {
     updateExists: boolean
     registration: any
   }
-  timeZones: any[],
-  currentTimeZoneId: string
+  timeZones: any[]
 }
 
 export const useUserStore = defineStore("user", {
@@ -22,12 +21,11 @@ export const useUserStore = defineStore("user", {
       updateExists: false,
       registration: null
     },
-    timeZones: [],
-    currentTimeZoneId: ''
+    timeZones: []
   }),
   getters: {
     getTimeZones: (state) => state.timeZones,
-    getCurrentTimeZone: (state) => state.currentTimeZoneId,
+    getCurrentTimeZone: (state) => state.current.timeZone,
     getUserPermissions(state: UserState) {
       return state.permissions
     },
@@ -116,7 +114,7 @@ export const useUserStore = defineStore("user", {
       }
     },
     async fetchPermissions() {
-      const permissionId = import.meta.env.VITE_VUE_APP_PERMISSION_ID;
+      const permissionId = import.meta.env.VITE_APP_PERMISSION_ID;
       const serverPermissions = [] as any;
 
       // TODO Make it configurable from the environment variables.
@@ -168,10 +166,10 @@ export const useUserStore = defineStore("user", {
         await api({
           url: "admin/user/profile",
           method: "POST",
-          data: { userId: this.current.userId, userTimeZone: tzId },
+          data: { userId: this.current.userId, timeZone: tzId },
         });
         this.updateUserInfo({ userTimeZone: tzId })
-        this.currentTimeZoneId = tzId
+        this.current.timeZone = tzId
       } catch (error: any) {
         console.error("Failed to set user time zone", error);
         commonUtil.showToast(translate("Failed to set user time zone"));

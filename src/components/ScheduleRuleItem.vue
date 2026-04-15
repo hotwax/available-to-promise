@@ -47,7 +47,7 @@ const ruleStore = useRuleStore();
 const ruleGroup = computed(() => ruleStore.getRuleGroup);
 const isReorderActive = computed(() => ruleStore.isReorderActive);
 
-const cronExpressions = JSON.parse(process.env?.VUE_APP_CRON_EXPRESSIONS as string)
+const cronExpressions = JSON.parse(import.meta.env.VITE_CRON_EXPRESSIONS)
 
 async function openScheduleActionsPopover(event: Event) {
   const popover = await popoverController.create({

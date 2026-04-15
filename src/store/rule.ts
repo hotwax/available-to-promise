@@ -37,7 +37,7 @@ export const useRuleStore = defineStore('rule', {
         const resp = await api({
           url: "available-to-promise/ruleGroups",
           method: "GET",
-          params: { ...payload, productStoreId: productStore.currentEComStore.productStoreId, statusId: "ATP_RG_ACTIVE" }
+          params: { ...payload, productStoreId: productStore.currentProductStore.productStoreId, statusId: "ATP_RG_ACTIVE" }
         }) as any;
         if (resp && !commonUtil.hasError(resp) && resp.data.length) {
           ruleGroup = resp.data[0]

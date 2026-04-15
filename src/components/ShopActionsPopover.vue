@@ -28,7 +28,7 @@ import { logger, translate } from '@common';
 import { copyOutline, flashOutline, stopCircleOutline, timeOutline } from 'ionicons/icons'
 import { computed } from "vue";
 import JobHistoryModal from "@/components/JobHistoryModal.vue"
-import { Plugins } from '@capacitor/core';
+import { Clipboard } from '@capacitor/clipboard';
 import { commonUtil } from "@common";
 import { useProductStore } from "@/store/productStore";
 import { DateTime } from 'luxon';
@@ -40,7 +40,7 @@ const channelStore = useChannelStore();
 const productStore = useProductStore();
 
 const props = defineProps(["job"]);
-const currentEComStore = computed(() => productStore.getCurrentEComStore)
+const currentProductStore = computed(() => productStore.getCurrentProductStore)
 
 function closePopover() {
   popoverController.dismiss({ dismissed: true });
@@ -62,7 +62,6 @@ async function viewJobHistory() {
 async function copyJobInformation() {
   const job = props.job;
 
-  const { Clipboard } = Plugins;
   const jobDetails = `jobId: ${job.jobId}, jobName: ${job.enumName}, jobDescription: ${job.description} ${job.runtimeData ? (", runtimeData: " + JSON.stringify(job.runtimeData)) : ""}`;
 
   await Clipboard.write({
@@ -144,7 +143,7 @@ async function runServiceNow(job: any) {
     'SERVICE_COUNT': '0',
     'SERVICE_TEMP_EXPR': job.jobStatus,
     'jobFields': {
-      'productStoreId': job.status === "SERVICE_PENDING" ? job.productStoreId : currentEComStore.value.productStoreId,
+      'productStoreId': job.status === "SERVICE_PENDING" ? job.productStoreId : currentProductStore.value.productStoreId,
       'systemJobEnumId': job.systemJobEnumId,
       'tempExprId': job.jobStatus, // Need to remove this as we are passing frequency in SERVICE_TEMP_EXPR, currently kept it for backward compatibility
       'parentJobId': job.parentJobId,
@@ -163,7 +162,7 @@ async function runServiceNow(job: any) {
   })
 
   // checking if the runtimeData has productStoreId, and if present then adding it on root level
-  job?.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = job.status === "SERVICE_PENDING" ? job.productStoreId : currentEComStore.value.productStoreId)
+  job?.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = job.status === "SERVICE_PENDING" ? job.productStoreId : currentProductStore.value.productStoreId)
   job?.priority && (payload['SERVICE_PRIORITY'] = job.priority.toString())
 
   // ShopifyConfig and ShopifyShop should be set based upon runtime data

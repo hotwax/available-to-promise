@@ -5,7 +5,7 @@ import { useUserStore } from '@/store/user'
 
 export interface ProductStoreState {
   productStores: any[]
-  currentEComStore: any
+  currentProductStore: any
   configFacilities: any[];
   appliedFilters: {
     included: {
@@ -41,7 +41,7 @@ export interface ProductStoreState {
 export const useProductStore = defineStore('productStore', {
   state: (): ProductStoreState => ({
     productStores: [],
-    currentEComStore: {},
+    currentProductStore: {},
     configFacilities: [],
     appliedFilters: {
       included: {
@@ -75,7 +75,7 @@ export const useProductStore = defineStore('productStore', {
   }),
   getters: {
     getProductStores: (state) => state.productStores,
-    getCurrentEComStore: (state) => state.currentEComStore,
+    getCurrentProductStore: (state) => state.currentProductStore,
     getConfigFacilities: (state) => state.configFacilities ? JSON.parse(JSON.stringify(state.configFacilities)) : [],
     getAppliedFilters: (state) => state.appliedFilters,
     getAppliedFiltersOperator: (state) => state.appliedFiltersOperator,
@@ -90,11 +90,11 @@ export const useProductStore = defineStore('productStore', {
     },
   },
   actions: {
-    setEcomStore(productStore: any) {
+    setCurrentProductStore(productStore: any) {
       if (!productStore) {
         productStore = this.productStores.find((store: any) => store.productStoreId === productStore.productStoreId);
       }
-      this.currentEComStore = productStore;
+      this.currentProductStore = productStore;
     },
     async fetchUserProductStores() {
       try {
@@ -116,9 +116,9 @@ export const useProductStore = defineStore('productStore', {
       let configFacilities = [];
       try {
         const resp = await api({
-          url: `admin/productStores/${this.currentEComStore.productStoreId}/facilities`,
+          url: `admin/productStores/${this.currentProductStore.productStoreId}/facilities`,
           method: "GET",
-          params: { facilityTypeId: 'CONFIGURATION', productStoreId: this.currentEComStore.productStoreId }
+          params: { facilityTypeId: 'CONFIGURATION', productStoreId: this.currentProductStore.productStoreId }
         }) as any;
         if (!commonUtil.hasError(resp)) {
           configFacilities = resp.data;
@@ -134,9 +134,9 @@ export const useProductStore = defineStore('productStore', {
       let facilityGroups = [];
       try {
         const resp = await api({
-          url: `admin/productStores/${this.currentEComStore.productStoreId}/facilityGroups`,
+          url: `admin/productStores/${this.currentProductStore.productStoreId}/facilityGroups`,
           method: "GET",
-          params: { productStoreId: this.currentEComStore.productStoreId, pageSize: 100 }
+          params: { productStoreId: this.currentProductStore.productStoreId, pageSize: 100 }
         }) as any;
         if (!commonUtil.hasError(resp)) {
           facilityGroups = resp.data;
@@ -185,7 +185,7 @@ export const useProductStore = defineStore('productStore', {
         parentFacilityTypeId_not: 'Y',
         facilityTypeId: 'VIRTUAL_FACILITY',
         facilityTypeId_not: 'Y',
-        productStoreId: this.currentEComStore.productStoreId,
+        productStoreId: this.currentProductStore.productStoreId,
         pageSize: payload.pageSize,
         pageIndex: payload.pageIndex
       }
@@ -252,9 +252,9 @@ export const useProductStore = defineStore('productStore', {
       const pickGroupFacilities = {} as any;
       try {
         const resp = await api({
-          url: `admin/productStores/${this.currentEComStore.productStoreId}/facilityGroups`,
+          url: `admin/productStores/${this.currentProductStore.productStoreId}/facilityGroups`,
           method: "GET",
-          params: { facilityGroupTypeId: 'PICKUP', productStoreId: this.currentEComStore.productStoreId, pageSize: 100 }
+          params: { facilityGroupTypeId: 'PICKUP', productStoreId: this.currentProductStore.productStoreId, pageSize: 100 }
         }) as any;
         if (resp && !commonUtil.hasError(resp)) {
           groups = resp.data;

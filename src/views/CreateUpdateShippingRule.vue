@@ -133,7 +133,7 @@ const configFacilities = computed(() => productStore.getConfigFacilities)
 const appliedFilters = computed(() => productStore.getAppliedFilters)
 const rules = computed(() => ruleStore.getRules);
 const total = computed(() => ruleStore.getTotalRulesCount)
-const currentEComStore = computed(() => productStore.getCurrentEComStore)
+const currentProductStore = computed(() => productStore.getCurrentProductStore)
 const selectedSegment = computed(() => productStore.getSelectedSegment)
 const facilityGroups = computed(() => productStore.getFacilityGroups)
 
@@ -259,7 +259,7 @@ async function createRule() {
     if(!ruleGroup.ruleGroupId) {
       ruleGroup = await ruleStore.createRuleGroup({
         "groupTypeEnumId": selectedSegment.value,
-        "productStoreId": currentEComStore.value.productStoreId,
+        "productStoreId": currentProductStore.value.productStoreId,
         "statusId": "ATP_RG_ACTIVE"
       })
     }

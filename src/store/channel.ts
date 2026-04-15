@@ -30,9 +30,9 @@ export const useChannelStore = defineStore('channel', {
       let inventoryChannels = [] as any
       try {
         const resp = await api({
-          url: `admin/productStores/${productStore.currentEComStore.productStoreId}/facilityGroups`,
+          url: `admin/productStores/${productStore.currentProductStore.productStoreId}/facilityGroups`,
           method: "GET",
-          params: { facilityGroupTypeId: "CHANNEL_FAC_GROUP", productStoreId: productStore.currentEComStore.productStoreId, pageSize: 50 }
+          params: { facilityGroupTypeId: "CHANNEL_FAC_GROUP", productStoreId: productStore.currentProductStore.productStoreId, pageSize: 50 }
         }) as any;
         if (!commonUtil.hasError(resp)) {
           inventoryChannels = resp?.data;
@@ -101,7 +101,7 @@ export const useChannelStore = defineStore('channel', {
         const resp = await api({
           url: "admin/shopifyShops",
           method: "get",
-          params: { productStoreId: productStore.currentEComStore.productStoreId }
+          params: { productStoreId: productStore.currentProductStore.productStoreId }
         }) as any;
         if (!commonUtil.hasError(resp)) {
           shopifyConfigs = resp.data;
@@ -147,7 +147,7 @@ export const useChannelStore = defineStore('channel', {
         inputFields: {
           statusId: "SERVICE_PENDING",
           systemJobEnumId: "JOB_UL_INV",
-          "productStoreId": productStore.currentEComStore.productStoreId,
+          "productStoreId": productStore.currentProductStore.productStoreId,
         } as any,
         fieldList: ["systemJobEnumId", "runTime", "tempExprId", "parentJobId", "serviceName", "jobId", "jobName", "currentRetryCount", "statusId", "productStoreId", "runtimeDataId", "shopId", "description", "enumTypeId", "enumName"],
         noConditionFind: "Y"

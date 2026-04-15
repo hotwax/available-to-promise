@@ -33,13 +33,13 @@
               <ion-note slot="end">{{ userProfile?.timeZone }}</ion-note>
             </ion-item>
             <ion-item v-if="productStores?.length > 1" lines="none">
-              <ion-select interface="popover" :value="eComStore.productStoreId" @ionChange="setEComStore($event)">
+              <ion-select interface="popover" :value="currentProductStore.productStoreId" @ionChange="setProductStore($event)">
                 <ion-select-option v-for="store in productStores" :key="store.productStoreId" :value="store.productStoreId" >{{ store.storeName ? store.storeName : store.productStoreId }}</ion-select-option>
               </ion-select>
             </ion-item>
             <ion-item v-else lines="none">
               <ion-label class="ion-text-wrap">
-                {{ eComStore.storeName ? eComStore.storeName : eComStore.productStoreId }}
+                {{ currentProductStore.storeName ? currentProductStore.storeName : currentProductStore.productStoreId }}
               </ion-label>
             </ion-item>
           </ion-toolbar>
@@ -87,7 +87,7 @@ const { isAuthenticated } = useAuth();
 const loader = ref<any>(null);
 
 const userProfile = computed(() => userStore.getUserProfile);
-const eComStore = computed(() => productStore.getCurrentEComStore);
+const currentProductStore = computed(() => productStore.getCurrentProductStore);
 const productStores = computed(() => productStore.getProductStores);
 const instanceUrl = computed(() => commonUtil.getOmsURL());
 
@@ -130,7 +130,7 @@ function dismissLoader() {
   }
 }
 
-async function setEComStore(event: SelectCustomEvent) {
+async function setProductStore(event: SelectCustomEvent) {
   const createUpdateRoute = ["/create-threshold", "/update-threshold/", "/create-safety-stock", "/update-safety-stock/", "/create-store-pickup", "update-store-pickup/", "/create-shipping", "/update-shipping/"]
   const path = router.currentRoute.value.path;
   if(productStores.value) {
@@ -143,14 +143,14 @@ async function setEComStore(event: SelectCustomEvent) {
             text: translate("No"),
             role: "cancel",
             handler: async () => {
-              // Reverting the selected ecomStore in ion-select if user select no to change product store.
-              event.target.value = eComStore.value.productStoreId
+              // Reverting the selected productStore in ion-select if user select no to change product store.
+              event.target.value = currentProductStore.value.productStoreId
             }
           },
           {
             text: translate("Yes"),
             handler: async () => {
-              await productStore.setEcomStore({
+              await productStore.setCurrentProductStore({
                 "productStoreId": event.detail.value
               })
               emitter.emit("productStoreOrConfigChanged")
@@ -158,10 +158,10 @@ async function setEComStore(event: SelectCustomEvent) {
           }
         ]
       })
-
+ 
       alert.present();
     } else {
-      productStore.setEcomStore({
+      productStore.setCurrentProductStore({
         "productStoreId": event.detail.value
       })
       emitter.emit("productStoreOrConfigChanged")
@@ -175,8 +175,8 @@ onBeforeMount(() => {
 });
 
 onMounted(() => {
-  if (userProfile.value && userProfile.value.userTimeZone) {
-    Settings.defaultZone = userProfile.value.userTimeZone;
+  if (userProfile.value && userProfile.value.timeZone) {
+    Settings.defaultZone = userProfile.value.timeZone;
   }
 });
 

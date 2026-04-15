@@ -54,7 +54,7 @@ export function useAuth() {
       await useUserStore().fetchUserProfile()
       await useUserStore().fetchPermissions()
       await useProductStore().fetchUserProductStores()
-      useProductStore().setEcomStore(useProductStore().getProductStores[0])
+      useProductStore().setCurrentProductStore(useProductStore().getProductStores[0])
 
     } catch (err: any) {
       commonUtil.showToast(translate("Something went wrong while login. Please contact administrator."));

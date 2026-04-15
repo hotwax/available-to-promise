@@ -43,38 +43,9 @@ const app = createApp(App)
   .use(logger as any, {
     level: import.meta.env.VITE_DEFAULT_LOG_LEVEL
   })
-  .use(router)
   .use(pinia)
+  .use(router)
   .use(createDxpI18n(localeMessages));
-
-// Filters are removed in Vue 3 and global filter introduced https://v3.vuejs.org/guide/migration/filters.html#global-filters
-app.config.globalProperties.$filters = {
-  formatDate(value: any, inFormat?: string, outFormat?: string) {
-    // TODO Make default format configurable and from environment variables
-    if (inFormat) {
-      return DateTime.fromFormat(value, inFormat).toFormat(outFormat ? outFormat : 'MM-DD-YYYY');
-    }
-    return DateTime.fromISO(value).toFormat(outFormat ? outFormat : 'MM-DD-YYYY');
-  },
-  formatUtcDate(value: any, inFormat?: any, outFormat?: string) {
-    // TODO Make default format configurable and from environment variables
-    const userStore = useUserStore(pinia);
-    const userProfile = userStore.getUserProfile;
-    // TODO Fix this setDefault should set the default timezone instead of getting it everytiem and setting the tz
-
-    return DateTime.utc(value, inFormat).setZone(userProfile.userTimeZone).toFormat(outFormat ? outFormat : 'MM-DD-YYYY')
-  },
-  getFeature(featureHierarchy: any, featureKey: string) {
-    let featureValue = ''
-    if (featureHierarchy) {
-      const feature = featureHierarchy.find((featureItem: any) => featureItem.startsWith(featureKey))
-      const featureSplit = feature ? feature.split('/') : [];
-      featureValue = featureSplit[2] ? featureSplit[2] : '';
-    }
-    return featureValue;
-  }
-}
-
 
 router.isReady().then(() => {
   app.mount('#app');

@@ -25,7 +25,7 @@
       </ion-item>
       <ion-item>
         <ion-label>{{ translate("Product store") }}</ion-label>
-        <ion-label slot="end">{{ eComStore.storeName ? eComStore.storeName : eComStore.productStoreId }}</ion-label>
+        <ion-label slot="end">{{ currentProductStore.storeName ? currentProductStore.storeName : currentProductStore.productStoreId }}</ion-label>
       </ion-item>
       <ion-item>
         <ion-select :label="translate('Group level configurations')" v-model="selectedConfigFacilityId" interface="popover">
@@ -63,7 +63,7 @@ const formData = ref({
 const selectedConfigFacilityId = ref("new");
 const facilityGroupId = ref("") as any;
 
-const eComStore = computed(() => productStore.getCurrentEComStore)
+const currentProductStore = computed(() => productStore.getCurrentProductStore)
 const configFacilities = computed(() => productStore.getConfigFacilities)
 
 function closeModal() {
@@ -114,7 +114,7 @@ async function createGroup() {
         }
 
         // Associating the config facility with the product store.
-        resp = await channelStore.updateFacilityAssociationWithProductStore({productStoreId: eComStore.value.productStoreId, facilityId: selectedConfigFacility.facilityId})
+        resp = await channelStore.updateFacilityAssociationWithProductStore({productStoreId: currentProductStore.value.productStoreId, facilityId: selectedConfigFacility.facilityId})
         if(resp && commonUtil.hasError(resp)) throw resp.data;
       } else {
         throw resp ? resp.data : "Failed to create facility";
@@ -124,7 +124,7 @@ async function createGroup() {
     }
 
     // Associating the facility group with the product store.
-    resp = await channelStore.updateGroupAssociationWithProductStore({productStoreId: eComStore.value.productStoreId, facilityGroupId: formData.value.facilityGroupId})
+    resp = await channelStore.updateGroupAssociationWithProductStore({productStoreId: currentProductStore.value.productStoreId, facilityGroupId: formData.value.facilityGroupId})
     if(resp && commonUtil.hasError(resp)) throw resp.data;
 
     // Associating the config facility with the group.
