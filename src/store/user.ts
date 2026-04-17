@@ -11,6 +11,7 @@ interface UserState {
     registration: any
   }
   timeZones: any[]
+  oms: any
 }
 
 export const useUserStore = defineStore("user", {
@@ -21,7 +22,8 @@ export const useUserStore = defineStore("user", {
       updateExists: false,
       registration: null
     },
-    timeZones: []
+    timeZones: [],
+    oms: ""
   }),
   getters: {
     getTimeZones: (state) => state.timeZones,
@@ -102,6 +104,7 @@ export const useUserStore = defineStore("user", {
           method: "get",
         }) as any;
         this.current = userProfileResp.data
+        useAuth().updateUserId(this.current.userId)
 
         if (this.current.timeZone) {
           Settings.defaultZone = this.current.timeZone;

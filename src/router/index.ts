@@ -36,14 +36,6 @@ const authGuard = async (to: any, from: any, next: any) => {
   }
 };
 
-const loginGuard = (to: any, from: any, next: any) => {
-  const { isAuthenticated } = useAuth()
-  if (isAuthenticated.value && !to.query?.token && !to.query?.oms) {
-    next('/')
-  }
-  next();
-};
-
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
@@ -163,8 +155,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/login',
     name: 'Login',
-    component: Login,
-    beforeEnter: loginGuard
+    component: Login
   },
   {
     path: "/settings",
