@@ -1,10 +1,11 @@
 import { api, commonUtil, cookieHelper, emitter, logger, translate, useNotificationStore } from "@common";
-import { useUserStore } from "@/store/user";
-import { useProductStore } from "@/store/productStore";
 import { DateTime } from "luxon";
 import { computed, ref } from "vue";
-import { useRuleStore } from "@/store/rule";
 import router from "@/router";
+import { useUserStore } from "@/store/user";
+import { useProductStore } from "@/store/productStore";
+import { useRuleStore } from "@/store/rule";
+import { useChannelStore } from "@/store/channel";
 
 interface LoginOption {
   loginAuthType?: string,
@@ -144,6 +145,7 @@ export function useAuth() {
     useUserStore().$reset();
     useProductStore().$reset();
     useRuleStore().$reset();
+    useChannelStore().$reset();
 
     // When the oms and party in state does not match the one stored in cookie, invalidAppContext is true
     // and in that case we do not need to clear the token from cookie
