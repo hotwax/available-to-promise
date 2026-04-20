@@ -51,35 +51,14 @@
 </template>
 
 <script setup lang="ts">
-import {
-  alertController,
-  IonApp,
-  IonContent,
-  IonFooter,
-  IonHeader,
-  IonIcon,
-  IonItem,
-  IonLabel,
-  IonList,
-  IonMenu,
-  IonMenuToggle,
-  IonNote,
-  IonRouterOutlet,
-  IonSelect,
-  IonSelectOption,
-  IonSplitPane,
-  IonTitle,
-  IonToolbar,
-  loadingController,
-  SelectCustomEvent
-} from "@ionic/vue";
+import { alertController, IonApp, IonContent, IonFooter, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonMenu, IonMenuToggle, IonNote, IonRouterOutlet, IonSelect, IonSelectOption, IonSplitPane, IonTitle, IonToolbar, loadingController, SelectCustomEvent } from "@ionic/vue";
 import { computed, onBeforeMount, onMounted, onUnmounted, ref } from "vue";
 import { translate, emitter, commonUtil } from "@common";
 import { Settings } from "luxon";
 import { useUserStore } from "@/store/user";
 import { useProductStore } from "@/store/productStore";
 import router from './router';
-import { useAuth } from "@/composables/useAuth";
+import { useAuth } from "@common/composables/auth";
 
 const userStore = useUserStore();
 const productStore = useProductStore();

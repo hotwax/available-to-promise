@@ -1,7 +1,6 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router';
-import { DateTime } from 'luxon';
 
 import { IonicVue } from '@ionic/vue';
 
@@ -28,9 +27,9 @@ import './theme/variables.css';
 
 import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
-import { createDxpI18n, logger } from "@common"
+import { createDxpI18n, logger, initialiseConfig } from "@common"
 import localeMessages from './locales';
-import { useUserStore } from './store/user'
+import { useUserStore } from './store/user';
 
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
@@ -46,6 +45,16 @@ const app = createApp(App)
   .use(pinia)
   .use(router)
   .use(createDxpI18n(localeMessages));
+
+initialiseConfig({
+  postLogin: useUserStore().postLogin,
+  postLogout: useUserStore().postLogout,
+  get oms() { return useUserStore().oms },
+  set oms(val) { useUserStore().oms = val },
+  get current() { return useUserStore().current },
+  set current(val) { useUserStore().current = val },
+  router: router
+})
 
 router.isReady().then(() => {
   app.mount('#app');

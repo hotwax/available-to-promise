@@ -1,7 +1,10 @@
 import { api, commonUtil, cookieHelper, i18n, logger, translate } from "@common";
 import { defineStore } from "pinia"
 import { DateTime, Settings } from "luxon"
-import { useAuth } from "@/composables/useAuth";
+import { useAuth } from "@common/composables/auth";
+import { useProductStore } from "@/store/productStore";
+import { useRuleStore } from "@/store/rule";
+import { useChannelStore } from "@/store/channel";
 
 interface UserState {
   permissions: any[]
@@ -168,6 +171,22 @@ export const useUserStore = defineStore("user", {
       } catch (err) {
         console.error('Error', err)
       }
+    },
+    async postLogin() {
+      try {
+        await this.fetchUserProfile();
+        await this.fetchPermissions();
+        await useProductStore().fetchUserProductStores();
+        useProductStore().setCurrentProductStore(useProductStore().getProductStores[0]);
+      } catch (error: any) {
+        return Promise.reject(new Error(error));
+      }
+    },
+    async postLogout() {
+      this.$reset();
+      useProductStore().$reset();
+      useRuleStore().$reset();
+      useChannelStore().$reset();
     }
   },
   persist: true

@@ -10,8 +10,8 @@ import CreateUpdateThresholdRule from '@/views/CreateUpdateThresholdRule.vue';
 import CreateUpdateSafetyStockRule from '@/views/CreateUpdateSafetyStockRule.vue'
 import CreateUpdateStorePickupRule from '@/views/CreateUpdateStorePickupRule.vue'
 import CreateUpdateShippingRule from '@/views/CreateUpdateShippingRule.vue'
-import Login from '@/views/Login.vue';
-import { useAuth } from '@/composables/useAuth';
+import Login from '@common/components/Login.vue';
+import { useAuth } from '@common/composables/auth';
 import { cloudUploadOutline, globeOutline, settingsOutline, sendOutline, storefrontOutline, pulseOutline } from 'ionicons/icons';
 
 import 'vue-router'
