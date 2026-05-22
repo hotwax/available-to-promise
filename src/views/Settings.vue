@@ -78,7 +78,7 @@ import { translate } from "@common";
 import DxpAppVersionInfo from '@/components/DxpAppVersionInfo.vue';
 import DxpOmsInstanceNavigator from '@/components/DxpOmsInstanceNavigator.vue';
 import DxpTimeZoneSwitcher from '@/components/DxpTimeZoneSwitcher.vue';
-import { useAuth } from '@common/composables/auth';
+import { useAuth } from '@common/composables/useAuth';
 
 const userStore = useUserStore()
 const ruleStore = useRuleStore()

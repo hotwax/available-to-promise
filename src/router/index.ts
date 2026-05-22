@@ -11,7 +11,7 @@ import CreateUpdateSafetyStockRule from '@/views/CreateUpdateSafetyStockRule.vue
 import CreateUpdateStorePickupRule from '@/views/CreateUpdateStorePickupRule.vue'
 import CreateUpdateShippingRule from '@/views/CreateUpdateShippingRule.vue'
 import Login from '@common/components/Login.vue';
-import { useAuth } from '@common/composables/auth';
+import { useAuth } from '@common/composables/useAuth';
 import { cloudUploadOutline, globeOutline, settingsOutline, sendOutline, storefrontOutline, pulseOutline } from 'ionicons/icons';
 
 import 'vue-router'

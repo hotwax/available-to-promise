@@ -58,7 +58,7 @@ import { Settings } from "luxon";
 import { useUserStore } from "@/store/user";
 import { useProductStore } from "@/store/productStore";
 import router from './router';
-import { useAuth } from "@common/composables/auth";
+import { useAuth } from "@common/composables/useAuth";
 
 const userStore = useUserStore();
 const productStore = useProductStore();
