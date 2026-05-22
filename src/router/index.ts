@@ -30,7 +30,8 @@ declare module 'vue-router' {
 const authGuard = async (to: any, from: any, next: any) => {
   const { isAuthenticated } = useAuth()
   if (!isAuthenticated.value) {
-    next('/login');
+    to.fullPath != "/" && localStorage.setItem("requestedPagePath", to.fullPath)
+    return next('/login');
   } else {
     next()
   }
