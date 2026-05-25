@@ -74,7 +74,7 @@ import { useUserStore } from '@/store/user';
 import { useRuleStore } from '@/store/rule';
 import { useProductStore } from '@/store/productStore';
 import Image from '@/components/Image.vue'
-import { translate } from "@common";
+import { commonUtil, translate } from "@common";
 import DxpAppVersionInfo from '@/components/DxpAppVersionInfo.vue';
 import DxpOmsInstanceNavigator from '@/components/DxpOmsInstanceNavigator.vue';
 import DxpTimeZoneSwitcher from '@/components/DxpTimeZoneSwitcher.vue';
@@ -82,7 +82,6 @@ import { useAuth } from '@common/composables/useAuth';
 
 const userStore = useUserStore()
 const ruleStore = useRuleStore()
-const { logout: authLogout } = useAuth();
 
 const userProfile = computed(() => userStore.getUserProfile)
 const currentProductStore = computed(() => useProductStore().getCurrentProductStore)
@@ -112,18 +111,11 @@ function setProductStore(event: CustomEvent) {
 }
 
 async function logout() {
-  useAuth().logout({ isUserUnauthorised: false }).then((redirectionUrl: any) => {
-    // redirectionUrl is only present when SSO enables, thus when not present redirect user to login
-    if(!redirectionUrl) {
-      router.replace("/login");
-    } else {
-      window.location.href = redirectionUrl
-    }
-  })
+  await useAuth().logout({ isUserUnauthorised: false });
 }
 
 function goToLaunchpad() {
-  window.location.href = `${import.meta.env.VITE_LOGIN_URL}`
+  window.location.href = `${import.meta.env.VITE_LOGIN_URL}?oms=${commonUtil.getOmsURL()}&token=${commonUtil.getToken()}`
 }
 </script>
 
