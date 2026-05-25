@@ -99,11 +99,10 @@ import { useUserStore } from '@/store/user';
 import { useProductStore } from '@/store/productStore';
 import { useRuleStore } from '@/store/rule';
 import AddProductFacilityGroupModal from '@/components/AddProductFacilityGroupModal.vue';
-import { useRouter } from 'vue-router';
+import router from '@/router';
 import { ruleUtil } from '@/utils/ruleUtil';
 import { commonUtil } from '@common';
 
-const router = useRouter();
 const userStore = useUserStore();
 const productStore = useProductStore();
 const ruleStore = useRuleStore();

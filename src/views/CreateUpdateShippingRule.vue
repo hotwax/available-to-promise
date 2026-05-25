@@ -119,12 +119,11 @@ import { useUserStore } from '@/store/user';
 import { useProductStore } from '@/store/productStore';
 import { useRuleStore } from '@/store/rule';
 import { ruleUtil } from '@/utils/ruleUtil';
-import { useRouter } from 'vue-router';
+import router from '@/router';
 
 const userStore = useUserStore();
 const productStore = useProductStore();
 const ruleStore = useRuleStore();
-const router = useRouter();
 
 const props = defineProps(["ruleId"]);
 const currentRule = ref({}) as any;

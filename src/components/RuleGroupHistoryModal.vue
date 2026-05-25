@@ -49,9 +49,8 @@ import { computed, onMounted, ref } from "vue";
 import { commonUtil } from "@common";
 import { useRuleStore } from "@/store/rule";
 import { logger } from "@common";
-import { useRouter } from "vue-router";
+import router from "@/router";
 
-const router = useRouter();
 const ruleStore = useRuleStore();
 const ruleGroup = computed(() => ruleStore.getRuleGroup);
 

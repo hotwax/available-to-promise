@@ -37,13 +37,12 @@
 import { IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonChip, IonIcon, IonItem, IonLabel, IonProgressBar, IonText, IonToggle, popoverController } from '@ionic/vue';
 import { computed, onMounted, ref } from 'vue';
 import { storefrontOutline } from 'ionicons/icons';
-import { useRouter } from 'vue-router';
+import router from '@/router';
 import { commonUtil, emitter, logger, translate } from '@common';
 import OrderLimitPopover from '@/components/OrderLimitPopover.vue';
 import { useProductStore } from '@/store/productStore';
 import { DateTime } from 'luxon';
 
-const router = useRouter();
 const productStore = useProductStore();
 
 const selectedPage = ref({

@@ -80,13 +80,12 @@ import FacilityItem from '@/components/FacilityItem.vue'
 import { commonUtil, emitter, translate } from '@common';
 import { ruleUtil } from '@/utils/ruleUtil';
 import ArchivedRuleItem from '@/components/ArchivedRuleItem.vue';
-import { useRouter } from 'vue-router';
+import router from '@/router';
 import { useRuleStore } from '@/store/rule';
 import { useProductStore } from '@/store/productStore';
 
 const ruleStore = useRuleStore();
 const productStore = useProductStore();
-const router = useRouter()
 
 const ruleGroup = computed(() => ruleStore.getRuleGroup);
 const rules = computed(() => ruleStore.getRules);

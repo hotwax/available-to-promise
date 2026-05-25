@@ -75,7 +75,7 @@ import RuleItem from '@/components/RuleItem.vue'
 import FacilityItem from '@/components/FacilityItem.vue'
 import { commonUtil, emitter, translate } from '@common';
 import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
-import { useRouter } from 'vue-router';
+import router from '@/router';
 import { useRuleStore } from '@/store/rule';
 import { useProductStore } from '@/store/productStore';
 import { ruleUtil } from '@/utils/ruleUtil';
@@ -83,7 +83,6 @@ import ArchivedRuleItem from '@/components/ArchivedRuleItem.vue';
 
 const ruleStore = useRuleStore();
 const productStore = useProductStore();
-const router = useRouter()
 
 const rules = computed(() => ruleStore.getRules);
 const ruleGroup = computed(() => ruleStore.getRuleGroup);

@@ -39,7 +39,7 @@
 import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonMenuButton, IonPage, IonReorderGroup, IonTitle, IonToolbar, onIonViewDidLeave, onIonViewDidEnter } from '@ionic/vue';
 import { addOutline, saveOutline, balloonOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue';
-import { useRouter } from "vue-router";
+import router from "@/router";
 import { computed, ref } from 'vue';
 import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
 import { useRuleStore } from '@/store/rule';
@@ -50,7 +50,6 @@ import ArchivedRuleItem from '@/components/ArchivedRuleItem.vue';
 
 const ruleStore = useRuleStore();
 const productStore = useProductStore();
-const router = useRouter()
 
 const rules = computed(() => ruleStore.getRules);
 const ruleGroup = computed(() => ruleStore.getRuleGroup);

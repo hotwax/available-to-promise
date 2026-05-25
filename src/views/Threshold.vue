@@ -41,7 +41,7 @@ import { addOutline, balloonOutline, saveOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue'
 import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
 import ArchivedRuleItem from '@/components/ArchivedRuleItem.vue';
-import { useRouter } from 'vue-router';
+import router from '@/router';
 import { computed, ref } from 'vue';
 import { useRuleStore } from '@/store/rule';
 import { useProductStore } from '@/store/productStore';
@@ -50,7 +50,6 @@ import { ruleUtil } from '@/utils/ruleUtil';
 
 const ruleStore = useRuleStore();
 const productStore = useProductStore();
-const router = useRouter()
 
 const rules = computed(() => ruleStore.getRules);
 const ruleGroup = computed(() => ruleStore.getRuleGroup);

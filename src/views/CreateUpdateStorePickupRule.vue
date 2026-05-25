@@ -114,7 +114,7 @@ import { addCircleOutline, closeCircle, saveOutline, storefrontOutline } from 'i
 import { commonUtil, emitter, logger, translate } from "@common";
 import { computed, ref } from 'vue';
 import ProductFilters from '@/components/ProductFilters.vue';
-import { useRouter } from 'vue-router';
+import router from '@/router';
 import AddProductFacilityGroupModal from '@/components/AddProductFacilityGroupModal.vue';
 import { useProductStore } from '@/store/productStore';
 import { useRuleStore } from '@/store/rule';
@@ -122,7 +122,6 @@ import { ruleUtil } from '@/utils/ruleUtil';
 
 const productStore = useProductStore();
 const ruleStore = useRuleStore();
-const router = useRouter();
 
 const currentRule = ref({}) as any;
 const props = defineProps(["ruleId"]);

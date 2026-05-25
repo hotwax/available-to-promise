@@ -124,13 +124,12 @@
 import { IonAccordion, IonAccordionGroup, IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonChip, IonIcon, IonItem, IonItemDivider, IonLabel, IonReorder, IonToggle, alertController } from '@ionic/vue';
 import { computed, onMounted, ref } from 'vue';
 import { archiveOutline, checkmarkDoneCircleOutline, closeCircleOutline, globeOutline, pulseOutline, sendOutline, shirtOutline, storefrontOutline } from 'ionicons/icons';
-import { useRouter } from 'vue-router';
+import router from '@/router';
 import { emitter, logger, translate } from '@common';
 import { useRuleStore } from '@/store/rule';
 import { useProductStore } from '@/store/productStore';
 import { commonUtil } from '@common';
 
-const router = useRouter();
 const ruleStore = useRuleStore();
 const productStore = useProductStore();
 
