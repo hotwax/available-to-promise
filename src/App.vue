@@ -1,7 +1,7 @@
 <template>
   <ion-app>
     <ion-split-pane content-id="main-content" when="lg">
-      <ion-menu side="start" content-id="main-content" type="overlay" :disabled="!isAuthenticated || (router.currentRoute.value.name as string) === 'Login'">
+      <ion-menu side="start" content-id="main-content" type="overlay" :disabled="!useAuth().isAuthenticated || (router.currentRoute.value.name as string) === 'Login'">
         <ion-header>
           <ion-toolbar>
             <ion-title>{{ translate("Available to Promise") }}</ion-title>
@@ -62,7 +62,6 @@ import { useAuth } from "@common/composables/useAuth";
 
 const userStore = useUserStore();
 const productStore = useProductStore();
-const { isAuthenticated } = useAuth();
 const loader = ref<any>(null);
 
 const userProfile = computed(() => userStore.getUserProfile);
