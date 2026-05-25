@@ -75,7 +75,7 @@ async function fetchFacilities () {
   try {
     let params = {
       productStoreId: productStore.currentProductStore.productStoreId,
-      pageSize: 20,
+      pageSize: 200,
       parentFacilityTypeId: 'VIRTUAL_FACILITY',
       parentFacilityTypeId_not: 'Y',
       facilityTypeId: 'VIRTUAL_FACILITY',
