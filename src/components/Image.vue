@@ -10,7 +10,7 @@ declare let process: any;
 
 const props = defineProps(['src']);
 let imageUrl = ref(defaultImage);
-let resourceUrl = process.env.VUE_APP_RESOURCE_URL || "";
+let resourceUrl = import.meta.env.VITE_RESOURCE_URL || "";
 
 const setImageUrl = () => {
   if (props.src) {

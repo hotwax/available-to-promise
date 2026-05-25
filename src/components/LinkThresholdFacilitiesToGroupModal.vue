@@ -37,20 +37,18 @@
 <script setup lang="ts">
 import { IonButton, IonButtons, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonLabel, IonRadio, IonRadioGroup, IonTitle, IonToolbar, modalController } from "@ionic/vue";
 import { closeOutline, saveOutline } from "ionicons/icons";
-import { translate } from '@hotwax/dxp-components';
-import { useStore } from "vuex";
-import { computed, defineProps, onMounted, ref } from "vue";
-import { hasError, showToast } from "@/utils";
-import { ChannelService } from '@/services/ChannelService';
-import logger from "@/logger";
+import { commonUtil, emitter, logger, translate } from '@common';
+import { computed, onMounted, ref } from "vue";
+import { useProductStore } from "@/store/productStore";
+import { useChannelStore } from "@/store/channel";
 import { DateTime } from "luxon";
-import emitter from "@/event-bus";
 
-const store = useStore();
+const productStore = useProductStore();
+const channelStore = useChannelStore();
 const selectedFacilityId = ref("");
 const props = defineProps(["group", "selectedConfigFacilityId"]);
 
-const configFacilities = computed(() => store.getters["util/getConfigFacilities"])
+const configFacilities = computed(() => productStore.getConfigFacilities)
 
 onMounted(() => {
   selectedFacilityId.value = props.selectedConfigFacilityId?.facilityId ? JSON.parse(JSON.stringify(props.selectedConfigFacilityId.facilityId)) : '';
@@ -62,7 +60,7 @@ function closeModal() {
 
 async function saveFacility() {
   if(!selectedFacilityId.value) {
-    showToast(translate("Please select a facility to update."))
+    commonUtil.showToast(translate("Please select a facility to update."))
     return;
   }
   let resp = {} as any;
@@ -71,33 +69,33 @@ async function saveFacility() {
 
   try {
     if(props.selectedConfigFacilityId?.facilityId) {
-      resp = await ChannelService.updateFacilityAssociationWithGroup({
+      resp = await channelStore.updateFacilityAssociationWithGroup({
         facilityGroupId: props.group.facilityGroupId,
         facilityId: props.selectedConfigFacilityId.facilityId,
         fromDate: props.selectedConfigFacilityId.fromDate,
         thruDate: DateTime.now().toMillis()
-      });
-      if(hasError(resp)) {
+      }) as any;
+      if(resp && commonUtil.hasError(resp)) {
         throw resp.data;
       }
     }
 
-    resp = await ChannelService.updateFacilityAssociationWithGroup({
+    resp = await channelStore.updateFacilityAssociationWithGroup({
       facilityGroupId: props.group.facilityGroupId,
       facilityId: selectedFacilityId.value,
       fromDate: DateTime.now().toMillis()
-    });
-    if(!hasError(resp)) {
-      showToast(translate("Threshold facility updated successfully."))
+    }) as any;
+    if(resp && !commonUtil.hasError(resp)) {
+      commonUtil.showToast(translate("Threshold facility updated successfully."))
       modalController.dismiss();
     } else {
-      throw resp.data;
+      throw resp ? resp.data : "Failed to update threshold facility.";
     }
   } catch(err: any) {
     logger.error(err)
-    showToast(translate("Failed to update threshold facility."))
+    commonUtil.showToast(translate("Failed to update threshold facility."))
   }
-  await store.dispatch("channel/fetchGroupFacilities", props.group.facilityGroupId);
+  await channelStore.fetchGroupFacilities(props.group.facilityGroupId);
   emitter.emit("dismissLoader");
 }
 

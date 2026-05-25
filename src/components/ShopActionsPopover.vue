@@ -24,21 +24,23 @@
 
 <script setup lang="ts">
 import { IonContent, IonIcon, IonItem, IonLabel, IonList, IonListHeader, alertController, modalController, popoverController } from "@ionic/vue";
-import { translate } from '@hotwax/dxp-components';
+import { logger, translate } from '@common';
 import { copyOutline, flashOutline, stopCircleOutline, timeOutline } from 'ionicons/icons'
-import { computed, defineProps } from "vue";
+import { computed } from "vue";
 import JobHistoryModal from "@/components/JobHistoryModal.vue"
-import { Plugins } from '@capacitor/core';
-import { hasError, showToast } from "@/utils";
-import logger from "@/logger";
-import { ChannelService } from "@/services/ChannelService";
+import { Clipboard } from '@capacitor/clipboard';
+import { commonUtil } from "@common";
+import { useProductStore } from "@/store/productStore";
 import { DateTime } from 'luxon';
-import { useStore } from "vuex";
+import { useUserStore } from "@/store/user";
+import { useChannelStore } from "@/store/channel";
 
-const store = useStore();
+const userStore = useUserStore();
+const channelStore = useChannelStore();
+const productStore = useProductStore();
 
 const props = defineProps(["job"]);
-const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
+const currentProductStore = computed(() => productStore.getCurrentProductStore)
 
 function closePopover() {
   popoverController.dismiss({ dismissed: true });
@@ -60,13 +62,12 @@ async function viewJobHistory() {
 async function copyJobInformation() {
   const job = props.job;
 
-  const { Clipboard } = Plugins;
   const jobDetails = `jobId: ${job.jobId}, jobName: ${job.enumName}, jobDescription: ${job.description} ${job.runtimeData ? (", runtimeData: " + JSON.stringify(job.runtimeData)) : ""}`;
 
   await Clipboard.write({
     string: jobDetails
   }).then(() => {
-    showToast(translate("Copied to clipboard"));
+    commonUtil.showToast(translate("Copied to clipboard"));
   })
 
   closePopover();
@@ -83,24 +84,24 @@ async function disableJob() {
       text: translate("Cancel"),
       handler: async() => {
         if(isRuntimePassed()) {
-          showToast(translate("Job runtime has passed. Please refresh to get the latest job data in order to perform any action."))
+          commonUtil.showToast(translate("Job runtime has passed. Please refresh to get the latest job data in order to perform any action."))
           return;
         }
 
         try {
-          const resp = await ChannelService.disableJob({ 
+          const resp = await channelStore.disableJob({ 
             jobId: props.job.jobId
-          })
+          }) as any;
 
-          if(!hasError(resp)) {
-            showToast(translate("Successfully cancelled this job."))
-            await store.dispatch("channel/fetchJobs");
+          if(resp && !commonUtil.hasError(resp)) {
+            commonUtil.showToast(translate("Successfully cancelled this job."))
+            await channelStore.fetchJobs();
             closePopover();
           } else {
-            throw resp.data;
+            throw resp ? resp.data : "Failed to cancel this job.";
           }
         } catch(error: any) {
-          showToast(translate("Failed to cancel this job."))
+          commonUtil.showToast(translate("Failed to cancel this job."))
           logger.error(error);
         }
       }
@@ -142,13 +143,13 @@ async function runServiceNow(job: any) {
     'SERVICE_COUNT': '0',
     'SERVICE_TEMP_EXPR': job.jobStatus,
     'jobFields': {
-      'productStoreId': job.status === "SERVICE_PENDING" ? job.productStoreId : currentEComStore.value.productStoreId,
+      'productStoreId': job.status === "SERVICE_PENDING" ? job.productStoreId : currentProductStore.value.productStoreId,
       'systemJobEnumId': job.systemJobEnumId,
       'tempExprId': job.jobStatus, // Need to remove this as we are passing frequency in SERVICE_TEMP_EXPR, currently kept it for backward compatibility
       'parentJobId': job.parentJobId,
-      'recurrenceTimeZone': store.state.user.current.timeZone,
-      'createdByUserLogin': store.state.user.current.username,
-      'lastModifiedByUserLogin': store.state.user.current.username
+      'recurrenceTimeZone': userStore.current.timeZone,
+      'createdByUserLogin': userStore.current.username,
+      'lastModifiedByUserLogin': userStore.current.username
     },
     'statusId': "SERVICE_PENDING",
     'systemJobEnumId': job.systemJobEnumId
@@ -161,7 +162,7 @@ async function runServiceNow(job: any) {
   })
 
   // checking if the runtimeData has productStoreId, and if present then adding it on root level
-  job?.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = job.status === "SERVICE_PENDING" ? job.productStoreId : store.state.user.currentEComStore.productStoreId)
+  job?.runtimeData?.productStoreId?.length >= 0 && (payload['productStoreId'] = job.status === "SERVICE_PENDING" ? job.productStoreId : currentProductStore.value.productStoreId)
   job?.priority && (payload['SERVICE_PRIORITY'] = job.priority.toString())
 
   // ShopifyConfig and ShopifyShop should be set based upon runtime data
@@ -169,7 +170,7 @@ async function runServiceNow(job: any) {
   const jobRunTimeDataKeys = job?.runtimeData ? Object.keys(job?.runtimeData) : [];
   if (jobRunTimeDataKeys.includes('shopifyConfigId') || jobRunTimeDataKeys.includes('shopId')) {
     if (job.status !== "SERVICE_PENDING" && !job.shopifyConfigId) {
-      showToast(translate('Shopify configuration not found. Scheduling failed.'))
+      commonUtil.showToast(translate('Shopify configuration not found. Scheduling failed.'))
       return;
     }
 
@@ -179,15 +180,15 @@ async function runServiceNow(job: any) {
   }
 
   try {
-    resp = await ChannelService.scheduleJob({ ...payload });
-    if(!hasError(resp)) {
-      showToast(translate("Service has been scheduled."))
+    resp = await channelStore.scheduleJob({ ...payload }) as any;
+    if(resp && !commonUtil.hasError(resp)) {
+      commonUtil.showToast(translate("Service has been scheduled."))
       closePopover();
     } else {
-      throw resp.data;
+      throw resp ? resp.data : "Failed to schedule service.";
     }
   } catch(err) {
-    showToast(translate("Failed to schedule service."))
+    commonUtil.showToast(translate("Failed to schedule service."))
     logger.error(err)
   }
 }
@@ -195,4 +196,4 @@ async function runServiceNow(job: any) {
 function isRuntimePassed() {
   return props.job.runTime <= DateTime.now().toMillis()
 }
-</script> 
+</script>

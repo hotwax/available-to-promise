@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
 import Settings from "@/views/Settings.vue"
-import store from '@/store'
 import Threshold from '@/views/Threshold.vue'
 import SafetyStock from '@/views/SafetyStock.vue'
 import StorePickup from '@/views/StorePickup.vue'
@@ -11,8 +10,9 @@ import CreateUpdateThresholdRule from '@/views/CreateUpdateThresholdRule.vue';
 import CreateUpdateSafetyStockRule from '@/views/CreateUpdateSafetyStockRule.vue'
 import CreateUpdateStorePickupRule from '@/views/CreateUpdateStorePickupRule.vue'
 import CreateUpdateShippingRule from '@/views/CreateUpdateShippingRule.vue'
-import { DxpLogin, useAuthStore } from '@hotwax/dxp-components';
-import { loader } from '@/user-utils';
+import Login from '@common/components/Login.vue';
+import { useAuth } from '@common/composables/useAuth';
+import { cloudUploadOutline, globeOutline, settingsOutline, sendOutline, storefrontOutline, pulseOutline } from 'ionicons/icons';
 
 import 'vue-router'
 
@@ -20,27 +20,21 @@ import 'vue-router'
 declare module 'vue-router' {
   interface RouteMeta {
     permissionId?: string;
+    title?: string;
+    icon?: string;
+    menuIndex?: number;
+    childRoutes?: string[];
   }
 }
 
 const authGuard = async (to: any, from: any, next: any) => {
-  const authStore = useAuthStore()
-  if (!authStore.isAuthenticated || !store.getters['user/isAuthenticated']) {
-    await loader.present('Authenticating')
-    // TODO use authenticate() when support is there
-    const redirectUrl = window.location.origin + '/login'
-    window.location.href = `${process.env.VUE_APP_LOGIN_URL}?redirectUrl=${redirectUrl}`
-    loader.dismiss()
+  const { isAuthenticated } = useAuth()
+  if (!isAuthenticated.value) {
+    to.fullPath != "/" && localStorage.setItem("requestedPagePath", to.fullPath)
+    return next('/login');
+  } else {
+    next()
   }
-  next()
-};
-
-const loginGuard = (to: any, from: any, next: any) => {
-  const authStore = useAuthStore()
-  if (authStore.isAuthenticated && !to.query?.token && !to.query?.oms) {
-    next('/')
-  }
-  next();
 };
 
 const routes: Array<RouteRecordRaw> = [
@@ -52,31 +46,60 @@ const routes: Array<RouteRecordRaw> = [
     path: '/threshold',
     name: 'Threshold',
     component: Threshold,
-    beforeEnter: authGuard
+    beforeEnter: authGuard,
+    meta: {
+      title: "Threshold",
+      icon: globeOutline,
+      menuIndex: 1,
+      childRoutes: ["/create-threshold", "/update-threshold/"]
+    }
   },
   {
     path: '/safety-stock',
     name: 'Safety stock',
     component: SafetyStock,
-    beforeEnter: authGuard
+    beforeEnter: authGuard,
+    meta: {
+      title: "Safety stock",
+      icon: pulseOutline,
+      menuIndex: 2,
+      childRoutes: ["/create-safety-stock", "/update-safety-stock/"]
+    }
   },
   {
     path: '/store-pickup',
     name: 'Store pickup',
     component: StorePickup,
-    beforeEnter: authGuard
+    beforeEnter: authGuard,
+    meta: {
+      title: "Store pickup",
+      icon: storefrontOutline,
+      menuIndex: 3,
+      childRoutes: ["/create-store-pickup", "/update-store-pickup/"]
+    }
   },
   {
     path: '/shipping',
     name: 'Shipping',
     component: Shipping,
-    beforeEnter: authGuard
+    beforeEnter: authGuard,
+    meta: {
+      title: "Shipping",
+      icon: sendOutline,
+      menuIndex: 4,
+      childRoutes: ["/create-shipping", "/update-shipping/"]
+    }
   },
   {
     path: '/inventory-channels',
     name: 'Inventory channels',
     component: InventoryChannels,
-    beforeEnter: authGuard
+    beforeEnter: authGuard,
+    meta: {
+      title: "Inventory channels",
+      icon: cloudUploadOutline,
+      menuIndex: 5
+    }
   },
   {
     path: '/create-threshold',
@@ -132,20 +155,24 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/login',
-    name: 'DxpLogin',
-    component: DxpLogin,
-    beforeEnter: loginGuard
+    name: 'Login',
+    component: Login
   },
   {
     path: "/settings",
     name: "Settings",
     component: Settings,
-    beforeEnter: authGuard
+    beforeEnter: authGuard,
+    meta: {
+      title: "Settings",
+      icon: settingsOutline,
+      menuIndex: 6
+    }
   }
 ]
 
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes
 })
 

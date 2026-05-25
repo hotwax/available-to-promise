@@ -69,17 +69,19 @@
 <script setup lang="ts">
 import { IonBackButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonPage, IonNote, IonText, IonTitle, IonToggle, IonToolbar, onIonViewWillLeave, onIonViewDidEnter } from '@ionic/vue';
 import { saveOutline } from 'ionicons/icons'
-import { translate } from "@hotwax/dxp-components";
+import { commonUtil, emitter, logger, translate } from "@common";
 import ProductFilters from '@/components/ProductFilters.vue';
-import { computed, defineProps, ref } from 'vue';
-import { useStore } from 'vuex';
-import { RuleService } from '@/services/RuleService';
-import { generateRuleActions, generateRuleConditions, hasError, showToast } from '@/utils';
-import logger from '@/logger';
+import { computed, ref } from 'vue';
+import { useUserStore } from '@/store/user';
+import { useProductStore } from '@/store/productStore';
+import { useRuleStore } from '@/store/rule';
+import { ruleUtil } from '@/utils/ruleUtil';
 import router from '@/router';
-import emitter from '@/event-bus';
 
-const store = useStore();
+const userStore = useUserStore();
+const productStore = useProductStore();
+const ruleStore = useRuleStore();
+
 const formData = ref({
   ruleName: '',
   threshold: '',
@@ -89,23 +91,23 @@ const formData = ref({
 const currentRule = ref({}) as any;
 const props = defineProps(["ruleId"]);
 
-const configFacilities = computed(() => store.getters["util/getConfigFacilities"])
-const appliedFilters = computed(() => store.getters["util/getAppliedFilters"]);
-const appliedFiltersOperator = computed(() => store.getters["util/getAppliedFiltersOperator"]);
-const rules = computed(() => store.getters["rule/getRules"]);
-const total = computed(() => store.getters["rule/getTotalRulesCount"])
-const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
+const configFacilities = computed(() => productStore.getConfigFacilities)
+const appliedFilters = computed(() => productStore.getAppliedFilters);
+const appliedFiltersOperator = computed(() => productStore.getAppliedFiltersOperator);
+const rules = computed(() => ruleStore.getRules);
+const total = computed(() => ruleStore.getTotalRulesCount)
+const currentProductStore = computed(() => productStore.getCurrentProductStore)
 
 onIonViewDidEnter(async () => {
   emitter.on("productStoreOrConfigChanged", redirectLink);
   emitter.emit("presentLoader");
-  await store.dispatch("util/fetchConfigFacilities");
+  await productStore.fetchConfigFacilities();
 
   if(props.ruleId) {
     try {
-      const resp = await RuleService.fetchRules({ ruleId: props.ruleId })
+      const resp = await ruleStore.fetchRulesDirect({ ruleId: props.ruleId }) as any;
 
-      if(!hasError(resp)) {
+      if(!commonUtil.hasError(resp)) {
         currentRule.value = resp.data[0];
 
         formData.value.ruleName = currentRule.value.ruleName;
@@ -129,8 +131,8 @@ onIonViewDidEnter(async () => {
           }
         })
 
-        await store.dispatch('util/updateAppliedFilters', currentAppliedFilters)
-        await store.dispatch('util/updateAppliedFiltersOperator', currentAppliedFiltersOperator)
+        await productStore.updateAppliedFilters(currentAppliedFilters)
+        await productStore.updateAppliedFiltersOperator(currentAppliedFiltersOperator)
       } else {
         throw resp.data
       }
@@ -147,8 +149,8 @@ onIonViewWillLeave(() => {
     threshold: '',
     selectedConfigFacilites: []
   }
-  store.dispatch("util/clearAppliedFilters")
-  store.dispatch("util/clearAppliedFiltersOperator")
+  productStore.clearAppliedFilters()
+  productStore.clearAppliedFiltersOperator()
   emitter.off("productStoreOrConfigChanged", redirectLink);
 })
 
@@ -173,13 +175,13 @@ async function createThresholdRule() {
 
   emitter.emit("presentLoader");
 
-  let ruleGroup = await store.dispatch("rule/fetchRuleGroup", { groupTypeEnumId: "RG_THRESHOLD" });
+  let ruleGroup = await ruleStore.fetchRuleGroup({ groupTypeEnumId: "RG_THRESHOLD" });
 
   try {
     if(!ruleGroup.ruleGroupId) {
-      ruleGroup = await RuleService.createRuleGroup({
+      ruleGroup = await ruleStore.createRuleGroup({
         "groupTypeEnumId": "RG_THRESHOLD",
-        "productStoreId": currentEComStore.value.productStoreId,
+        "productStoreId": currentProductStore.value.productStoreId,
         "statusId": "ATP_RG_ACTIVE"
       })
     }
@@ -191,21 +193,21 @@ async function createThresholdRule() {
       "sequenceNum": total.value ? rules.value[total.value-1].sequenceNum + 1 : 1
     }
 
-    const rule = await RuleService.createRule(params)
+    const rule = await ruleStore.createRule(params)
 
-    await RuleService.updateRule({
+    await ruleStore.updateRuleApi({
       ...params,
-      "ruleConditions": generateRuleConditions(rule.ruleId, "ENTCT_ATP_FACILITIES", appliedFilters.value, formData.value.selectedConfigFacilites, formData.value.areAllChannelsSelected, appliedFiltersOperator.value),
-      "ruleActions": generateRuleActions(rule.ruleId, "ATP_THRESHOLD", formData.value.threshold, false, [])
+      "ruleConditions": ruleUtil.generateRuleConditions(rule.ruleId, "ENTCT_ATP_FACILITIES", appliedFilters.value, formData.value.selectedConfigFacilites, formData.value.areAllChannelsSelected, appliedFiltersOperator.value),
+      "ruleActions": ruleUtil.generateRuleActions(rule.ruleId, "ATP_THRESHOLD", formData.value.threshold, false, [])
     }, rule.ruleId);
 
-    showToast(translate("Rule created successfully."))
-    store.dispatch("rule/clearRuleState")
-    store.dispatch("util/clearAppliedFilters")
+    commonUtil.showToast(translate("Rule created successfully."))
+    ruleStore.clearRuleState()
+    productStore.clearAppliedFilters()
     router.push("/threshold");
   } catch(err: any) {
     logger.error(err);
-    showToast(translate("Failed to create rule."))
+    commonUtil.showToast(translate("Failed to create rule."))
   }
   emitter.emit("dismissLoader");
 }
@@ -214,7 +216,7 @@ async function updateRule() {
   if(!isRuleValid()) return;
 
   const currentRuleConditions = JSON.parse(JSON.stringify(currentRule.value.ruleConditions));
-  const updatedRuleConditions = generateRuleConditions(props.ruleId, "ENTCT_ATP_FACILITIES", appliedFilters.value, formData.value.selectedConfigFacilites, formData.value.areAllChannelsSelected, appliedFiltersOperator.value);
+  const updatedRuleConditions = ruleUtil.generateRuleConditions(props.ruleId, "ENTCT_ATP_FACILITIES", appliedFilters.value, formData.value.selectedConfigFacilites, formData.value.areAllChannelsSelected, appliedFiltersOperator.value);
   updatedRuleConditions.map((updatedCondition: any) => {
     const current = currentRuleConditions.find((condition: any) => condition.conditionTypeEnumId === updatedCondition.conditionTypeEnumId && condition.fieldName === updatedCondition.fieldName && condition.operator === updatedCondition.operator);
     if(current) updatedCondition["conditionSeqId"] = current.conditionSeqId;
@@ -223,20 +225,20 @@ async function updateRule() {
   const conditionsToRemove = currentRuleConditions.filter((condition: any) => !updatedRuleConditions.some((updatedCondition: any) => condition.conditionTypeEnumId === updatedCondition.conditionTypeEnumId && condition.fieldName === updatedCondition.fieldName && condition.operator === updatedCondition.operator && condition.conditionSeqId === updatedCondition.conditionSeqId))
 
   try {
-    await RuleService.updateRule({
+    await ruleStore.updateRuleApi({
       ...currentRule.value,
       "ruleName": formData.value.ruleName,
       "ruleConditions": updatedRuleConditions,
-      "ruleActions": generateRuleActions(props.ruleId, "ATP_THRESHOLD", formData.value.threshold, true, currentRule.value.ruleActions)
+      "ruleActions": ruleUtil.generateRuleActions(props.ruleId, "ATP_THRESHOLD", formData.value.threshold, true, currentRule.value.ruleActions)
     }, props.ruleId);
-    showToast(translate("Rule updated successfully."))
+    commonUtil.showToast(translate("Rule updated successfully."))
 
-    const removeResponses = await Promise.allSettled(conditionsToRemove.map(async (condition: any) => await RuleService.deleteCondition({ ...condition, ruleId: props.ruleId})));
+    const removeResponses = await Promise.allSettled(conditionsToRemove.map(async (condition: any) => await ruleStore.deleteCondition({ ...condition, ruleId: props.ruleId})));
     const hasFailedResponse = removeResponses.some((response: any) => response.status === 'rejected');
     if(hasFailedResponse) logger.error("Failed to delete some rule conditions.")
 
-    store.dispatch("rule/clearRuleState")
-    store.dispatch("util/clearAppliedFilters")
+    ruleStore.clearRuleState()
+    productStore.clearAppliedFilters()
     router.push("/threshold");
   } catch(err: any) {
     logger.error(err);
@@ -245,15 +247,15 @@ async function updateRule() {
 
 function isRuleValid() {
   if(!formData.value.ruleName.trim() || !formData.value.threshold) {
-    showToast(translate("Please fill in all the required fields."))
+    commonUtil.showToast(translate("Please fill in all the required fields."))
     return false;
   }
   if(formData.value.threshold < 0){
-    showToast(translate("Threshold should be greater than or equal to 0."))
+    commonUtil.showToast(translate("Threshold should be greater than or equal to 0."))
     return false;
   }
   if(!formData.value.areAllChannelsSelected && !formData.value.selectedConfigFacilites.length) {
-    showToast(translate("Please select atleast one channel."))
+    commonUtil.showToast(translate("Please select atleast one channel."))
     return false;
   }
   return true

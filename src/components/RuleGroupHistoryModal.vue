@@ -15,10 +15,10 @@
       <template v-for="history in groupHistory" :key="history.jobRunId">
         <ion-item v-if="history.startTime">
           <ion-label>
-            <h3>{{ getTime(history.startTime) }}</h3>
-            <p>{{ getDate(history.startTime) }}</p>
+            <h3>{{ commonUtil.getTime(history.startTime) }}</h3>
+            <p>{{ commonUtil.getDate(history.startTime) }}</p>
           </ion-label>
-          <ion-badge color="dark" v-if="history.endTime">{{ timeTillRun(history.endTime) }}</ion-badge>
+          <ion-badge color="dark" v-if="history.endTime">{{ commonUtil.getRelativeTime(history.endTime) }}</ion-badge>
         </ion-item>
       </template>
     </ion-list>
@@ -29,7 +29,7 @@
 </template>
 
 <script setup lang="ts">
-import { translate } from '@hotwax/dxp-components';
+import { translate } from '@common';
 import {
   IonBadge,
   IonButton,
@@ -46,15 +46,13 @@ import {
 } from "@ionic/vue";
 import { closeOutline } from "ionicons/icons";
 import { computed, onMounted, ref } from "vue";
-import { getDate, getTime, timeTillRun, hasError } from "@/utils";
-import { useStore } from "vuex";
-import { RuleService } from "@/services/RuleService";
-import logger from "@/logger";
-import { useRouter } from "vue-router";
+import { commonUtil } from "@common";
+import { useRuleStore } from "@/store/rule";
+import { logger } from "@common";
+import router from "@/router";
 
-const router = useRouter();
-const store = useStore();
-const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
+const ruleStore = useRuleStore();
+const ruleGroup = computed(() => ruleStore.getRuleGroup);
 
 let groupHistory = ref([]) as any
 
@@ -70,9 +68,9 @@ async function fetchGroupHistory() {
   }
 
   try {
-    const resp = await RuleService.fetchRuleGroupHistory({ jobName: ruleGroup.value.jobName, pageSize: 20, orderByField: "lastUpdatedStamp DESC" })
+    const resp = await ruleStore.fetchRuleGroupHistory({ jobName: ruleGroup.value.jobName, pageSize: 20, orderByField: "lastUpdatedStamp DESC" })
 
-    if(!hasError(resp)) {
+    if(!commonUtil.hasError(resp)) {
       // Sorting the history based on startTime, as we does not get the records in sorted order from api
       groupHistory.value = resp.data.sort((a: any, b: any) => b.startTime - a.startTime)
     } else {

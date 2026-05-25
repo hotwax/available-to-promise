@@ -33,15 +33,13 @@
 <script setup lang="ts">
 import { IonButton, IonButtons, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonList, IonText, IonTextarea, IonTitle, IonToolbar, modalController } from "@ionic/vue";
 import { closeOutline, saveOutline } from "ionicons/icons";
-import { translate } from '@hotwax/dxp-components';
-import { defineProps, onMounted, ref } from "vue";
-import logger from "@/logger";
-import { hasError, showToast } from "@/utils";
-import { ChannelService } from '@/services/ChannelService'
-import store from "@/store";
-import emitter from "@/event-bus";
+import { emitter, logger, translate } from '@common';
+import { onMounted, ref } from "vue";
+import { commonUtil } from "@common";
+import { useChannelStore } from "@/store/channel";
 
 const props = defineProps(["group"]);
+const channelStore = useChannelStore();
 const formData = ref({
   facilityGroupName: "",
   description: ""
@@ -58,23 +56,23 @@ function isGroupUpdated() {
 
 async function updateGroup() {
   if (!formData.value.facilityGroupName?.trim()) {
-    showToast(translate("Please fill in all the required fields."))
+    commonUtil.showToast(translate("Please fill in all the required fields."))
     return;
   }
 
   emitter.emit("presentLoader");
   try {
-    const resp = await ChannelService.updateGroup({...formData.value, facilityGroupId: props.group.facilityGroupId})
+    const resp = await channelStore.updateGroupApi({...formData.value, facilityGroupId: props.group.facilityGroupId}) as any;
 
-    if(!hasError(resp)) {
-      store.dispatch("channel/updateGroup", { facilityGroupId: props.group.facilityGroupId, ...formData.value })
-      showToast(translate("Group updated successfully."))
+    if(resp && !commonUtil.hasError(resp)) {
+      channelStore.updateGroup({ facilityGroupId: props.group.facilityGroupId, ...formData.value })
+      commonUtil.showToast(translate("Group updated successfully."))
       modalController.dismiss();
     } else {
-      throw resp.data;
+      throw resp ? resp.data : "Failed to update group";
     }
   } catch(err) {
-    showToast(translate("Failed to update group."))
+    commonUtil.showToast(translate("Failed to update group."))
     logger.error(err);
   }
   emitter.emit("dismissLoader");

@@ -44,17 +44,14 @@
 <script setup lang="ts">
 import { IonButton, IonButtons, IonCheckbox, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonSearchbar, IonSpinner, IonTitle, IonToolbar, modalController } from "@ionic/vue";
 import { closeOutline, saveOutline } from "ionicons/icons";
-import { translate } from '@hotwax/dxp-components';
-import { defineProps, onMounted, ref } from "vue";
-import { useStore } from "vuex";
+import { commonUtil, emitter, logger, translate } from '@common';
+import { onMounted, ref } from "vue";
+import { useChannelStore } from "@/store/channel";
+import { useProductStore } from "@/store/productStore";
 import { DateTime } from "luxon";
-import { ChannelService } from "@/services/ChannelService";
-import { UtilService } from "@/services/UtilService";
-import { hasError, showToast } from "@/utils";
-import logger from "@/logger";
-import emitter from "@/event-bus";
 
-const store = useStore();
+const channelStore = useChannelStore();
+const productStore = useProductStore();
 const queryString = ref('');
 const selectedFacilityValues = ref([]) as any;
 const isLoading = ref(false);
@@ -77,7 +74,7 @@ async function fetchFacilities () {
 
   try {
     let params = {
-      productStoreId: store.state.user.currentEComStore.productStoreId,
+      productStoreId: productStore.currentProductStore.productStoreId,
       pageSize: 200,
       parentFacilityTypeId: 'VIRTUAL_FACILITY',
       parentFacilityTypeId_not: 'Y',
@@ -93,12 +90,12 @@ async function fetchFacilities () {
       }
     }
 
-    const resp = await UtilService.fetchFacilities(params);
+    const resp = await productStore.fetchFacilitiesDirect(params) as any;
 
-    if(!hasError(resp)) {
+    if(resp && !commonUtil.hasError(resp)) {
       facilities.value = resp.data;
     } else {
-      throw resp.data
+      throw resp ? resp.data : "Failed to fetch facilities";
     }
   } catch (err: any) {
     logger.error(err)
@@ -130,7 +127,7 @@ async function saveFacilities() {
   const facilitiesToRemove = props.selectedFacilities.filter((facility: any) => !selectedFacilityValues.value.some((selectedFacility: any) => facility.facilityId === selectedFacility.facilityId))
 
   const removeResponses = await Promise.allSettled(facilitiesToRemove
-    .map(async (facility: any) => await ChannelService.updateFacilityAssociationWithGroup({
+    .map(async (facility: any) => await channelStore.updateFacilityAssociationWithGroup({
       facilityId: facility.facilityId,
       facilityGroupId: props.group.facilityGroupId,
       fromDate: facility.fromDate,
@@ -139,7 +136,7 @@ async function saveFacilities() {
   )
 
   const addResponses = await Promise.allSettled(facilitiesToAdd
-    .map(async (facility: any) => await ChannelService.updateFacilityAssociationWithGroup({
+    .map(async (facility: any) => await channelStore.updateFacilityAssociationWithGroup({
       facilityId: facility.facilityId,
       facilityGroupId: props.group.facilityGroupId,
       fromDate: DateTime.now().toMillis()
@@ -148,11 +145,11 @@ async function saveFacilities() {
 
   const hasFailedResponse = [...removeResponses, ...addResponses].some((response: any) => response.status === 'rejected')
   if(hasFailedResponse) {
-    showToast(translate("Failed to associate some facilites to group."))
+    commonUtil.showToast(translate("Failed to associate some facilites to group."))
   } else {
-    showToast(translate("Facilities associated to group successfully."))
+    commonUtil.showToast(translate("Facilities associated to group successfully."))
+    await channelStore.fetchGroupFacilities(props.group.facilityGroupId);
   }
-  await store.dispatch("channel/fetchGroupFacilities", props.group.facilityGroupId);
   modalController.dismiss()  
   emitter.emit("dismissLoader");
 }

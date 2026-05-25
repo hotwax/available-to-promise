@@ -111,30 +111,28 @@
 <script setup lang="ts">
 import { IonBackButton, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonNote, IonPage, IonText, IonTitle, IonToggle, IonToolbar, modalController, onIonViewDidEnter, onIonViewWillLeave } from '@ionic/vue';
 import { addCircleOutline, closeCircle, saveOutline, storefrontOutline } from 'ionicons/icons'
-import { translate } from "@hotwax/dxp-components";
-import { computed, defineProps, ref } from 'vue';
+import { commonUtil, emitter, logger, translate } from "@common";
+import { computed, ref } from 'vue';
 import ProductFilters from '@/components/ProductFilters.vue';
-import { useRouter } from 'vue-router';
+import router from '@/router';
 import AddProductFacilityGroupModal from '@/components/AddProductFacilityGroupModal.vue';
-import { useStore } from 'vuex';
-import { RuleService } from '@/services/RuleService';
-import { generateRuleActions, generateRuleConditions, hasError, showToast } from '@/utils';
-import logger from '@/logger';
-import emitter from '@/event-bus';
+import { useProductStore } from '@/store/productStore';
+import { useRuleStore } from '@/store/rule';
+import { ruleUtil } from '@/utils/ruleUtil';
 
-const store = useStore();
-const router = useRouter();
+const productStore = useProductStore();
+const ruleStore = useRuleStore();
 
 const currentRule = ref({}) as any;
 const props = defineProps(["ruleId"]);
 
-const configFacilities = computed(() => store.getters["util/getConfigFacilities"])
-const appliedFilters = computed(() => store.getters["util/getAppliedFilters"])
-const rules = computed(() => store.getters["rule/getRules"]);
-const total = computed(() => store.getters["rule/getTotalRulesCount"])
-const currentEComStore = computed(() => store.getters["user/getCurrentEComStore"])
-const selectedSegment = computed(() => store.getters["util/getSelectedSegment"]);
-const facilityGroups = computed(() => store.getters["util/getFacilityGroups"])
+const configFacilities = computed(() => productStore.getConfigFacilities)
+const appliedFilters = computed(() => productStore.getAppliedFilters)
+const rules = computed(() => ruleStore.getRules);
+const total = computed(() => ruleStore.getTotalRulesCount)
+const currentProductStore = computed(() => productStore.getCurrentProductStore)
+const selectedSegment = computed(() => productStore.getSelectedSegment);
+const facilityGroups = computed(() => productStore.getFacilityGroups)
 
 const formData = ref({
   ruleName: '',
@@ -150,13 +148,13 @@ const formData = ref({
 onIonViewDidEnter(async () => {
   emitter.on("productStoreOrConfigChanged", redirectLink);
   emitter.emit("presentLoader");
-  await Promise.allSettled([store.dispatch("util/fetchFacilityGroups"), store.dispatch("util/fetchConfigFacilities")]);
+  await Promise.allSettled([productStore.fetchFacilityGroups(), productStore.fetchConfigFacilities()]);
   
   if(props.ruleId) {
     try {
-      const resp = await RuleService.fetchRules({ ruleId: props.ruleId })
+      const resp = await ruleStore.fetchRulesDirect({ ruleId: props.ruleId }) as any;
       
-      if(!hasError(resp)) {
+      if(!commonUtil.hasError(resp)) {
         currentRule.value = resp.data[0];
 
         formData.value.ruleName = currentRule.value.ruleName;
@@ -189,7 +187,7 @@ onIonViewDidEnter(async () => {
             }
           }
         })
-        await store.dispatch('util/updateAppliedFilters', currentAppliedFilters)
+        await productStore.updateAppliedFilters(currentAppliedFilters)
       } else {
         throw resp.data
       }
@@ -210,7 +208,7 @@ onIonViewWillLeave(() => {
     },
     selectedConfigFacilites: []
   }
-  store.dispatch("util/clearAppliedFilters")
+  productStore.clearAppliedFilters()
   emitter.off("productStoreOrConfigChanged", redirectLink);
 })
 
@@ -253,13 +251,13 @@ async function createRule() {
 
   emitter.emit("presentLoader");
 
-  let ruleGroup = await store.dispatch("rule/fetchRuleGroup", { groupTypeEnumId: selectedSegment.value });
+  let ruleGroup = await ruleStore.fetchRuleGroup({ groupTypeEnumId: selectedSegment.value });
 
   try {
     if(!ruleGroup.ruleGroupId) {
-      ruleGroup = await RuleService.createRuleGroup({
+      ruleGroup = await ruleStore.createRuleGroup({
         "groupTypeEnumId": selectedSegment.value,
-        "productStoreId": currentEComStore.value.productStoreId,
+        "productStoreId": currentProductStore.value.productStoreId,
         "statusId": "ATP_RG_ACTIVE"
       })
     }
@@ -271,20 +269,20 @@ async function createRule() {
       "sequenceNum": total.value ? rules.value[total.value-1].sequenceNum + 1 : 1
     }
 
-    const rule = await RuleService.createRule(params)
-    await RuleService.updateRule({
+    const rule = await ruleStore.createRule(params)
+    await ruleStore.updateRuleApi({
       ...params,
-      "ruleConditions": generateRuleConditions(rule.ruleId, selectedSegment.value === 'RG_PICKUP_FACILITY' ? "ENTCT_ATP_FAC_GROUPS" : "ENTCT_ATP_FACILITIES", appliedFilters.value, selectedSegment.value === 'RG_PICKUP_FACILITY' ? formData.value.selectedFacilityGroups : formData.value.selectedConfigFacilites, formData.value.areAllSelected),
-      "ruleActions": generateRuleActions(rule.ruleId, "ATP_ALLOW_PICKUP", formData.value.isPickupAllowed, false, [])
+      "ruleConditions": ruleUtil.generateRuleConditions(rule.ruleId, selectedSegment.value === 'RG_PICKUP_FACILITY' ? "ENTCT_ATP_FAC_GROUPS" : "ENTCT_ATP_FACILITIES", appliedFilters.value, selectedSegment.value === 'RG_PICKUP_FACILITY' ? formData.value.selectedFacilityGroups : formData.value.selectedConfigFacilites, formData.value.areAllSelected),
+      "ruleActions": ruleUtil.generateRuleActions(rule.ruleId, "ATP_ALLOW_PICKUP", formData.value.isPickupAllowed, false, [])
     }, rule.ruleId);
 
-    showToast(translate("Rule created successfully."))
-    store.dispatch("rule/clearRuleState")
-    store.dispatch("util/clearAppliedFilters")
+    commonUtil.showToast(translate("Rule created successfully."))
+    ruleStore.clearRuleState()
+    productStore.clearAppliedFilters()
     router.push("/store-pickup");
   } catch(err: any) {
     logger.error(err);
-    showToast(translate("Failed to create rule."))
+    commonUtil.showToast(translate("Failed to create rule."))
   }
   emitter.emit("dismissLoader");
 }
@@ -293,7 +291,7 @@ async function updateRule() {
   if(!isRuleValid()) return;
 
   const currentRuleConditions = JSON.parse(JSON.stringify(currentRule.value.ruleConditions));
-  const updatedRuleConditions = generateRuleConditions(props.ruleId, selectedSegment.value === 'RG_PICKUP_FACILITY' ? "ENTCT_ATP_FAC_GROUPS" : "ENTCT_ATP_FACILITIES", appliedFilters.value, selectedSegment.value === 'RG_PICKUP_FACILITY' ? formData.value.selectedFacilityGroups : formData.value.selectedConfigFacilites, formData.value.areAllSelected);
+  const updatedRuleConditions = ruleUtil.generateRuleConditions(props.ruleId, selectedSegment.value === 'RG_PICKUP_FACILITY' ? "ENTCT_ATP_FAC_GROUPS" : "ENTCT_ATP_FACILITIES", appliedFilters.value, selectedSegment.value === 'RG_PICKUP_FACILITY' ? formData.value.selectedFacilityGroups : formData.value.selectedConfigFacilites, formData.value.areAllSelected);
 
   updatedRuleConditions.map((updatedCondition: any) => {
     const current = currentRuleConditions.find((condition: any) => condition.conditionTypeEnumId === updatedCondition.conditionTypeEnumId && condition.fieldName === updatedCondition.fieldName && condition.operator === updatedCondition.operator);
@@ -303,20 +301,20 @@ async function updateRule() {
   const conditionsToRemove = currentRuleConditions.filter((condition: any) => !updatedRuleConditions.some((updatedCondition: any) => condition.conditionTypeEnumId === updatedCondition.conditionTypeEnumId && condition.fieldName === updatedCondition.fieldName && condition.operator === updatedCondition.operator && condition.conditionSeqId === updatedCondition.conditionSeqId))
 
   try {
-    await RuleService.updateRule({
+    await ruleStore.updateRuleApi({
       ...currentRule.value,
       "ruleName": formData.value.ruleName,
       "ruleConditions": updatedRuleConditions,
-      "ruleActions": generateRuleActions(props.ruleId, "ATP_ALLOW_PICKUP", formData.value.isPickupAllowed, true, currentRule.value.ruleActions)
+      "ruleActions": ruleUtil.generateRuleActions(props.ruleId, "ATP_ALLOW_PICKUP", formData.value.isPickupAllowed, true, currentRule.value.ruleActions)
     }, props.ruleId);
-    showToast(translate("Rule updated successfully."))
+    commonUtil.showToast(translate("Rule updated successfully."))
 
-    const removeResponses = await Promise.allSettled(conditionsToRemove.map(async (condition: any) => await RuleService.deleteCondition({ ...condition, ruleId: props.ruleId})));
+    const removeResponses = await Promise.allSettled(conditionsToRemove.map(async (condition: any) => await ruleStore.deleteCondition({ ...condition, ruleId: props.ruleId})));
     const hasFailedResponse = removeResponses.some((response: any) => response.status === 'rejected');
     if(hasFailedResponse) logger.error("Failed to delete some rule conditions.")
 
-    store.dispatch("rule/clearRuleState")
-    store.dispatch("util/clearAppliedFilters")
+    ruleStore.clearRuleState()
+    productStore.clearAppliedFilters()
     router.push('/store-pickup');
   } catch(err: any) {
     logger.error(err);
@@ -325,15 +323,15 @@ async function updateRule() {
 
 function isRuleValid() {
   if(!formData.value.ruleName.trim()) {
-    showToast(translate("Please fill in all the required fields."))
+    commonUtil.showToast(translate("Please fill in all the required fields."))
     return false;
   }
 
   if(selectedSegment.value === 'RG_PICKUP_FACILITY' && !formData.value.areAllSelected && !formData.value.selectedFacilityGroups.included.length) {
-    showToast(translate("Please include atleast one facility."))
+    commonUtil.showToast(translate("Please include atleast one facility."))
     return false;
   } else if(selectedSegment.value === 'RG_PICKUP_CHANNEL' && !formData.value.areAllSelected && !formData.value.selectedConfigFacilites.length) {
-    showToast(translate("Please select atleast one channel."))
+    commonUtil.showToast(translate("Please select atleast one channel."))
     return false;
   }
 

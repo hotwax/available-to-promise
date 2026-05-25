@@ -32,7 +32,7 @@
 
 <script setup lang="ts">
 import { IonButton, IonButtons, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonNote, IonTitle, IonToolbar, modalController } from '@ionic/vue';
-import { translate } from '@hotwax/dxp-components';
+import { translate } from '@common';
 import { defineProps, onMounted, ref } from 'vue';
 import { closeOutline, saveOutline } from "ionicons/icons";
 

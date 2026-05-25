@@ -72,27 +72,26 @@ import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInfiniteScroll
 import { computed, ref } from 'vue';
 import { addOutline, balloonOutline, saveOutline } from 'ionicons/icons';
 import RuleItem from '@/components/RuleItem.vue'
-import { translate } from '@hotwax/dxp-components';
-import FacilityItem from '@/components/FacilityItem.vue';
+import FacilityItem from '@/components/FacilityItem.vue'
+import { commonUtil, emitter, translate } from '@common';
 import ScheduleRuleItem from '@/components/ScheduleRuleItem.vue';
-import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
-import emitter from '@/event-bus';
-import { RuleService } from '@/services/RuleService';
-import { doReorder, showToast } from '@/utils';
+import router from '@/router';
+import { useRuleStore } from '@/store/rule';
+import { useProductStore } from '@/store/productStore';
+import { ruleUtil } from '@/utils/ruleUtil';
 import ArchivedRuleItem from '@/components/ArchivedRuleItem.vue';
 
-const store = useStore();
-const router = useRouter()
+const ruleStore = useRuleStore();
+const productStore = useProductStore();
 
-const rules = computed(() => store.getters["rule/getRules"]);
-const ruleGroup = computed(() => store.getters["rule/getRuleGroup"]);
-const isScrollable = computed(() => store.getters["util/isFacilitiesScrollable"]);
-const facilities = computed(() => store.getters["util/getFacilities"]);
-const selectedSegment = computed(() => store.getters["util/getSelectedSegment"]);
-const isReorderActive = computed(() => store.getters["rule/isReorderActive"]);
-const archivedRules = computed(() => store.getters["rule/getArchivedRules"]);
-const reorderingRules = ref([]);
+const rules = computed(() => ruleStore.getRules);
+const ruleGroup = computed(() => ruleStore.getRuleGroup);
+const isScrollable = computed(() => productStore.isFacilitiesScrollable);
+const facilities = computed(() => productStore.getFacilities);
+const selectedSegment = computed(() => productStore.getSelectedSegment);
+const isReorderActive = computed(() => ruleStore.isReorderActive);
+const archivedRules = computed(() => ruleStore.getArchivedRules);
+const reorderingRules = ref([]) as any;
 
 const isScrollingEnabled = ref(false);
 const contentRef = ref({}) as any;
@@ -105,27 +104,27 @@ onIonViewDidEnter(async() => {
 
 onIonViewDidLeave(() => {
   emitter.off("productStoreOrConfigChanged", fetchRules);
-  store.dispatch("rule/updateIsReorderActive", false)
+  ruleStore.updateIsReorderActive(false)
 })
 
 async function fetchRules() {
   emitter.emit("presentLoader");
-  store.dispatch("rule/updateIsReorderActive", false)
-  if(!selectedSegment.value || (selectedSegment.value !== 'RG_SHIPPING_FACILITY' && selectedSegment.value !== 'RG_SHIPPING_CHANNEL' && selectedSegment.value !== 'SHIPPING_FACILITY')) store.dispatch("util/updateSelectedSegment", "RG_SHIPPING_FACILITY");
-  await Promise.allSettled([store.dispatch('rule/fetchRules', { groupTypeEnumId: selectedSegment.value, pageSize: 50 }), store.dispatch("util/fetchConfigFacilities"), store.dispatch("util/fetchFacilityGroups")])
+  ruleStore.updateIsReorderActive(false)
+  if(!selectedSegment.value || (selectedSegment.value !== 'RG_SHIPPING_FACILITY' && selectedSegment.value !== 'RG_SHIPPING_CHANNEL' && selectedSegment.value !== 'SHIPPING_FACILITY')) productStore.updateSelectedSegment("RG_SHIPPING_FACILITY");
+  await Promise.allSettled([ruleStore.fetchRules({ groupTypeEnumId: selectedSegment.value, pageSize: 50 }), productStore.fetchConfigFacilities(), productStore.fetchFacilityGroups()])
   if(selectedSegment.value === 'SHIPPING_FACILITY') fetchFacilities();
   emitter.emit("dismissLoader");
 }
 
 async function fetchFacilities(vSize?: any, vIndex?: any) {
-  const pageSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
+  const pageSize = vSize ? vSize : import.meta.env.VITE_VIEW_SIZE;
   const pageIndex = vIndex ? vIndex : 0;
   const payload = {
     pageSize,
     pageIndex,
     isOrderCountRequired: true
   };
-  await store.dispatch('util/fetchFacilities', payload)
+  await productStore.fetchFacilities(payload)
 }
 
 function enableScrolling() {
@@ -148,7 +147,7 @@ async function loadMoreFacilities(event: any) {
   fetchFacilities(
     undefined,
     Math.ceil(
-      facilities.value?.length / (process.env.VUE_APP_VIEW_SIZE as any)
+      facilities.value?.length / (import.meta.env.VITE_VIEW_SIZE as any)
     ).toString()
   ).then(async () => {
     await event.target.complete();
@@ -156,53 +155,53 @@ async function loadMoreFacilities(event: any) {
 }
 
 async function updateSegment(event: any) {
-  store.dispatch("util/updateSelectedSegment", event.detail.value);
+  productStore.updateSelectedSegment(event.detail.value);
 
   emitter.emit("presentLoader");
   if(selectedSegment.value === 'SHIPPING_FACILITY') {
     isScrollingEnabled.value = false;
     await fetchFacilities();
-    store.dispatch("rule/updateIsReorderActive", false)
+    ruleStore.updateIsReorderActive(false)
   } else {
-    store.dispatch("rule/updateIsReorderActive", false)
+    ruleStore.updateIsReorderActive(false)
     reorderingRules.value = []
-    await store.dispatch('rule/fetchRules', { groupTypeEnumId: selectedSegment.value, pageSize: 50 })
+    await ruleStore.fetchRules({ groupTypeEnumId: selectedSegment.value, pageSize: 50 })
   }
   emitter.emit("dismissLoader");
 }
 
 
 function activateReordering() {
-  store.dispatch("rule/updateIsReorderActive", true)
+  ruleStore.updateIsReorderActive(true)
   reorderingRules.value = rules.value;
 }
 
 async function saveReorder() {
   const diffRules = reorderingRules.value.filter((reorderRule: any) => rules.value.some((rule: any) => rule.ruleId === reorderRule.ruleId && rule.sequenceNum !== reorderRule.sequenceNum))
   if(!diffRules.length) {
-    store.dispatch("rule/updateIsReorderActive", false)
-    showToast(translate("No sequence has been changed."))
+    ruleStore.updateIsReorderActive(false)
+    commonUtil.showToast(translate("No sequence has been changed."))
     return;
   }
 
   emitter.emit("presentLoader", { messgae: "Saving changes.." })
   const responses = await Promise.allSettled(diffRules.map(async (rule: any) => {
-    await RuleService.updateRule(rule, rule.ruleId)
+    await ruleStore.updateRuleApi(rule, rule.ruleId)
   }))
 
-  const isFailedToUpdateSomeRule = responses.some((response) => response.status === 'rejected')
+  const isFailedToUpdateSomeRule = responses.some((response: any) => response.status === 'rejected')
   if(isFailedToUpdateSomeRule) {
-    showToast(translate("Failed to update sequence for some rules."))
+    commonUtil.showToast(translate("Failed to update sequence for some rules."))
   } else {
-    showToast(translate("Sequence for rules updated successfully."))
+    commonUtil.showToast(translate("Sequence for rules updated successfully."))
   }
   emitter.emit("dismissLoader");
-  await store.dispatch('rule/updateRules', { rules: reorderingRules.value })
-  store.dispatch("rule/updateIsReorderActive", false)
+  await ruleStore.updateRules({ rules: reorderingRules.value })
+  ruleStore.updateIsReorderActive(false)
 }
 
 function updateReorderingRules(event: any) {
-  reorderingRules.value = doReorder(event, reorderingRules.value)
+  reorderingRules.value = ruleUtil.doReorder(event, reorderingRules.value)
 }
 
 function createShipping() {
