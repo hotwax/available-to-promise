@@ -18,6 +18,7 @@
     "@ionic/core": "catalog:",
     "@ionic/vue": "catalog:",
     "@ionic/vue-router": "catalog:",
+    "ionicons": "catalog:",
     "axios": "catalog:",
     "axios-cache-adapter": "catalog:",
     "boolean-parser": "0.0.2",
@@ -50,6 +51,7 @@
     "terser": "^5.46.1",
     "typescript": "catalog:",
     "vite": "catalog:",
+    "vite-plugin-pwa": "1.2.0",
     "vitest": "catalog:"
   }
 }
