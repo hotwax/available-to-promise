@@ -1,5 +1,6 @@
 import legacy from '@vitejs/plugin-legacy'
 import vue from '@vitejs/plugin-vue'
+import { ideTraceVue } from 'chrome-ide-trace/vite'
 import path from 'path'
 import { defineConfig } from 'vite'
 import { versionInfoUtil } from '../accxui/common/utils/versionInfoUtil'
@@ -10,9 +11,10 @@ import manifest from "./manifest.json"
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   return {
-    plugins: [
-      vue(),
-      legacy(),
+  plugins: [
+    ideTraceVue(),
+    vue(),
+    legacy(),
       VitePWA({
         registerType: "autoUpdate", // Automatically updates the service worker, check if this correct to aut update or we should go with prompt support
         selfDestroying: true, // Unregisters any existing service worker and clears cache,
