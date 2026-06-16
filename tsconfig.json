@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../accxui/tsconfig.json",
   "compilerOptions": {
     "baseUrl": ".",
     "types": [
@@ -8,8 +8,8 @@
     ],
     "paths": {
       "@/*": ["src/*"],
-      "@common": ["../../common/index.ts"],
-      "@common/*": ["../../common/*"]
+      "@common": ["../accxui/common/index.ts"],
+      "@common/*": ["../accxui/common/*"]
     }
   },
   "include": [
