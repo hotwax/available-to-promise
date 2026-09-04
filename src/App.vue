@@ -28,7 +28,6 @@
           :instance-label="instanceUrl"
           :product-stores="productStores"
           :current-product-store-id="currentProductStore.productStoreId"
-          :time-zone="userProfile?.timeZone"
           @update:product-store="(productStoreId, ionEvent) => setProductStore(ionEvent)"
         />
       </ion-menu>
