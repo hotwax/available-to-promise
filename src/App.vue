@@ -24,26 +24,12 @@
           </ion-list>
         </ion-content>
 
-        <ion-footer>
-          <ion-toolbar>
-            <ion-item lines="none">
-              <ion-label class="ion-text-wrap">
-                <p class="overline">{{ instanceUrl }}</p>
-              </ion-label>
-              <ion-note slot="end">{{ userProfile?.timeZone }}</ion-note>
-            </ion-item>
-            <ion-item v-if="productStores?.length > 1" lines="none">
-              <ion-select interface="popover" :value="currentProductStore.productStoreId" @ionChange="setProductStore($event)">
-                <ion-select-option v-for="store in productStores" :key="store.productStoreId" :value="store.productStoreId" >{{ store.storeName ? store.storeName : store.productStoreId }}</ion-select-option>
-              </ion-select>
-            </ion-item>
-            <ion-item v-else lines="none">
-              <ion-label class="ion-text-wrap">
-                {{ currentProductStore.storeName ? currentProductStore.storeName : currentProductStore.productStoreId }}
-              </ion-label>
-            </ion-item>
-          </ion-toolbar>
-        </ion-footer>
+        <DxpOmsInstanceFooter
+          :instance-label="instanceUrl"
+          :product-stores="productStores"
+          :current-product-store-id="currentProductStore.productStoreId"
+          @update:product-store="(productStoreId, ionEvent) => setProductStore(ionEvent)"
+        />
       </ion-menu>
       <ion-router-outlet id="main-content" />
     </ion-split-pane>
@@ -51,9 +37,9 @@
 </template>
 
 <script setup lang="ts">
-import { alertController, IonApp, IonContent, IonFooter, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonMenu, IonMenuToggle, IonNote, IonRouterOutlet, IonSelect, IonSelectOption, IonSplitPane, IonTitle, IonToolbar, loadingController, SelectCustomEvent } from "@ionic/vue";
+import { alertController, IonApp, IonContent, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonMenu, IonMenuToggle, IonRouterOutlet, IonSplitPane, IonTitle, IonToolbar, loadingController, SelectCustomEvent } from "@ionic/vue";
 import { computed, onBeforeMount, onMounted, onUnmounted, ref } from "vue";
-import { translate, emitter, commonUtil } from "@common";
+import { translate, emitter, commonUtil, DxpOmsInstanceFooter } from "@common";
 import { Settings } from "luxon";
 import { useUserStore } from "@/store/user";
 import { useProductStore } from "@/store/productStore";
