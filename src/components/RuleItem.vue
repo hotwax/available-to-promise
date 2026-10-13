@@ -188,7 +188,7 @@ async function editThreshold() {
         if(!rule.ruleActions?.length) {
           rule.ruleActions = [{
             "ruleId": props.rule.ruleId,
-            "actionTypeEnumId": "ATP_SAFETY_STOCK",
+            "actionTypeEnumId": "ATP_THRESHOLD",
             "fieldName": "minimum-stock",
             "fieldValue": data.threshold
           }]
