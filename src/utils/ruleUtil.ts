@@ -46,7 +46,7 @@ const generateRuleActions = (ruleId: string, actionTypeEnumId: string, actionVal
     condition = [{
       ruleId,
       actionTypeEnumId,
-      "fieldName": "facility-safety-stock",
+      "fieldName": "minimum-stock",
       "fieldValue": actionValue ? actionValue : 0
     }]
   } else {
