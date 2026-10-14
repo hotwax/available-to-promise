@@ -5,7 +5,7 @@
       <ion-card slot="content">
         <ion-card-header>
           <ion-card-title>{{ translate("Schedule") }}</ion-card-title>
-          <ion-badge :color="ruleGroup.schedule?.paused === 'Y' ? 'warning' : 'dark'">{{ ruleGroup.schedule?.paused === "Y" ? translate("Paused") : commonUtil.getRelativeTime(ruleGroup.schedule?.nextExecutionDateTime) }}</ion-badge>
+          <ion-badge :color="ruleGroup.schedule?.paused === 'Y' ? 'warning' : 'dark'">{{ ruleGroup.schedule?.paused === "Y" ? translate("Paused") : (ruleGroup.schedule?.nextExecutionDateTime != null ? commonUtil.getRelativeTime(ruleGroup.schedule.nextExecutionDateTime) : "-") }}</ion-badge>
         </ion-card-header>
 
         <ion-item>
