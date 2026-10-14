@@ -152,6 +152,18 @@ onMounted(() => {
   selectedPage.value.name = router.currentRoute.value.name
 })
 
+// Read the saved rule back so the store holds server-assigned keys such as actionSeqId;
+// an action created locally would otherwise be inserted again on the next save.
+async function fetchSavedRule(rule: any) {
+  try {
+    const resp = await ruleStore.fetchRulesDirect({ ruleId: rule.ruleId }) as any
+    if(!commonUtil.hasError(resp) && resp.data?.length) return resp.data[0]
+  } catch(err) {
+    logger.error(err)
+  }
+  return rule
+}
+
 async function editThreshold() {
   const alert = await alertController.create({
     header: translate("Edit threshold"),
@@ -199,7 +211,7 @@ async function editThreshold() {
 
         try {
           await ruleStore.updateRuleApi(rule, props.rule.ruleId)
-          await ruleStore.updateRuleData({ rule })
+          await ruleStore.updateRuleData({ rule: await fetchSavedRule(rule) })
           commonUtil.showToast(translate("Threshold updated successfully."))
           alertController.dismiss()
         } catch(err: any) {
@@ -261,7 +273,7 @@ async function editSafetyStock() {
 
         try {
           await ruleStore.updateRuleApi(rule, props.rule.ruleId)
-          await ruleStore.updateRuleData({ rule })
+          await ruleStore.updateRuleData({ rule: await fetchSavedRule(rule) })
           commonUtil.showToast(translate("Safety stock updated successfully."))
           alertController.dismiss()
         } catch(err: any) {
@@ -368,7 +380,7 @@ async function updateRulePickup(event: any) {
 
     await ruleStore.updateRuleApi(rule, props.rule.ruleId)
     commonUtil.showToast(translate("Rule pickup updated successfully."))
-    await ruleStore.updateRuleData({ rule })
+    await ruleStore.updateRuleData({ rule: await fetchSavedRule(rule) })
     event.target.checked = isChecked
   } catch(err) {
     logger.error(err)
@@ -388,7 +400,7 @@ async function updateRuleShipping(event: any) {
 
     await ruleStore.updateRuleApi(rule, props.rule.ruleId)
     commonUtil.showToast(translate("Rule shipping updated successfully."))
-    await ruleStore.updateRuleData({ rule })
+    await ruleStore.updateRuleData({ rule: await fetchSavedRule(rule) })
     event.target.checked = isChecked
   } catch(err) {
     logger.error(err)
