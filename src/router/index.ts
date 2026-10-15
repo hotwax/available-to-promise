@@ -11,7 +11,9 @@ import CreateUpdateSafetyStockRule from '@/views/CreateUpdateSafetyStockRule.vue
 import CreateUpdateStorePickupRule from '@/views/CreateUpdateStorePickupRule.vue'
 import CreateUpdateShippingRule from '@/views/CreateUpdateShippingRule.vue'
 import Login from '@common/components/Login.vue';
+import UnsupportedOms from '@/views/UnsupportedOms.vue'
 import { useAuth } from '@common/composables/useAuth';
+import { useUserStore } from '@/store/user';
 import { cloudUploadOutline, globeOutline, settingsOutline, sendOutline, storefrontOutline, pulseOutline } from 'ionicons/icons';
 
 import 'vue-router'
@@ -32,9 +34,30 @@ const authGuard = async (to: any, from: any, next: any) => {
   if (!isAuthenticated.value) {
     to.fullPath != "/" && localStorage.setItem("requestedPagePath", to.fullPath)
     return next('/login');
-  } else {
-    next()
   }
+
+  const userStore = useUserStore()
+  await userStore.checkOmsCompatibility()
+  if(userStore.omsCompatibility.incompatible) {
+    return next({ path: '/unsupported-oms', query: { from: to.fullPath } })
+  }
+
+  next()
+};
+
+const unsupportedOmsGuard = async (to: any, from: any, next: any) => {
+  const { isAuthenticated } = useAuth()
+  if(!isAuthenticated.value) {
+    return next('/login');
+  }
+
+  const userStore = useUserStore()
+  await userStore.checkOmsCompatibility()
+  if(!userStore.omsCompatibility.incompatible) {
+    return next('/');
+  }
+
+  next()
 };
 
 const routes: Array<RouteRecordRaw> = [
@@ -157,6 +180,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/login',
     name: 'Login',
     component: Login
+  },
+  {
+    path: '/unsupported-oms',
+    name: 'Unsupported OMS',
+    component: UnsupportedOms,
+    beforeEnter: unsupportedOmsGuard
   },
   {
     path: "/settings",

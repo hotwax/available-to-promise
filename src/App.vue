@@ -1,7 +1,7 @@
 <template>
   <ion-app>
     <ion-split-pane content-id="main-content" when="lg">
-      <ion-menu side="start" content-id="main-content" type="overlay" :disabled="!useAuth().isAuthenticated || (router.currentRoute.value.name as string) === 'Login'">
+      <ion-menu side="start" content-id="main-content" type="overlay" :disabled="!useAuth().isAuthenticated || ['Login', 'Unsupported OMS'].includes(router.currentRoute.value.name as string)">
         <ion-header>
           <ion-toolbar>
             <ion-title>{{ translate("Available to Promise") }}</ion-title>

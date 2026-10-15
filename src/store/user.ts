@@ -5,6 +5,10 @@ import { useAuth } from "@common/composables/useAuth";
 import { useProductStore } from "@/store/productStore";
 import { useRuleStore } from "@/store/rule";
 import { useChannelStore } from "@/store/channel";
+import { getOmsVersion, isIncompatibleOms } from "@/utils/omsCompatibility";
+
+// Not persisted: the OMS can be upgraded between visits, so check once per page load and OMS.
+let omsCompatibilityCheckedFor = "";
 
 interface UserState {
   permissions: any[]
@@ -15,6 +19,10 @@ interface UserState {
   }
   timeZones: any[]
   oms: any
+  omsCompatibility: {
+    incompatible: boolean
+    omsVersion: string
+  }
 }
 
 export const useUserStore = defineStore("user", {
@@ -26,7 +34,11 @@ export const useUserStore = defineStore("user", {
       registration: null
     },
     timeZones: [],
-    oms: ""
+    oms: "",
+    omsCompatibility: {
+      incompatible: false,
+      omsVersion: ""
+    }
   }),
   getters: {
     getTimeZones: (state) => state.timeZones,
@@ -172,6 +184,28 @@ export const useUserStore = defineStore("user", {
         console.error('Error', err)
       }
     },
+    async checkOmsCompatibility() {
+      const omsUrl = commonUtil.getOmsURL();
+      if(omsCompatibilityCheckedFor === omsUrl) {
+        return;
+      }
+
+      try {
+        const resp = await api({
+          url: "admin/maarg",
+          method: "get"
+        }) as any;
+        this.omsCompatibility = {
+          incompatible: isIncompatibleOms(resp.data),
+          omsVersion: getOmsVersion(resp.data)
+        }
+      } catch (error: any) {
+        // Without version information the app stays available, as it is on an OMS older than this endpoint.
+        logger.error("Failed to fetch the OMS version", error);
+        this.omsCompatibility = { incompatible: false, omsVersion: "" }
+      }
+      omsCompatibilityCheckedFor = omsUrl;
+    },
     async postLogin() {
       try {
         await this.fetchUserProfile();
@@ -183,6 +217,7 @@ export const useUserStore = defineStore("user", {
       }
     },
     async postLogout() {
+      omsCompatibilityCheckedFor = "";
       this.$reset();
       useProductStore().$reset();
       useRuleStore().$reset();
