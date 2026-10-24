@@ -315,7 +315,7 @@ export const useProductStore = defineStore('productStore', {
             noConditionFind: 'Y',
             limit: 1000,
             offset,
-            searchfield: "tags",
+            searchfield: params.searchfield === "tags" ? "search_tags" : params.searchfield,
             term: params.queryString || "",
             q: params.queryString || ""
           }
